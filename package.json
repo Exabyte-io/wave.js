@@ -3,7 +3,8 @@
     "version": "0.1.0",
     "description": "Web-based Atomic Viewer by Exabyte",
     "scripts": {
-        "postinstall": "mkdir -p lib; babel src --out-dir lib"
+        "postinstall": "mkdir -p lib; babel src --out-dir lib",
+        "test": "jest --config=tests/config.js"
     },
     "repository": {
         "type": "git",
@@ -28,6 +29,15 @@
         "underscore.string": "^3.3.4",
         "mixwith": "^0.1.1",
         "react": "^15.6.2",
+        "react-dom": "^15.6.2",
+        "react-test-renderer": "^15.6.2",
         "made.js": "file:/stack/lib/made-js"
+    },
+    "devDependencies": {
+        "jest": "^24.1.0",
+        "babel-jest": "^24.1.0",
+        "enzyme": "^3.8.0",
+        "enzyme-to-json": "^3.3.5",
+        "enzyme-adapter-react-15": "^1.3.0"
     }
 }
