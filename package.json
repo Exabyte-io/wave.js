@@ -31,7 +31,8 @@
         "react": "^15.6.2",
         "react-dom": "^15.6.2",
         "react-test-renderer": "^15.6.2",
-        "made.js": "file:/stack/lib/made-js"
+        "made.js": "file:/stack/lib/made-js",
+        "periodic-table": "file:/stack/lib/periodic-table"
     },
     "devDependencies": {
         "jest": "^24.1.0",
