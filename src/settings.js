@@ -1,4 +1,4 @@
-import {VDW_RADII, COLORS} from "periodic-table";
+import {ELEMENT_VDW_RADIIS, ELEMENT_COLORS} from "periodic-table";
 
 export default {
     // atoms
@@ -10,7 +10,7 @@ export default {
     sphereRadius: 1.5,
     sphereQuality: 16,
     elementColors: ELEMENT_COLORS,
-    vdwRadii: VDW_RADII,
+    vdwRadii: ELEMENT_VDW_RADIIS,
     // line
     lineWidth: 1.5,
     lineMaterial: {
