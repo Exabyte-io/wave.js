@@ -28,6 +28,7 @@
         "underscore.string": "^3.3.4",
         "mixwith": "^0.1.1",
         "react": "^15.6.2",
-        "made.js": "file:/stack/lib/made-js"
+        "made.js": "file:/stack/lib/made-js",
+        "periodic-table": "file:/stack/lib/periodic-table"
     }
 }
