@@ -151,6 +151,26 @@ export class ThreeDEditor extends React.Component {
         )
     }
 
+    getExportToolbarItems() {
+        return [
+            <RoundIconButton tooltipPlacement="top" mini
+                title="Screenshot"
+                isToggleable={false}
+                onClick={this.handleTakeScreenshot}
+            >
+                <PictureInPicture/>
+            </RoundIconButton>,
+
+            <RoundIconButton tooltipPlacement="top" mini
+                title="Download"
+                isToggleable={false}
+                onClick={this.handleDownloadClick}
+            >
+                <FileDownload/>
+            </RoundIconButton>
+        ]
+    }
+
     renderExportToolbar(className = "") {
         return (
             <IconToolbar
@@ -159,24 +179,64 @@ export class ThreeDEditor extends React.Component {
                 iconComponent={ImportExport}
                 isHidden={!this.state.isInteractive}
             >
-                <RoundIconButton tooltipPlacement="top" mini
-                    title="Screenshot"
-                    isToggleable={false}
-                    onClick={this.handleTakeScreenshot}
-                >
-                    <PictureInPicture/>
-                </RoundIconButton>
-
-                <RoundIconButton tooltipPlacement="top" mini
-                    title="Download"
-                    isToggleable={false}
-                    onClick={this.handleDownloadClick}
-                >
-                    <FileDownload/>
-                </RoundIconButton>
-
+                {this.getExportToolbarItems()}
             </IconToolbar>
         )
+    }
+
+    getViewToolbarItems() {
+        return [
+            <RoundIconButton tooltipPlacement="top" mini
+                isToggled={this._getWaveProperty('areOrbitControlsEnabled')}
+                title="Rotate/Zoom View [O]"
+                onClick={this.handleToggleOrbitControls}
+            >
+                <ThreeDRotation/>
+            </RoundIconButton>,
+
+            <RoundIconButton tooltipPlacement="top" mini
+                isToggled={this._getWaveProperty('isOrbitControlsAnimationEnabled')}
+                title="Toggle Auto Rotate"
+                onClick={this.handleToggleOrbitControlsAnimation}
+            >
+                <Autorenew/>
+            </RoundIconButton>,
+
+            <RoundIconButton tooltipPlacement="top" mini
+                isToggled={this._getWaveProperty('areAxesEnabled')}
+                title="Toggle Axes"
+                onClick={this.handleToggleAxes}
+            >
+                <GpsFixed/>
+            </RoundIconButton>,
+
+            <RoundIconButton tooltipPlacement="top" mini
+                title="Reset View"
+                isToggleable={false}
+                onClick={this.handleResetViewer}
+            >
+                <Replay/>
+            </RoundIconButton>,
+
+            <Tooltip title="RADIUS" placement="top">
+                <input className="inverse stepper sphere-radius"
+                    id="sphere-radius"
+                    value={this.state.viewerSettings.atomRadiiScale}
+                    type="number" max="10" min="0.1" step="0.1"
+                    onChange={this.handleSphereRadiusChange}
+                />
+            </Tooltip>,
+
+            <Tooltip title="REPETITIONS" placement="top">
+                <input className="inverse stepper cell-repetitions"
+                    id="cell-repetitions"
+                    value={this.state.viewerSettings.atomRepetitions}
+                    type="number" max="10" min="1" step="1"
+                    onChange={this.handleCellRepetitionsChange}
+                />
+            </Tooltip>
+
+        ]
     }
 
     renderViewToolbar(className = "") {
@@ -187,60 +247,39 @@ export class ThreeDEditor extends React.Component {
                 iconComponent={RemoveRedEye}
                 isHidden={!this.state.isInteractive}
             >
-                <RoundIconButton tooltipPlacement="top" mini
-                    isToggled={this._getWaveProperty('areOrbitControlsEnabled')}
-                    title="Rotate/Zoom View [O]"
-                    onClick={this.handleToggleOrbitControls}
-                >
-                    <ThreeDRotation/>
-                </RoundIconButton>
-
-                <RoundIconButton tooltipPlacement="top" mini
-                    isToggled={this._getWaveProperty('isOrbitControlsAnimationEnabled')}
-                    title="Toggle Auto Rotate"
-                    onClick={this.handleToggleOrbitControlsAnimation}
-                >
-                    <Autorenew/>
-                </RoundIconButton>
-
-                <RoundIconButton tooltipPlacement="top" mini
-                    isToggled={this._getWaveProperty('areAxesEnabled')}
-                    title="Toggle Axes"
-                    onClick={this.handleToggleAxes}
-                >
-                    <GpsFixed/>
-                </RoundIconButton>
-
-                <RoundIconButton tooltipPlacement="top" mini
-                    title="Reset View"
-                    isToggleable={false}
-                    onClick={this.handleResetViewer}
-                >
-                    <Replay/>
-                </RoundIconButton>
-
-
-                <Tooltip title="RADIUS" placement="top">
-                    <input className="inverse stepper sphere-radius"
-                        id="sphere-radius"
-                        value={this.state.viewerSettings.atomRadiiScale}
-                        type="number" max="10" min="0.1" step="0.1"
-                        onChange={this.handleSphereRadiusChange}
-                    />
-                </Tooltip>
-
-                <Tooltip title="REPETITIONS" placement="top">
-                    <input className="inverse stepper cell-repetitions"
-                        id="cell-repetitions"
-                        value={this.state.viewerSettings.atomRepetitions}
-                        type="number" max="10" min="1" step="1"
-                        onChange={this.handleCellRepetitionsChange}
-                    />
-                </Tooltip>
-
+                {this.getViewToolbarItems()}
             </IconToolbar>
         )
+    }
 
+    getEditToolbarItems() {
+        return [
+            <RoundIconButton tooltipPlacement="top" mini
+                isToggled={this._getWaveProperty('isSelectionEnabled')}
+                title="Rectangular Selection [S]"
+                onClick={this.handleToggleMouseSelection}
+            >
+                <SelectAll/>
+            </RoundIconButton>,
+
+            <RoundIconButton tooltipPlacement="top" mini
+                isToggled={this._getWaveProperty('areTransformControlsEnabled')}
+                title="Toggle Rotate/Translate [T, R/A]"
+                onClick={this.handleToggleTransformControls}
+            >
+                <ThreeDRotation/>
+            </RoundIconButton>,
+
+            <RoundIconButton tooltipPlacement="top" mini
+                isToggled={this._getWaveProperty('isIntersectionEnabled')}
+                title="Inject/Delete [I + Right/Left click]"
+                onClick={this.handleToggleMouseIntersection}
+            >
+                <Mouse/>
+            </RoundIconButton>,
+
+            <input id="materials-glmol-lattice-type" style={{display: 'none'}}/>,
+        ]
     }
 
     renderEditToolbar(className = "") {
@@ -251,72 +290,9 @@ export class ThreeDEditor extends React.Component {
                 iconComponent={Create}
                 isHidden={!this.state.isInteractive}
             >
-
-                <RoundIconButton tooltipPlacement="top" mini
-                    isToggled={this._getWaveProperty('isSelectionEnabled')}
-                    title="Rectangular Selection [S]"
-                    onClick={this.handleToggleMouseSelection}
-                >
-                    <SelectAll/>
-                </RoundIconButton>
-
-                <RoundIconButton tooltipPlacement="top" mini
-                    isToggled={this._getWaveProperty('areTransformControlsEnabled')}
-                    title="Toggle Rotate/Translate [T, R/A]"
-                    onClick={this.handleToggleTransformControls}
-                >
-                    <ThreeDRotation/>
-                </RoundIconButton>
-
-                <RoundIconButton tooltipPlacement="top" mini
-                    isToggled={this._getWaveProperty('isIntersectionEnabled')}
-                    title="Inject/Delete [I + Right/Left click]"
-                    onClick={this.handleToggleMouseIntersection}
-                >
-                    <Mouse/>
-                </RoundIconButton>
-
-                {/* TODO: implement later */}
-                {/*<RoundIconButton disabled tooltipPlacement="top" mini*/}
-                {/*title="Create"*/}
-                {/*onClick={null}*/}
-                {/*>*/}
-                {/*<AddCircle/>*/}
-                {/*</RoundIconButton>*/}
-
-                {/*<RoundIconButton disabled tooltipPlacement="top" mini*/}
-                {/*title="Delete"*/}
-                {/*onClick={null}*/}
-                {/*>*/}
-                {/*<RemoveCircle/>*/}
-                {/*</RoundIconButton>*/}
-
-                {/*<RoundIconButton disabled tooltipPlacement="top" mini*/}
-                {/*title="Copy"*/}
-                {/*onClick={null}*/}
-                {/*>*/}
-                {/*<ContentCopy/>*/}
-                {/*</RoundIconButton>*/}
-
-                {/*<RoundIconButton disabled tooltipPlacement="top" mini*/}
-                {/*title="Paste"*/}
-                {/*onClick={null}*/}
-                {/*>*/}
-                {/*<ContentPaste/>*/}
-                {/*</RoundIconButton>*/}
-
-                {/*<RoundIconButton disabled tooltipPlacement="top" mini*/}
-                {/*title="Reset Selection"*/}
-                {/*onClick={null}*/}
-                {/*>*/}
-                {/*<SettingsBackupRestore/>*/}
-                {/*</RoundIconButton>*/}
-
-
-                <input id="materials-glmol-lattice-type" style={{display: 'none'}}/>
+                {this.getEditToolbarItems()}
             </IconToolbar>
         )
-
     }
 
     getWaveComponent() {
@@ -357,7 +333,6 @@ export class ThreeDEditor extends React.Component {
                 </div>
             </div>
         )
-
     }
 }
 
