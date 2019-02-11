@@ -18,7 +18,7 @@ export class WaveComponent extends React.Component {
     componentDidMount() {this.initViewer()}
 
     componentDidUpdate(prevProps, prevState) {
-        this.props.triggerHandleResize && this._handleFullscreenTransition();
+        this.props.triggerHandleResize && this._handleResizeTransition();
         this.wave && this.reloadViewer();
     }
 
@@ -41,7 +41,7 @@ export class WaveComponent extends React.Component {
 
     }
 
-    _handleFullscreenTransition() {
+    _handleResizeTransition() {
         // TODO: use standard recommended way
         // This is a workaround: OrbitControls in Wave.js listens to resize events properly, but fails to resize the
         // renderer component on fullscreen event. Here we explicitly do that and wait for the event to finish, assuming
