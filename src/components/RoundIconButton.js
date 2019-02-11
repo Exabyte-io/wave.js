@@ -3,8 +3,6 @@ import _ from "underscore";
 import Button from 'material-ui-next/Button';
 import Tooltip from 'material-ui-next/Tooltip';
 
-import {randomAlphanumeric} from "../utils";
-
 export class RoundIconButton extends React.Component {
 
     constructor(props) {
@@ -19,6 +17,10 @@ export class RoundIconButton extends React.Component {
 
     handleToggle() {
         this.setState({isToggled: !this.state.isToggled})
+    }
+
+    get tooltipId() {
+        return this.props.id || this.props.title;
     }
 
     render() {
@@ -49,6 +51,5 @@ RoundIconButton.propTypes = {
 };
 
 RoundIconButton.defaultProps = {
-    id: "button-" + randomAlphanumeric(10),
     isToggleable: true,
 };
