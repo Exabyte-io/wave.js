@@ -21,6 +21,8 @@
         "@babel/polyfill": "7.0.0",
         "@babel/preset-env": "7.0.0",
         "@babel/preset-react": "7.0.0",
+        "@babel/plugin-proposal-class-properties": "7.0.0",
+        "classnames": "^2.2.5",
         "three": "^0.90.0",
         "three-orbit-controls": "^82.1.0",
         "three-transform-controls": "^1.0.4",
@@ -29,6 +31,8 @@
         "mixwith": "^0.1.1",
         "react": "^15.6.2",
         "made.js": "file:/stack/lib/made-js",
-        "periodic-table": "file:/stack/lib/periodic-table"
+        "periodic-table": "file:/stack/lib/periodic-table",
+        "material-ui-icons-next": "^1.0.0-beta.17-next",
+        "material-ui-next": "^1.0.0-beta.38"
     }
 }

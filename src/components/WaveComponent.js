@@ -1,12 +1,12 @@
 import React from "react";
 
-import {Wave} from "./wave";
+import {Wave} from "../wave";
 
 /*
  * Uses Wave.js to render an arrangement of atoms passed in XYZ format in cartesian coordinates
  * Expects "cell" property to represent the crystal unit cell for the atomic arrangement.
  */
-class WaveComponent extends React.Component {
+export class WaveComponent extends React.Component {
 
     constructor(props) {
         super(props);
@@ -79,5 +79,3 @@ WaveComponent.propTypes = {
     structure: React.PropTypes.object, // Material
     cell: React.PropTypes.object, // UnitCell object
 };
-
-export default WaveComponent;
