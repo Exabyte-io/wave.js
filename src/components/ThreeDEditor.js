@@ -317,20 +317,21 @@ export class ThreeDEditor extends React.Component {
         </RoundIconButton>
     }
 
-    render() {
+    getThreeDEditorClassNames() {
         const isInteractiveCls = this.state.isInteractive ? "" : "non-interactive";
+        return setClass('materials-designer-3d-editor', isInteractiveCls);
+    }
+
+    render() {
         return (
-            <div className={this.props.className}>
-                <div className={setClass('materials-designer-3d-editor', isInteractiveCls)}
-                    ref={(el) => {this.ThreeDEditor = el}}
-                >
-                    {this.renderCoverDiv()}
-                    {this.getWaveComponent()}
-                    {this.renderInteractiveSwitch()}
-                    {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
-                    {this.props.editable && this.renderEditToolbar(this.classNamesForTopToolbar + " third-row")}
-                    {this.renderExportToolbar(this.classNamesForBottomToolbar)}
-                </div>
+            <div className={this.getThreeDEditorClassNames()}
+            >
+                {this.renderCoverDiv()}
+                {this.getWaveComponent()}
+                {this.renderInteractiveSwitch()}
+                {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
+                {this.props.editable && this.renderEditToolbar(this.classNamesForTopToolbar + " third-row")}
+                {this.renderExportToolbar(this.classNamesForBottomToolbar)}
             </div>
         )
     }
