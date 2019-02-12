@@ -91,5 +91,5 @@ export async function takeSnapshotAndAssertEquality(webGLContext, imagePrefix) {
             reject(false);
         }
     });
-    await expect(promise).resolves.toBe(true);
+    return expect(promise).resolves.toBe(true);
 }
