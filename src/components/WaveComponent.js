@@ -1,12 +1,12 @@
 import React from "react";
 
-import {Wave} from "./wave";
+import {Wave} from "../wave";
 
 /*
  * Uses Wave.js to render an arrangement of atoms passed in XYZ format in cartesian coordinates
  * Expects "cell" property to represent the crystal unit cell for the atomic arrangement.
  */
-class WaveComponent extends React.Component {
+export class WaveComponent extends React.Component {
 
     constructor(props) {
         super(props);
@@ -18,7 +18,7 @@ class WaveComponent extends React.Component {
     componentDidMount() {this.initViewer()}
 
     componentDidUpdate(prevProps, prevState) {
-        this.props.triggerHandleResize && this._handleFullscreenTransition();
+        this.props.triggerHandleResize && this._handleResizeTransition();
         this.wave && this.reloadViewer();
     }
 
@@ -41,7 +41,7 @@ class WaveComponent extends React.Component {
 
     }
 
-    _handleFullscreenTransition() {
+    _handleResizeTransition() {
         // TODO: use standard recommended way
         // This is a workaround: OrbitControls in Wave.js listens to resize events properly, but fails to resize the
         // renderer component on fullscreen event. Here we explicitly do that and wait for the event to finish, assuming
@@ -79,5 +79,3 @@ WaveComponent.propTypes = {
     structure: React.PropTypes.object, // Material
     cell: React.PropTypes.object, // UnitCell object
 };
-
-export default WaveComponent;
