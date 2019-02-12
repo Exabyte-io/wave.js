@@ -194,9 +194,7 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         const length = 100;
         const containerDimension = 100;
 
-        this.renderer2 = this.getWebGLRenderer({
-            alpha: true,
-        });
+        this.renderer2 = this.getWebGLRenderer({alpha: true});
         this.renderer2.setClearColor("#FFFFFF", 0);
         this.renderer2.setSize(containerDimension, containerDimension);
         this.container.prepend(this.renderer2.domElement);

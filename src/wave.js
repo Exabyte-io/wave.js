@@ -62,8 +62,8 @@ class WaveBase {
         });
 
         this.renderer.sortObjects = false;
-        this.renderer.domElement.style.WIDTH = "100%";
-        this.renderer.domElement.style.HEIGHT = "100%";
+        this.renderer.domElement.style.width = "100%";
+        this.renderer.domElement.style.height = "100%";
         this.container.appendChild(this.renderer.domElement);
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
         // TODO: detach listener on exit
