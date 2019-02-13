@@ -1,8 +1,10 @@
 import GL from "gl";
+import expect from 'expect'
 import {Made} from "made.js";
 import * as THREE from "three";
 import {configure} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-15';
+import {toBeDeepCloseTo, toMatchCloseTo} from 'jest-matcher-deep-close-to';
 
 import {Wave} from "../src/wave";
 import {createElement} from "./utils";
@@ -27,3 +29,9 @@ Wave.prototype.getWebGLRenderer = (config) => {
         canvas
     })
 };
+
+// extend jest expect
+expect.extend({
+    toBeDeepCloseTo,
+    toMatchCloseTo
+});
