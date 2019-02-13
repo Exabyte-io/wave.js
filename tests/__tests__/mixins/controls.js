@@ -1,5 +1,5 @@
 import {getWaveInstance} from "../../enums";
-import {takeSnapshotAndAssertEquality} from "../../utils";
+import {dispatchMouseEvent, takeSnapshotAndAssertEquality} from "../../utils";
 
 test('toggleAxes', async () => {
     const wave = getWaveInstance();
@@ -30,26 +30,9 @@ test('toggleTransformControls', async () => {
 test('rotate', async () => {
     const wave = getWaveInstance();
     wave.toggleOrbitControls();
-
-    wave.renderer.domElement.dispatchEvent(new MouseEvent('mousedown', {
-        button: 0,
-        clientX: 10,
-        clientY: 10
-    }));
-
-    // three-orbit-controls adds the mousemove/up handlers directly to the root element,
-    // hence document.dispatchEvent instead of wave.renderer.domElement.dispatchEvent!
-    document.dispatchEvent(new MouseEvent('mousemove', {
-        button: 0,
-        clientX: 100,
-        clientY: 10,
-    }));
-
-    document.dispatchEvent(new MouseEvent('mouseup', {
-        button: 0,
-        clientX: 100,
-        clientY: 10
-    }));
-
+    dispatchMouseEvent(wave.renderer.domElement, 'mousedown', 10, 10);
+    // three-orbit-controls adds the mousemove/up handlers directly to the document!
+    dispatchMouseEvent(document, 'mousemove', 100, 10);
+    dispatchMouseEvent(document, 'mouseup', 100, 10);
     return takeSnapshotAndAssertEquality(wave.renderer.context, "rotate");
 });

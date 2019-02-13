@@ -10,9 +10,6 @@ import {Wave} from "../src/wave";
 import {createElement} from "./utils";
 import {ELEMENT_PROPERTIES, HEIGHT, WIDTH} from "./enums";
 
-// tell jest to wait more for async functions to resolve/reject.
-jest.setTimeout(30000); // 30s
-
 // configure enzyme adapter
 configure({adapter: new Adapter()});
 
