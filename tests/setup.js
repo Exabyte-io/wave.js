@@ -8,8 +8,8 @@ import {Wave} from "../src/wave";
 import {createElement} from "./utils";
 import {ELEMENT_PROPERTIES, HEIGHT, WIDTH} from "./enums";
 
-// make THREE globally available
-global.THREE = THREE;
+// tell jest to wait more for async functions to resolve/reject.
+jest.setTimeout(30000); // 30s
 
 // configure enzyme adapter
 configure({adapter: new Adapter()});
@@ -19,10 +19,11 @@ configure({adapter: new Adapter()});
  */
 Wave.prototype.getWebGLRenderer = (config) => {
     const context = GL(WIDTH, HEIGHT, {preserveDrawingBuffer: true});
+    // create a canvas element with mocked width/height otherwise the default with 0 width is used.
     const canvas = createElement("canvas", ELEMENT_PROPERTIES);
-    Object.defineProperty(context, 'canvas', {value: canvas});
     return new THREE.WebGLRenderer({
         ...config,
-        context
+        context,
+        canvas
     })
 };
