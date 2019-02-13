@@ -94,7 +94,7 @@ export async function takeSnapshotAndAssertEquality(webGLContext, imagePrefix) {
     return expect(promise).resolves.toBe(true);
 }
 
-export function dispatchMouseEvent(element, type, clientX, clientY, button = 0) {
+export function dispatchMouseDownMoveOrUpEvent(element, type, clientX, clientY, button = 0) {
     element.dispatchEvent(new MouseEvent(type, {
         button,
         clientX,
