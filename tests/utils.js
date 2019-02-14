@@ -83,7 +83,7 @@ export async function takeSnapshotAndAssertEquality(webGLContext, imagePrefix) {
     await expect(takeSnapshot(webGLContext, actualImageFilePath)).resolves.toBe(true);
     const promise = new Promise((resolve, reject) => {
         try {
-            looksSame(actualImageFilePath, expectedImageFilePath, {ignoreAntialiasing: true}, (err, {equal}) => {
+            looksSame(actualImageFilePath, expectedImageFilePath, (err, {equal}) => {
                 if (err) reject(false);
                 resolve(equal);
             });

@@ -2,7 +2,7 @@ import React from 'react';
 import {Made} from "made.js";
 import {mount} from 'enzyme';
 
-import {SELECTORS} from "./selectors";
+import {SELECTORS} from "../../selectors";
 import {createElement} from "../../utils";
 import {ELEMENT_PROPERTIES, MATERIAL_CONFIG} from "../../enums";
 import {ThreeDEditor} from "../../../src/components/ThreeDEditor";
