@@ -1,11 +1,44 @@
 import React from 'react';
 import {Made} from "made.js";
-import {shallow} from 'enzyme';
+import {mount} from 'enzyme';
 
-import {MATERIAL_CONFIG} from "../../enums";
+import {SELECTORS} from "./selectors";
+import {createElement} from "../../utils";
+import {ELEMENT_PROPERTIES, MATERIAL_CONFIG} from "../../enums";
 import {ThreeDEditor} from "../../../src/components/ThreeDEditor";
 
-test('ThreeDEditor Base Test', async () => {
-    const component = shallow(<ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)}/>);
-    expect(component).toMatchSnapshot();
+test('toggleInteractive', async () => {
+    const container = createElement("div", ELEMENT_PROPERTIES);
+    const wrapper = mount(<ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)}/>, {attachTo: container});
+
+    // assert view and export buttons are hidden
+    expect(wrapper.find(SELECTORS.viewIconToolbar).hasClass("hidden")).toBe(true);
+    expect(wrapper.find(SELECTORS.exportIconToolbar).hasClass("hidden")).toBe(true);
+
+    const interactiveButton = wrapper.find(`${SELECTORS.interactiveIconToolbar} button`);
+    interactiveButton.prop('onClick')();
+    wrapper.update();
+
+    // assert view and export buttons are visible
+    expect(wrapper.find(SELECTORS.viewIconToolbar).hasClass("hidden")).toBe(false);
+    expect(wrapper.find(SELECTORS.exportIconToolbar).hasClass("hidden")).toBe(false);
+});
+
+test('toggleView', async () => {
+    const container = createElement("div", ELEMENT_PROPERTIES);
+    const wrapper = mount(<ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)}/>, {attachTo: container});
+
+    const interactiveButton = wrapper.find(`${SELECTORS.interactiveIconToolbar} button`);
+    interactiveButton.prop('onClick')();
+    wrapper.update();
+
+    // assert toggle axes button is hidden
+    expect(wrapper.find(SELECTORS.toggleAxesRoundIconButton).exists()).toBe(false);
+
+    const viewButton = wrapper.find(`${SELECTORS.viewIconToolbar} button`);
+    viewButton.prop('onClick')();
+    wrapper.update();
+
+    // assert toggle axes button is visible
+    expect(wrapper.find(SELECTORS.toggleAxesRoundIconButton).exists()).toBe(true);
 });
