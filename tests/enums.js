@@ -1,3 +1,4 @@
+import path from "path";
 import {Made} from "made.js";
 
 // canvas element width/height
@@ -15,54 +16,25 @@ export const ELEMENT_PROPERTIES = {
     clientHeight: {value: HEIGHT},
 };
 
+import fs from "fs-extra";
+import _ from "underscore";
+import {expect} from "chai";
+
+export function readFile(filePath, coding = 'utf8') {
+    return fs.readFileSync(filePath, coding);
+}
+
+export function readJSONFile(filePath) {
+    return JSON.parse(readFile(filePath));
+}
+
+export function assertDeepAlmostEqual(leftHandOperand, rightHandOperand, excludedKeys = []) {
+    expect(_.omit(leftHandOperand, excludedKeys)).to.be.deep.almost.equal(_.omit(rightHandOperand, excludedKeys));
+}
+
 // default material config
-export const MATERIAL_CONFIG = {
-    "name": "Silicon FCC",
-    "basis": {
-        "elements": [
-            {
-                "id": 0,
-                "value": "Si"
-            },
-            {
-                "id": 1,
-                "value": "Si"
-            }
-        ],
-        "coordinates": [
-            {
-                "id": 0,
-                "value": [
-                    0,
-                    0,
-                    0
-                ]
-            },
-            {
-                "id": 1,
-                "value": [
-                    0.25,
-                    0.25,
-                    0.25
-                ]
-            }
-        ],
-        "units": "crystal"
-    },
-    "lattice": {
-        "a": 3.867,
-        "b": 3.867,
-        "c": 3.867,
-        "alpha": 60,
-        "beta": 60,
-        "gamma": 59.99999,
-        "units": {
-            "length": "angstrom",
-            "angle": "degree"
-        },
-        "type": "FCC"
-    }
-};
+const materialJsonFilePath = path.resolve(__dirname, "material.json");
+export const MATERIAL_CONFIG = JSON.parse(readFile(fs.readFileSync(materialJsonFilePath)));
 
 export const WAVE_SETTINGS = {
     atomRadiiScale: 0.2,
