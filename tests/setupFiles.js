@@ -13,6 +13,12 @@ import {ELEMENT_PROPERTIES, HEIGHT, WIDTH} from "./enums";
 // configure enzyme adapter
 configure({adapter: new Adapter()});
 
+// extend jest expect
+expect.extend({
+    toBeDeepCloseTo,
+    toMatchCloseTo
+});
+
 /**
  * mock WebGLRenderer by headless GL.
  */
@@ -26,9 +32,3 @@ Wave.prototype.getWebGLRenderer = (config) => {
         canvas
     })
 };
-
-// extend jest expect
-expect.extend({
-    toBeDeepCloseTo,
-    toMatchCloseTo
-});
