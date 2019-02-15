@@ -5,7 +5,7 @@ import looksSame from "looks-same";
 import {WIDTH, HEIGHT} from "./enums";
 
 /**
- * Creates an element with given properties.
+ * Creates a DOM element with given properties.
  * @param name {String} element name.
  * @param elementProperties {Object} element object properties.
  * @returns {HTMLElement}
@@ -23,9 +23,9 @@ export function createElement(name, elementProperties) {
 }
 
 /**
- * Flip pixels.
+ * Divides the pixels into two halves, top and bottom and switch (flip) them.
+ * WebGlRenderingContext.readPixels() returns the pixels upside down.
  * Source: https://stackoverflow.com/questions/41969562/how-can-i-flip-the-result-of-webglrenderingcontext-readpixels
- * @param pixels
  */
 export function flipPixels(pixels) {
     var halfHeight = HEIGHT / 2 | 0;  // the | 0 keeps the result an int
@@ -49,7 +49,8 @@ export function flipPixels(pixels) {
 }
 
 /**
- * Takes snapshot and save it as PNG.
+ * Takes snapshot and saves it as PNG.
+ * Note: The function returns a promise as the operation is asynchronous and should be awaited when called.
  * @param webGLContext {Object} WebGLRenderer context
  * @param imagePath {String} path to save the snapshot
  * @returns {Promise}
@@ -71,7 +72,7 @@ export function takeSnapshot(webGLContext, imagePath) {
 }
 
 /**
- * Takes snapshot, save the image and compare it with the reference.
+ * Takes snapshot, saves the image and compares it with the reference.
  * @param webGLContext {Object} WebGLRenderer context
  * @param imagePrefix {String} the prefix for actual/expected image names
  * @returns {Promise}

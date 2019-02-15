@@ -1,0 +1,47 @@
+{
+    "name": "Silicon FCC",
+    "basis": {
+        "elements": [
+            {
+                "id": 0,
+                "value": "Si"
+            },
+            {
+                "id": 1,
+                "value": "Si"
+            }
+        ],
+        "coordinates": [
+            {
+                "id": 0,
+                "value": [
+                    0,
+                    0,
+                    0
+                ]
+            },
+            {
+                "id": 1,
+                "value": [
+                    0.25,
+                    0.25,
+                    0.25
+                ]
+            }
+        ],
+        "units": "crystal"
+    },
+    "lattice": {
+        "a": 3.867,
+        "b": 3.867,
+        "c": 3.867,
+        "alpha": 60,
+        "beta": 60,
+        "gamma": 59.99999,
+        "units": {
+            "length": "angstrom",
+            "angle": "degree"
+        },
+        "type": "FCC"
+    }
+}
