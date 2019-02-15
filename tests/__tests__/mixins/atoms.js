@@ -5,7 +5,7 @@ test('addAtom', async () => {
     const wave = getWaveInstance();
     wave.toggleMouseIntersection();
     wave["onUpdate"] = jest.fn();  // mock onUpdate callback
-    // move the mouse to click point
+    // move the mouse to click point (150, 150)
     dispatchMouseDownMoveOrUpEvent(wave.container, 'mousemove', 150, 150);
     // right click to add a new atom
     dispatchMouseDownMoveOrUpEvent(wave.container, 'contextmenu', 150, 150, 2);
