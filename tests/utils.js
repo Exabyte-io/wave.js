@@ -77,14 +77,14 @@ export function takeSnapshot(webGLContext, imagePath) {
  * @param imagePrefix {String} the prefix for actual/expected image names
  * @returns {Promise}
  */
-export async function takeSnapshotAndAssertEquality(webGLContext, imagePrefix) {
+export async function takeSnapshotAndAssertEqualityAsync(webGLContext, imagePrefix) {
     const snapshotDir = path.resolve(__dirname, "__tests__", "__snapshots__");
     const actualImageFilePath = path.resolve(snapshotDir, `${imagePrefix}.actual.png`);
     const expectedImageFilePath = path.resolve(snapshotDir, `${imagePrefix}.expected.png`);
     await expect(takeSnapshot(webGLContext, actualImageFilePath)).resolves.toBe(true);
     const promise = new Promise((resolve, reject) => {
         try {
-            looksSame(actualImageFilePath, expectedImageFilePath, {ignoreAntialiasing: true}, (err, {equal}) => {
+            looksSame(actualImageFilePath, expectedImageFilePath, (err, {equal}) => {
                 if (err) reject(false);
                 resolve(equal);
             });
@@ -93,4 +93,12 @@ export async function takeSnapshotAndAssertEquality(webGLContext, imagePrefix) {
         }
     });
     return expect(promise).resolves.toBe(true);
+}
+
+export function dispatchMouseDownMoveOrUpEvent(element, type, clientX, clientY, button = 0) {
+    element.dispatchEvent(new MouseEvent(type, {
+        button,
+        clientX,
+        clientY
+    }))
 }

@@ -18,7 +18,7 @@ export const ELEMENT_PROPERTIES = {
 };
 
 // default material config
-const materialJsonFilePath = path.resolve(__dirname, "material.json");
+const materialJsonFilePath = path.resolve(__dirname, "fixtures/material.json");
 export const MATERIAL_CONFIG = JSON.parse(fs.readFileSync(materialJsonFilePath));
 
 export const WAVE_SETTINGS = {

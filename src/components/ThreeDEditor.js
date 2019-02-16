@@ -137,7 +137,7 @@ export class ThreeDEditor extends React.Component {
     renderInteractiveSwitch() {
         return (
             <div className={setClass(this.classNamesForTopToolbar)}
-                data-name="interactive-trigger"
+                data-name="Interactive"
             >
 
                 <RoundIconButton tooltipPlacement="top" mini

@@ -1,13 +1,21 @@
 import {getWaveInstance} from "../enums";
-import {takeSnapshotAndAssertEquality} from "../utils";
+import {takeSnapshotAndAssertEqualityAsync} from "../utils";
 
-test('draw silicon', async () => {
+test('wave', async () => {
     const wave = getWaveInstance();
-    return takeSnapshotAndAssertEquality(wave.renderer.context, "si");
+    return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "wave");
 });
 
-test('draw silicon with toggled axes', async () => {
+test('atomRadiiScale', async () => {
     const wave = getWaveInstance();
-    wave.toggleAxes();
-    return takeSnapshotAndAssertEquality(wave.renderer.context, "siWithAxes");
+    wave.updateSettings({atomRadiiScale: 0.5});
+    wave.rebuildScene();
+    return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "atomRadiiScale");
+});
+
+test('atomRepetitions', async () => {
+    const wave = getWaveInstance();
+    wave.updateSettings({atomRepetitions: 2});
+    wave.rebuildScene();
+    return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "atomRepetitions");
 });
