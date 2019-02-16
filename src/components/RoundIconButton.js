@@ -3,6 +3,9 @@ import _ from "underscore";
 import Button from 'material-ui-next/Button';
 import Tooltip from 'material-ui-next/Tooltip';
 
+/**
+ * Round icon button with toggle logic
+ */
 export class RoundIconButton extends React.Component {
 
     constructor(props) {
