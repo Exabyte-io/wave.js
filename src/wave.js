@@ -48,11 +48,14 @@ class WaveBase {
         this.WIDTH = this.container.clientWidth;
         this.HEIGHT = this.container.clientHeight;
         this.ASPECT = this.WIDTH / this.HEIGHT;
+    }
 
+    getWebGLRenderer(config) {
+        return new THREE.WebGLRenderer(config);
     }
 
     initRenderer() {
-        this.renderer = new THREE.WebGLRenderer({
+        this.renderer = this.getWebGLRenderer({
             antialias: true,
             alpha: true,
             preserveDrawingBuffer: true,

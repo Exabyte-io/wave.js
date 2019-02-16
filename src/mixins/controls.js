@@ -166,7 +166,7 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         this.axesGroup = new THREE.Object3D();
 
         const gridHelper = new THREE.GridHelper(100, 100, this.settings.colors.amber, this.settings.colors.gray);
-        gridHelper.geometry.rotateX( Math.PI / 2 );
+        gridHelper.geometry.rotateX(Math.PI / 2);
         gridHelper.position.x = 0;
         gridHelper.position.y = 0;
 
@@ -194,7 +194,7 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         const length = 100;
         const containerDimension = 100;
 
-        this.renderer2 = new THREE.WebGLRenderer({alpha: true});
+        this.renderer2 = this.getWebGLRenderer({alpha: true});
         this.renderer2.setClearColor("#FFFFFF", 0);
         this.renderer2.setSize(containerDimension, containerDimension);
         this.container.prepend(this.renderer2.domElement);
