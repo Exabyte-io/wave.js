@@ -77,7 +77,7 @@ export function takeSnapshot(webGLContext, imagePath) {
  * @param imagePrefix {String} the prefix for actual/expected image names
  * @returns {Promise}
  */
-export async function takeSnapshotAndAssertEquality(webGLContext, imagePrefix) {
+export async function takeSnapshotAndAssertEqualityAsync(webGLContext, imagePrefix) {
     const snapshotDir = path.resolve(__dirname, "__tests__", "__snapshots__");
     const actualImageFilePath = path.resolve(snapshotDir, `${imagePrefix}.actual.png`);
     const expectedImageFilePath = path.resolve(snapshotDir, `${imagePrefix}.expected.png`);
