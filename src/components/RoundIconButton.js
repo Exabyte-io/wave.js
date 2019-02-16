@@ -19,10 +19,6 @@ export class RoundIconButton extends React.Component {
         this.setState({isToggled: !this.state.isToggled})
     }
 
-    get tooltipId() {
-        return this.props.id || this.props.title;
-    }
-
     render() {
         return (
             <Tooltip id={this.props.id} title={this.props.title.toUpperCase()} placement={this.props.tooltipPlacement}>

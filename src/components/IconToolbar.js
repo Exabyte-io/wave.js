@@ -21,12 +21,13 @@ export class IconToolbar extends React.Component {
 
     render() {
         return (
-            <div className={setClass(this.props.className, {'hidden': this.props.isHidden})}>
+            <div className={setClass(this.props.className, {'hidden': this.props.isHidden})}
+                data-name={this.props.title}
+            >
 
                 <RoundIconButton
                     tooltipPlacement="top" mini
                     title={this.props.title}
-                    data-name={this.props.title}
                     onClick={this.handleToggleActive}
                 >
                     {this.state.isActive ? <Close/> : <this.props.iconComponent/>}
