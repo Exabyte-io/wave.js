@@ -1,7 +1,14 @@
 export const LabelsMixin = (superclass) => class extends superclass {
 
-    _createTextSprite(message, opts) {
-        const parameters = opts || {};
+    /**
+     * Work-in-progress function for adding labels with text to 3D objects.
+     * @param {String }text
+     * @param {Object} options
+     * @return {THREE.Sprite}
+     * @private
+     */
+    _createTextSprite(text, options) {
+        const parameters = options || {};
         const fontface = parameters.fontface || 'Helvetica';
         const fontsize = parameters.fontsize || 70;
         const canvas = document.createElement('canvas');
@@ -9,12 +16,12 @@ export const LabelsMixin = (superclass) => class extends superclass {
         context.font = fontsize + "px " + fontface;
 
         // get size data (height depends only on font size)
-        const metrics = context.measureText(message);
+        const metrics = context.measureText(text);
         const textWidth = metrics.width;
 
         // text color
         context.fillStyle = 'rgba(255, 255, 255, 1.0)';
-        context.fillText(message, 0, fontsize);
+        context.fillText(text, 0, fontsize);
 
         // canvas contents will be used for a texture
         const texture = new THREE.Texture(canvas);
@@ -31,7 +38,7 @@ export const LabelsMixin = (superclass) => class extends superclass {
     }
 
     createLabel() {
-
+        // TBA
     }
 
 };

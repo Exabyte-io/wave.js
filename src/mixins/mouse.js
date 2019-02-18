@@ -2,6 +2,11 @@ import * as THREE from "three";
 
 import {UtilsMixin} from "./utils";
 
+/*
+ * Mixin containing the logic for simple mouse movements/actions.
+ * Tracks mouse position, initializes its projection onto 3D with Raycaster, and inits selection-related variables.
+ * TODO: consider isolating selection, intersection related functionality to their corresponding mixins.
+ */
 export const MouseInitMixin = (superclass) => class extends superclass {
 
     constructor(config) {
@@ -18,17 +23,25 @@ export const MouseInitMixin = (superclass) => class extends superclass {
         this.setCursorStyle();
     }
 
-    // Raycaster is used to project mouse position to 3D
     initRaycaster() {
+        // Raycaster is used to project mouse position onto 3D
         this.raycaster = new THREE.Raycaster();
         this.SELECTED_OBJECTS = [];
     }
 
+    /**
+     * Returns targets for mouse selection. One or more of them are to be selected on mouse click and drag.
+     * @return {Array}
+     */
     get mouseSelectionTargets() {
         return this.atomsGroup.children || [];
     }
 
-    // calculates current cursor position in pixels relative to the container element
+    /**
+     * Calculates current cursor position in pixels relative to the container element
+     * @param {event} event - DOM Event
+     * @param {Object} mousePointer - Object representing mouse position, example: {x: 0, y: 0}
+     */
     setRelativeMousePosition(event, mousePointer) {
         const canvasPosition = this.renderer.domElement.getBoundingClientRect();
         mousePointer.x = (event.clientX - canvasPosition.left);
@@ -47,6 +60,10 @@ export const MouseInitMixin = (superclass) => class extends superclass {
         this.container.addEventListener('mousemove', this.updateMouseBound, false);
     }
 
+    /**
+     * Sets mouse cursor type.
+     * @param {String} cursorType - CSS Cursor attribute (https://developer.mozilla.org/en-US/docs/Web/CSS/cursor).
+     */
     setCursorStyle(cursorType) {
         if (!cursorType) {
             this.container.style.cursor = this.container.style.previousCursor || "default";
@@ -58,15 +75,24 @@ export const MouseInitMixin = (superclass) => class extends superclass {
 
 };
 
+/*
+ * Mixin containing the logic for mouse intersection with 3D objects.
+ * Tracks the nearest (first) intersected object inside `this.INTERSECTED_OBJECT` variable.
+ */
 export const MouseIntersectMixin = (superclass) => MouseInitMixin(class extends superclass {
 
     constructor(config) {
         super(config);
+        // initially no object is intersected
         this.INTERSECTED_OBJECT = null;
         this.addEventListenersIntersection = this.addEventListenersIntersection.bind(this);
         this.removeEventListenersIntersection = this.removeEventListenersIntersection.bind(this);
     }
 
+    /**
+     * Helper function to track the currently intersected object (by raycaster).
+     * Highlights the latter object by changing its color.
+     */
     updateIntersection() {
         this.raycaster.setFromCamera(this.mouseNormalized, this.camera);
         const intersects = this.raycaster.intersectObjects(this.mouseSelectionTargets);
@@ -122,6 +148,13 @@ export const MouseIntersectMixin = (superclass) => MouseInitMixin(class extends 
 
 });
 
+/*
+ * Mixin containing the logic for mouse selection with respect to 3D objects.
+ * Uses a frustum to project a 2D selection onto 3D.
+ * Tracks selected objects inside `this.SELECTED_OBJECTS` variable.
+ * The logic for selection is implemented through a semi-transparent DOM Element `this.selectionContainer`.
+ * Upon mouse click and drag the container is resized to highlight the current selection area.
+ */
 export const MouseSelectMixin = (superclass) => MouseInitMixin(class extends superclass {
 
     constructor(config) {
@@ -158,6 +191,13 @@ export const MouseSelectMixin = (superclass) => MouseInitMixin(class extends sup
         this.render();  // to reset colors for previously selected objects
     }
 
+    /**
+     * Project the 2D rectangular selection onto 3D.
+     * @param {Number} x1 - Top left corner of selection, x coordinate.
+     * @param {Number} x2 - Bottom right corner of selection, x coordinate.
+     * @param {Number} y1 - Same as above for x1.
+     * @param {Number} y2 - Same as above for x2.
+     */
     makeSelection(x1, x2, y1, y2) {
         const rx1 = (x1 / this.WIDTH) * 2 - 1;
         const rx2 = (x2 / this.WIDTH) * 2 - 1;
@@ -180,6 +220,10 @@ export const MouseSelectMixin = (superclass) => MouseInitMixin(class extends sup
         this.updateSelection(frustum);
     }
 
+    /**
+     * "Create" the selection DOM element based on current mouse position.
+     * @param event
+     */
     onMouseDownSelection(event) {
         this.resetSelection();
         this.selecting = true;
@@ -195,6 +239,10 @@ export const MouseSelectMixin = (superclass) => MouseInitMixin(class extends sup
         });
     }
 
+    /**
+     * Update the size of the selection DOM element based on current mouse position.
+     * @param event
+     */
     onMouseMoveSelection(event) {
         if (!this.selecting) return;
 
@@ -215,6 +263,10 @@ export const MouseSelectMixin = (superclass) => MouseInitMixin(class extends sup
         this.makeSelection(x1, x2, y1, y2);
     }
 
+    /**
+     * Hide selection element on mouse up.
+     * @param event
+     */
     onMouseUpSelection(event) {
         this.selecting = false;
         this.selectionContainer.style.visibility = "hidden";
@@ -244,6 +296,12 @@ export const MouseSelectMixin = (superclass) => MouseInitMixin(class extends sup
 
 });
 
+/*
+ * Mixin containing the logic for enabling/disabling mouse listeners.
+ * Aggregates Selection and Intersection mixins. Includes a helper Utils Mixin.
+ * Holds the current state for the mouse listeners - ie. selection/intersection enablement - and initializes the
+ *  key event listeners for the triggers.
+ */
 export const MouseMixin = (superclass) => UtilsMixin(MouseSelectMixin(MouseIntersectMixin(class extends superclass {
 
     constructor(config) {

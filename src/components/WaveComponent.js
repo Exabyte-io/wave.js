@@ -3,8 +3,8 @@ import React from "react";
 import {Wave} from "../wave";
 
 /*
- * Uses Wave.js to render an arrangement of atoms passed in XYZ format in cartesian coordinates
- * Expects "cell" property to represent the crystal unit cell for the atomic arrangement.
+ * Wrapper component for materials visualizer. Uses Wave class to render a material structure.
+ * See below for property description.
  */
 export class WaveComponent extends React.Component {
 
@@ -73,9 +73,12 @@ export class WaveComponent extends React.Component {
 }
 
 WaveComponent.propTypes = {
+    // Whether to trigger handleResizeTransition() on update
     triggerHandleResize: React.PropTypes.bool,
-    name: React.PropTypes.string,
+    // Wave settings
     settings: React.PropTypes.object,
-    structure: React.PropTypes.object, // Material
-    cell: React.PropTypes.object, // UnitCell object
+    // Material structure to be visualized
+    structure: React.PropTypes.object,
+    // Expects "cell" property to represent the crystal unit cell for the atomic arrangement. Made.js UnitCell object.
+    cell: React.PropTypes.object,
 };

@@ -4,8 +4,12 @@ import {UtilsMixin} from "./utils";
 const OrbitControls = require('three-orbit-controls')(THREE);
 const TransformControls = require('three-transform-controls')(THREE);
 
-const TV3 = THREE.Vector3, TCo = THREE.Color;
+const TV3 = THREE.Vector3;
 
+/*
+ * Mixin containing the logic for dealing with transform controls for THREE scene.
+ * Example: https://threejs.org/examples/misc_controls_transform.html
+ */
 const TransformControlsMixin = (superclass) => class extends superclass {
 
     constructor(config) {
@@ -24,6 +28,8 @@ const TransformControlsMixin = (superclass) => class extends superclass {
         this.transformControls = new TransformControls(this.camera, this.renderer.domElement);
         this.transformControls.enabled = enabled;
         this.transformControls.space = "world";
+
+        // TODO: use a settings variable instead of explicit number below
         this.transformControls.setSize(0.5);
         this.transformControls.attach(this.atomsGroup);
         this.transformControls.addEventListener('change', (event) => {
@@ -77,8 +83,12 @@ const TransformControlsMixin = (superclass) => class extends superclass {
         this.transformControls = null;
     }
 
-}
+};
 
+/*
+ * Mixin containing the logic for dealing with orbit controls for THREE scene.
+ * Example: https://threejs.org/examples/misc_controls_orbit.html
+ */
 const OrbitControlsMixin = (superclass) => class extends superclass {
 
     constructor(config) {
@@ -103,6 +113,7 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         this.orbitControls.enabled = enabled;
         this.orbitControls.enableZoom = true;
         this.orbitControls.enableKeys = false;
+        // TODO: use a settings variable instead of explicit number below
         this.orbitControls.rotateSpeed = 2.0;
         this.orbitControls.zoomSpeed = 2.0;
         this.orbitControls.update();
@@ -125,8 +136,16 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         this.setCursorStyle('alias');
     }
 
+    /**
+     * Getter returning the status of rotating animation for orbit controls.
+     * @return {Boolean}
+     */
     get isOrbitControlsAnimationEnabled() {return Boolean(this.animationFrameId)}
 
+    /**
+     * Enable automatic rotation of the camera around the current focus point.
+     * Implemented through `window.requestAnimationFrame`.
+     */
     enableOrbitControlsAnimation() {
         if (!this.orbitControls) return;
         this.orbitControls.autoRotate = true;
@@ -147,7 +166,16 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         this.animationFrameId ? this.disableOrbitControlsAnimation() : this.enableOrbitControlsAnimation();
     }
 
+    /*
+     *          AXES-RELATED FUNCTIONALITY.
+     *          TODO: separate to its own mixin
+     */
+
+    /**
+     * Initialize Axes Helper - XYZ axes with a mesh plane in XY.
+     */
     initAxes() {
+        // length of the axes
         const length = 100;
 
         const lineMaterial = new THREE.LineDashedMaterial(
@@ -163,6 +191,7 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         geometry.vertices.push(origin, x, origin, y, origin, z);
         const line = new THREE.LineSegments(geometry, lineMaterial);
         line.computeLineDistances();
+        // group axes vertices in the viewer together and treat as a 3D object
         this.axesGroup = new THREE.Object3D();
 
         const gridHelper = new THREE.GridHelper(100, 100, this.settings.colors.amber, this.settings.colors.gray);
@@ -188,7 +217,7 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
     }
 
     /*
-     * @summary Initialize a "picture-in-picture" Axes Helper
+     * Initialize a "picture-in-picture" Axes Helper to visualize camera movements around the object.
      */
     initSecondAxes() {
         const length = 100;
@@ -235,7 +264,8 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
     }
 
     /*
-     * @summary Draws a "shooter-target" like object for aiming at the center of orbiting
+     * Draws a "shooter-target" like object for aiming at the center of orbiting
+     * NOTE: not yet used, kept for the future.
      */
     addTargetCrossToCamera() {
         const TargetCrossHelper = new THREE.Mesh(
@@ -245,8 +275,13 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         this.camera.add(TargetCrossHelper);
     }
 
-}
+};
 
+/*
+ * Mixin containing the logic for enabling/disabling controls from key types.
+ * Aggregates Transform and Orbit Controls.
+ * Holds the current state for the controls - ie. enabled/disabled - and initialized key event listeners.
+ */
 export const ControlsMixin = (superclass) => UtilsMixin(TransformControlsMixin(OrbitControlsMixin(class extends superclass {
 
     constructor(config) {

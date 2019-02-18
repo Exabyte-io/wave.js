@@ -5,13 +5,14 @@ import {Close} from 'material-ui-icons-next';
 import {ShowIf} from "./ShowIf";
 import {RoundIconButton} from "./RoundIconButton";
 
+/**
+ * Icon toolbar that can be activated/deactivated
+ */
 export class IconToolbar extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            isActive: false,
-        };
+        this.state = {isActive: false};
         this.handleToggleActive = this.handleToggleActive.bind(this);
     }
 

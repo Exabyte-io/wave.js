@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * @summary Renders children depending on the condition which is either true or false.
+ * Renders children depending on a Boolean condition
  * @property {boolean} condition The condition
  * @property {node} children Children element that are required for this component
  */

@@ -1,3 +1,8 @@
+/**
+ * Helper to save textual/bitmap data to a file.
+ * @param {String} strData - Textual data
+ * @param {String} filename
+ */
 export function saveFile(strData, filename) {
     const link = document.createElement('a');
     document.body.appendChild(link);
@@ -7,6 +12,11 @@ export function saveFile(strData, filename) {
     document.body.removeChild(link);
 }
 
+/**
+ * Save image data file with type
+ * @param {String} imgData
+ * @param {String} type
+ */
 export function saveImageDataToFile(imgData, type = 'png') {
     try {
         saveFile(imgData, `screenshot.${type}`);
@@ -14,7 +24,6 @@ export function saveImageDataToFile(imgData, type = 'png') {
     } catch (e) {
         console.error(e);
     }
-
 }
 
 /**

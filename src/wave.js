@@ -12,15 +12,19 @@ import {MouseMixin} from "./mixins/mouse";
 const TV3 = THREE.Vector3, TCo = THREE.Color;
 
 /*
- * @summary WaveBase is a helper class to initialize three js variables, settings and dimensions.
- *          Initializes a renderer, camera and scene, then Wave draws atoms as spheres according to material geometry.
- * @params DOMElement {Object} The container DOM element to attach three.js <canvas> to.
- * @params structure {Object|String} Material structure.
- * @params cell {Object} Lattice vectors forming the unit cell (to draw the unit cell).
- * @params settings {Object} Setting object to override the default values.
+ * WaveBase is a helper class to initialize three js variables, settings and dimensions.
+*  Initializes a renderer, camera and scene.
  */
 
 class WaveBase {
+
+    /**
+     * Create a WaveBase class.
+     * @params DOMElement {Object} The container DOM element to attach three.js <canvas> to.
+     * @params structure {Object|String} Material structure.
+     * @params cell {Object} Lattice vectors forming the unit cell (to draw the unit cell).
+     * @params settings {Object} Setting object to override the default values.
+     */
     constructor({DOMElement, structure, cell, settings = {}}) {
 
         this._structure = structure;
@@ -41,7 +45,6 @@ class WaveBase {
 
     }
 
-    // TODO: aggregate settings under `settings` variable
     updateSettings(settings) {this.settings = Object.assign(SETTINGS, settings)}
 
     initDimensions() {
@@ -84,6 +87,10 @@ class WaveBase {
         this.scene.fog = new THREE.FogExp2(this.settings.backgroundColor, 0.00025 / 100);
     }
 
+    /**
+     * Helper method to trigger the reconstruction of the visual on parent node resize
+     * @param {node} domElement
+     */
     handleResize(domElement = this.container) {
         this.WIDTH = domElement.clientWidth;
         this.HEIGHT = domElement.clientHeight;
@@ -117,6 +124,9 @@ class WaveBase {
 
 }
 
+/**
+ * Wave draws atoms as spheres according to the material geometry passed.
+ */
 export class Wave extends mix(WaveBase).with(
     AtomsMixin,
     CellMixin,
@@ -124,6 +134,11 @@ export class Wave extends mix(WaveBase).with(
     MouseMixin,  // has to be last
 ) {
 
+    /**
+     *
+     * @param {Object} config
+     * @param {Function} config.onUpdate - Function to be called when the underlying structure is update
+     */
     constructor(config) {
         super(config);
 
@@ -143,6 +158,11 @@ export class Wave extends mix(WaveBase).with(
         saveImageDataToFile(this.renderer.domElement.toDataURL("image/png"))
     }
 
+    /**
+     * Helper to remove a 1-level group of 3D objects.
+     * @param {THREE.Object3D} group - Groupd of 3D objects
+     * @private
+     */
     _clearViewForGroup(group) {
         for (let i = group.children.length - 1; i >= 0; i--) {
             group.remove(group.children[i])

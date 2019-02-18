@@ -14,13 +14,24 @@ import {IconToolbar} from "./IconToolbar";
 import {WaveComponent} from './WaveComponent';
 import {RoundIconButton} from "./RoundIconButton";
 
+/**
+ * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
+ */
 export class ThreeDEditor extends React.Component {
 
+    /**
+     * Create a ThreeDEditor component
+     * @param props Properties as explained below
+     */
     constructor(props) {
         super(props);
         this.state = {
+            // on/off switch for the component
             isInteractive: false,
+            // TODO: remove the need for `viewerTriggerResize`
+            // whether to trigger resize
             viewerTriggerResize: false,
+            // Settings of the wave viewer
             viewerSettings: {
                 atomRadiiScale: 0.2,
                 atomRepetitions: 1,
@@ -40,7 +51,8 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleMouseIntersection = this.handleToggleMouseIntersection.bind(this);
     }
 
-    /*
+    /**
+     * TODO: remove the need for it
      * Lattice vectors for the Unit cell of a crystal
      */
     get unitCell() {
@@ -60,7 +72,7 @@ export class ThreeDEditor extends React.Component {
             }
         });
 
-    }
+    };
 
     handleCellRepetitionsChange(e) {
         this.handleSetSetting({atomRepetitions: parseFloat($(e.target).val())});
@@ -119,8 +131,10 @@ export class ThreeDEditor extends React.Component {
 
     _getWaveProperty(name) {return this.WaveComponent && this.WaveComponent.wave[name]}
 
+    /**
+     * Returns a cover div to cover the area and prevent user interaction with component
+     */
     renderCoverDiv() {
-        /* DIV TO COVER THE AREA AND PREVENT INTERACTION */
         const style = {
             position: 'absolute',
             height: '100%',
@@ -134,23 +148,27 @@ export class ThreeDEditor extends React.Component {
 
     get classNamesForBottomToolbar() {return "buttons-toolbar buttons-toolbar-bottom pull-left"}
 
+    /**
+     * ON/OFF switch button
+     */
     renderInteractiveSwitch() {
         return (
             <div className={setClass(this.classNamesForTopToolbar)}
                 data-name="Interactive"
             >
-
                 <RoundIconButton tooltipPlacement="top" mini
                     title="Interactive"
                     onClick={this.handleToggleInteractive}
                 >
                     {this.state.isInteractive ? <NotInterested/> : <PowerSettingsNew/>}
                 </RoundIconButton>
-
             </div>
         )
     }
 
+    /**
+     * Items for Export toolbar
+     */
     getExportToolbarItems() {
         return [
             <RoundIconButton tooltipPlacement="top" mini
@@ -184,6 +202,9 @@ export class ThreeDEditor extends React.Component {
         )
     }
 
+    /**
+     * Items for View toolbar
+     */
     getViewToolbarItems() {
         return [
             <RoundIconButton tooltipPlacement="top" mini
@@ -252,6 +273,9 @@ export class ThreeDEditor extends React.Component {
         )
     }
 
+    /**
+     * Items for Edit toolbar
+     */
     getEditToolbarItems() {
         return [
             <RoundIconButton tooltipPlacement="top" mini
@@ -295,7 +319,7 @@ export class ThreeDEditor extends React.Component {
         )
     }
 
-    getWaveComponent() {
+    renderWaveComponent() {
         return <WaveComponent
             ref={(el) => {this.WaveComponent = el}}
             triggerHandleResize={this.state.viewerTriggerResize}
@@ -307,6 +331,10 @@ export class ThreeDEditor extends React.Component {
         />
     }
 
+    /**
+     * Helper to produce RoundIconButton
+     * TODO: adjust the code above to use this
+     * */
     getRoundIconButton(title, tooltipPlacement, onClick, icon) {
         return <RoundIconButton tooltipPlacement={tooltipPlacement} mini
             title={title}
@@ -317,6 +345,7 @@ export class ThreeDEditor extends React.Component {
         </RoundIconButton>
     }
 
+    /** Helper to construct a compound CSS classname based on interactivity state */
     getThreeDEditorClassNames() {
         const isInteractiveCls = this.state.isInteractive ? "" : "non-interactive";
         return setClass('materials-designer-3d-editor', isInteractiveCls);
@@ -327,7 +356,7 @@ export class ThreeDEditor extends React.Component {
             <div className={this.getThreeDEditorClassNames()}
             >
                 {this.renderCoverDiv()}
-                {this.getWaveComponent()}
+                {this.renderWaveComponent()}
                 {this.renderInteractiveSwitch()}
                 {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
                 {this.props.editable && this.renderEditToolbar(this.classNamesForTopToolbar + " third-row")}
