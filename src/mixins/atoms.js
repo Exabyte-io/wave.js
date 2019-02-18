@@ -1,14 +1,20 @@
 import {Made} from "made.js";
 import * as THREE from "three";
 
-const TV3 = THREE.Vector3, TCo = THREE.Color;
+const TV3 = THREE.Vector3;
 
+/*
+ * Mixin containing the logic for dealing with atoms.
+ * Draws atoms as spheres and handles actions performed on them.
+ */
 export const AtomsMixin = (superclass) => class extends superclass {
 
     constructor(config) {
         super(config);
 
-        this.initSphereParameters();  // to draw atoms as spheres
+        // to draw atoms as spheres
+        this.initSphereParameters();
+        // group all atoms in the viewer together and treat as a 3D object
         this.atomsGroup = new THREE.Object3D();
         this.scene.add(this.atomsGroup);
 
@@ -24,6 +30,10 @@ export const AtomsMixin = (superclass) => class extends superclass {
 
     get structure() {return this._structure}
 
+    /**
+     * Helper function to set the structural information.
+     * @param {Made.Material} s - Structural information as Made.Material.
+     */
     setStructure(s) {
         this._structure = s.clone();  // clone original structure to assert that any updates are propagated to parents
         this._basis = s.Basis;
@@ -38,7 +48,7 @@ export const AtomsMixin = (superclass) => class extends superclass {
         this._basis = b;
         if (convertBackToCrystal) b.toCrystal();
         this.structure.setBasis(b);
-        // explicitly direct the class to call 'onUpdate' during render
+        // explicitly direct the class to call 'onUpdate' during next render
         this.callOnUpdate = true;
     }
 
@@ -50,6 +60,13 @@ export const AtomsMixin = (superclass) => class extends superclass {
 
     }
 
+    /**
+     * Prepares a sphere mesh object
+     * @param {String} color
+     * @param {Number} radius
+     * @param {Array} coordinate
+     * @return {THREE.Object3D}
+     */
     getSphereMeshObject({color = this.settings.defaultColor, radius = this.settings.sphereRadius, coordinate = []}) {
         // clone original mesh to optimize the speed
         const sphereMesh = this.sphereMesh.clone();
@@ -63,25 +80,44 @@ export const AtomsMixin = (superclass) => class extends superclass {
         return sphereMesh;
     }
 
+    /**
+     * Convert THREE.vector to an XYZ coordinate array
+     * @param {THREE.Vector} vector THREE vector
+     * @return {Number[]}
+     * @private
+     */
     _vectorToXYZCoordinate(vector) {return [vector.x, vector.y, vector.z]}
 
+    /**
+     * Add atoms as objects to THREE context based on the current mouse cursor position using THREE.Raycaster().
+     * TODO: set the "into-the-screen" position of the atoms explicitly instead
+     * TODO: split into two functions - one adding atoms at coordinates and one getting coordinates from Raycaster.
+     * @param {Array} objects - Atoms as THREE.Object3D objects.
+     */
     addAtoms(objects = []) {
-        const addGroup = this.atomsGroup;
         if (!this.raycaster) return;
         const raycasterOrigin = this.raycaster.ray.origin.clone();
         const raycasterDirection = this.raycaster.ray.direction.clone();
         const positionVector = raycasterOrigin.add(raycasterDirection.multiplyScalar(53));
+
+        const addGroup = this.atomsGroup;
         const coordinate = this._convertXYZCoordinateToLocal(addGroup, this._vectorToXYZCoordinate(positionVector));
         const sphereMeshObjects = objects.map(o => this.getSphereMeshObject({
             ...this._getDefaultSettingsForElement(),
             coordinate
         }));
+
         this.basis.addAtom({coordinate});
-        this.setBasis(this.basis);  // propagate changes to structure/material
+        // propagate changes to structure/material
+        this.setBasis(this.basis);
         addGroup.add(...sphereMeshObjects);
         this.render();
     }
 
+    /**
+     * Remove atoms from the structure based on the coordinates of THREE.Object3D objects passed.
+     * @param {Array} meshObjects - THREE.Object3D objects.
+     */
     removeAtomsAtObjectPositions(meshObjects) {
         const objectPositions = meshObjects.map(o => this._vectorToXYZCoordinate(o.getWorldPosition()));
         objectPositions.forEach(coordinate => {
@@ -90,6 +126,11 @@ export const AtomsMixin = (superclass) => class extends superclass {
         this.setBasis(this.basis);  // propagate changes to structure/material
     }
 
+    /**
+     * Sets new coordinates for structure atoms based on the coordinates of meshObjects passed.
+     * TODO: rename to propagateTHREECoordinatesToAtoms
+     * @param meshObjects
+     */
     moveAtoms(meshObjects) {
         const moveGroup = this.atomsGroup;
         meshObjects = meshObjects || moveGroup.children;
@@ -113,7 +154,13 @@ export const AtomsMixin = (superclass) => class extends superclass {
         }
     }
 
-    // converts coordinates from world space to local wrt object3d
+    /**
+     * Converts coordinates from the global (world) space to local wrt object3d
+     * @param {THREE.Object3D} object3d - The object to set new reference frame.
+     * @param {Number[]} worldCoordinate - Coordinate of the object in the Global (World) frame.
+     * @return {Number[]}
+     * @private
+     */
     _convertXYZCoordinateToLocal(object3d, worldCoordinate) {
         return this._vectorToXYZCoordinate(object3d.worldToLocal(new TV3(...worldCoordinate)));
     }
