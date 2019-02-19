@@ -74,42 +74,55 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
         position: absolute;
         right: 10px;
         margin: 16px 20px;
+
         &.pull-left {
             left: 0;
         }
+
         &.buttons-toolbar-bottom {
             bottom: 0;
+
             &.second-row {
                 bottom: 60px;
             }
+
             &.third-row {
                 bottom: 2 * 60px;
             }
+
             &.fourth-row {
                 bottom: 3 * 60px;
             }
+
             &.fifth-row {
                 bottom: 4 * 60px;
             }
         }
+
         &.buttons-toolbar-top {
             top: 0;
+
             &.second-row {
                 top: 60px;
             }
+
             &.third-row {
                 top: 2 * 60px;
             }
+
             &.fourth-row {
                 top: 3 * 60px;
             }
+
             &.fifth-row {
                 top: 4 * 60px;
             }
         }
+
         @media (min-width: $screen-md) {
             margin: 10px 20px;
         }
+
         .sphere-radius, .cell-repetitions {
             border: none;
             width: 45px;
@@ -123,32 +136,14 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
 
     .atoms-toolbar {
         padding: 0;
+
         button {
             background-color: $exagray_semi-transparent;
         }
+
         &:hover.non-interactive .atom-view-cover {
             background: rgba($gray-darkest, 0.35);
         }
-    }
-
-}
-
-$source-editor-crystal-lattice-collapsed-height: 215px;
-
-.materials-designer-source-editor {
-
-    height: $materials-designer-height;
-    overflow: hidden;
-    min-height: 445px; // to avoid basis-view being hidden behind GLmol on mobile
-    padding: 10px 10px;
-    .btn-custom {
-        margin-bottom: 10px;
-        background-color: $exagray_semi-transparent;
-    }
-
-    textarea[name="basis-xyz"] {
-        height: calc(#{$materials-designer-height} - #{$source-editor-crystal-lattice-collapsed-height});
-        resize: vertical;
     }
 
 }
@@ -157,21 +152,26 @@ $source-editor-crystal-lattice-collapsed-height: 215px;
     button {
         color: inherit;
         background-color: $material-ui-expansion-panels-color;
+
         &:hover {
             color: white;
         }
     }
+
     .buttons-toolbar {
         display: table; // to make width fit content
         margin: 10px;
+
         button {
             box-shadow: $material-ui-button-box-shadow-override !important;
             margin: 5px;
+
             &[aria-toggled="true"] {
                 color: $amber;
             }
         }
     }
+
     &:hover.non-interactive .atom-view-cover {
         background: rgba($gray-darkest, 0.35);
     }

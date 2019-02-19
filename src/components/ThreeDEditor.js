@@ -2,7 +2,8 @@ import $ from 'jquery';
 import React from 'react';
 import setClass from "classnames";
 import Tooltip from "material-ui-next/Tooltip";
-import "../../lib/styles.css"
+
+import "../styles/styles.css"
 
 import {
     NotInterested, ImportExport, RemoveRedEye, Create,

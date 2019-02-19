@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "description": "Web-based Atomic Viewer by Exabyte",
     "scripts": {
-        "postinstall": "mkdir -p lib; babel src --out-dir lib; node-sass styles/styles.scss lib/styles.css"
+        "postinstall": "mkdir -p lib/styles; babel src --out-dir lib; node-sass -r src/styles -o lib/styles"
     },
     "repository": {
         "type": "git",
