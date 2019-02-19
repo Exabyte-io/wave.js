@@ -1,0 +1,179 @@
+//== Media queries breakpoints
+// Extra small screen / phone
+$screen-xs: 480px !default;
+// Small screen / tablet
+$screen-sm: 767px !default;
+// Medium screen / desktop
+$screen-md: 992px !default;
+// Large screen / wide desktop
+$screen-lg: 1200px !default;
+// Extra large screen / wide desktop
+$screen-xl-min: $screen-lg !default;
+$screen-xl-max: 1599px !default;
+
+// fonts
+$font-family-monospace: Menlo, Monaco, Consolas, "Courier New", monospace !default;
+
+// colors
+$warning_color: #ff9800;
+$amber: #ffc107;
+$wave-background: #202020;
+
+$gray-base: #000 !default;
+$gray: lighten($gray-base, 33.5%) !default; // #555
+$gray-light: lighten($gray-base, 46.7%) !default; // #777
+$gray-lighter: lighten($gray-base, 66.7%) !default; // #777// #DCDCDC !default;
+$gray-dark: lighten($gray-base, 20%) !default; // #333
+$gray-darkest: lighten($wave-background, 3%) !default; // #222
+
+// Exabyte colors
+$exablue: #0A3677;
+$exagray: #F4F4F4;
+$exagray_dark: darken($exagray, 15%);
+$exagray_darkest: #5e5e5e;
+$exagray_darker: #BDBDBD;
+$exagray_semi-transparent: rgba(101, 101, 101, 0.23);
+$exagray_background: #edecec;
+
+// material-ui v1.00-beta.37 dark theme
+$material-ui-expansion-panels-color: #424242;
+$material-ui-menu-box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
+$material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2), 0px 0px 1px 1px rgba(255, 255, 255, 0.14), 0px 0px 1px 1px rgba(255, 255, 255, 0.12);
+
+
+// Mixins
+@mixin inverse {
+    color: $exagray_darker;
+    border-color: $exagray_darker;
+    background-color: $wave-background;
+    p, h1, h2, h3, h4, h5, h6 {
+        color: $exagray-darker;
+    }
+}
+
+
+@mixin darkScrollbar($width) {
+    &::-webkit-scrollbar {
+        width: #{$width}px;
+    }
+    &::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 #{$width/2}px rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+    }
+    &::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        -webkit-box-shadow: inset 0 0 #{$width}px $gray-light;
+    }
+}
+
+.materials-designer-3d-editor {
+
+    padding: 0;
+
+    .buttons-toolbar {
+        position: absolute;
+        right: 10px;
+        margin: 16px 20px;
+        &.pull-left {
+            left: 0;
+        }
+        &.buttons-toolbar-bottom {
+            bottom: 0;
+            &.second-row {
+                bottom: 60px;
+            }
+            &.third-row {
+                bottom: 2 * 60px;
+            }
+            &.fourth-row {
+                bottom: 3 * 60px;
+            }
+            &.fifth-row {
+                bottom: 4 * 60px;
+            }
+        }
+        &.buttons-toolbar-top {
+            top: 0;
+            &.second-row {
+                top: 60px;
+            }
+            &.third-row {
+                top: 2 * 60px;
+            }
+            &.fourth-row {
+                top: 3 * 60px;
+            }
+            &.fifth-row {
+                top: 4 * 60px;
+            }
+        }
+        @media (min-width: $screen-md) {
+            margin: 10px 20px;
+        }
+        .sphere-radius, .cell-repetitions {
+            border: none;
+            width: 45px;
+            height: 35px;
+            padding-left: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            background-color: $material-ui-expansion-panels-color;
+        }
+    }
+
+    .atoms-toolbar {
+        padding: 0;
+        button {
+            background-color: $exagray_semi-transparent;
+        }
+        &:hover.non-interactive .atom-view-cover {
+            background: rgba($gray-darkest, 0.35);
+        }
+    }
+
+}
+
+$source-editor-crystal-lattice-collapsed-height: 215px;
+
+.materials-designer-source-editor {
+
+    height: $materials-designer-height;
+    overflow: hidden;
+    min-height: 445px; // to avoid basis-view being hidden behind GLmol on mobile
+    padding: 10px 10px;
+    .btn-custom {
+        margin-bottom: 10px;
+        background-color: $exagray_semi-transparent;
+    }
+
+    textarea[name="basis-xyz"] {
+        height: calc(#{$materials-designer-height} - #{$source-editor-crystal-lattice-collapsed-height});
+        resize: vertical;
+    }
+
+}
+
+.materials-designer-3d-editor {
+    button {
+        color: inherit;
+        background-color: $material-ui-expansion-panels-color;
+        &:hover {
+            color: white;
+        }
+    }
+    .buttons-toolbar {
+        display: table; // to make width fit content
+        margin: 10px;
+        button {
+            box-shadow: $material-ui-button-box-shadow-override !important;
+            margin: 5px;
+            &[aria-toggled="true"] {
+                color: $amber;
+            }
+        }
+    }
+    &:hover.non-interactive .atom-view-cover {
+        background: rgba($gray-darkest, 0.35);
+    }
+
+}
