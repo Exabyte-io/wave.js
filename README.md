@@ -72,9 +72,9 @@ Desirable features for implementation:
 
 ## Tests
 
-There are two types of tests: asserting Wave class functionality and the ones which tests the React components. Wave class tests use snapshot testing in which an snapshot of the WebGL [[3]](#links) context is taken and compared with the reference. The test will fail if the two snapshots do not match. React component tests use Enzyme [[4]](#links) that makes DOM manipulation and traversal easier.
+There are two types of tests: asserting Wave class functionality and testing React components. Wave class tests use snapshot testing in which an snapshot of the WebGL [[3]](#links) context is taken and compared with the reference. The test will fail if the two snapshots do not match. React component tests use Enzyme [[4]](#links) that makes DOM manipulation and traversal easier.
 
-In order to make the tests continuously pass locally and on the CI, the tests should be executed in the same environment as the snapshots may be slightly different on different operating systems. We recommend to use Docker container or Vagrant VM with CentOS 7.2 as OS to execute the tests. Wave tests are written based on Jest [[5]](#links) testing framework and can be executed as below.
+In order to make the tests continuously pass locally and on the CI, the tests should be executed in the same environment as the snapshots may be slightly different on different operating systems. We recommend to use Docker container or Vagrant VM with CentOS 7.2 as OS to execute the tests. Wave tests are written based on Jest [[5]](#links) framework and can be executed as below.
 
 ```bash
 sh run-tests.sh
