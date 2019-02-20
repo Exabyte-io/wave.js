@@ -3,7 +3,7 @@ import React from 'react';
 import setClass from "classnames";
 import Tooltip from "material-ui-next/Tooltip";
 
-import "../styles/styles.css"
+import "../styles/styles.scss"
 
 import {
     NotInterested, ImportExport, RemoveRedEye, Create,
