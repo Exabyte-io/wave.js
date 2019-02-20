@@ -3,6 +3,8 @@ import React from 'react';
 import setClass from "classnames";
 import Tooltip from "material-ui-next/Tooltip";
 
+import "../styles/styles.scss"
+
 import {
     NotInterested, ImportExport, RemoveRedEye, Create,
     Replay, PictureInPicture, PowerSettingsNew, FileDownload,
