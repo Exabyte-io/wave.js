@@ -7,7 +7,7 @@ import {createElement} from "../../utils";
 import {ELEMENT_PROPERTIES, MATERIAL_CONFIG} from "../../enums";
 import {ThreeDEditor} from "../../../src/components/ThreeDEditor";
 
-test('toggleInteractive', async () => {
+test('toggleInteractive', () => {
     const container = createElement("div", ELEMENT_PROPERTIES);
     const wrapper = mount(<ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)}/>, {attachTo: container});
 
@@ -24,7 +24,7 @@ test('toggleInteractive', async () => {
     expect(wrapper.find(SELECTORS.exportIconToolbar).hasClass("hidden")).toBe(false);
 });
 
-test('toggleView', async () => {
+test('toggleView', () => {
     const container = createElement("div", ELEMENT_PROPERTIES);
     const wrapper = mount(<ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)}/>, {attachTo: container});
 
