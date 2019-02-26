@@ -2,6 +2,8 @@ import $ from 'jquery';
 import React from 'react';
 import setClass from "classnames";
 import Tooltip from "material-ui-next/Tooltip";
+import JssProvider from 'react-jss/lib/JssProvider';
+import {createGenerateClassName} from "material-ui-next/styles";
 
 import "../styles/styles.scss"
 
@@ -15,6 +17,12 @@ import {exportToDisk} from "../utils";
 import {IconToolbar} from "./IconToolbar";
 import {WaveComponent} from './WaveComponent';
 import {RoundIconButton} from "./RoundIconButton";
+
+/**
+ * This is to avoid class name conflicts when the component is used inside other material-ui dependent components.
+ * See https://material-ui.com/customization/css-in-js/#creategenerateclassname-options-class-name-generator for more information.
+ */
+const generateClassName = createGenerateClassName({productionPrefix: 'wave'});
 
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
@@ -355,15 +363,17 @@ export class ThreeDEditor extends React.Component {
 
     render() {
         return (
-            <div className={this.getThreeDEditorClassNames()}
-            >
-                {this.renderCoverDiv()}
-                {this.renderWaveComponent()}
-                {this.renderInteractiveSwitch()}
-                {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
-                {this.props.editable && this.renderEditToolbar(this.classNamesForTopToolbar + " third-row")}
-                {this.renderExportToolbar(this.classNamesForBottomToolbar)}
-            </div>
+            <JssProvider generateClassName={generateClassName}>
+                <div className={this.getThreeDEditorClassNames()}
+                >
+                    {this.renderCoverDiv()}
+                    {this.renderWaveComponent()}
+                    {this.renderInteractiveSwitch()}
+                    {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
+                    {this.props.editable && this.renderEditToolbar(this.classNamesForTopToolbar + " third-row")}
+                    {this.renderExportToolbar(this.classNamesForBottomToolbar)}
+                </div>
+            </JssProvider>
         )
     }
 }
