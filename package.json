@@ -29,6 +29,7 @@
         "node-sass": "^4.11.0",
         "periodic-table": "file:/stack/lib/periodic-table",
         "react": "^15.6.2",
+        "react-jss": "^8.6.1",
         "react-dom": "^15.6.2",
         "three": "^0.90.0",
         "three-orbit-controls": "^82.1.0",
