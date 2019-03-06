@@ -38,7 +38,8 @@ export class WaveComponent extends React.Component {
             settings: this.props.settings,
             onUpdate: this.props.onUpdate,
         });
-
+        // The height of the dom element is initially zero as css is loaded after component is rendered, hence below.
+        this._handleResizeTransition();
     }
 
     _handleResizeTransition() {
