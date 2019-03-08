@@ -28,9 +28,7 @@
         "mixwith": "^0.1.1",
         "node-sass": "^4.11.0",
         "periodic-table": "file:/stack/lib/periodic-table",
-        "react": "^15.6.2",
         "react-jss": "^8.6.1",
-        "react-dom": "^15.6.2",
         "three": "^0.90.0",
         "three-orbit-controls": "^82.1.0",
         "three-transform-controls": "^1.0.4",
@@ -40,7 +38,13 @@
         "material-ui-next": "^1.0.0-beta.38",
         "jquery": "^1.11.2"
     },
+    "peerDependencies": {
+        "react": "^15.6.2",
+        "react-dom": "^15.6.2"
+    },
     "devDependencies": {
+        "react": "^15.6.2",
+        "react-dom": "^15.6.2",
         "babel-jest": "^24.1.0",
         "enzyme": "^3.8.0",
         "enzyme-adapter-react-15": "^1.3.0",
