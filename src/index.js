@@ -2,7 +2,6 @@ import React from 'react';
 import {Made} from "made.js";
 import ReactDOM from 'react-dom';
 
-import 'bootstrap/dist/css/bootstrap.css';
 import "./stylesheets/wave.scss";
 
 import {ThreeDEditor} from './components/ThreeDEditor';

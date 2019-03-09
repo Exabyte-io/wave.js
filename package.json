@@ -58,5 +58,11 @@
         "pngjs2": "^2.0.0",
         "react-scripts": "^2.1.5",
         "react-test-renderer": "^15.6.2"
-    }
+    },
+    "browserslist": [
+        ">0.2%",
+        "not dead",
+        "not ie <= 11",
+        "not op_mini all"
+    ]
 }

@@ -177,3 +177,20 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
     }
 
 }
+
+.three-renderer {
+    height: 100vh;
+}
+
+.three-renderer {
+    canvas:first-child {
+        position: absolute;
+        right: 10px;
+    }
+
+    .three-renderer-selection {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.4);
+        visibility: hidden;
+    }
+}
