@@ -60,7 +60,6 @@ const TransformControlsMixin = (superclass) => class extends superclass {
     }
 
     removeEventListenersTransformControls() {
-        const clsInstance = this;
         [
             // no events are bound to container from `transformControls`, and it itself is disposed of on disable
         ].map(o => this.container.removeEventListener(Object.keys(o)[0], Object.values(o)[0], false));

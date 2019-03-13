@@ -5,8 +5,6 @@ import Tooltip from "material-ui-next/Tooltip";
 import JssProvider from 'react-jss/lib/JssProvider';
 import {createGenerateClassName} from "material-ui-next/styles";
 
-import "../styles/styles.scss"
-
 import {
     NotInterested, ImportExport, RemoveRedEye, Create,
     Replay, PictureInPicture, PowerSettingsNew, FileDownload,

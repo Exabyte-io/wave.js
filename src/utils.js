@@ -1,3 +1,5 @@
+import {sprintf} from 'sprintf-js';
+
 /**
  * Helper to save textual/bitmap data to a file.
  * @param {String} strData - Textual data
@@ -35,6 +37,6 @@ export function saveImageDataToFile(imgData, type = 'png') {
 export const exportToDisk = function (content, name = 'file', extension = 'txt') {
     const pom = document.createElement('a');
     pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
-    pom.setAttribute('download', s.sprintf(`%s.${extension}`, name));
+    pom.setAttribute('download', sprintf(`%s.${extension}`, name));
     pom.click();
 };
