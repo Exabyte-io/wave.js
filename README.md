@@ -37,7 +37,7 @@ npm install wave-js
 From source to contribute to development:
 
 ```bash
-git clone git@github.com:Exabyte-io/wave-js.git
+git clone git@github.com:Exabyte-io/wave.git
 ```
 
 ## Contribution
