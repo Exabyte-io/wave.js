@@ -1,6 +1,6 @@
 import React from 'react';
-import {Made} from "made.js";
 import ReactDOM from 'react-dom';
+import {Made} from "@exabyte-io/made.js";
 
 import "./stylesheets/wave.scss";
 

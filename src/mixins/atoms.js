@@ -1,5 +1,5 @@
-import {Made} from "made.js";
 import * as THREE from "three";
+import {Made} from "@exabyte-io/made.js";
 
 const TV3 = THREE.Vector3;
 
