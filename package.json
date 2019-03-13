@@ -1,6 +1,6 @@
 {
     "name": "@exabyte-io/wave.js",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Web-based Atomic Viewer and Editor in JavaScript.",
     "scripts": {
         "start": "PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
