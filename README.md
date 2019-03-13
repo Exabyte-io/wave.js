@@ -1,6 +1,6 @@
-# Wave-js
+# Wave.js
 
-**W**eb-based **A**tomic **V**iewer and **E**ditor in **J**ava**S**cript. Wave-js is a library for atomic visualization and editing written in JavaScript enabling visualization of material structures from atoms up on the web. The library is aimed to be used for the development of web applications in JavaScript.
+**W**eb-based **A**tomic **V**iewer and **E**ditor in **J**ava**S**cript. Wave.js is a library for atomic visualization and editing written in JavaScript enabling visualization of material structures from atoms up on the web. The library is aimed to be used for the development of web applications in JavaScript.
 
 The library was originally designed as part of and presently powers materials design capabilities of the [Exabyte.io](https://exabyte.io) platform. For example, [this page](https://platform.exabyte.io/demo/materials/n3HSzCmyoctgJFGGE) representing a crystal of Silicon online uses Made.js.
 
@@ -30,7 +30,7 @@ The package is written in a modular way easy to extend. Contributions can be in 
 From NPM for use within a software project:
 
 ```bash
-npm install wave-js
+npm install @exabyte-io/wave.js
 
 ```
 
@@ -54,7 +54,7 @@ We suggest forking this repository and introducing the adjustments there to be c
 
 ### Source code conventions
 
-Wave-js is written in EcmaScript 6th edition [[2]](#links) with the application of object-oriented design patterns encapsulating key concepts following the conventions below.
+Wave.js is written in EcmaScript 6th edition [[2]](#links) with the application of object-oriented design patterns encapsulating key concepts following the conventions below.
 
 1. One main class exposing the functionality with a set of mixins (implemented through [mixwith](https://www.npmjs.com/package/mixwith)) containing domain-specific functionality inside `mixins` folder 
 
