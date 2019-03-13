@@ -1,4 +1,4 @@
-import {ELEMENT_VDW_RADII, ELEMENT_COLORS} from "periodic-table";
+import {ELEMENT_VDW_RADII, ELEMENT_COLORS} from "@exabyte-io/periodic-table.js";
 
 export default {
     // atoms

@@ -1,7 +1,7 @@
 {
-    "name": "wave-js",
-    "version": "0.1.0",
-    "description": "Web-based Atomic Viewer by Exabyte",
+    "name": "@exabyte-io/wave.js",
+    "version": "1.0.3",
+    "description": "Web-based Atomic Viewer and Editor in JavaScript.",
     "scripts": {
         "start": "PORT=3001 react-scripts start",
         "transpile": "babel --out-dir dist src; node-sass -r src/stylesheets -o dist/stylesheets"
@@ -15,6 +15,7 @@
     "bugs": {
         "url": "https://github.com/Exabyte-io/wave/issues"
     },
+    "license": "Apache-2.0",
     "homepage": "https://github.com/Exabyte-io/wave",
     "dependencies": {
         "@babel/cli": "7.0.0",
@@ -24,11 +25,11 @@
         "@babel/preset-react": "7.0.0",
         "@babel/runtime-corejs2": "^7.0.0",
         "@babel/plugin-proposal-class-properties": "7.0.0",
-        "made.js": "file:/stack/lib/made-js",
         "classnames": "^2.2.5",
         "mixwith": "^0.1.1",
         "node-sass": "^4.11.0",
-        "periodic-table": "file:/stack/lib/periodic-table",
+        "@exabyte-io/made.js": "1.0.1",
+        "@exabyte-io/periodic-table.js": "1.0.0",
         "react-jss": "^8.6.1",
         "sprintf-js": "^1.1.2",
         "three": "^0.90.0",
