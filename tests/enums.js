@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import {Made} from "made.js";
+import {Made} from "@exabyte-io/made.js";
 
 // canvas element width/height
 import {Wave} from "../src/wave";
