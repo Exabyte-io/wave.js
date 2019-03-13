@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-const TV3 = THREE.Vector3, TCo = THREE.Color;
+const TV3 = THREE.Vector3;
 
 
 /*
