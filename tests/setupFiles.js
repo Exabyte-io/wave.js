@@ -1,8 +1,8 @@
 import GL from "gl";
 import expect from 'expect'
-import {Made} from "made.js";
 import * as THREE from "three";
 import {configure} from 'enzyme';
+import {Made} from "@exabyte-io/made.js";
 import Adapter from 'enzyme-adapter-react-15';
 import {toBeDeepCloseTo, toMatchCloseTo} from 'jest-matcher-deep-close-to';
 

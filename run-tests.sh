@@ -5,7 +5,7 @@ export NVM_DIR="/root/.nvm"
 
 yum install -y libXext-devel libXi-devel mesa-libGL-devel mesa-dri-drivers xorg-x11-server-Xvfb
 
-npm install
+npm install --no-save
 # babel/runtime moved core-js into babel/runtime-corejs2, hence the below.
 if [[ -d node_modules/@babel/runtime ]]; then
     cd node_modules/@babel/runtime

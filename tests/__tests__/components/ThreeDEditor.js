@@ -1,6 +1,6 @@
 import React from 'react';
-import {Made} from "made.js";
 import {mount} from 'enzyme';
+import {Made} from "@exabyte-io/made.js";
 
 import {SELECTORS} from "../../selectors";
 import {createElement} from "../../utils";
