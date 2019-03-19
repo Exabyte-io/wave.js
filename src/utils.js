@@ -40,3 +40,11 @@ export const exportToDisk = function (content, name = 'file', extension = 'txt')
     pom.setAttribute('download', sprintf(`%s.${extension}`, name));
     pom.click();
 };
+
+export function ThreeDSceneDataToMaterial(sceneData) {
+    return [];
+}
+
+export function materialsToThreeDSceneData(materials) {
+    return {};
+}

@@ -6,15 +6,16 @@ import JssProvider from 'react-jss/lib/JssProvider';
 import {createGenerateClassName} from "material-ui-next/styles";
 
 import {
-    NotInterested, ImportExport, RemoveRedEye, Create,
-    Replay, PictureInPicture, PowerSettingsNew, FileDownload,
-    ThreeDRotation, Autorenew, GpsFixed, SelectAll, Mouse,
+    NotInterested, ImportExport, RemoveRedEye,
+    Replay, PictureInPicture, PowerSettingsNew,
+    FileDownload, ThreeDRotation, Autorenew, GpsFixed, Edit
 } from 'material-ui-icons-next';
 
 import {exportToDisk} from "../utils";
 import {IconToolbar} from "./IconToolbar";
 import {WaveComponent} from './WaveComponent';
 import {RoundIconButton} from "./RoundIconButton";
+import {ThreeDEditorModal} from "./ThreeDEditorModal";
 
 /**
  * This is to avoid class name conflicts when the component is used inside other material-ui dependent components.
@@ -36,6 +37,7 @@ export class ThreeDEditor extends React.Component {
         this.state = {
             // on/off switch for the component
             isInteractive: false,
+            is3DEdit: false,
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -49,6 +51,7 @@ export class ThreeDEditor extends React.Component {
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
         this.handleDownloadClick = this.handleDownloadClick.bind(this);
         this.handleToggleInteractive = this.handleToggleInteractive.bind(this);
+        this.handleToggle3DEdit = this.handleToggle3DEdit.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);
         this.handleTakeScreenshot = this.handleTakeScreenshot.bind(this);
         this.handleToggleTransformControls = this.handleToggleTransformControls.bind(this);
@@ -97,6 +100,10 @@ export class ThreeDEditor extends React.Component {
 
     handleToggleInteractive(e) {
         this.setState({isInteractive: !this.state.isInteractive})
+    }
+
+    handleToggle3DEdit(e) {
+        this.setState({is3DEdit: !this.state.is3DEdit})
     }
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
@@ -281,49 +288,18 @@ export class ThreeDEditor extends React.Component {
         )
     }
 
-    /**
-     * Items for Edit toolbar
-     */
-    getEditToolbarItems() {
-        return [
-            <RoundIconButton tooltipPlacement="top" mini
-                isToggled={this._getWaveProperty('isSelectionEnabled')}
-                title="Rectangular Selection [S]"
-                onClick={this.handleToggleMouseSelection}
-            >
-                <SelectAll/>
-            </RoundIconButton>,
-
-            <RoundIconButton tooltipPlacement="top" mini
-                isToggled={this._getWaveProperty('areTransformControlsEnabled')}
-                title="Toggle Rotate/Translate [T, R/A]"
-                onClick={this.handleToggleTransformControls}
-            >
-                <ThreeDRotation/>
-            </RoundIconButton>,
-
-            <RoundIconButton tooltipPlacement="top" mini
-                isToggled={this._getWaveProperty('isIntersectionEnabled')}
-                title="Inject/Delete [I + Right/Left click]"
-                onClick={this.handleToggleMouseIntersection}
-            >
-                <Mouse/>
-            </RoundIconButton>,
-
-            <input id="materials-glmol-lattice-type" style={{display: 'none'}}/>,
-        ]
-    }
-
-    renderEditToolbar(className = "") {
+    render3DEditToggle(className = "") {
         return (
-            <IconToolbar
-                className={className}
-                title="Edit"
-                iconComponent={Create}
-                isHidden={!this.state.isInteractive}
+            <div className={className}
+                data-name="3DEdit"
             >
-                {this.getEditToolbarItems()}
-            </IconToolbar>
+                <RoundIconButton tooltipPlacement="top" mini
+                    title="3DEdit"
+                    onClick={this.handleToggle3DEdit}
+                >
+                    <Edit/>
+                </RoundIconButton>
+            </div>
         )
     }
 
@@ -368,8 +344,13 @@ export class ThreeDEditor extends React.Component {
                     {this.renderWaveComponent()}
                     {this.renderInteractiveSwitch()}
                     {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
-                    {this.props.editable && this.renderEditToolbar(this.classNamesForTopToolbar + " third-row")}
+                    {this.props.editable && this.render3DEditToggle(this.classNamesForTopToolbar + " third-row")}
                     {this.renderExportToolbar(this.classNamesForBottomToolbar)}
+                    <ThreeDEditorModal
+                        show={this.state.is3DEdit}
+                        onHide={this.handleToggle3DEdit}
+                        materials={[this.props.material]}
+                    />
                 </div>
             </JssProvider>
         )
