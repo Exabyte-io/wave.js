@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Made} from "@exabyte-io/made.js";
 
-import "./stylesheets/wave.scss";
+import "./stylesheets/main.scss";
 
 import {ThreeDEditor} from './components/ThreeDEditor';
 
