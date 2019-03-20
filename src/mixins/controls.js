@@ -2,87 +2,8 @@ import * as THREE from "three";
 import {UtilsMixin} from "./utils";
 
 const OrbitControls = require('three-orbit-controls')(THREE);
-const TransformControls = require('three-transform-controls')(THREE);
 
 const TV3 = THREE.Vector3;
-
-/*
- * Mixin containing the logic for dealing with transform controls for THREE scene.
- * Example: https://threejs.org/examples/misc_controls_transform.html
- */
-const TransformControlsMixin = (superclass) => class extends superclass {
-
-    constructor(config) {
-        super(config);
-
-        // Bind methods to context
-        this.initTransformControls = this.initTransformControls.bind(this);
-        this.enableTransformControls = this.enableTransformControls.bind(this);
-        this.disableTransformControls = this.disableTransformControls.bind(this);
-    }
-
-    initTransformControls(enabled = false) {
-
-        if (this.transformControls) return;  // sanity check
-
-        this.transformControls = new TransformControls(this.camera, this.renderer.domElement);
-        this.transformControls.enabled = enabled;
-        this.transformControls.space = "world";
-
-        // TODO: use a settings variable instead of explicit number below
-        this.transformControls.setSize(0.5);
-        this.transformControls.attach(this.materialGroup);
-        this.transformControls.addEventListener('change', (event) => {
-            this.transformControls.update();
-            this.render();
-        });
-
-    }
-
-    onMouseDownTransformControls(event) {
-        this.transforming = true;
-    }
-
-    onMouseUpTransformControls(event) {
-        this.transforming = false;
-        this.moveAtoms();
-    }
-
-    addEventListenersTransformControls() {
-        this.onMouseDownTransformControlsBound = e => this.onMouseDownTransformControls(e);
-        this.onMouseUpTransformControlsBound = e => this.onMouseUpTransformControls(e);
-
-        // TODO: add listeners for touch events
-        // NOTE: mousedown and mouseup events have to be on the controls themselves and have to be in camelCase
-        this.transformControls.addEventListener('mouseDown', this.onMouseDownTransformControlsBound, false);
-        this.transformControls.addEventListener('mouseUp', this.onMouseUpTransformControlsBound, false);
-        this.setCursorStyle('move');
-    }
-
-    removeEventListenersTransformControls() {
-        [
-            // no events are bound to container from `transformControls`, and it itself is disposed of on disable
-        ].map(o => this.container.removeEventListener(Object.keys(o)[0], Object.values(o)[0], false));
-        this.setCursorStyle();
-    }
-
-    enableTransformControls() {
-        this.initTransformControls(true);
-        this.scene.add(this.transformControls) && this.render();
-        this.addEventListenersTransformControls();
-        this.setCursorStyle('move');
-    }
-
-    // transform controls does not support `enable/disable` => dispose of it completely
-    disableTransformControls() {
-        this.removeEventListenersTransformControls();
-        if (!this.transformControls) return;
-        this.scene.remove(this.transformControls);
-        this.transformControls.dispose();
-        this.transformControls = null;
-    }
-
-};
 
 /*
  * Mixin containing the logic for dealing with orbit controls for THREE scene.
@@ -274,52 +195,51 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         this.camera.add(TargetCrossHelper);
     }
 
+    /**
+     * Sets mouse cursor type.
+     * @param {String} cursorType - CSS Cursor attribute (https://developer.mozilla.org/en-US/docs/Web/CSS/cursor).
+     */
+    setCursorStyle(cursorType) {
+        if (!cursorType) {
+            this.container.style.cursor = this.container.style.previousCursor || "default";
+        } else if (cursorType !== this.container.style.cursor) {  // avoid setting cursor to same value twice
+            this.container.style.previousCursor = this.container.style.cursor;
+            this.container.style.cursor = cursorType;
+        }
+    }
+
 };
 
 /*
  * Mixin containing the logic for enabling/disabling controls from key types.
- * Aggregates Transform and Orbit Controls.
  * Holds the current state for the controls - ie. enabled/disabled - and initialized key event listeners.
  */
-export const ControlsMixin = (superclass) => UtilsMixin(TransformControlsMixin(OrbitControlsMixin(class extends superclass {
+export const ControlsMixin = (superclass) => UtilsMixin(OrbitControlsMixin(class extends superclass {
 
     constructor(config) {
         super(config);
-
-        this.toggleTransformControls = this.toggleTransformControls.bind(this);
         this.toggleOrbitControls = this.toggleOrbitControls.bind(this);
         this.initControls();
         this.initControlsSwitchFromKeyboard();
-
     }
 
     initControls() {
-        this.areTransformControlsEnabled = false;
         this.areOrbitControlsEnabled = false;
     }
 
     getControlsState() {
         return {
-            areTransformControlsEnabled: this.areTransformControlsEnabled,
             areOrbitControlsEnabled: this.areOrbitControlsEnabled,
         }
     }
 
     setControlsState(s = {}) {
-        this.areTransformControlsEnabled = s.areTransformControlsEnabled || false;
         this.areOrbitControlsEnabled = s.areOrbitControlsEnabled || false;
-    }
-
-    toggleTransformControls(skipStateUpdate = false) {
-        const initialState = this.getControlsState();
-        this.toggleBoolean("areTransformControlsEnabled", ["areOrbitControlsEnabled"]);
-        !skipStateUpdate && this.updateControlsFromState(initialState, this.getControlsState());
-
     }
 
     toggleOrbitControls(skipStateUpdate = false) {
         const initialState = this.getControlsState();
-        this.toggleBoolean("areOrbitControlsEnabled", ["areTransformControlsEnabled"]);
+        this.toggleBoolean("areOrbitControlsEnabled");
         !skipStateUpdate && this.updateControlsFromState(initialState, this.getControlsState());
     }
 
@@ -329,15 +249,6 @@ export const ControlsMixin = (superclass) => UtilsMixin(TransformControlsMixin(O
             const initialState = this.getControlsState();
 
             switch (event.keyCode) {
-                case 84: // T
-                    this.toggleTransformControls(true);
-                    break;
-                case 65: // A
-                    this.areTransformControlsEnabled && this.transformControls.setMode("translate");
-                    break;
-                case 82: // R
-                    this.areTransformControlsEnabled && this.transformControls.setMode("rotate");
-                    break;
                 case 79: // O
                     this.toggleOrbitControls(true);
                     break;
@@ -355,13 +266,10 @@ export const ControlsMixin = (superclass) => UtilsMixin(TransformControlsMixin(O
         if (!this.areTwoObjectsShallowEqual(initialState, finalState)) {
             const diffObject = this.getTwoObjectsShallowDifferentKeys(initialState, finalState);
 
-            diffObject.areTransformControlsEnabled &&
-            (this.areTransformControlsEnabled ? this.enableTransformControls() : this.disableTransformControls());
-
             diffObject.areOrbitControlsEnabled &&
             (this.areOrbitControlsEnabled ? this.enableOrbitControls() : this.disableOrbitControls());
         }
         this.render();
     }
 
-})));
+}));
