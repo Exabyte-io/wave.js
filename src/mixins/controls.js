@@ -31,7 +31,7 @@ const TransformControlsMixin = (superclass) => class extends superclass {
 
         // TODO: use a settings variable instead of explicit number below
         this.transformControls.setSize(0.5);
-        this.transformControls.attach(this.atomsGroup);
+        this.transformControls.attach(this.materialGroup);
         this.transformControls.addEventListener('change', (event) => {
             this.transformControls.update();
             this.render();

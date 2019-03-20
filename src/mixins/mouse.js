@@ -34,7 +34,7 @@ export const MouseInitMixin = (superclass) => class extends superclass {
      * @return {Array}
      */
     get mouseSelectionTargets() {
-        return this.atomsGroup.children || [];
+        return this.materialGroup.children || [];
     }
 
     /**

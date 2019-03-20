@@ -2,7 +2,6 @@ import * as THREE from "three";
 
 const TV3 = THREE.Vector3;
 
-
 /*
  * Mixin containing the logic for dealing with the calculation/unit cell.
  * Draws cell edges as lines.
@@ -12,11 +11,6 @@ export const CellMixin = (superclass) => class extends superclass {
 
     constructor(config) {
         super(config);
-
-        // group all cell lines/edges in the viewer together and treat as a 3D object
-        this.cellGroup = new THREE.Object3D();
-        this.scene.add(this.cellGroup);
-
         this.drawUnitCell = this.drawUnitCell.bind(this);
     }
 
@@ -50,8 +44,9 @@ export const CellMixin = (superclass) => class extends superclass {
             color: this.settings.lineColor || this.settings.defaultColor || "#CCCCCC",
         });
 
-        const line = new THREE.LineSegments(geometry, lineMaterial);
-        this.cellGroup.add(line);
+        const cellObject = new THREE.LineSegments(geometry, lineMaterial);
+        cellObject.name = "Cell";
+        this.materialGroup.add(cellObject);
     }
 
-}
+};

@@ -14,9 +14,6 @@ export const AtomsMixin = (superclass) => class extends superclass {
 
         // to draw atoms as spheres
         this.initSphereParameters();
-        // group all atoms in the viewer together and treat as a 3D object
-        this.atomsGroup = new THREE.Object3D();
-        this.scene.add(this.atomsGroup);
 
         this.drawAtomsAsSpheres = this.drawAtomsAsSpheres.bind(this);
         this.getAtomColorByElement = this.getAtomColorByElement.bind(this);
@@ -100,7 +97,7 @@ export const AtomsMixin = (superclass) => class extends superclass {
         const raycasterDirection = this.raycaster.ray.direction.clone();
         const positionVector = raycasterOrigin.add(raycasterDirection.multiplyScalar(53));
 
-        const addGroup = this.atomsGroup;
+        const addGroup = this.materialGroup;
         const coordinate = this._convertXYZCoordinateToLocal(addGroup, this._vectorToXYZCoordinate(positionVector));
         const sphereMeshObjects = objects.map(o => this.getSphereMeshObject({
             ...this._getDefaultSettingsForElement(),
@@ -132,7 +129,7 @@ export const AtomsMixin = (superclass) => class extends superclass {
      * @param meshObjects
      */
     moveAtoms(meshObjects) {
-        const moveGroup = this.atomsGroup;
+        const moveGroup = this.materialGroup;
         meshObjects = meshObjects || moveGroup.children;
         // global positions with respect to the THREE world
         const worldPositions = meshObjects.map(o => this._vectorToXYZCoordinate(o.getWorldPosition()));
@@ -143,7 +140,7 @@ export const AtomsMixin = (superclass) => class extends superclass {
 
     removeAtoms(objects = []) {
         this.removeAtomsAtObjectPositions(objects);
-        this.atomsGroup.remove(...objects);
+        this.materialGroup.remove(...objects);
         this.render();
     }
 
@@ -167,7 +164,7 @@ export const AtomsMixin = (superclass) => class extends superclass {
 
     drawAtomsAsSpheres(atomRadiiScale) {
 
-        const drawGroup = this.atomsGroup;
+        const drawGroup = this.materialGroup;
         this.getAtomColorByElement();
 
         const basisWithRepetitions = Made.tools.basis.repeat(this.basis, Array(3).fill(this.settings.atomRepetitions));
@@ -175,10 +172,12 @@ export const AtomsMixin = (superclass) => class extends superclass {
             const element = basisWithRepetitions.getElementByIndex(atomicIndex);
             // local coordinate with respect to the drawGroup
             const coordinate = this._convertXYZCoordinateToLocal(drawGroup, atomicCoordinate.value);
-            return this.getSphereMeshObject({
+            const sphereMesh = this.getSphereMeshObject({
                 ...this._getDefaultSettingsForElement(element, atomRadiiScale),
                 coordinate,
             });
+            sphereMesh.name = `${element}-${atomicIndex}`;
+            return sphereMesh;
         });
 
         drawGroup.add(...sphereMeshObjects);
