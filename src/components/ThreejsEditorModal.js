@@ -3,9 +3,11 @@ import * as THREE from "three";
 import {ModalBody} from "react-bootstrap";
 
 import {ShowIf} from "./ShowIf";
+import settings from "../settings";
 import ModalDialog from "./ModalDialog";
 import {materialsToThreeDSceneData} from "../utils";
 import {LoadingIndicator} from "./LoadingIndicator";
+
 import {THREE_D_BASE_URL, THREE_D_SOURCES} from "../enums";
 
 export class ThreejsEditorModal extends ModalDialog {
@@ -40,6 +42,7 @@ export class ThreejsEditorModal extends ModalDialog {
                     var editor = new window.Editor();
 
                     var viewport = new window.Viewport(editor);
+
                     this.domElement.appendChild(viewport.dom);
 
                     var toolbar = new window.Toolbar(editor);
@@ -74,6 +77,11 @@ export class ThreejsEditorModal extends ModalDialog {
 
                     window.addEventListener('resize', onWindowResize, false);
                     onWindowResize();
+
+                    editor.sceneHelpers.children = editor.sceneHelpers.children.filter(obj => obj instanceof THREE.GridHelper);
+                    const gridHelper = new THREE.GridHelper(100, 100, settings.colors.amber, settings.colors.gray);
+                    editor.sceneHelpers.add(gridHelper);
+                    editor.scene.background = new THREE.Color(settings.backgroundColor);
 
                     var loader = new window.THREE.ObjectLoader();
                     var result = loader.parse(materialsToThreeDSceneData(this.props.materials));
