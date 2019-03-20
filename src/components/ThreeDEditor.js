@@ -47,6 +47,7 @@ export class ThreeDEditor extends React.Component {
                 atomRepetitions: 1,
             },
         };
+        this.threejsEditor = undefined;
         this.handleCellRepetitionsChange = this.handleCellRepetitionsChange.bind(this);
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
         this.handleDownloadClick = this.handleDownloadClick.bind(this);
@@ -103,7 +104,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     ToggleThreejsEditorModal(e) {
-        this.setState({isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown})
+        this.setState({isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown});
     }
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
@@ -311,7 +312,6 @@ export class ThreeDEditor extends React.Component {
             cell={this.unitCell}
             name={this.props.material.name}
             settings={this.state.viewerSettings}
-            onUpdate={this.props.onUpdate}
         />
     }
 
@@ -339,7 +339,10 @@ export class ThreeDEditor extends React.Component {
         if (this.state.isThreejsEditorModalShown) {
             return <ThreejsEditorModal
                 show={this.state.isThreejsEditorModalShown}
-                onHide={this.ToggleThreejsEditorModal}
+                onHide={(material) => {
+                    this.ToggleThreejsEditorModal();
+                    this.props.onUpdate && this.props.onUpdate(material);
+                }}
                 materials={[this.props.material]}
                 modalId="threejs-editor"
             />
