@@ -1,4 +1,5 @@
 import {sprintf} from 'sprintf-js';
+import {Made} from "@exabyte-io/made.js";
 
 import {Wave} from "./wave";
 
@@ -43,8 +44,46 @@ export const exportToDisk = function (content, name = 'file', extension = 'txt')
     pom.click();
 };
 
+function extractLattice(sceneData) {
+    const cellObject = sceneData.object.children[1].children.find(child => child.type === "LineSegments");
+    const cellGeometries = sceneData.geometries.find(g => g.uuid === cellObject.geometry);
+    const vertices = cellGeometries.data.vertices;
+    const a = [vertices[3] - vertices[0], vertices[4] - vertices[1], vertices[5] - vertices[2]];
+    const b = [vertices[9] - vertices[0], vertices[10] - vertices[1], vertices[11] - vertices[2]];
+    const c = [vertices[51] - vertices[0], vertices[52] - vertices[1], vertices[53] - vertices[2]];
+    return Made.Lattice.fromVectors({
+        a,
+        b,
+        c
+    });
+}
+
+function extractBasis(sceneData, cell) {
+    const elements = [];
+    const coordinates = [];
+    sceneData.object.children[1].children.forEach(child => {
+        if (child.type === "Mesh") {
+            elements.push(child.name);
+            coordinates.push([child.matrix[12], child.matrix[13], child.matrix[14]])
+        }
+    });
+    return new Made.Basis({
+        cell,
+        elements,
+        coordinates,
+        units: "cartesian"
+    });
+}
+
 export function ThreeDSceneDataToMaterial(sceneData) {
-    return [];
+    const lattice = extractLattice(sceneData);
+    const basis = extractBasis(sceneData, lattice.vectorArrays);
+    basis.toCrystal();
+    return new Made.Material({
+        name: sceneData.object.children[1].name,
+        lattice: lattice.toJSON(),
+        basis: basis.toJSON(),
+    });
 }
 
 export function materialsToThreeDSceneData(materials) {

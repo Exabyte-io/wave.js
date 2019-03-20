@@ -46,8 +46,9 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: 0.2,
                 atomRepetitions: 1,
             },
+            originalMaterial: this.props.material,
+            material: this.props.material.clone(),
         };
-        this.threejsEditor = undefined;
         this.handleCellRepetitionsChange = this.handleCellRepetitionsChange.bind(this);
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
         this.handleDownloadClick = this.handleDownloadClick.bind(this);
@@ -55,12 +56,9 @@ export class ThreeDEditor extends React.Component {
         this.ToggleThreejsEditorModal = this.ToggleThreejsEditorModal.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);
         this.handleTakeScreenshot = this.handleTakeScreenshot.bind(this);
-        this.handleToggleTransformControls = this.handleToggleTransformControls.bind(this);
         this.handleToggleOrbitControls = this.handleToggleOrbitControls.bind(this);
         this.handleToggleOrbitControlsAnimation = this.handleToggleOrbitControlsAnimation.bind(this);
         this.handleToggleAxes = this.handleToggleAxes.bind(this);
-        this.handleToggleMouseSelection = this.handleToggleMouseSelection.bind(this);
-        this.handleToggleMouseIntersection = this.handleToggleMouseIntersection.bind(this);
     }
 
     /**
@@ -68,7 +66,7 @@ export class ThreeDEditor extends React.Component {
      * Lattice vectors for the Unit cell of a crystal
      */
     get unitCell() {
-        return this.props.material.Lattice.unitCell;
+        return this.state.material.Lattice.unitCell;
     }
 
     _resetStateWaveComponent() {
@@ -95,7 +93,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleDownloadClick(e) {
-        const material = this.props.material;
+        const material = this.state.originalMaterial;
         exportToDisk(material.getAsPOSCAR(), material.name, 'poscar')
     }
 
@@ -125,23 +123,8 @@ export class ThreeDEditor extends React.Component {
         this._resetStateWaveComponent();
     }
 
-    handleToggleTransformControls(e) {
-        this.WaveComponent.wave.toggleTransformControls();
-        this._resetStateWaveComponent();
-    }
-
     handleToggleAxes(e) {
         this.WaveComponent.wave.toggleAxes();
-        this._resetStateWaveComponent();
-    }
-
-    handleToggleMouseSelection(e) {
-        this.WaveComponent.wave.toggleMouseSelection();
-        this._resetStateWaveComponent();
-    }
-
-    handleToggleMouseIntersection(e) {
-        this.WaveComponent.wave.toggleMouseIntersection();
         this._resetStateWaveComponent();
     }
 
@@ -174,6 +157,7 @@ export class ThreeDEditor extends React.Component {
             >
                 <RoundIconButton tooltipPlacement="top" mini
                     title="Interactive"
+                    isToggled={this.state.isInteractive}
                     onClick={this.handleToggleInteractive}
                 >
                     {this.state.isInteractive ? <NotInterested/> : <PowerSettingsNew/>}
@@ -291,7 +275,7 @@ export class ThreeDEditor extends React.Component {
 
     render3DEditToggle(className = "") {
         return (
-            <div className={className}
+            <div className={setClass(className, {'hidden': !this.state.isInteractive})}
                 data-name="3DEdit"
             >
                 <RoundIconButton tooltipPlacement="top" mini
@@ -308,9 +292,9 @@ export class ThreeDEditor extends React.Component {
         return <WaveComponent
             ref={(el) => {this.WaveComponent = el}}
             triggerHandleResize={this.state.viewerTriggerResize}
-            structure={this.props.material}
+            structure={this.state.material}
             cell={this.unitCell}
-            name={this.props.material.name}
+            name={this.state.material.name}
             settings={this.state.viewerSettings}
         />
     }
@@ -340,10 +324,14 @@ export class ThreeDEditor extends React.Component {
             return <ThreejsEditorModal
                 show={this.state.isThreejsEditorModalShown}
                 onHide={(material) => {
-                    this.ToggleThreejsEditorModal();
+                    this.setState({
+                        originalMaterial: material,
+                        material: material.clone(),
+                        isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown
+                    });
                     this.props.onUpdate && this.props.onUpdate(material);
                 }}
-                materials={[this.props.material]}
+                materials={[this.state.originalMaterial]}
                 modalId="threejs-editor"
             />
         } else {

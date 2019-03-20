@@ -1,13 +1,12 @@
-import _ from "underscore";
 import {mix} from "mixwith";
 import * as THREE from "three";
 
 import SETTINGS from "./settings"
-import {saveImageDataToFile} from "./utils";
-import {AtomsMixin} from "./mixins/atoms";
 import {CellMixin} from "./mixins/cell";
-import {ControlsMixin} from "./mixins/controls";
+import {AtomsMixin} from "./mixins/atoms";
 import {MouseMixin} from "./mixins/mouse";
+import {saveImageDataToFile} from "./utils";
+import {ControlsMixin} from "./mixins/controls";
 
 const TV3 = THREE.Vector3, TCo = THREE.Color;
 
@@ -45,7 +44,7 @@ class WaveBase {
 
     }
 
-    updateSettings(settings) {this.settings = Object.assign(SETTINGS, settings)}
+    updateSettings(settings) {this.settings = Object.assign({}, SETTINGS, settings)}
 
     initDimensions() {
         this.WIDTH = this.container.clientWidth;

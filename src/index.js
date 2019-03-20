@@ -6,5 +6,6 @@ import "./stylesheets/main.scss";
 
 import {ThreeDEditor} from './components/ThreeDEditor';
 
+const domElement = document.getElementById('root');
 const material = new Made.Material(Made.defaultMaterialConfig);
-window.threeDEditor = ReactDOM.render(<ThreeDEditor editable={true} material={material}/>, document.getElementById('root'));
+window.threeDEditor = ReactDOM.render(<ThreeDEditor editable={true} material={material}/>, domElement);
