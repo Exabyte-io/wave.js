@@ -7,4 +7,4 @@ import "./stylesheets/main.scss";
 import {ThreeDEditor} from './components/ThreeDEditor';
 
 const material = new Made.Material(Made.defaultMaterialConfig);
-window.wave = ReactDOM.render(<ThreeDEditor editable={true} material={material}/>, document.getElementById('root'));
+window.threeDEditor = ReactDOM.render(<ThreeDEditor editable={true} material={material}/>, document.getElementById('root'));
