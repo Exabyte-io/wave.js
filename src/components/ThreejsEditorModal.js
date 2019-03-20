@@ -40,6 +40,7 @@ export class ThreejsEditorModal extends ModalDialog {
                     };
 
                     var editor = new window.Editor();
+                    editor.scene.background = new THREE.Color(settings.backgroundColor);
 
                     var viewport = new window.Viewport(editor);
 
@@ -63,29 +64,25 @@ export class ThreejsEditorModal extends ModalDialog {
                     var modal = new window.UI.Modal();
                     this.domElement.appendChild(modal.dom);
 
-                    function onWindowResize(event) {editor.signals.windowResize.dispatch()}
-
                     document.addEventListener('dragover', function (event) {
                         event.preventDefault();
                         event.dataTransfer.dropEffect = 'copy';
                     }, false);
 
                     document.addEventListener('drop', function (event) {
-                        event.preventDefault();
-                        editor.loader.loadFiles(event.dataTransfer.files);
+                        if (event.dataTransfer.files.length > 0) {
+                            editor.loader.loadFile(event.dataTransfer.files[0]);
+                        }
                     }, false);
+
+                    function onWindowResize(event) {editor.signals.windowResize.dispatch()}
 
                     window.addEventListener('resize', onWindowResize, false);
                     onWindowResize();
 
-                    editor.sceneHelpers.children = editor.sceneHelpers.children.filter(obj => obj instanceof THREE.GridHelper);
-                    const gridHelper = new THREE.GridHelper(100, 100, settings.colors.amber, settings.colors.gray);
-                    editor.sceneHelpers.add(gridHelper);
-                    editor.scene.background = new THREE.Color(settings.backgroundColor);
-
-                    var loader = new window.THREE.ObjectLoader();
-                    var result = loader.parse(materialsToThreeDSceneData(this.props.materials));
-                    editor.execute(new window.SetSceneCommand(result));
+                    const loader = new window.THREE.ObjectLoader();
+                    const scene = loader.parse(materialsToThreeDSceneData(this.props.materials));
+                    editor.execute(new window.SetSceneCommand(scene));
 
                 }
             }
