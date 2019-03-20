@@ -15,7 +15,7 @@ import {exportToDisk} from "../utils";
 import {IconToolbar} from "./IconToolbar";
 import {WaveComponent} from './WaveComponent';
 import {RoundIconButton} from "./RoundIconButton";
-import {ThreeDEditorModal} from "./ThreeDEditorModal";
+import {ThreejsEditorModal} from "./ThreejsEditorModal";
 
 /**
  * This is to avoid class name conflicts when the component is used inside other material-ui dependent components.
@@ -37,7 +37,7 @@ export class ThreeDEditor extends React.Component {
         this.state = {
             // on/off switch for the component
             isInteractive: false,
-            is3DEdit: false,
+            isThreejsEditorModalShown: false,
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -51,7 +51,7 @@ export class ThreeDEditor extends React.Component {
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
         this.handleDownloadClick = this.handleDownloadClick.bind(this);
         this.handleToggleInteractive = this.handleToggleInteractive.bind(this);
-        this.handleToggle3DEdit = this.handleToggle3DEdit.bind(this);
+        this.ToggleThreejsEditorModal = this.ToggleThreejsEditorModal.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);
         this.handleTakeScreenshot = this.handleTakeScreenshot.bind(this);
         this.handleToggleTransformControls = this.handleToggleTransformControls.bind(this);
@@ -102,8 +102,8 @@ export class ThreeDEditor extends React.Component {
         this.setState({isInteractive: !this.state.isInteractive})
     }
 
-    handleToggle3DEdit(e) {
-        this.setState({is3DEdit: !this.state.is3DEdit})
+    ToggleThreejsEditorModal(e) {
+        this.setState({isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown})
     }
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
@@ -295,7 +295,7 @@ export class ThreeDEditor extends React.Component {
             >
                 <RoundIconButton tooltipPlacement="top" mini
                     title="3DEdit"
-                    onClick={this.handleToggle3DEdit}
+                    onClick={this.ToggleThreejsEditorModal}
                 >
                     <Edit/>
                 </RoundIconButton>
@@ -335,23 +335,31 @@ export class ThreeDEditor extends React.Component {
         return setClass('materials-designer-3d-editor', isInteractiveCls);
     }
 
+    renderWaveOrThreejsEditorModal() {
+        if (this.state.isThreejsEditorModalShown) {
+            return <ThreejsEditorModal
+                show={this.state.isThreejsEditorModalShown}
+                onHide={this.ToggleThreejsEditorModal}
+                materials={[this.props.material]}
+                modalId="threejs-editor"
+            />
+        } else {
+            return <div className={this.getThreeDEditorClassNames()}
+            >
+                {this.renderCoverDiv()}
+                {this.renderInteractiveSwitch()}
+                {this.renderWaveComponent()}
+                {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
+                {this.props.editable && this.render3DEditToggle(this.classNamesForTopToolbar + " third-row")}
+                {this.renderExportToolbar(this.classNamesForBottomToolbar)}
+            </div>;
+        }
+    }
+
     render() {
         return (
             <JssProvider generateClassName={generateClassName}>
-                <div className={this.getThreeDEditorClassNames()}
-                >
-                    {this.renderCoverDiv()}
-                    {this.renderWaveComponent()}
-                    {this.renderInteractiveSwitch()}
-                    {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
-                    {this.props.editable && this.render3DEditToggle(this.classNamesForTopToolbar + " third-row")}
-                    {this.renderExportToolbar(this.classNamesForBottomToolbar)}
-                    <ThreeDEditorModal
-                        show={this.state.is3DEdit}
-                        onHide={this.handleToggle3DEdit}
-                        materials={[this.props.material]}
-                    />
-                </div>
+                {this.renderWaveOrThreejsEditorModal()}
             </JssProvider>
         )
     }

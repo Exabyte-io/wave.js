@@ -1,5 +1,7 @@
 import {sprintf} from 'sprintf-js';
 
+import {Wave} from "./wave";
+
 /**
  * Helper to save textual/bitmap data to a file.
  * @param {String} strData - Textual data
@@ -46,5 +48,10 @@ export function ThreeDSceneDataToMaterial(sceneData) {
 }
 
 export function materialsToThreeDSceneData(materials) {
-    return {};
+    const wave = new Wave({
+        DOMElement: document.createElement("div"),
+        structure: materials[0],
+        cell: materials[0].Lattice.unitCell
+    });
+    return wave.scene.toJSON();
 }
