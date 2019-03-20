@@ -118,6 +118,7 @@ export class ThreejsEditorModal extends React.Component {
 }
 
 ThreejsEditorModal.propTypes = {
+    materials: React.PropTypes.array,
     modalId: React.PropTypes.string,
     show: React.PropTypes.bool,
     onHide: React.PropTypes.func,
