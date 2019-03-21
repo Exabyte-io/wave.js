@@ -1,163 +1,170 @@
 body {
-	font-family: Helvetica, Arial, sans-serif;
-	font-size: 14px;
-	margin: 0;
-	overflow: hidden;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    margin: 0;
+    overflow: hidden;
 }
 
-hr {
-	border: 0;
-	border-top: 1px solid #ccc;
-}
+#threejs-editor {
 
-button {
-	position: relative;
-}
+    hr {
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
 
-textarea {
-	tab-size: 4;
-	white-space: pre;
-	word-wrap: normal;
-}
+    button {
+        position: relative;
+    }
 
-	textarea.success {
-		border-color: #8b8 !important;
-	}
+    textarea {
+        tab-size: 4;
+        white-space: pre;
+        word-wrap: normal;
+    }
 
-	textarea.fail {
-		border-color: #f00 !important;
-		background-color: rgba(255,0,0,0.05);
-	}
+    textarea.success {
+        border-color: #8b8 !important;
+    }
 
-textarea, input { outline: none; } /* osx */
+    textarea.fail {
+        border-color: #f00 !important;
+        background-color: rgba(255, 0, 0, 0.05);
+    }
 
-.Panel {
-	-moz-user-select: none;
-	-webkit-user-select: none;
-	-ms-user-select: none;
+    textarea, input {
+        outline: none;
+    }
 
-	/* No support for these yet */
-	-o-user-select: none;
-	user-select: none;
-}
+    /* osx */
 
-/* CodeMirror */
+    .Panel {
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
 
-.CodeMirror {
+        /* No support for these yet */
+        -o-user-select: none;
+        user-select: none;
+    }
 
-	position: absolute !important;
-	top: 37px;
-	width: 100% !important;
-	height: calc(100% - 37px) !important;
+    /* CodeMirror */
 
-}
+    .CodeMirror {
 
-	.CodeMirror .errorLine {
+        position: absolute !important;
+        top: 37px;
+        width: 100% !important;
+        height: calc(100% - 37px) !important;
 
-		background: rgba(255,0,0,0.25);
+    }
 
-	}
+    .CodeMirror .errorLine {
 
-	.CodeMirror .esprima-error {
+        background: rgba(255, 0, 0, 0.25);
 
-		color: #f00;
-		text-align: right;
-		padding: 0 20px;
+    }
 
-	}
+    .CodeMirror .esprima-error {
 
-/* outliner */
+        color: #f00;
+        text-align: right;
+        padding: 0 20px;
 
-#outliner .option {
+    }
 
-	border: 1px solid transparent;
-}
+    /* outliner */
 
-#outliner .option.drag {
+    #outliner .option {
 
-	border: 1px dashed #999;
+        border: 1px solid transparent;
+    }
 
-}
+    #outliner .option.drag {
 
-#outliner .option.dragTop {
+        border: 1px dashed #999;
 
-	border-top: 1px dashed #999;
+    }
 
-}
+    #outliner .option.dragTop {
 
-#outliner .option.dragBottom {
+        border-top: 1px dashed #999;
 
-	border-bottom: 1px dashed #999;
+    }
 
-}
+    #outliner .option.dragBottom {
 
-#outliner .type {
-	position:relative;
-	top:-2px;
-	padding: 0 2px;
-	color: #ddd;
-}
+        border-bottom: 1px dashed #999;
 
-#outliner .type:after {
-	content: '■';
-}
+    }
 
-#outliner .Scene {
-	color: #ccccff;
-}
+    #outliner .type {
+        position: relative;
+        top: -2px;
+        padding: 0 2px;
+        color: #ddd;
+    }
 
-#outliner .Object3D {
-	color: #aaaaee;
-}
+    #outliner .type:after {
+        content: '■';
+    }
 
-#outliner .Mesh {
-	color: #8888ee;
-}
+    #outliner .Scene {
+        color: #ccccff;
+    }
 
-#outliner .Line {
-	color: #88ee88;
-}
+    #outliner .Object3D {
+        color: #aaaaee;
+    }
 
-#outliner .LineSegments {
-	color: #88ee88;
-}
+    #outliner .Mesh {
+        color: #8888ee;
+    }
 
-#outliner .Points {
-	color: #ee8888;
-}
+    #outliner .Line {
+        color: #88ee88;
+    }
 
-/* */
+    #outliner .LineSegments {
+        color: #88ee88;
+    }
 
-#outliner .PointLight {
-	color: #dddd00;
-}
+    #outliner .Points {
+        color: #ee8888;
+    }
 
-/* */
+    /* */
 
-#outliner .Geometry {
-	color: #88ff88;
-}
+    #outliner .PointLight {
+        color: #dddd00;
+    }
 
-#outliner .BoxGeometry {
-	color: #bbeebb;
-}
+    /* */
 
-#outliner .TorusGeometry {
-	color: #aaeeaa;
-}
+    #outliner .Geometry {
+        color: #88ff88;
+    }
 
-/* */
+    #outliner .BoxGeometry {
+        color: #bbeebb;
+    }
 
-#outliner .Material {
-	color: #ff8888;
-}
+    #outliner .TorusGeometry {
+        color: #aaeeaa;
+    }
 
-#outliner .MeshPhongMaterial {
-	color: #ffaa88;
-}
+    /* */
 
-/* */
+    #outliner .Material {
+        color: #ff8888;
+    }
 
-#outliner .Script:after {
-	content: '{...}' /* ❮/❯ */
+    #outliner .MeshPhongMaterial {
+        color: #ffaa88;
+    }
+
+    /* */
+
+    #outliner .Script:after {
+        content: '{...}' /* ❮/❯ */
+    }
 }
