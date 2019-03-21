@@ -324,12 +324,16 @@ export class ThreeDEditor extends React.Component {
             return <ThreejsEditorModal
                 show={this.state.isThreejsEditorModalShown}
                 onHide={(material) => {
-                    this.setState({
-                        originalMaterial: material,
-                        material: material.clone(),
-                        isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown
-                    });
-                    this.props.onUpdate && this.props.onUpdate(material);
+                    if (!material || material.hash === this.state.originalMaterial.hash) {
+                        this.setState({isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown});
+                    } else {
+                        this.setState({
+                            material: material.clone(),
+                            originalMaterial: material,
+                            isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown
+                        });
+                        this.props.onUpdate && this.props.onUpdate(material);
+                    }
                 }}
                 materials={[this.state.originalMaterial]}
                 modalId="threejs-editor"
