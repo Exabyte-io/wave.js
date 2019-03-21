@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import {sprintf} from 'sprintf-js';
 import {Made} from "@exabyte-io/made.js";
 
@@ -97,5 +98,19 @@ export function materialsToThreeDSceneData(materials) {
         structure: materials[0],
         cell: materials[0].Lattice.unitCell
     });
+    wave.scene.remove(wave.camera);
+
+    const lightsGroup = new THREE.Group();
+    lightsGroup.name = "Lights - DO NOT MODIFY";
+    const directionalLight = new THREE.DirectionalLight("#FFFFFF");
+    directionalLight.name = "Directional - DO NOT MODIFY";
+    const ambientLight = new THREE.AmbientLight("#202020");
+    ambientLight.name = "Ambient - DO NOT MODIFY";
+    directionalLight.position.copy(new THREE.Vector3(0.2, 0.2, -1).normalize());
+    directionalLight.intensity = 1.2;
+    lightsGroup.add(directionalLight);
+    lightsGroup.add(ambientLight);
+    wave.scene.add(lightsGroup);
+
     return wave.scene.toJSON();
 }
