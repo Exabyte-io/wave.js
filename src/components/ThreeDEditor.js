@@ -332,7 +332,7 @@ export class ThreeDEditor extends React.Component {
                     this.props.onUpdate && this.props.onUpdate(material);
                 }}
                 materials={[this.state.originalMaterial]}
-                modalId="threejs-editor-modal"
+                modalId="threejs-editor"
             />
         } else {
             return <div className={this.getThreeDEditorClassNames()}

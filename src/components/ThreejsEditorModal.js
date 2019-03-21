@@ -106,8 +106,8 @@ export class ThreejsEditorModal extends React.Component {
                 }}
                 className={className}
             >
-                <ModalBody className="p-0">
-                    <div id="threejs-editor" ref={el => {this.domElement = el}}/>
+                <ModalBody>
+                    <div ref={el => {this.domElement = el}}/>
                     <ShowIf condition={!this.state.areScriptsLoaded}>
                         <LoadingIndicator/>
                     </ShowIf>
