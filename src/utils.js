@@ -75,7 +75,12 @@ function extractBasis(sceneData, cell) {
     });
 }
 
+function validateSceneData(sceneData) {
+    // TODO
+}
+
 export function ThreeDSceneDataToMaterial(sceneData) {
+    validateSceneData(sceneData);
     const lattice = extractLattice(sceneData);
     const basis = extractBasis(sceneData, lattice.vectorArrays);
     basis.toCrystal();
