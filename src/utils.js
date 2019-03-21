@@ -111,6 +111,8 @@ export function materialsToThreeDSceneData(materials) {
     lightsGroup.add(directionalLight);
     lightsGroup.add(ambientLight);
     wave.scene.add(lightsGroup);
+    lightsGroup.position.set(-50, 0, 10);
+    wave.render();
 
     return wave.scene.toJSON();
 }
