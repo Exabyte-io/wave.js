@@ -96,7 +96,8 @@ export class ThreejsEditorModal extends React.Component {
         const className = setClass(this.props.className, this.props.isFullWidth ? "full-page-overlay" : "");
         if (this.props.show) elementClass(document.body).add('modal-backdrop-color-' + this.props.backdropColor);
         return (
-            <Modal id={this.props.modalId}
+            <Modal
+                id={this.props.modalId}
                 animation={false}
                 show={this.props.show}
                 onHide={(e) => {
@@ -106,7 +107,7 @@ export class ThreejsEditorModal extends React.Component {
                 className={className}
             >
                 <ModalBody className="p-0">
-                    <div ref={el => {this.domElement = el}}/>
+                    <div id="threejs-editor" ref={el => {this.domElement = el}}/>
                     <ShowIf condition={!this.state.areScriptsLoaded}>
                         <LoadingIndicator/>
                     </ShowIf>
