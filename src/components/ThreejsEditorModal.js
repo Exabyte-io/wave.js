@@ -4,10 +4,9 @@ import {ModalBody} from "react-bootstrap";
 
 import {ShowIf} from "./ShowIf";
 import settings from "../settings";
-import ModalDialog from "./ModalDialog";
+import {ModalDialog} from "./ModalDialog";
 import {materialsToThreeDSceneData} from "../utils";
 import {LoadingIndicator} from "./LoadingIndicator";
-
 import {THREE_D_BASE_URL, THREE_D_SOURCES} from "../enums";
 
 export class ThreejsEditorModal extends ModalDialog {
@@ -108,14 +107,6 @@ export class ThreejsEditorModal extends ModalDialog {
             }
             document.head.appendChild(script);
         });
-    }
-
-    renderHeader() {
-        return null;
-    }
-
-    renderFooter() {
-        return null;
     }
 
     renderBody() {
