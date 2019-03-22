@@ -44,13 +44,24 @@ export const exportToDisk = function (content, name = 'file', extension = 'txt')
     pom.click();
 };
 
-function extractMaterialData(sceneData) {
-    return sceneData.object.children.find(child => child.name !== "PerspectiveCamera");
+function findObjectsByType(data, type) {
+    const objects = [];
+    if (data.type === type) objects.push(data);
+    if (data.children) data.children.forEach(child => {
+        const childObjects = findObjectsByType(child, type);
+        childObjects.forEach(childObject => {
+            childObject.matrix[12] += child.matrix[12];
+            childObject.matrix[13] += child.matrix[13];
+            childObject.matrix[14] += child.matrix[14];
+        });
+        Array.prototype.push.apply(objects, childObjects);
+    });
+    return objects;
 }
 
-function extractLattice(materialData, sceneData) {
-    const cellObject = materialData.children.find(child => child.type === "LineSegments");
-    const cellGeometries = sceneData.geometries.find(g => g.uuid === cellObject.geometry);
+function extractLattice(sceneData) {
+    const unitCellData = findObjectsByType(sceneData.object, "LineSegments")[0];
+    const cellGeometries = sceneData.geometries.find(g => g.uuid === unitCellData.geometry);
     const vertices = cellGeometries.data.vertices;
     const a = [vertices[3] - vertices[0], vertices[4] - vertices[1], vertices[5] - vertices[2]];
     const b = [vertices[9] - vertices[0], vertices[10] - vertices[1], vertices[11] - vertices[2]];
@@ -62,14 +73,12 @@ function extractLattice(materialData, sceneData) {
     });
 }
 
-function extractBasis(materialData, cell) {
+function extractBasis(sceneData, cell) {
     const elements = [];
     const coordinates = [];
-    materialData.children.forEach(child => {
-        if (child.type === "Mesh") {
-            elements.push(child.name);
-            coordinates.push([child.matrix[12], child.matrix[13], child.matrix[14]])
-        }
+    findObjectsByType(sceneData.object, "Mesh").forEach(child => {
+        elements.push(child.name);
+        coordinates.push([child.matrix[12], child.matrix[13], child.matrix[14]])
     });
     return new Made.Basis({
         cell,
@@ -85,12 +94,11 @@ function validateSceneData(sceneData) {
 
 export function ThreeDSceneDataToMaterial(sceneData) {
     validateSceneData(sceneData);
-    const materialData = extractMaterialData(sceneData);
-    const lattice = extractLattice(materialData, sceneData);
-    const basis = extractBasis(materialData, lattice.vectorArrays);
+    const lattice = extractLattice(sceneData);
+    const basis = extractBasis(sceneData, lattice.vectorArrays);
     basis.toCrystal();
     return new Made.Material({
-        name: materialData.name,
+        name: sceneData.object.children.find(child => child.name !== "PerspectiveCamera").name,
         lattice: lattice.toJSON(),
         basis: basis.toJSON(),
     });
@@ -102,14 +110,14 @@ export function materialsToThreeDSceneData(materials) {
         cell: materials[0].Lattice.unitCell,
         DOMElement: document.createElement("div")
     });
-    materials.slice(1).forEach(material => {
-        const structureGroup = wave.createStructureGroup(material);
-        const unitCellObject = wave.createUnitCellObject(material.Lattice.unitCell);
-        structureGroup.add(unitCellObject);
-        const sphereMeshObjects = wave.createSphereMeshObjects(material.Basis);
-        structureGroup.add(...sphereMeshObjects);
-        wave.scene.add(structureGroup);
-    });
-    wave.render();
+    if (materials.length > 1) {
+        wave.structureGroup.name = "New Material";
+        materials.slice(1).forEach(material => {
+            material.toCartesian();
+            const sitesGroup = wave.createSitesGroup(material.Basis);
+            wave.structureGroup.add(sitesGroup);
+        });
+        wave.render();
+    }
     return wave.scene.toJSON();
 }
