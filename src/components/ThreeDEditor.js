@@ -46,7 +46,9 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: 0.2,
                 atomRepetitions: 1,
             },
+            // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
             originalMaterial: this.props.material,
+            // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
             material: this.props.material.clone(),
         };
         this.handleCellRepetitionsChange = this.handleCellRepetitionsChange.bind(this);
@@ -59,6 +61,17 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleOrbitControls = this.handleToggleOrbitControls.bind(this);
         this.handleToggleOrbitControlsAnimation = this.handleToggleOrbitControlsAnimation.bind(this);
         this.handleToggleAxes = this.handleToggleAxes.bind(this);
+        this.onThreejsEditorModalHide = this.onThreejsEditorModalHide.bind(this);
+    }
+
+    componentWillReceiveProps(nextProps, nextContext) {
+        const material = nextProps.material;
+        if (material) {
+            this.setState({
+                originalMaterial: material,
+                material: material.clone(),
+            })
+        }
     }
 
     /**
@@ -319,18 +332,20 @@ export class ThreeDEditor extends React.Component {
         return setClass('materials-designer-3d-editor', isInteractiveCls);
     }
 
+    onThreejsEditorModalHide(material) {
+        this.setState({
+            originalMaterial: material,
+            material: material.clone(),
+            isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown
+        });
+        this.props.onUpdate && this.props.onUpdate(material);
+    }
+
     renderWaveOrThreejsEditorModal() {
         if (this.state.isThreejsEditorModalShown) {
             return <ThreejsEditorModal
                 show={this.state.isThreejsEditorModalShown}
-                onHide={(material) => {
-                    this.setState({
-                        originalMaterial: material,
-                        material: material.clone(),
-                        isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown
-                    });
-                    this.props.onUpdate && this.props.onUpdate(material);
-                }}
+                onHide={this.onThreejsEditorModalHide}
                 materials={[this.state.originalMaterial]}
                 modalId="threejs-editor"
             />
