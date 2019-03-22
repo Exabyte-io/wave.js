@@ -1,6 +1,7 @@
 import React from 'react';
 import * as THREE from "three";
 import {ModalBody} from "react-bootstrap";
+import ThreeOrbitControls from "three-orbit-controls";
 
 import {ShowIf} from "./ShowIf";
 import settings from "../settings";
@@ -35,11 +36,17 @@ export class ThreejsEditorModal extends ModalDialog {
      */
     initializeEditor() {
 
-        this.editor = new window.Editor();
+        THREE.Object3D.DefaultUp.set(0, 0, 1);
+
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 20000);
+        camera.name = "Camera";
+        camera.position.copy(new THREE.Vector3(-20, 0, 10));
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+        this.editor = new window.Editor(camera);
         this.editor.scene.background = new THREE.Color(settings.backgroundColor);
 
         const viewport = new window.Viewport(this.editor);
-
         this.domElement.appendChild(viewport.dom);
 
         const toolbar = new window.Toolbar(this.editor);
@@ -59,6 +66,16 @@ export class ThreejsEditorModal extends ModalDialog {
 
         const modal = new window.UI.Modal();
         this.domElement.appendChild(modal.dom);
+
+        const OrbitControls = ThreeOrbitControls(THREE);
+        const orbitControls = new OrbitControls(this.editor.camera, document.getElementById("viewport"));
+        orbitControls.enabled = true;
+        orbitControls.enableZoom = true;
+        orbitControls.enableKeys = false;
+        orbitControls.rotateSpeed = 2.0;
+        orbitControls.zoomSpeed = 2.0;
+        orbitControls.update();
+
     }
 
     /**
