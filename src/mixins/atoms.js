@@ -1,8 +1,6 @@
 import * as THREE from "three";
 import {Made} from "@exabyte-io/made.js";
 
-const TV3 = THREE.Vector3;
-
 /*
  * Mixin containing the logic for dealing with atoms.
  * Draws atoms as spheres and handles actions performed on them.
@@ -63,14 +61,6 @@ export const AtomsMixin = (superclass) => class extends superclass {
         return sphereMesh;
     }
 
-    /**
-     * Convert THREE.vector to an XYZ coordinate array
-     * @param {THREE.Vector} vector THREE vector
-     * @return {Number[]}
-     * @private
-     */
-    _vectorToXYZCoordinate(vector) {return [vector.x, vector.y, vector.z]}
-
     _getDefaultSettingsForElement(element = this.settings.defaultElement, scale = this.settings.atomRadiiScale) {
         return {
             color: this.getAtomColorByElement(element),
@@ -78,37 +68,23 @@ export const AtomsMixin = (superclass) => class extends superclass {
         }
     }
 
-    /**
-     * Converts coordinates from the global (world) space to local wrt object3d
-     * @param {THREE.Object3D} object3d - The object to set new reference frame.
-     * @param {Number[]} worldCoordinate - Coordinate of the object in the Global (World) frame.
-     * @return {Number[]}
-     * @private
-     */
-    _convertXYZCoordinateToLocal(object3d, worldCoordinate) {
-        return this._vectorToXYZCoordinate(object3d.worldToLocal(new TV3(...worldCoordinate)));
-    }
-
-    drawAtomsAsSpheres(atomRadiiScale) {
-
-        const drawGroup = this.materialGroup;
-        this.getAtomColorByElement();
-
-        const basisWithRepetitions = Made.tools.basis.repeat(this.basis, Array(3).fill(this.settings.atomRepetitions));
-        const sphereMeshObjects = basisWithRepetitions.coordinates.map((atomicCoordinate, atomicIndex) => {
-            const element = basisWithRepetitions.getElementByIndex(atomicIndex);
-            // local coordinate with respect to the drawGroup
-            const coordinate = this._convertXYZCoordinateToLocal(drawGroup, atomicCoordinate.value);
+    createSphereMeshObjects(basis, atomRadiiScale) {
+        return basis.coordinates.map((atomicCoordinate, atomicIndex) => {
+            const element = basis.getElementByIndex(atomicIndex);
             const sphereMesh = this.getSphereMeshObject({
                 ...this._getDefaultSettingsForElement(element, atomRadiiScale),
-                coordinate,
+                coordinate: atomicCoordinate.value,
             });
             sphereMesh.name = element;
             return sphereMesh;
         });
 
-        drawGroup.add(...sphereMeshObjects);
+    }
 
+    drawAtomsAsSpheres(atomRadiiScale) {
+        const basisWithRepetitions = Made.tools.basis.repeat(this.basis, Array(3).fill(this.settings.atomRepetitions));
+        const sphereMeshObjects = this.createSphereMeshObjects(basisWithRepetitions, atomRadiiScale);
+        this.structureGroup.add(...sphereMeshObjects);
     }
 
     getAtomColorByElement(element, pallette = this.settings.elementColors) {

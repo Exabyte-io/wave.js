@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import {sprintf} from 'sprintf-js';
 import {Made} from "@exabyte-io/made.js";
 
@@ -45,8 +44,12 @@ export const exportToDisk = function (content, name = 'file', extension = 'txt')
     pom.click();
 };
 
-function extractLattice(sceneData) {
-    const cellObject = sceneData.object.children[1].children.find(child => child.type === "LineSegments");
+function extractMaterialData(sceneData) {
+    return sceneData.object.children.find(child => child.name !== "PerspectiveCamera");
+}
+
+function extractLattice(materialData, sceneData) {
+    const cellObject = materialData.children.find(child => child.type === "LineSegments");
     const cellGeometries = sceneData.geometries.find(g => g.uuid === cellObject.geometry);
     const vertices = cellGeometries.data.vertices;
     const a = [vertices[3] - vertices[0], vertices[4] - vertices[1], vertices[5] - vertices[2]];
@@ -59,10 +62,10 @@ function extractLattice(sceneData) {
     });
 }
 
-function extractBasis(sceneData, cell) {
+function extractBasis(materialData, cell) {
     const elements = [];
     const coordinates = [];
-    sceneData.object.children[1].children.forEach(child => {
+    materialData.children.forEach(child => {
         if (child.type === "Mesh") {
             elements.push(child.name);
             coordinates.push([child.matrix[12], child.matrix[13], child.matrix[14]])
@@ -82,11 +85,12 @@ function validateSceneData(sceneData) {
 
 export function ThreeDSceneDataToMaterial(sceneData) {
     validateSceneData(sceneData);
-    const lattice = extractLattice(sceneData);
-    const basis = extractBasis(sceneData, lattice.vectorArrays);
+    const materialData = extractMaterialData(sceneData);
+    const lattice = extractLattice(materialData, sceneData);
+    const basis = extractBasis(materialData, lattice.vectorArrays);
     basis.toCrystal();
     return new Made.Material({
-        name: sceneData.object.children[1].name,
+        name: materialData.name,
         lattice: lattice.toJSON(),
         basis: basis.toJSON(),
     });
@@ -94,25 +98,18 @@ export function ThreeDSceneDataToMaterial(sceneData) {
 
 export function materialsToThreeDSceneData(materials) {
     const wave = new Wave({
-        DOMElement: document.createElement("div"),
         structure: materials[0],
-        cell: materials[0].Lattice.unitCell
+        cell: materials[0].Lattice.unitCell,
+        DOMElement: document.createElement("div")
     });
-    wave.scene.remove(wave.camera);
-
-    const lightsGroup = new THREE.Group();
-    lightsGroup.name = "Lights - DO NOT MODIFY";
-    const directionalLight = new THREE.DirectionalLight("#FFFFFF");
-    directionalLight.name = "Directional - DO NOT MODIFY";
-    const ambientLight = new THREE.AmbientLight("#202020");
-    ambientLight.name = "Ambient - DO NOT MODIFY";
-    directionalLight.position.copy(new THREE.Vector3(0.2, 0.2, -1).normalize());
-    directionalLight.intensity = 1.2;
-    lightsGroup.add(directionalLight);
-    lightsGroup.add(ambientLight);
-    wave.scene.add(lightsGroup);
-    lightsGroup.position.set(-50, 0, 10);
+    materials.slice(1).forEach(material => {
+        const structureGroup = wave.createStructureGroup(material);
+        const unitCellObject = wave.createUnitCellObject(material.Lattice.unitCell);
+        structureGroup.add(unitCellObject);
+        const sphereMeshObjects = wave.createSphereMeshObjects(material.Basis);
+        structureGroup.add(...sphereMeshObjects);
+        wave.scene.add(structureGroup);
+    });
     wave.render();
-
     return wave.scene.toJSON();
 }

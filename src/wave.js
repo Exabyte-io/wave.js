@@ -35,8 +35,9 @@ class WaveBase {
 
         this.initDimensions();
         this.initRenderer();
-        this.initCamera();
         this.initScene();
+        this.initCamera();
+        this.initStructureGroup();
         this.setupLights();
 
         this.handleResize = this.handleResize.bind(this);
@@ -79,6 +80,7 @@ class WaveBase {
         this.camera.position.copy(new TV3(...initialPosition));
         this.camera.up = new TV3(0, 0, 1);
         this.camera.lookAt(new TV3(0, 0, 0));
+        this.scene.add(this.camera);
     }
 
     initScene() {
@@ -86,9 +88,17 @@ class WaveBase {
         this.scene.name = "Scene";
         this.scene.background = new TCo(this.settings.backgroundColor);
         this.scene.fog = new THREE.FogExp2(this.settings.backgroundColor, 0.00025 / 100);
-        this.materialGroup = new THREE.Group();
-        this.materialGroup.name = this._structure.name || this._structure.formula;
-        this.scene.add(this.materialGroup);
+    }
+
+    createStructureGroup(structure) {
+        const structureGroup = new THREE.Group();
+        structureGroup.name = structure.name || structure.formula;
+        return structureGroup;
+    }
+
+    initStructureGroup() {
+        this.structureGroup = this.createStructureGroup(this._structure);
+        this.scene.add(this.structureGroup);
     }
 
     /**
@@ -110,15 +120,11 @@ class WaveBase {
         directionalLight.name = "DirectionalLight";
         const ambientLight = new THREE.AmbientLight("#202020");
         ambientLight.name = "AmbientLight";
-        directionalLight.position.copy(new TV3(0.2, 0.2, -1).normalize());
+        directionalLight.position.copy(new THREE.Vector3(0.2, 0.2, -1).normalize());
         directionalLight.intensity = 1.2;
-        this.scene.add(this.camera);
         // Dynamic lights - moving with camera while orbiting/rotating/zooming
         this.camera.add(directionalLight);
         this.camera.add(ambientLight);
-        // Uncomment the below to enable static lights instead
-        // this.scene.add(directionalLight);
-        // this.scene.add(ambientLight);
     }
 
     setBackground(hex, a) {
@@ -168,7 +174,7 @@ export class Wave extends mix(WaveBase).with(
     }
 
     clearView() {
-        [this.materialGroup].map(g => this._clearViewForGroup(g));
+        [this.structureGroup].map(g => this._clearViewForGroup(g));
     }
 
     rebuildScene() {
