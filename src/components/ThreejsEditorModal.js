@@ -1,16 +1,15 @@
 import React from 'react';
 import * as THREE from "three";
-import setClass from "classnames";
-import elementClass from "element-class";
-import {Modal, ModalBody} from "react-bootstrap";
+import {ModalBody} from "react-bootstrap";
 
 import {ShowIf} from "./ShowIf";
 import settings from "../settings";
+import {ModalDialog} from "./ModalDialog";
 import {LoadingIndicator} from "./LoadingIndicator";
 import {THREE_D_BASE_URL, THREE_D_SOURCES} from "../enums";
 import {materialsToThreeDSceneData, ThreeDSceneDataToMaterial} from "../utils";
 
-export class ThreejsEditorModal extends React.Component {
+export class ThreejsEditorModal extends ModalDialog {
 
     constructor(props) {
         super(props);
@@ -25,6 +24,72 @@ export class ThreejsEditorModal extends React.Component {
         window.localStorage.removeItem("threejs-editor");
     }
 
+    setNumberFormat() {
+        Number.prototype.format = function () {
+            return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+        };
+    }
+
+    /**
+     * Initialize threejs editor and add it to the dom.
+     */
+    initializeEditor() {
+
+        this.editor = new window.Editor();
+        this.editor.scene.background = new THREE.Color(settings.backgroundColor);
+
+        const viewport = new window.Viewport(this.editor);
+
+        this.domElement.appendChild(viewport.dom);
+
+        const toolbar = new window.Toolbar(this.editor);
+        this.domElement.appendChild(toolbar.dom);
+
+        const script = new window.Script(this.editor);
+        this.domElement.appendChild(script.dom);
+
+        const player = new window.Player(this.editor);
+        this.domElement.appendChild(player.dom);
+
+        const menubar = new window.Menubar(this.editor);
+        this.domElement.appendChild(menubar.dom);
+
+        const sidebar = new window.Sidebar(this.editor);
+        this.domElement.appendChild(sidebar.dom);
+
+        const modal = new window.UI.Modal();
+        this.domElement.appendChild(modal.dom);
+    }
+
+    /**
+     * Add dragover listeners to group the objects.
+     */
+    addEventListeners() {
+        const clsInstance = this;
+        document.addEventListener('dragover', function (event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'copy';
+        }, false);
+
+        function onWindowResize(event) {clsInstance.editor.signals.windowResize.dispatch()}
+
+        window.addEventListener('resize', onWindowResize, false);
+        onWindowResize();
+    }
+
+    /**
+     * Load the scene based on the given materials.
+     */
+    loadScene() {
+        const loader = new THREE.ObjectLoader();
+        const scene = loader.parse(materialsToThreeDSceneData(this.props.materials));
+        this.editor.execute(new window.SetSceneCommand(scene));
+    }
+
+    /**
+     * Inject threejs editor scripts into dom.
+     * `areScriptsLoaded` flag is used to enable/disable a loader as it takes some time to load the scripts.
+     */
     injectScripts() {
         const clsInstance = this;
         THREE_D_SOURCES.forEach(src => {
@@ -34,102 +99,30 @@ export class ThreejsEditorModal extends React.Component {
             script.defer = false;
             if (src.includes("SetSceneCommand")) {
                 script.onload = () => {
-
                     clsInstance.setState({areScriptsLoaded: true});
-
-                    Number.prototype.format = function () {
-                        return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-                    };
-
-                    clsInstance.editor = new window.Editor();
-                    clsInstance.editor.scene.background = new THREE.Color(settings.backgroundColor);
-
-                    var viewport = new window.Viewport(clsInstance.editor);
-
-                    this.domElement.appendChild(viewport.dom);
-
-                    var toolbar = new window.Toolbar(clsInstance.editor);
-                    this.domElement.appendChild(toolbar.dom);
-
-                    var script = new window.Script(clsInstance.editor);
-                    this.domElement.appendChild(script.dom);
-
-                    var player = new window.Player(clsInstance.editor);
-                    this.domElement.appendChild(player.dom);
-
-                    var menubar = new window.Menubar(clsInstance.editor);
-                    this.domElement.appendChild(menubar.dom);
-
-                    var sidebar = new window.Sidebar(clsInstance.editor);
-                    this.domElement.appendChild(sidebar.dom);
-
-                    var modal = new window.UI.Modal();
-                    this.domElement.appendChild(modal.dom);
-
-                    document.addEventListener('dragover', function (event) {
-                        event.preventDefault();
-                        event.dataTransfer.dropEffect = 'copy';
-                    }, false);
-
-                    document.addEventListener('drop', function (event) {
-                        if (event.dataTransfer.files.length > 0) {
-                            clsInstance.editor.loader.loadFile(event.dataTransfer.files[0]);
-                        }
-                    }, false);
-
-                    function onWindowResize(event) {clsInstance.editor.signals.windowResize.dispatch()}
-
-                    window.addEventListener('resize', onWindowResize, false);
-                    onWindowResize();
-
-                    const loader = new THREE.ObjectLoader();
-                    const scene = loader.parse(materialsToThreeDSceneData(this.props.materials));
-                    clsInstance.editor.execute(new window.SetSceneCommand(scene));
-
+                    clsInstance.setNumberFormat();
+                    clsInstance.initializeEditor();
+                    clsInstance.addEventListeners();
+                    clsInstance.loadScene();
                 }
             }
             document.head.appendChild(script);
         });
     }
 
-    render() {
-        const className = setClass(this.props.className, this.props.isFullWidth ? "full-page-overlay" : "");
-        if (this.props.show) elementClass(document.body).add('modal-backdrop-color-' + this.props.backdropColor);
-        return (
-            <Modal
-                id={this.props.modalId}
-                animation={false}
-                show={this.props.show}
-                onHide={(e) => {
-                    this.props.onHide(ThreeDSceneDataToMaterial(this.editor.scene.toJSON()));
-                    elementClass(document.body).remove('modal-backdrop-color-' + this.props.backdropColor);
-                }}
-                className={className}
-            >
-                <ModalBody>
-                    <div ref={el => {this.domElement = el}}/>
-                    <ShowIf condition={!this.state.areScriptsLoaded}>
-                        <LoadingIndicator/>
-                    </ShowIf>
-                </ModalBody>
-            </Modal>
-        )
+    eventToOnHideArgs(e) {return ThreeDSceneDataToMaterial(this.editor.scene.toJSON())}
+
+    renderBody() {
+        return <ModalBody>
+            <div ref={el => {this.domElement = el}}/>
+            <ShowIf condition={!this.state.areScriptsLoaded}>
+                <LoadingIndicator/>
+            </ShowIf>
+        </ModalBody>
     }
 
 }
 
 ThreejsEditorModal.propTypes = {
     materials: React.PropTypes.array,
-    modalId: React.PropTypes.string,
-    show: React.PropTypes.bool,
-    onHide: React.PropTypes.func,
-    title: React.PropTypes.string,
-    className: React.PropTypes.string,
-    isFullWidth: React.PropTypes.bool,
-    backdropColor: React.PropTypes.string
-};
-
-ThreejsEditorModal.defaultProps = {
-    isFullWidth: true,
-    backdropColor: 'white',
 };
