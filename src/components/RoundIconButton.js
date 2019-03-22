@@ -15,7 +15,7 @@ export class RoundIconButton extends React.Component {
     }
 
     componentWillReceiveProps(newProps) {
-        if (this.props.isToggled !== newProps.isToggled) this.state.isToggled = newProps.isToggled || false;
+        if (this.props.isToggled !== newProps.isToggled) this.setState({isToggled: newProps.isToggled || false});
     }
 
     handleToggle() {
