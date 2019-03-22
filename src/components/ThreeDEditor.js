@@ -61,6 +61,16 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleAxes = this.handleToggleAxes.bind(this);
     }
 
+    componentWillReceiveProps(nextProps, nextContext) {
+        const material = nextProps.material;
+        if (material) {
+            this.setState({
+                originalMaterial: material,
+                material: material.clone(),
+            })
+        }
+    }
+
     /**
      * TODO: remove the need for it
      * Lattice vectors for the Unit cell of a crystal
