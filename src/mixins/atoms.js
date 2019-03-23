@@ -77,7 +77,7 @@ export const AtomsMixin = (superclass) => class extends superclass {
                 ...this._getDefaultSettingsForElement(element, atomRadiiScale),
                 coordinate: atomicCoordinate.value,
             });
-            sphereMesh.name = element;
+            sphereMesh.name = `${element}-${atomicIndex}`;
             return sphereMesh;
         }));
         return sitesGroup;
