@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import {sprintf} from 'sprintf-js';
 import {Made} from "@exabyte-io/made.js";
 
@@ -95,8 +96,15 @@ export function materialsToThreeDSceneData(materials) {
         wave.structureGroup.name = "New Material";
         materials.slice(1).forEach(material => {
             material.toCartesian();
+            const structureGroup = new THREE.Group();
+            structureGroup.name = material.name || material.formula;
             const sitesGroup = wave.createSitesGroup(material.Basis);
-            wave.structureGroup.add(sitesGroup);
+            structureGroup.add(sitesGroup);
+            const unitCellObject = wave.createUnitCellObject(material.Lattice.unitCell);
+            unitCellObject.visible = false;
+            structureGroup.add(unitCellObject);
+            structureGroup.position.set(2, 0, 0); //slightly shift along x axis
+            wave.structureGroup.add(structureGroup);
         });
         wave.render();
     }

@@ -12,7 +12,7 @@ export default {
     elementColors: ELEMENT_COLORS,
     vdwRadii: ELEMENT_VDW_RADII,
     // line
-    lineWidth: 1.5,
+    lineWidth: 2,
     lineMaterial: {
         dashSize: 1,
         gapSize: 2,
