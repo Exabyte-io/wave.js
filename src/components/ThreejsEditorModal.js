@@ -1,4 +1,5 @@
 import React from 'react';
+import swal from 'sweetalert';
 import * as THREE from "three";
 import {ModalBody} from "react-bootstrap";
 import ThreeOrbitControls from "three-orbit-controls";
@@ -127,7 +128,29 @@ export class ThreejsEditorModal extends ModalDialog {
         });
     }
 
-    eventToOnHideArgs(e) {return ThreeDSceneDataToMaterial(this.editor.scene.toJSON())}
+    onHide(e) {
+        try {
+            const material = ThreeDSceneDataToMaterial(this.editor.scene);
+            super.onHide(material);
+        } catch (e) {
+            swal({
+                icon: 'error',
+                buttons: {
+                    cancel: "Cancel",
+                    exit: "Exit",
+                },
+                text: 'Unable to extract a material from the editor!',
+            }).then((value) => {
+                switch (value) {
+                    case "exit":
+                        super.onHide();
+                        break;
+                    default:
+                        break;
+                }
+            });
+        }
+    }
 
     renderBody() {
         return <ModalBody>
