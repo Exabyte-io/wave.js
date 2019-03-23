@@ -41,7 +41,7 @@ export class ThreejsEditorModal extends ModalDialog {
 
         const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 20000);
         camera.name = "Camera";
-        camera.position.copy(new THREE.Vector3(-20, 0, 10));
+        camera.position.copy(new THREE.Vector3(0, -20, 8));
         camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         this.editor = new window.Editor(camera);
