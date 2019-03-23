@@ -44,28 +44,12 @@ export const exportToDisk = function (content, name = 'file', extension = 'txt')
     pom.click();
 };
 
-function findObjectsByType(data, type) {
-    const objects = [];
-    if (data.type === type) objects.push(data);
-    if (data.children) data.children.forEach(child => {
-        const childObjects = findObjectsByType(child, type);
-        childObjects.forEach(childObject => {
-            childObject.matrix[12] += child.matrix[12];
-            childObject.matrix[13] += child.matrix[13];
-            childObject.matrix[14] += child.matrix[14];
-        });
-        Array.prototype.push.apply(objects, childObjects);
-    });
-    return objects;
-}
-
-function extractLattice(sceneData) {
-    const unitCellData = findObjectsByType(sceneData.object, "LineSegments")[0];
-    const cellGeometries = sceneData.geometries.find(g => g.uuid === unitCellData.geometry);
-    const vertices = cellGeometries.data.vertices;
-    const a = [vertices[3] - vertices[0], vertices[4] - vertices[1], vertices[5] - vertices[2]];
-    const b = [vertices[9] - vertices[0], vertices[10] - vertices[1], vertices[11] - vertices[2]];
-    const c = [vertices[51] - vertices[0], vertices[52] - vertices[1], vertices[53] - vertices[2]];
+function extractLattice(scene) {
+    const unitCellObject = scene.getObjectByProperty("type", "LineSegments");
+    const vertices = unitCellObject.geometry.vertices;
+    const a = vertices[1].sub(vertices[0]).toArray();
+    const b = vertices[3].sub(vertices[0]).toArray();
+    const c = vertices[17].sub(vertices[0]).toArray();
     return Made.Lattice.fromVectors({
         a,
         b,
@@ -73,12 +57,14 @@ function extractLattice(sceneData) {
     });
 }
 
-function extractBasis(sceneData, cell) {
+function extractBasis(scene, cell) {
     const elements = [];
     const coordinates = [];
-    findObjectsByType(sceneData.object, "Mesh").forEach(child => {
-        elements.push(child.name);
-        coordinates.push([child.matrix[12], child.matrix[13], child.matrix[14]])
+    scene.traverse((object) => {
+        if (object.type === "Mesh") {
+            elements.push(object.name.split("-")[0] || "Si");
+            coordinates.push(object.getWorldPosition().toArray())
+        }
     });
     return new Made.Basis({
         cell,
@@ -88,17 +74,12 @@ function extractBasis(sceneData, cell) {
     });
 }
 
-function validateSceneData(sceneData) {
-    // TODO
-}
-
-export function ThreeDSceneDataToMaterial(sceneData) {
-    validateSceneData(sceneData);
-    const lattice = extractLattice(sceneData);
-    const basis = extractBasis(sceneData, lattice.vectorArrays);
+export function ThreeDSceneDataToMaterial(scene) {
+    const lattice = extractLattice(scene);
+    const basis = extractBasis(scene, lattice.vectorArrays);
     basis.toCrystal();
     return new Made.Material({
-        name: sceneData.object.children.find(child => child.name !== "PerspectiveCamera").name,
+        name: scene.getObjectByProperty("type", "Group").name,
         lattice: lattice.toJSON(),
         basis: basis.toJSON(),
     });
