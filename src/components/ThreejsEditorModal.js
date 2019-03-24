@@ -37,37 +37,48 @@ export class ThreejsEditorModal extends ModalDialog {
      */
     initializeEditor() {
 
+        // adjust the orientation to have Z-axis up/down
         THREE.Object3D.DefaultUp.set(0, 0, 1);
 
+        // create a PerspectiveCamera at specific position and pass to the editor to override the default one.
         const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 20000);
         camera.name = "Camera";
         camera.position.copy(new THREE.Vector3(0, -20, 8));
         camera.lookAt(new THREE.Vector3(0, 0, 0));
 
+        // initialize editor and set the scene background
         this.editor = new window.Editor(camera);
         this.editor.scene.background = new THREE.Color(settings.backgroundColor);
 
+        // initialize viewport and add it to the dom
         const viewport = new window.Viewport(this.editor);
         this.domElement.appendChild(viewport.dom);
 
+        // initialize toolbar and add it to the dom
         const toolbar = new window.Toolbar(this.editor);
         this.domElement.appendChild(toolbar.dom);
 
+        // initialize script and add it to the dom
         const script = new window.Script(this.editor);
         this.domElement.appendChild(script.dom);
 
+        // initialize player and add it to the dom
         const player = new window.Player(this.editor);
         this.domElement.appendChild(player.dom);
 
+        // initialize menubar and add it to the dom
         const menubar = new window.Menubar(this.editor);
         this.domElement.appendChild(menubar.dom);
 
+        // initialize sidebar and add it to the dom
         const sidebar = new window.Sidebar(this.editor);
         this.domElement.appendChild(sidebar.dom);
 
+        // initialize modal and add it to the dom
         const modal = new window.UI.Modal();
         this.domElement.appendChild(modal.dom);
 
+        // add OrbitControls to allow the camera to orbit around the scene.
         const OrbitControls = ThreeOrbitControls(THREE);
         const orbitControls = new OrbitControls(this.editor.camera, document.getElementById("viewport"));
         orbitControls.enabled = true;
@@ -128,27 +139,31 @@ export class ThreejsEditorModal extends ModalDialog {
         });
     }
 
+    showAlert(error) {
+        swal({
+            icon: 'error',
+            buttons: {
+                cancel: "Cancel",
+                exit: "Exit",
+            },
+            text: 'Unable to extract a material from the editor!',
+        }).then((value) => {
+            switch (value) {
+                case "exit":
+                    super.onHide();
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+
     onHide(e) {
         try {
             const material = ThreeDSceneDataToMaterial(this.editor.scene);
             super.onHide(material);
         } catch (e) {
-            swal({
-                icon: 'error',
-                buttons: {
-                    cancel: "Cancel",
-                    exit: "Exit",
-                },
-                text: 'Unable to extract a material from the editor!',
-            }).then((value) => {
-                switch (value) {
-                    case "exit":
-                        super.onHide();
-                        break;
-                    default:
-                        break;
-                }
-            });
+            this.showAlert(e);
         }
     }
 

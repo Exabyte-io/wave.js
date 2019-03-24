@@ -45,6 +45,9 @@ export const exportToDisk = function (content, name = 'file', extension = 'txt')
     pom.click();
 };
 
+/**
+ * Extracts the lattice from the LineSegments object vertices.
+ */
 function extractLattice(scene) {
     const unitCellObject = scene.getObjectByProperty("type", "LineSegments");
     const vertices = unitCellObject.geometry.vertices;
@@ -58,6 +61,10 @@ function extractLattice(scene) {
     });
 }
 
+/**
+ * Extracts basis from all SphereMesh objects.
+ * The name of the element is extracted from the name of the corresponding 3D object.
+ */
 function extractBasis(scene, cell) {
     const elements = [];
     const coordinates = [];
@@ -75,6 +82,11 @@ function extractBasis(scene, cell) {
     });
 }
 
+/**
+ * Converts a given scene data to a material.
+ * Lattice is constructed from the LineSegments object.
+ * Basis is constructed based on all SphereMesh objects.
+ */
 export function ThreeDSceneDataToMaterial(scene) {
     const lattice = extractLattice(scene);
     const basis = extractBasis(scene, lattice.vectorArrays);
@@ -86,6 +98,12 @@ export function ThreeDSceneDataToMaterial(scene) {
     });
 }
 
+/**
+ * Converts given materials to scene data.
+ * The first material is used as parent and it's unit cell is used in case multiple materials are passed.
+ * Other materials are added as a group under the first material with their cell hidden by default.
+ * The sites are slightly shifted along X axis if multiple materials are passed.
+ */
 export function materialsToThreeDSceneData(materials) {
     const wave = new Wave({
         structure: materials[0],
