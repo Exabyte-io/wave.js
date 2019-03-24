@@ -1,13 +1,12 @@
-import _ from "underscore";
 import {mix} from "mixwith";
 import * as THREE from "three";
 
 import SETTINGS from "./settings"
-import {saveImageDataToFile} from "./utils";
-import {AtomsMixin} from "./mixins/atoms";
 import {CellMixin} from "./mixins/cell";
-import {ControlsMixin} from "./mixins/controls";
+import {AtomsMixin} from "./mixins/atoms";
 import {MouseMixin} from "./mixins/mouse";
+import {saveImageDataToFile} from "./utils";
+import {ControlsMixin} from "./mixins/controls";
 
 const TV3 = THREE.Vector3, TCo = THREE.Color;
 
@@ -45,7 +44,7 @@ class WaveBase {
 
     }
 
-    updateSettings(settings) {this.settings = Object.assign(SETTINGS, settings)}
+    updateSettings(settings) {this.settings = Object.assign({}, SETTINGS, settings)}
 
     initDimensions() {
         this.WIDTH = this.container.clientWidth;
@@ -144,18 +143,10 @@ export class Wave extends mix(WaveBase).with(
     /**
      *
      * @param {Object} config
-     * @param {Function} config.onUpdate - Function to be called when the underlying structure is update
      */
     constructor(config) {
         super(config);
-
-        this.onUpdate = config.onUpdate;
-
         this.rebuildScene();
-
-        this.onUpdate = _.debounce(this.onUpdate, 500);
-        this.onUpdate = this.onUpdate.bind(this);
-
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
@@ -167,7 +158,7 @@ export class Wave extends mix(WaveBase).with(
 
     /**
      * Helper to remove a 1-level group of 3D objects.
-     * @param {THREE.Object3D} group - Groupd of 3D objects
+     * @param {THREE.Object3D} group - Group of 3D objects
      * @private
      */
     _clearViewForGroup(group) {
@@ -189,10 +180,6 @@ export class Wave extends mix(WaveBase).with(
 
     render() {
         this.renderer.render(this.scene, this.camera);
-        if (this.callOnUpdate) {
-            this.onUpdate(this.structure);
-            this.callOnUpdate = false;
-        }
         this.renderer2 && this.renderer2.render(this.scene2, this.camera2);
     }
 

@@ -15,9 +15,15 @@ export class ModalDialog extends React.Component {
         return null;
     }
 
-    onHide(material) {
-        this.props.onHide(material);
+    removeStylingFromBody() {
         elementClass(document.body).remove('modal-backdrop-color-' + this.props.backdropColor);
+    }
+
+    eventToOnHideArgs(e) {return e}
+
+    onHide(e) {
+        this.props.onHide(this.eventToOnHideArgs(e));
+        this.removeStylingFromBody();
     }
 
     render() {

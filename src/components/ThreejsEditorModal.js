@@ -5,15 +5,16 @@ import {ModalBody} from "react-bootstrap";
 import {ShowIf} from "./ShowIf";
 import settings from "../settings";
 import {ModalDialog} from "./ModalDialog";
-import {materialsToThreeDSceneData} from "../utils";
 import {LoadingIndicator} from "./LoadingIndicator";
 import {THREE_D_BASE_URL, THREE_D_SOURCES} from "../enums";
+import {materialsToThreeDSceneData, ThreeDSceneDataToMaterial} from "../utils";
 
 export class ThreejsEditorModal extends ModalDialog {
 
     constructor(props) {
         super(props);
         window.THREE = THREE;
+        this.editor = undefined;
         this.domElement = undefined;
         this.state = {areScriptsLoaded: false};
         this.injectScripts();
@@ -109,22 +110,19 @@ export class ThreejsEditorModal extends ModalDialog {
         });
     }
 
+    eventToOnHideArgs(e) {return ThreeDSceneDataToMaterial(this.editor.scene.toJSON())}
+
     renderBody() {
-        return <ModalBody className="p-0">
+        return <ModalBody>
             <div ref={el => {this.domElement = el}}/>
             <ShowIf condition={!this.state.areScriptsLoaded}>
                 <LoadingIndicator/>
             </ShowIf>
-        </ModalBody>;
+        </ModalBody>
     }
 
 }
 
 ThreejsEditorModal.propTypes = {
-    onSubmit: React.PropTypes.func,
-};
-
-ThreejsEditorModal.defaultProps = {
-    isFullWidth: true,
-    backdropColor: 'white',
+    materials: React.PropTypes.array,
 };
