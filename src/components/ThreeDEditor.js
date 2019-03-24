@@ -6,15 +6,16 @@ import JssProvider from 'react-jss/lib/JssProvider';
 import {createGenerateClassName} from "material-ui-next/styles";
 
 import {
-    NotInterested, ImportExport, RemoveRedEye, Create,
-    Replay, PictureInPicture, PowerSettingsNew, FileDownload,
-    ThreeDRotation, Autorenew, GpsFixed, SelectAll, Mouse,
+    NotInterested, ImportExport, RemoveRedEye,
+    Replay, PictureInPicture, PowerSettingsNew,
+    FileDownload, ThreeDRotation, Autorenew, GpsFixed, Edit
 } from 'material-ui-icons-next';
 
 import {exportToDisk} from "../utils";
 import {IconToolbar} from "./IconToolbar";
 import {WaveComponent} from './WaveComponent';
 import {RoundIconButton} from "./RoundIconButton";
+import {ThreejsEditorModal} from "./ThreejsEditorModal";
 
 /**
  * This is to avoid class name conflicts when the component is used inside other material-ui dependent components.
@@ -36,6 +37,7 @@ export class ThreeDEditor extends React.Component {
         this.state = {
             // on/off switch for the component
             isInteractive: false,
+            isThreejsEditorModalShown: false,
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -44,19 +46,32 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: 0.2,
                 atomRepetitions: 1,
             },
+            // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
+            originalMaterial: this.props.material,
+            // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
+            material: this.props.material.clone(),
         };
         this.handleCellRepetitionsChange = this.handleCellRepetitionsChange.bind(this);
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
         this.handleDownloadClick = this.handleDownloadClick.bind(this);
         this.handleToggleInteractive = this.handleToggleInteractive.bind(this);
+        this.ToggleThreejsEditorModal = this.ToggleThreejsEditorModal.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);
         this.handleTakeScreenshot = this.handleTakeScreenshot.bind(this);
-        this.handleToggleTransformControls = this.handleToggleTransformControls.bind(this);
         this.handleToggleOrbitControls = this.handleToggleOrbitControls.bind(this);
         this.handleToggleOrbitControlsAnimation = this.handleToggleOrbitControlsAnimation.bind(this);
         this.handleToggleAxes = this.handleToggleAxes.bind(this);
-        this.handleToggleMouseSelection = this.handleToggleMouseSelection.bind(this);
-        this.handleToggleMouseIntersection = this.handleToggleMouseIntersection.bind(this);
+        this.onThreejsEditorModalHide = this.onThreejsEditorModalHide.bind(this);
+    }
+
+    componentWillReceiveProps(nextProps, nextContext) {
+        const material = nextProps.material;
+        if (material) {
+            this.setState({
+                originalMaterial: material,
+                material: material.clone(),
+            })
+        }
     }
 
     /**
@@ -64,7 +79,7 @@ export class ThreeDEditor extends React.Component {
      * Lattice vectors for the Unit cell of a crystal
      */
     get unitCell() {
-        return this.props.material.Lattice.unitCell;
+        return this.state.material.Lattice.unitCell;
     }
 
     _resetStateWaveComponent() {
@@ -91,12 +106,16 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleDownloadClick(e) {
-        const material = this.props.material;
+        const material = this.state.originalMaterial;
         exportToDisk(material.getAsPOSCAR(), material.name, 'poscar')
     }
 
     handleToggleInteractive(e) {
         this.setState({isInteractive: !this.state.isInteractive})
+    }
+
+    ToggleThreejsEditorModal(e) {
+        this.setState({isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown});
     }
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
@@ -117,23 +136,8 @@ export class ThreeDEditor extends React.Component {
         this._resetStateWaveComponent();
     }
 
-    handleToggleTransformControls(e) {
-        this.WaveComponent.wave.toggleTransformControls();
-        this._resetStateWaveComponent();
-    }
-
     handleToggleAxes(e) {
         this.WaveComponent.wave.toggleAxes();
-        this._resetStateWaveComponent();
-    }
-
-    handleToggleMouseSelection(e) {
-        this.WaveComponent.wave.toggleMouseSelection();
-        this._resetStateWaveComponent();
-    }
-
-    handleToggleMouseIntersection(e) {
-        this.WaveComponent.wave.toggleMouseIntersection();
         this._resetStateWaveComponent();
     }
 
@@ -166,6 +170,7 @@ export class ThreeDEditor extends React.Component {
             >
                 <RoundIconButton tooltipPlacement="top" mini
                     title="Interactive"
+                    isToggled={this.state.isInteractive}
                     onClick={this.handleToggleInteractive}
                 >
                     {this.state.isInteractive ? <NotInterested/> : <PowerSettingsNew/>}
@@ -281,49 +286,18 @@ export class ThreeDEditor extends React.Component {
         )
     }
 
-    /**
-     * Items for Edit toolbar
-     */
-    getEditToolbarItems() {
-        return [
-            <RoundIconButton tooltipPlacement="top" mini
-                isToggled={this._getWaveProperty('isSelectionEnabled')}
-                title="Rectangular Selection [S]"
-                onClick={this.handleToggleMouseSelection}
-            >
-                <SelectAll/>
-            </RoundIconButton>,
-
-            <RoundIconButton tooltipPlacement="top" mini
-                isToggled={this._getWaveProperty('areTransformControlsEnabled')}
-                title="Toggle Rotate/Translate [T, R/A]"
-                onClick={this.handleToggleTransformControls}
-            >
-                <ThreeDRotation/>
-            </RoundIconButton>,
-
-            <RoundIconButton tooltipPlacement="top" mini
-                isToggled={this._getWaveProperty('isIntersectionEnabled')}
-                title="Inject/Delete [I + Right/Left click]"
-                onClick={this.handleToggleMouseIntersection}
-            >
-                <Mouse/>
-            </RoundIconButton>,
-
-            <input id="materials-glmol-lattice-type" style={{display: 'none'}}/>,
-        ]
-    }
-
-    renderEditToolbar(className = "") {
+    render3DEditToggle(className = "") {
         return (
-            <IconToolbar
-                className={className}
-                title="Edit"
-                iconComponent={Create}
-                isHidden={!this.state.isInteractive}
+            <div className={setClass(className, {'hidden': !this.state.isInteractive})}
+                data-name="3DEdit"
             >
-                {this.getEditToolbarItems()}
-            </IconToolbar>
+                <RoundIconButton tooltipPlacement="top" mini
+                    title="3DEdit"
+                    onClick={this.ToggleThreejsEditorModal}
+                >
+                    <Edit/>
+                </RoundIconButton>
+            </div>
         )
     }
 
@@ -331,11 +305,10 @@ export class ThreeDEditor extends React.Component {
         return <WaveComponent
             ref={(el) => {this.WaveComponent = el}}
             triggerHandleResize={this.state.viewerTriggerResize}
-            structure={this.props.material}
+            structure={this.state.material}
             cell={this.unitCell}
-            name={this.props.material.name}
+            name={this.state.material.name}
             settings={this.state.viewerSettings}
-            onUpdate={this.props.onUpdate}
         />
     }
 
@@ -359,18 +332,40 @@ export class ThreeDEditor extends React.Component {
         return setClass('materials-designer-3d-editor', isInteractiveCls);
     }
 
+    onThreejsEditorModalHide(material) {
+        this.setState({
+            originalMaterial: material,
+            material: material.clone(),
+            isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown
+        });
+        this.props.onUpdate && this.props.onUpdate(material);
+    }
+
+    renderWaveOrThreejsEditorModal() {
+        if (this.state.isThreejsEditorModalShown) {
+            return <ThreejsEditorModal
+                show={this.state.isThreejsEditorModalShown}
+                onHide={this.onThreejsEditorModalHide}
+                materials={[this.state.originalMaterial]}
+                modalId="threejs-editor"
+            />
+        } else {
+            return <div className={this.getThreeDEditorClassNames()}
+            >
+                {this.renderCoverDiv()}
+                {this.renderInteractiveSwitch()}
+                {this.renderWaveComponent()}
+                {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
+                {this.props.editable && this.render3DEditToggle(this.classNamesForTopToolbar + " third-row")}
+                {this.renderExportToolbar(this.classNamesForBottomToolbar)}
+            </div>;
+        }
+    }
+
     render() {
         return (
             <JssProvider generateClassName={generateClassName}>
-                <div className={this.getThreeDEditorClassNames()}
-                >
-                    {this.renderCoverDiv()}
-                    {this.renderWaveComponent()}
-                    {this.renderInteractiveSwitch()}
-                    {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
-                    {this.props.editable && this.renderEditToolbar(this.classNamesForTopToolbar + " third-row")}
-                    {this.renderExportToolbar(this.classNamesForBottomToolbar)}
-                </div>
+                {this.renderWaveOrThreejsEditorModal()}
             </JssProvider>
         )
     }
