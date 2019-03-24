@@ -1,13 +1,12 @@
-import _ from "underscore";
 import {mix} from "mixwith";
 import * as THREE from "three";
 
 import SETTINGS from "./settings"
-import {saveImageDataToFile} from "./utils";
-import {AtomsMixin} from "./mixins/atoms";
 import {CellMixin} from "./mixins/cell";
-import {ControlsMixin} from "./mixins/controls";
+import {AtomsMixin} from "./mixins/atoms";
 import {MouseMixin} from "./mixins/mouse";
+import {saveImageDataToFile} from "./utils";
+import {ControlsMixin} from "./mixins/controls";
 
 const TV3 = THREE.Vector3, TCo = THREE.Color;
 
@@ -45,7 +44,7 @@ class WaveBase {
 
     }
 
-    updateSettings(settings) {this.settings = Object.assign(SETTINGS, settings)}
+    updateSettings(settings) {this.settings = Object.assign({}, SETTINGS, settings)}
 
     initDimensions() {
         this.WIDTH = this.container.clientWidth;
@@ -76,6 +75,7 @@ class WaveBase {
     initCamera() {
         const initialPosition = [-50, 0, 10];
         this.camera = new THREE.PerspectiveCamera(20, this.ASPECT, 1, 20000);
+        this.camera.name = "PerspectiveCamera";
         this.camera.position.copy(new TV3(...initialPosition));
         this.camera.up = new TV3(0, 0, 1);
         this.camera.lookAt(new TV3(0, 0, 0));
@@ -83,8 +83,12 @@ class WaveBase {
 
     initScene() {
         this.scene = new THREE.Scene();
+        this.scene.name = "Scene";
         this.scene.background = new TCo(this.settings.backgroundColor);
         this.scene.fog = new THREE.FogExp2(this.settings.backgroundColor, 0.00025 / 100);
+        this.materialGroup = new THREE.Group();
+        this.materialGroup.name = this._structure.name || this._structure.formula;
+        this.scene.add(this.materialGroup);
     }
 
     /**
@@ -103,7 +107,9 @@ class WaveBase {
 
     setupLights() {
         const directionalLight = new THREE.DirectionalLight("#FFFFFF");
+        directionalLight.name = "DirectionalLight";
         const ambientLight = new THREE.AmbientLight("#202020");
+        ambientLight.name = "AmbientLight";
         directionalLight.position.copy(new TV3(0.2, 0.2, -1).normalize());
         directionalLight.intensity = 1.2;
         this.scene.add(this.camera);
@@ -137,18 +143,10 @@ export class Wave extends mix(WaveBase).with(
     /**
      *
      * @param {Object} config
-     * @param {Function} config.onUpdate - Function to be called when the underlying structure is update
      */
     constructor(config) {
         super(config);
-
-        this.onUpdate = config.onUpdate;
-
         this.rebuildScene();
-
-        this.onUpdate = _.debounce(this.onUpdate, 500);
-        this.onUpdate = this.onUpdate.bind(this);
-
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
@@ -160,7 +158,7 @@ export class Wave extends mix(WaveBase).with(
 
     /**
      * Helper to remove a 1-level group of 3D objects.
-     * @param {THREE.Object3D} group - Groupd of 3D objects
+     * @param {THREE.Object3D} group - Group of 3D objects
      * @private
      */
     _clearViewForGroup(group) {
@@ -170,7 +168,7 @@ export class Wave extends mix(WaveBase).with(
     }
 
     clearView() {
-        [this.atomsGroup, this.cellGroup].map(g => this._clearViewForGroup(g));
+        [this.materialGroup].map(g => this._clearViewForGroup(g));
     }
 
     rebuildScene() {
@@ -182,10 +180,6 @@ export class Wave extends mix(WaveBase).with(
 
     render() {
         this.renderer.render(this.scene, this.camera);
-        if (this.callOnUpdate) {
-            this.onUpdate(this.structure);
-            this.callOnUpdate = false;
-        }
         this.renderer2 && this.renderer2.render(this.scene2, this.camera2);
     }
 

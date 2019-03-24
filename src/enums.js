@@ -1,18 +1,5 @@
 export const THREE_D_BASE_URL = "https://s3.us-west-2.amazonaws.com/threejs-editor";
 
-export const THREE_D_STYLESHEETS = [
-    {href: "editor/css/main.css"},
-    {
-        id: "theme",
-        href: "editor/css/light.css"
-    },
-    {href: "editor/js/libs/codemirror/codemirror.css"},
-    {href: "editor/js/libs/codemirror/theme/monokai.css"},
-    {href: "editor/js/libs/codemirror/addon/dialog.css"},
-    {href: "editor/js/libs/codemirror/addon/show-hint.css"},
-    {href: "editor/js/libs/codemirror/addon/tern.css"},
-];
-
 export const THREE_D_SOURCES = [
     "examples/js/libs/system.min.js",
     "examples/js/controls/EditorControls.js",

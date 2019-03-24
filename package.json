@@ -1,6 +1,6 @@
 {
     "name": "@exabyte-io/wave.js",
-    "version": "1.0.4",
+    "version": "2.0.0",
     "description": "Web-based Atomic Viewer and Editor in JavaScript.",
     "scripts": {
         "start": "PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
@@ -29,7 +29,7 @@
         "@exabyte-io/periodic-table.js": "1.0.0",
         "classnames": "^2.2.5",
         "element-class": "^0.2.2",
-        "jquery": "^1.11.2",
+        "jquery": "^3.0.0",
         "material-ui-icons-next": "^1.0.0-beta.17-next",
         "material-ui-next": "^1.0.0-beta.38",
         "mixwith": "^0.1.1",
