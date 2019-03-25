@@ -1,20 +1,23 @@
 import $ from 'jquery';
 import React from 'react';
 import setClass from "classnames";
+import {Made} from "@exabyte-io/made.js";
 import Tooltip from "material-ui-next/Tooltip";
 import JssProvider from 'react-jss/lib/JssProvider';
 import {createGenerateClassName} from "material-ui-next/styles";
+import {primitiveCell} from "@exabyte-io/made.js/lib/cell/primitive_cell";
 
 import {
     NotInterested, ImportExport, RemoveRedEye,
     Replay, PictureInPicture, PowerSettingsNew,
-    FileDownload, ThreeDRotation, Autorenew, GpsFixed, Edit, SwitchCamera
+    FileDownload, ThreeDRotation, Autorenew,
+    GpsFixed, Edit, SwitchCamera, FormatShapes
 } from 'material-ui-icons-next';
-
 import {exportToDisk} from "../utils";
 import {IconToolbar} from "./IconToolbar";
 import {WaveComponent} from './WaveComponent';
 import {RoundIconButton} from "./RoundIconButton";
+
 import {ThreejsEditorModal} from "./ThreejsEditorModal";
 
 /**
@@ -46,6 +49,8 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: 0.2,
                 atomRepetitions: 1,
             },
+            isPrimitiveCell: false,
+            isOrthographicCamera: false,
             // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
             originalMaterial: this.props.material,
             // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
@@ -57,6 +62,7 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleInteractive = this.handleToggleInteractive.bind(this);
         this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
+        this.handleTogglePrimitiveCell = this.handleTogglePrimitiveCell.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);
         this.handleTakeScreenshot = this.handleTakeScreenshot.bind(this);
         this.handleToggleOrbitControls = this.handleToggleOrbitControls.bind(this);
@@ -108,7 +114,14 @@ export class ThreeDEditor extends React.Component {
 
     handleToggleOrthographicCamera(e) {
         this.WaveComponent.wave.toggleOrthographicCamera();
-        this._resetStateWaveComponent();
+        this.setState({isOrthographicCamera: !this.state.isOrthographicCamera});
+    }
+
+    handleTogglePrimitiveCell(e) {
+        const originalLattice = this.state.originalMaterial.Lattice;
+        const primitiveLattice = Made.Lattice.fromVectorArrays(primitiveCell(originalLattice), originalLattice.type);
+        this.state.material.lattice = (this.state.isPrimitiveCell ? originalLattice : primitiveLattice).toJSON();
+        this.setState({isPrimitiveCell: !this.state.isPrimitiveCell});
     }
 
     handleDownloadClick(e) {
@@ -252,10 +265,18 @@ export class ThreeDEditor extends React.Component {
 
             <RoundIconButton tooltipPlacement="top" mini
                 title="Toggle Orthographic Camera"
-                isToggled={this.state.viewerSettings.isOrthographicCamera}
+                isToggled={this.state.isOrthographicCamera}
                 onClick={this.handleToggleOrthographicCamera}
             >
                 <SwitchCamera/>
+            </RoundIconButton>,
+
+            <RoundIconButton tooltipPlacement="top" mini
+                title="Primitive Cell"
+                isToggled={this.state.isPrimitiveCell}
+                onClick={this.handleTogglePrimitiveCell}
+            >
+                <FormatShapes/>
             </RoundIconButton>,
 
             <RoundIconButton tooltipPlacement="top" mini
