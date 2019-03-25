@@ -4,7 +4,6 @@ import * as THREE from "three";
 import SETTINGS from "./settings"
 import {CellMixin} from "./mixins/cell";
 import {AtomsMixin} from "./mixins/atoms";
-import {MouseMixin} from "./mixins/mouse";
 import {saveImageDataToFile} from "./utils";
 import {ControlsMixin} from "./mixins/controls";
 
@@ -36,7 +35,8 @@ class WaveBase {
         this.initDimensions();
         this.initRenderer();
         this.initScene();
-        this.initCamera();
+        this.initPerspectiveCamera();
+        this.initOrthographicCamera();
         this.initStructureGroup();
         this.setupLights();
 
@@ -73,14 +73,32 @@ class WaveBase {
         window.addEventListener('resize', () => {this.handleResize()}, false);
     }
 
-    initCamera() {
+    initOrthographicCamera() {
         const initialPosition = [-50, 0, 10];
-        this.camera = new THREE.PerspectiveCamera(20, this.ASPECT, 1, 20000);
-        this.camera.name = "PerspectiveCamera";
-        this.camera.position.copy(new TV3(...initialPosition));
-        this.camera.up = new TV3(0, 0, 1);
-        this.camera.lookAt(new TV3(0, 0, 0));
-        this.scene.add(this.camera);
+        this.orthographicCamera = new THREE.OrthographicCamera(-10 * this.ASPECT, 10 * this.ASPECT, 10, -10, 1, 1000);
+        this.orthographicCamera.name = "OrthographicCamera";
+        this.orthographicCamera.position.copy(new TV3(...initialPosition));
+        this.orthographicCamera.up = new TV3(0, 0, 1);
+        this.orthographicCamera.lookAt(new TV3(0, 0, 0));
+        this.scene.add(this.orthographicCamera);
+    }
+
+    initPerspectiveCamera() {
+        const initialPosition = [-50, 0, 10];
+        this.perspectiveCamera = new THREE.PerspectiveCamera(20, this.ASPECT, 1, 20000);
+        this.perspectiveCamera.name = "PerspectiveCamera";
+        this.perspectiveCamera.position.copy(new TV3(...initialPosition));
+        this.perspectiveCamera.up = new TV3(0, 0, 1);
+        this.perspectiveCamera.lookAt(new TV3(0, 0, 0));
+        this.scene.add(this.perspectiveCamera);
+        this.camera = this.perspectiveCamera; // set default camera
+    }
+
+    toggleOrthographicCamera() {
+        this.camera = this.camera.isPerspectiveCamera ? this.orthographicCamera : this.perspectiveCamera;
+        this.camera.add(this.directionalLight);
+        this.camera.add(this.ambientLight);
+        this.orbitControls.object = this.camera;
     }
 
     initScene() {
@@ -110,21 +128,24 @@ class WaveBase {
         this.HEIGHT = domElement.clientHeight;
         this.ASPECT = this.WIDTH / this.HEIGHT;
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
-        this.camera.aspect = this.ASPECT;
-        this.camera.updateProjectionMatrix();
+        this.perspectiveCamera.aspect = this.ASPECT;
+        this.perspectiveCamera.updateProjectionMatrix();
+        this.orthographicCamera.left = -10 * this.ASPECT;
+        this.orthographicCamera.right = 10 * this.ASPECT;
+        this.orthographicCamera.updateProjectionMatrix();
         this.render();
     }
 
     setupLights() {
-        const directionalLight = new THREE.DirectionalLight("#FFFFFF");
-        directionalLight.name = "DirectionalLight";
-        const ambientLight = new THREE.AmbientLight("#202020");
-        ambientLight.name = "AmbientLight";
-        directionalLight.position.copy(new THREE.Vector3(0.2, 0.2, -1).normalize());
-        directionalLight.intensity = 1.2;
+        this.directionalLight = new THREE.DirectionalLight("#FFFFFF");
+        this.directionalLight.name = "DirectionalLight";
+        this.ambientLight = new THREE.AmbientLight("#202020");
+        this.ambientLight.name = "AmbientLight";
+        this.directionalLight.position.copy(new THREE.Vector3(0.2, 0.2, -1).normalize());
+        this.directionalLight.intensity = 1.2;
         // Dynamic lights - moving with camera while orbiting/rotating/zooming
-        this.camera.add(directionalLight);
-        this.camera.add(ambientLight);
+        this.camera.add(this.directionalLight);
+        this.camera.add(this.ambientLight);
     }
 
     setBackground(hex, a) {
@@ -143,7 +164,6 @@ export class Wave extends mix(WaveBase).with(
     AtomsMixin,
     CellMixin,
     ControlsMixin,
-    MouseMixin,  // has to be last
 ) {
 
     /**
