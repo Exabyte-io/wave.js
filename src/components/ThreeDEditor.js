@@ -272,7 +272,7 @@ export class ThreeDEditor extends React.Component {
             </RoundIconButton>,
 
             <RoundIconButton tooltipPlacement="top" mini
-                title="Primitive Cell"
+                title="Toggle Primitive Cell"
                 isToggled={this.state.isPrimitiveCell}
                 onClick={this.handleTogglePrimitiveCell}
             >
