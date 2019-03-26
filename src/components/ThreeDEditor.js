@@ -118,10 +118,14 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleTogglePrimitiveCell(e) {
+        const material = this.state.material;
         const originalLattice = this.state.originalMaterial.Lattice;
         const primitiveLattice = Made.Lattice.fromVectorArrays(primitiveCell(originalLattice), originalLattice.type);
-        this.state.material.lattice = (this.state.isPrimitiveCell ? originalLattice : primitiveLattice).toJSON();
-        this.setState({isPrimitiveCell: !this.state.isPrimitiveCell});
+        material.lattice = (this.state.isPrimitiveCell ? originalLattice : primitiveLattice).toJSON();
+        this.setState({
+            material: material,
+            isPrimitiveCell: !this.state.isPrimitiveCell
+        });
     }
 
     handleDownloadClick(e) {
@@ -203,7 +207,7 @@ export class ThreeDEditor extends React.Component {
      */
     getExportToolbarItems() {
         return [
-            <RoundIconButton tooltipPlacement="top" mini
+            <RoundIconButton key="Screenshot" tooltipPlacement="top" mini
                 title="Screenshot"
                 isToggleable={false}
                 onClick={this.handleTakeScreenshot}
@@ -211,7 +215,7 @@ export class ThreeDEditor extends React.Component {
                 <PictureInPicture/>
             </RoundIconButton>,
 
-            <RoundIconButton tooltipPlacement="top" mini
+            <RoundIconButton key="Download" tooltipPlacement="top" mini
                 title="Download"
                 isToggleable={false}
                 onClick={this.handleDownloadClick}
@@ -239,7 +243,7 @@ export class ThreeDEditor extends React.Component {
      */
     getViewToolbarItems() {
         return [
-            <RoundIconButton tooltipPlacement="top" mini
+            <RoundIconButton key="Rotate/Zoom View [O]" tooltipPlacement="top" mini
                 isToggled={this._getWaveProperty('areOrbitControlsEnabled')}
                 title="Rotate/Zoom View [O]"
                 onClick={this.handleToggleOrbitControls}
@@ -247,7 +251,7 @@ export class ThreeDEditor extends React.Component {
                 <ThreeDRotation/>
             </RoundIconButton>,
 
-            <RoundIconButton tooltipPlacement="top" mini
+            <RoundIconButton key="Toggle Auto Rotate" tooltipPlacement="top" mini
                 isToggled={this._getWaveProperty('isOrbitControlsAnimationEnabled')}
                 title="Toggle Auto Rotate"
                 onClick={this.handleToggleOrbitControlsAnimation}
@@ -255,7 +259,7 @@ export class ThreeDEditor extends React.Component {
                 <Autorenew/>
             </RoundIconButton>,
 
-            <RoundIconButton tooltipPlacement="top" mini
+            <RoundIconButton key="Toggle Axes" tooltipPlacement="top" mini
                 isToggled={this._getWaveProperty('areAxesEnabled')}
                 title="Toggle Axes"
                 onClick={this.handleToggleAxes}
@@ -263,7 +267,7 @@ export class ThreeDEditor extends React.Component {
                 <GpsFixed/>
             </RoundIconButton>,
 
-            <RoundIconButton tooltipPlacement="top" mini
+            <RoundIconButton key="Toggle Orthographic Camera" tooltipPlacement="top" mini
                 title="Toggle Orthographic Camera"
                 isToggled={this.state.isOrthographicCamera}
                 onClick={this.handleToggleOrthographicCamera}
@@ -271,7 +275,7 @@ export class ThreeDEditor extends React.Component {
                 <SwitchCamera/>
             </RoundIconButton>,
 
-            <RoundIconButton tooltipPlacement="top" mini
+            <RoundIconButton key="Toggle Primitive Cell" tooltipPlacement="top" mini
                 title="Toggle Primitive Cell"
                 isToggled={this.state.isPrimitiveCell}
                 onClick={this.handleTogglePrimitiveCell}
@@ -279,7 +283,7 @@ export class ThreeDEditor extends React.Component {
                 <FormatShapes/>
             </RoundIconButton>,
 
-            <RoundIconButton tooltipPlacement="top" mini
+            <RoundIconButton key="Reset View" tooltipPlacement="top" mini
                 title="Reset View"
                 isToggleable={false}
                 onClick={this.handleResetViewer}
@@ -287,7 +291,7 @@ export class ThreeDEditor extends React.Component {
                 <Replay/>
             </RoundIconButton>,
 
-            <Tooltip title="RADIUS" placement="top">
+            <Tooltip key="RADIUS" title="RADIUS" placement="top">
                 <input className="inverse stepper sphere-radius"
                     id="sphere-radius"
                     value={this.state.viewerSettings.atomRadiiScale}
@@ -296,7 +300,7 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip title="REPETITIONS" placement="top">
+            <Tooltip key="REPETITIONS" title="REPETITIONS" placement="top">
                 <input className="inverse stepper cell-repetitions"
                     id="cell-repetitions"
                     value={this.state.viewerSettings.atomRepetitions}
@@ -326,7 +330,7 @@ export class ThreeDEditor extends React.Component {
             <div className={setClass(className, {'hidden': !this.state.isInteractive})}
                 data-name="3DEdit"
             >
-                <RoundIconButton tooltipPlacement="top" mini
+                <RoundIconButton key="" tooltipPlacement="top" mini
                     title="3DEdit"
                     onClick={this.toggleThreejsEditorModal}
                 >

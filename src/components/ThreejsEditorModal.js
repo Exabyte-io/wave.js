@@ -27,9 +27,8 @@ export class ThreejsEditorModal extends ModalDialog {
     }
 
     setNumberFormat() {
-        Number.prototype.format = function () {
-            return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-        };
+        /*eslint no-extend-native: [0, { "exceptions": ["Object"] }]*/
+        Number.prototype.format = function () {return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")};
     }
 
     /**
