@@ -92,8 +92,10 @@ class WaveBase {
         this.camera = this.perspectiveCamera; // set default camera
     }
 
+    get isCameraOrthographic() {return this.camera.isOrthographicCamera}
+
     toggleOrthographicCamera() {
-        this.camera = this.camera.isPerspectiveCamera ? this.orthographicCamera : this.perspectiveCamera;
+        this.camera = this.isCameraOrthographic ? this.perspectiveCamera : this.orthographicCamera;
         this.camera.add(this.directionalLight);
         this.camera.add(this.ambientLight);
         this.orbitControls.object = this.camera;
@@ -192,7 +194,7 @@ export class Wave extends mix(WaveBase).with(
     }
 
     clearView() {
-        [this.structureGroup].map(g => this._clearViewForGroup(g));
+        [this.structureGroup, this.bondsGroup].map(g => this._clearViewForGroup(g));
     }
 
     rebuildScene() {

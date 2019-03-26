@@ -47,8 +47,6 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: 0.2,
                 atomRepetitions: 1,
             },
-            areBondsDrawn: false,
-            isOrthographicCamera: false,
             // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
             originalMaterial: this.props.material,
             // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
@@ -112,7 +110,7 @@ export class ThreeDEditor extends React.Component {
 
     handleToggleOrthographicCamera(e) {
         this.WaveComponent.wave.toggleOrthographicCamera();
-        this.setState({isOrthographicCamera: !this.state.isOrthographicCamera});
+        this._resetStateWaveComponent();
     }
 
     handleDownloadClick(e) {
@@ -261,7 +259,7 @@ export class ThreeDEditor extends React.Component {
 
             <RoundIconButton key="Toggle Orthographic Camera" tooltipPlacement="top" mini
                 title="Toggle Orthographic Camera"
-                isToggled={this.state.isOrthographicCamera}
+                isToggled={this._getWaveProperty('isCameraOrthographic')}
                 onClick={this.handleToggleOrthographicCamera}
             >
                 <SwitchCamera/>
