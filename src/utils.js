@@ -102,7 +102,7 @@ export function ThreeDSceneDataToMaterial(scene) {
  * Converts given materials to scene data.
  * The first material is used as parent and it's unit cell is used in case multiple materials are passed.
  * Other materials are added as a group under the first material with their cell hidden by default.
- * The sites are slightly shifted along X axis if multiple materials are passed.
+ * Atoms are slightly shifted along X axis if multiple materials are passed.
  */
 export function materialsToThreeDSceneData(materials) {
     const wave = new Wave({
@@ -116,8 +116,8 @@ export function materialsToThreeDSceneData(materials) {
             material.toCartesian();
             const structureGroup = new THREE.Group();
             structureGroup.name = material.name || material.formula;
-            const sitesGroup = wave.createSitesGroup(material.Basis);
-            structureGroup.add(sitesGroup);
+            const atomsGroup = wave.createAtomsGroup(material.Basis);
+            structureGroup.add(atomsGroup);
             const unitCellObject = wave.createUnitCellObject(material.Lattice.unitCell);
             unitCellObject.visible = false;
             structureGroup.add(unitCellObject);

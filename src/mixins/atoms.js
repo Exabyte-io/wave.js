@@ -68,10 +68,10 @@ export const AtomsMixin = (superclass) => class extends superclass {
         }
     }
 
-    createSitesGroup(basis, atomRadiiScale) {
-        const sitesGroup = new THREE.Group();
-        sitesGroup.name = "Sites";
-        sitesGroup.add(...basis.coordinates.map((atomicCoordinate, atomicIndex) => {
+    createAtomsGroup(basis, atomRadiiScale) {
+        const atomsGroup = new THREE.Group();
+        atomsGroup.name = "Atoms";
+        atomsGroup.add(...basis.coordinates.map((atomicCoordinate, atomicIndex) => {
             const element = basis.getElementByIndex(atomicIndex);
             const sphereMesh = this.getSphereMeshObject({
                 ...this._getDefaultSettingsForElement(element, atomRadiiScale),
@@ -80,13 +80,13 @@ export const AtomsMixin = (superclass) => class extends superclass {
             sphereMesh.name = `${element}-${atomicIndex}`;
             return sphereMesh;
         }));
-        return sitesGroup;
+        return atomsGroup;
     }
 
     drawAtomsAsSpheres(atomRadiiScale) {
         const basisWithRepetitions = Made.tools.basis.repeat(this.basis, Array(3).fill(this.settings.atomRepetitions));
-        const sitesGroup = this.createSitesGroup(basisWithRepetitions, atomRadiiScale);
-        this.structureGroup.add(sitesGroup);
+        const atomsGroup = this.createAtomsGroup(basisWithRepetitions, atomRadiiScale);
+        this.structureGroup.add(atomsGroup);
     }
 
     getAtomColorByElement(element, pallette = this.settings.elementColors) {
