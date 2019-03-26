@@ -11,7 +11,7 @@ import {
     NotInterested, ImportExport, RemoveRedEye,
     Replay, PictureInPicture, PowerSettingsNew,
     FileDownload, ThreeDRotation, Autorenew,
-    GpsFixed, Edit, SwitchCamera, FormatShapes
+    GpsFixed, Edit, SwitchCamera, FormatShapes, Menu
 } from 'material-ui-icons-next';
 import {exportToDisk} from "../utils";
 import {IconToolbar} from "./IconToolbar";
@@ -49,6 +49,7 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: 0.2,
                 atomRepetitions: 1,
             },
+            areBondsDrawn: false,
             isPrimitiveCell: false,
             isOrthographicCamera: false,
             // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
@@ -60,6 +61,7 @@ export class ThreeDEditor extends React.Component {
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
         this.handleDownloadClick = this.handleDownloadClick.bind(this);
         this.handleToggleInteractive = this.handleToggleInteractive.bind(this);
+        this.handleToggleBonds = this.handleToggleBonds.bind(this);
         this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
         this.handleTogglePrimitiveCell = this.handleTogglePrimitiveCell.bind(this);
@@ -131,6 +133,11 @@ export class ThreeDEditor extends React.Component {
 
     handleToggleInteractive(e) {
         this.setState({isInteractive: !this.state.isInteractive})
+    }
+
+    handleToggleBonds(e) {
+        this.WaveComponent.wave.toggleBonds();
+        this._resetStateWaveComponent();
     }
 
     toggleThreejsEditorModal(e) {
@@ -269,6 +276,14 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleOrthographicCamera}
             >
                 <SwitchCamera/>
+            </RoundIconButton>,
+
+            <RoundIconButton tooltipPlacement="top" mini
+                title="Toggle Bonds"
+                isToggled={this._getWaveProperty('areBondsDrawn')}
+                onClick={this.handleToggleBonds}
+            >
+                <Menu/>
             </RoundIconButton>,
 
             <RoundIconButton tooltipPlacement="top" mini

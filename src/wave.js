@@ -200,6 +200,7 @@ export class Wave extends mix(WaveBase).with(
     rebuildScene() {
         this.clearView();
         this.drawAtomsAsSpheres();
+        this.areBondsDrawn && this.addBonds();
         this.drawUnitCell();
         this.render();
     }

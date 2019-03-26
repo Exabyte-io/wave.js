@@ -10,9 +10,14 @@ export const AtomsMixin = (superclass) => class extends superclass {
     constructor(config) {
         super(config);
 
+        this.areBondsDrawn = false;
+        this.bondsGroup = new THREE.Group();
+        this.bondsGroup.name = "Bonds";
+
         // to draw atoms as spheres
         this.initSphereParameters();
 
+        this.toggleBonds = this.toggleBonds.bind(this);
         this.drawAtomsAsSpheres = this.drawAtomsAsSpheres.bind(this);
         this.getAtomColorByElement = this.getAtomColorByElement.bind(this);
 
@@ -71,16 +76,68 @@ export const AtomsMixin = (superclass) => class extends superclass {
     createSitesGroup(basis, atomRadiiScale) {
         const sitesGroup = new THREE.Group();
         sitesGroup.name = "Sites";
-        sitesGroup.add(...basis.coordinates.map((atomicCoordinate, atomicIndex) => {
+        basis.coordinates.forEach((atomicCoordinate, atomicIndex) => {
             const element = basis.getElementByIndex(atomicIndex);
             const sphereMesh = this.getSphereMeshObject({
                 ...this._getDefaultSettingsForElement(element, atomRadiiScale),
                 coordinate: atomicCoordinate.value,
             });
             sphereMesh.name = `${element}-${atomicIndex}`;
-            return sphereMesh;
-        }));
+            sitesGroup.add(sphereMesh);
+        });
         return sitesGroup;
+    }
+
+    /**
+     * Whether to draw bond between given atoms.
+     */
+    areElementsBonded(element1, coordinate1, element2, coordinate2) {
+        // TODo: implement the logic.
+        return true;
+    }
+
+    /**
+     * Add bonds.
+     */
+    addBonds() {
+        const basis = Made.tools.basis.repeat(this.basis, Array(3).fill(this.settings.atomRepetitions));
+        basis.coordinates.forEach((coordinate1, index1) => {
+            const element1 = basis.getElementByIndex(index1);
+            basis.coordinates.forEach((coordinate2, index2) => {
+                const element2 = basis.getElementByIndex(index2);
+                if (index2 <= index1 || !this.areElementsBonded(element1, coordinate1, element2, coordinate2)) return;
+                const bond = this.getBondObject(element1, index1, coordinate1, element2, index2, coordinate2);
+                this.bondsGroup.add(bond);
+            });
+        });
+        this.structureGroup.add(this.bondsGroup);
+    }
+
+    getBondObject(element1, index1, coordinate1, element2, index2, coordinate2) {
+        const material = new THREE.LineBasicMaterial({color: this.settings.colors.amber});
+        const geometry = new THREE.Geometry();
+        geometry.vertices.push(new THREE.Vector3(...coordinate1.value));
+        geometry.vertices.push(new THREE.Vector3(...coordinate2.value));
+        const bond = new THREE.Line(geometry, material);
+        bond.name = `${element1}-${index1}:${element2}-${index2}`;
+        return bond;
+    }
+
+    /**
+     * Remove bonds.
+     */
+    removeBonds() {
+        this.structureGroup.remove(this.bondsGroup);
+    }
+
+    toggleBonds() {
+        if (this.areBondsDrawn) {
+            this.removeBonds();
+            this.areBondsDrawn = false;
+        } else {
+            this.addBonds();
+            this.areBondsDrawn = true;
+        }
     }
 
     drawAtomsAsSpheres(atomRadiiScale) {
