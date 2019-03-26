@@ -133,7 +133,7 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
             box-shadow: $material-ui-button-box-shadow-override !important;
             margin: 5px;
 
-            &[aria-toggled="true"] {
+            &[aria-checked="true"] {
                 color: $amber;
             }
         }

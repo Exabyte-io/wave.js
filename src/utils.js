@@ -48,7 +48,7 @@ export const exportToDisk = function (content, name = 'file', extension = 'txt')
 /**
  * Extracts the lattice from the LineSegments object vertices.
  */
-function extractLattice(scene) {
+function extractLatticeFromScene(scene) {
     const unitCellObject = scene.getObjectByProperty("type", "LineSegments");
     const vertices = unitCellObject.geometry.vertices;
     const a = vertices[1].sub(vertices[0]).toArray();
@@ -65,7 +65,7 @@ function extractLattice(scene) {
  * Extracts basis from all SphereMesh objects.
  * The name of the element is extracted from the name of the corresponding 3D object.
  */
-function extractBasis(scene, cell) {
+function extractBasisFromScene(scene, cell) {
     const elements = [];
     const coordinates = [];
     scene.traverse((object) => {
@@ -88,8 +88,8 @@ function extractBasis(scene, cell) {
  * Basis is constructed based on all SphereMesh objects.
  */
 export function ThreeDSceneDataToMaterial(scene) {
-    const lattice = extractLattice(scene);
-    const basis = extractBasis(scene, lattice.vectorArrays);
+    const lattice = extractLatticeFromScene(scene);
+    const basis = extractBasisFromScene(scene, lattice.vectorArrays);
     basis.toCrystal();
     return new Made.Material({
         name: scene.getObjectByProperty("type", "Group").name,
@@ -102,9 +102,9 @@ export function ThreeDSceneDataToMaterial(scene) {
  * Converts given materials to scene data.
  * The first material is used as parent and it's unit cell is used in case multiple materials are passed.
  * Other materials are added as a group under the first material with their cell hidden by default.
- * The sites are slightly shifted along X axis if multiple materials are passed.
+ * Atoms are slightly shifted along X axis if multiple materials are passed.
  */
-export function materialsToThreeDSceneData(materials) {
+export function materialsToThreeDSceneData(materials, shift = [2, 0, 0]) {
     const wave = new Wave({
         structure: materials[0],
         cell: materials[0].Lattice.unitCell,
@@ -116,12 +116,12 @@ export function materialsToThreeDSceneData(materials) {
             material.toCartesian();
             const structureGroup = new THREE.Group();
             structureGroup.name = material.name || material.formula;
-            const sitesGroup = wave.createSitesGroup(material.Basis);
-            structureGroup.add(sitesGroup);
+            const atomsGroup = wave.createAtomsGroup(material.Basis);
+            structureGroup.add(atomsGroup);
             const unitCellObject = wave.createUnitCellObject(material.Lattice.unitCell);
             unitCellObject.visible = false;
             structureGroup.add(unitCellObject);
-            structureGroup.position.set(2, 0, 0); //slightly shift along x axis
+            structureGroup.position.set(...shift); //slightly shift along x axis
             wave.structureGroup.add(structureGroup);
         });
         wave.render();
