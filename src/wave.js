@@ -74,20 +74,18 @@ class WaveBase {
     }
 
     initOrthographicCamera() {
-        const initialPosition = [-50, 0, 10];
         this.orthographicCamera = new THREE.OrthographicCamera(-10 * this.ASPECT, 10 * this.ASPECT, 10, -10, 1, 1000);
         this.orthographicCamera.name = "OrthographicCamera";
-        this.orthographicCamera.position.copy(new TV3(...initialPosition));
+        this.orthographicCamera.position.copy(new TV3(...this.settings.initialCameraPosition));
         this.orthographicCamera.up = new TV3(0, 0, 1);
         this.orthographicCamera.lookAt(new TV3(0, 0, 0));
         this.scene.add(this.orthographicCamera);
     }
 
     initPerspectiveCamera() {
-        const initialPosition = [-50, 0, 10];
         this.perspectiveCamera = new THREE.PerspectiveCamera(20, this.ASPECT, 1, 20000);
         this.perspectiveCamera.name = "PerspectiveCamera";
-        this.perspectiveCamera.position.copy(new TV3(...initialPosition));
+        this.perspectiveCamera.position.copy(new TV3(...this.settings.initialCameraPosition));
         this.perspectiveCamera.up = new TV3(0, 0, 1);
         this.perspectiveCamera.lookAt(new TV3(0, 0, 0));
         this.scene.add(this.perspectiveCamera);
