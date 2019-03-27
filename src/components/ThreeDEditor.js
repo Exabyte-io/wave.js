@@ -5,7 +5,7 @@ import {Made} from "@exabyte-io/made.js";
 import Tooltip from "material-ui-next/Tooltip";
 import JssProvider from 'react-jss/lib/JssProvider';
 import {createGenerateClassName} from "material-ui-next/styles";
-import {conventionalCell} from "@exabyte-io/made.js/lib/cell/conventional_cell";
+import {getConventionalCellFromPrimitiveLattice} from "@exabyte-io/made.js/lib/cell/conventional_cell";
 
 import {
     NotInterested, ImportExport, RemoveRedEye,
@@ -120,7 +120,8 @@ export class ThreeDEditor extends React.Component {
     handleToggleConventionalCell(e) {
         const material = this.state.material;
         const originalLattice = this.state.originalMaterial.Lattice;
-        const conventionalLattice = Made.Lattice.fromVectorArrays(conventionalCell(originalLattice), originalLattice.type);
+        const conventionalLatticeVectors = getConventionalCellFromPrimitiveLattice(originalLattice);
+        const conventionalLattice = Made.Lattice.fromVectorArrays(conventionalLatticeVectors, originalLattice.type);
         material.lattice = (this.state.isConventionalCell ? originalLattice : conventionalLattice).toJSON();
         this.setState({
             material: material,
