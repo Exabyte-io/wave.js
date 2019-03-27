@@ -26,6 +26,10 @@ export class ThreejsEditorModal extends ModalDialog {
         window.localStorage.removeItem("threejs-editor");
     }
 
+    /**
+     * Used inside threejs editor codebase to format numbers.
+     * Eslint error is disabled as we try to modify a read-only object.
+     */
     setNumberFormat() {
         /*eslint no-extend-native: [0, { "exceptions": ["Object"] }]*/
         Number.prototype.format = function () {return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")};

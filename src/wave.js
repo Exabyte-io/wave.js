@@ -4,6 +4,7 @@ import * as THREE from "three";
 import SETTINGS from "./settings"
 import {CellMixin} from "./mixins/cell";
 import {AtomsMixin} from "./mixins/atoms";
+import {BondsMixin} from "./mixins/bonds";
 import {saveImageDataToFile} from "./utils";
 import {ControlsMixin} from "./mixins/controls";
 
@@ -35,8 +36,7 @@ class WaveBase {
         this.initDimensions();
         this.initRenderer();
         this.initScene();
-        this.initPerspectiveCamera();
-        this.initOrthographicCamera();
+        this.initCameras();
         this.initStructureGroup();
         this.setupLights();
 
@@ -73,22 +73,21 @@ class WaveBase {
         window.addEventListener('resize', () => {this.handleResize()}, false);
     }
 
-    initOrthographicCamera() {
-        this.orthographicCamera = new THREE.OrthographicCamera(-10 * this.ASPECT, 10 * this.ASPECT, 10, -10, 1, 1000);
-        this.orthographicCamera.name = "OrthographicCamera";
-        this.orthographicCamera.position.copy(new TV3(...this.settings.initialCameraPosition));
-        this.orthographicCamera.up = new TV3(0, 0, 1);
-        this.orthographicCamera.lookAt(new TV3(0, 0, 0));
-        this.scene.add(this.orthographicCamera);
+    addCameraToScene(type, ...args) {
+        const camera = new THREE[type](...args);
+        camera.name = type;
+        camera.position.copy(new TV3(...this.settings.initialCameraPosition));
+        camera.up = new TV3(0, 0, 1);
+        camera.lookAt(new TV3(0, 0, 0));
+        this.scene.add(camera);
+        return camera;
     }
 
-    initPerspectiveCamera() {
-        this.perspectiveCamera = new THREE.PerspectiveCamera(20, this.ASPECT, 1, 20000);
-        this.perspectiveCamera.name = "PerspectiveCamera";
-        this.perspectiveCamera.position.copy(new TV3(...this.settings.initialCameraPosition));
-        this.perspectiveCamera.up = new TV3(0, 0, 1);
-        this.perspectiveCamera.lookAt(new TV3(0, 0, 0));
-        this.scene.add(this.perspectiveCamera);
+    initCameras() {
+        const perspectiveCameraParams = [20, this.ASPECT, 1, 20000];
+        this.perspectiveCamera = this.addCameraToScene("PerspectiveCamera", ...perspectiveCameraParams);
+        const orthographicCameraParams = [-10 * this.ASPECT, 10 * this.ASPECT, 10, -10, 1, 1000];
+        this.orthographicCamera = this.addCameraToScene("OrthographicCamera", ...orthographicCameraParams);
         this.camera = this.perspectiveCamera; // set default camera
     }
 
@@ -162,6 +161,7 @@ class WaveBase {
  */
 export class Wave extends mix(WaveBase).with(
     AtomsMixin,
+    BondsMixin,
     CellMixin,
     ControlsMixin,
 ) {
