@@ -33,7 +33,7 @@ export class ThreejsEditorModal extends ModalDialog {
     }
 
     /**
-     * Initialize threejs editor and add it to the dom.
+     * Initialize threejs editor and add it to the DOM.
      */
     initializeEditor() {
 
@@ -50,31 +50,21 @@ export class ThreejsEditorModal extends ModalDialog {
         this.editor = new window.Editor(camera);
         this.editor.scene.background = new THREE.Color(settings.backgroundColor);
 
-        // initialize viewport and add it to the dom
+        // initialize viewport and add it to the DOM
         const viewport = new window.Viewport(this.editor);
         this.domElement.appendChild(viewport.dom);
 
-        // initialize toolbar and add it to the dom
+        // initialize UI elements and add them to the DOM
         const toolbar = new window.Toolbar(this.editor);
         this.domElement.appendChild(toolbar.dom);
-
-        // initialize script and add it to the dom
         const script = new window.Script(this.editor);
         this.domElement.appendChild(script.dom);
-
-        // initialize player and add it to the dom
         const player = new window.Player(this.editor);
         this.domElement.appendChild(player.dom);
-
-        // initialize menubar and add it to the dom
         const menubar = new window.Menubar(this.editor);
         this.domElement.appendChild(menubar.dom);
-
-        // initialize sidebar and add it to the dom
         const sidebar = new window.Sidebar(this.editor);
         this.domElement.appendChild(sidebar.dom);
-
-        // initialize modal and add it to the dom
         const modal = new window.UI.Modal();
         this.domElement.appendChild(modal.dom);
 
@@ -116,7 +106,7 @@ export class ThreejsEditorModal extends ModalDialog {
     }
 
     /**
-     * Inject threejs editor scripts into dom.
+     * Inject threejs editor scripts into DOM.
      * `areScriptsLoaded` flag is used to enable/disable a loader as it takes some time to load the scripts.
      */
     injectScripts() {
