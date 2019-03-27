@@ -8,7 +8,7 @@ import {createGenerateClassName} from "material-ui-next/styles";
 import {
     NotInterested, ImportExport, RemoveRedEye,
     Replay, PictureInPicture, PowerSettingsNew,
-    FileDownload, ThreeDRotation, Autorenew, GpsFixed, Edit
+    FileDownload, ThreeDRotation, Autorenew, GpsFixed, Edit, SwitchCamera
 } from 'material-ui-icons-next';
 
 import {exportToDisk} from "../utils";
@@ -55,7 +55,8 @@ export class ThreeDEditor extends React.Component {
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
         this.handleDownloadClick = this.handleDownloadClick.bind(this);
         this.handleToggleInteractive = this.handleToggleInteractive.bind(this);
-        this.ToggleThreejsEditorModal = this.ToggleThreejsEditorModal.bind(this);
+        this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
+        this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);
         this.handleTakeScreenshot = this.handleTakeScreenshot.bind(this);
         this.handleToggleOrbitControls = this.handleToggleOrbitControls.bind(this);
@@ -105,6 +106,11 @@ export class ThreeDEditor extends React.Component {
         this.handleSetSetting({atomRadiiScale: parseFloat($(e.target).val())})
     }
 
+    handleToggleOrthographicCamera(e) {
+        this.WaveComponent.wave.toggleOrthographicCamera();
+        this._resetStateWaveComponent();
+    }
+
     handleDownloadClick(e) {
         const material = this.state.originalMaterial;
         exportToDisk(material.getAsPOSCAR(), material.name, 'poscar')
@@ -114,7 +120,7 @@ export class ThreeDEditor extends React.Component {
         this.setState({isInteractive: !this.state.isInteractive})
     }
 
-    ToggleThreejsEditorModal(e) {
+    toggleThreejsEditorModal(e) {
         this.setState({isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown});
     }
 
@@ -245,6 +251,14 @@ export class ThreeDEditor extends React.Component {
             </RoundIconButton>,
 
             <RoundIconButton tooltipPlacement="top" mini
+                title="Toggle Orthographic Camera"
+                isToggled={this.state.viewerSettings.isOrthographicCamera}
+                onClick={this.handleToggleOrthographicCamera}
+            >
+                <SwitchCamera/>
+            </RoundIconButton>,
+
+            <RoundIconButton tooltipPlacement="top" mini
                 title="Reset View"
                 isToggleable={false}
                 onClick={this.handleResetViewer}
@@ -293,7 +307,7 @@ export class ThreeDEditor extends React.Component {
             >
                 <RoundIconButton tooltipPlacement="top" mini
                     title="3DEdit"
-                    onClick={this.ToggleThreejsEditorModal}
+                    onClick={this.toggleThreejsEditorModal}
                 >
                     <Edit/>
                 </RoundIconButton>

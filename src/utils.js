@@ -126,5 +126,6 @@ export function materialsToThreeDSceneData(materials, shift = [2, 0, 0]) {
         });
         wave.render();
     }
+    wave.scene.remove(wave.orthographicCamera);
     return wave.scene.toJSON();
 }
