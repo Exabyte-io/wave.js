@@ -92,7 +92,6 @@ export class ThreejsEditorModal extends ModalDialog {
         orbitControls.rotateSpeed = 2.0;
         orbitControls.zoomSpeed = 2.0;
         orbitControls.update();
-
     }
 
     /**
@@ -118,6 +117,7 @@ export class ThreejsEditorModal extends ModalDialog {
         const loader = new THREE.ObjectLoader();
         const scene = loader.parse(materialsToThreeDSceneData(this.props.materials));
         this.editor.execute(new window.SetSceneCommand(scene));
+        this.editor.signals.objectSelected.dispatch(this.editor.camera);
     }
 
     /**
