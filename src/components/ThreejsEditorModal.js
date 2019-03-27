@@ -53,6 +53,8 @@ export class ThreejsEditorModal extends ModalDialog {
         this.editor = new window.Editor(camera);
         this.editor.scene.background = new THREE.Color(settings.backgroundColor);
 
+        this.editor.onHide = this.onHide;
+
         // initialize viewport and add it to the dom
         const viewport = new window.Viewport(this.editor);
         this.domElement.appendChild(viewport.dom);
@@ -161,7 +163,7 @@ export class ThreejsEditorModal extends ModalDialog {
         });
     }
 
-    onHide(e) {
+    onHide() {
         try {
             const material = ThreeDSceneDataToMaterial(this.editor.scene);
             super.onHide(material);
