@@ -320,8 +320,8 @@ export class ThreeDEditor extends React.Component {
             <div className={setClass(className, {'hidden': !this.state.isInteractive})}
                 data-name="3DEdit"
             >
-                <RoundIconButton key="" tooltipPlacement="top" mini
-                    title="3DEdit"
+                <RoundIconButton key="3D Editor" tooltipPlacement="top" mini
+                    title="3D Editor"
                     onClick={this.toggleThreejsEditorModal}
                 >
                     <Edit/>

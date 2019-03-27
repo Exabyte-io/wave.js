@@ -4,6 +4,7 @@ import * as THREE from "three";
 import SETTINGS from "./settings"
 import {CellMixin} from "./mixins/cell";
 import {AtomsMixin} from "./mixins/atoms";
+import {BondsMixin} from "./mixins/bonds";
 import {saveImageDataToFile} from "./utils";
 import {ControlsMixin} from "./mixins/controls";
 
@@ -160,6 +161,7 @@ class WaveBase {
  */
 export class Wave extends mix(WaveBase).with(
     AtomsMixin,
+    BondsMixin,
     CellMixin,
     ControlsMixin,
 ) {
