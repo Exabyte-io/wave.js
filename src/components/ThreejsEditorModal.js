@@ -27,8 +27,8 @@ export class ThreejsEditorModal extends ModalDialog {
     }
 
     /**
-     * Used inside threejs editor codebase to format numbers.
-     * Eslint error is disabled as we try to modify a read-only object.
+     * `Number.prototype.format` is used inside three.js editor codebase to format the numbers.
+     * The editor does not start without it. The ESLint line is a way to turn off the warning shown in the console.
      */
     setNumberFormat() {
         /*eslint no-extend-native: [0, { "exceptions": ["Object"] }]*/

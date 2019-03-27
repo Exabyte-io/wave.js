@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import {Made} from "@exabyte-io/made.js";
-import {ELEMENT_BONDS} from "@exabyte-io/periodic-table.js";
+import {areElementsBonded} from "@exabyte-io/periodic-table.js";
 
 /*
  * Mixin containing the logic for dealing with bonds.
@@ -19,10 +19,7 @@ export const BondsMixin = (superclass) => class extends superclass {
      * Whether to draw a bond between given elements.
      */
     areElementsBonded(element1, coordinate1, element2, coordinate2) {
-        return Boolean(ELEMENT_BONDS.find(b => {
-            return b.elements.includes(element1) && b.elements.includes(element2) &&
-                b.length.value && b.length.value >= Made.math.vDist(coordinate1.value, coordinate2.value);
-        }));
+        return areElementsBonded(element1, element2, Made.math.vDist(coordinate1.value, coordinate2.value));
     }
 
     /**
