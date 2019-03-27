@@ -4,7 +4,6 @@ import * as THREE from "three";
 import SETTINGS from "./settings"
 import {CellMixin} from "./mixins/cell";
 import {AtomsMixin} from "./mixins/atoms";
-import {MouseMixin} from "./mixins/mouse";
 import {saveImageDataToFile} from "./utils";
 import {ControlsMixin} from "./mixins/controls";
 
@@ -35,8 +34,9 @@ class WaveBase {
 
         this.initDimensions();
         this.initRenderer();
-        this.initCamera();
         this.initScene();
+        this.initCameras();
+        this.initStructureGroup();
         this.setupLights();
 
         this.handleResize = this.handleResize.bind(this);
@@ -72,13 +72,29 @@ class WaveBase {
         window.addEventListener('resize', () => {this.handleResize()}, false);
     }
 
-    initCamera() {
-        const initialPosition = [-50, 0, 10];
-        this.camera = new THREE.PerspectiveCamera(20, this.ASPECT, 1, 20000);
-        this.camera.name = "PerspectiveCamera";
-        this.camera.position.copy(new TV3(...initialPosition));
-        this.camera.up = new TV3(0, 0, 1);
-        this.camera.lookAt(new TV3(0, 0, 0));
+    addCameraToScene(type, ...args) {
+        const camera = new THREE[type](...args);
+        camera.name = type;
+        camera.position.copy(new TV3(...this.settings.initialCameraPosition));
+        camera.up = new TV3(0, 0, 1);
+        camera.lookAt(new TV3(0, 0, 0));
+        this.scene.add(camera);
+        return camera;
+    }
+
+    initCameras() {
+        const perspectiveCameraParams = [20, this.ASPECT, 1, 20000];
+        this.perspectiveCamera = this.addCameraToScene("PerspectiveCamera", ...perspectiveCameraParams);
+        const orthographicCameraParams = [-10 * this.ASPECT, 10 * this.ASPECT, 10, -10, 1, 1000];
+        this.orthographicCamera = this.addCameraToScene("OrthographicCamera", ...orthographicCameraParams);
+        this.camera = this.perspectiveCamera; // set default camera
+    }
+
+    toggleOrthographicCamera() {
+        this.camera = this.camera.isPerspectiveCamera ? this.orthographicCamera : this.perspectiveCamera;
+        this.camera.add(this.directionalLight);
+        this.camera.add(this.ambientLight);
+        this.orbitControls.object = this.camera;
     }
 
     initScene() {
@@ -86,9 +102,17 @@ class WaveBase {
         this.scene.name = "Scene";
         this.scene.background = new TCo(this.settings.backgroundColor);
         this.scene.fog = new THREE.FogExp2(this.settings.backgroundColor, 0.00025 / 100);
-        this.materialGroup = new THREE.Group();
-        this.materialGroup.name = this._structure.name || this._structure.formula;
-        this.scene.add(this.materialGroup);
+    }
+
+    createStructureGroup(structure) {
+        const structureGroup = new THREE.Group();
+        structureGroup.name = structure.name || structure.formula;
+        return structureGroup;
+    }
+
+    initStructureGroup() {
+        this.structureGroup = this.createStructureGroup(this._structure);
+        this.scene.add(this.structureGroup);
     }
 
     /**
@@ -100,25 +124,24 @@ class WaveBase {
         this.HEIGHT = domElement.clientHeight;
         this.ASPECT = this.WIDTH / this.HEIGHT;
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
-        this.camera.aspect = this.ASPECT;
-        this.camera.updateProjectionMatrix();
+        this.perspectiveCamera.aspect = this.ASPECT;
+        this.perspectiveCamera.updateProjectionMatrix();
+        this.orthographicCamera.left = -10 * this.ASPECT;
+        this.orthographicCamera.right = 10 * this.ASPECT;
+        this.orthographicCamera.updateProjectionMatrix();
         this.render();
     }
 
     setupLights() {
-        const directionalLight = new THREE.DirectionalLight("#FFFFFF");
-        directionalLight.name = "DirectionalLight";
-        const ambientLight = new THREE.AmbientLight("#202020");
-        ambientLight.name = "AmbientLight";
-        directionalLight.position.copy(new TV3(0.2, 0.2, -1).normalize());
-        directionalLight.intensity = 1.2;
-        this.scene.add(this.camera);
+        this.directionalLight = new THREE.DirectionalLight("#FFFFFF");
+        this.directionalLight.name = "DirectionalLight";
+        this.ambientLight = new THREE.AmbientLight("#202020");
+        this.ambientLight.name = "AmbientLight";
+        this.directionalLight.position.copy(new THREE.Vector3(0.2, 0.2, -1).normalize());
+        this.directionalLight.intensity = 1.2;
         // Dynamic lights - moving with camera while orbiting/rotating/zooming
-        this.camera.add(directionalLight);
-        this.camera.add(ambientLight);
-        // Uncomment the below to enable static lights instead
-        // this.scene.add(directionalLight);
-        // this.scene.add(ambientLight);
+        this.camera.add(this.directionalLight);
+        this.camera.add(this.ambientLight);
     }
 
     setBackground(hex, a) {
@@ -137,7 +160,6 @@ export class Wave extends mix(WaveBase).with(
     AtomsMixin,
     CellMixin,
     ControlsMixin,
-    MouseMixin,  // has to be last
 ) {
 
     /**
@@ -168,7 +190,7 @@ export class Wave extends mix(WaveBase).with(
     }
 
     clearView() {
-        [this.materialGroup].map(g => this._clearViewForGroup(g));
+        [this.structureGroup].map(g => this._clearViewForGroup(g));
     }
 
     rebuildScene() {

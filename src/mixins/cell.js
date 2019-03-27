@@ -20,7 +20,7 @@ export const CellMixin = (superclass) => class extends superclass {
 
     setCell(s) {this.cell = s}
 
-    drawUnitCell(cell = this.cell) {
+    createUnitCellObject(cell) {
         const vertices = [
             [0, 0, 0],
             [cell.ax, cell.ay, cell.az],
@@ -40,13 +40,19 @@ export const CellMixin = (superclass) => class extends superclass {
         edges.forEach(edge => geometry.vertices.push(new TV3(vertices[edge][0], vertices[edge][1], vertices[edge][2])));
 
         const lineMaterial = new THREE.LineBasicMaterial({
-            linewidth: this.settings.lineWidth || 2,
-            color: this.settings.lineColor || this.settings.defaultColor || "#CCCCCC",
+            linewidth: this.settings.lineWidth,
+            color: this.settings.defaultColor,
         });
 
-        const cellObject = new THREE.LineSegments(geometry, lineMaterial);
-        cellObject.name = "Cell";
-        this.materialGroup.add(cellObject);
+        const unitCellObject = new THREE.LineSegments(geometry, lineMaterial);
+        unitCellObject.name = "Cell";
+        return unitCellObject;
+
+    }
+
+    drawUnitCell(cell = this.cell) {
+        const cellObject = this.createUnitCellObject(cell);
+        this.structureGroup.add(cellObject);
     }
 
 };

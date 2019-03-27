@@ -45,13 +45,15 @@ export const exportToDisk = function (content, name = 'file', extension = 'txt')
     pom.click();
 };
 
-function extractLattice(sceneData) {
-    const cellObject = sceneData.object.children[1].children.find(child => child.type === "LineSegments");
-    const cellGeometries = sceneData.geometries.find(g => g.uuid === cellObject.geometry);
-    const vertices = cellGeometries.data.vertices;
-    const a = [vertices[3] - vertices[0], vertices[4] - vertices[1], vertices[5] - vertices[2]];
-    const b = [vertices[9] - vertices[0], vertices[10] - vertices[1], vertices[11] - vertices[2]];
-    const c = [vertices[51] - vertices[0], vertices[52] - vertices[1], vertices[53] - vertices[2]];
+/**
+ * Extracts the lattice from the LineSegments object vertices.
+ */
+function extractLatticeFromScene(scene) {
+    const unitCellObject = scene.getObjectByProperty("type", "LineSegments");
+    const vertices = unitCellObject.geometry.vertices;
+    const a = vertices[1].sub(vertices[0]).toArray();
+    const b = vertices[3].sub(vertices[0]).toArray();
+    const c = vertices[17].sub(vertices[0]).toArray();
     return Made.Lattice.fromVectors({
         a,
         b,
@@ -59,13 +61,17 @@ function extractLattice(sceneData) {
     });
 }
 
-function extractBasis(sceneData, cell) {
+/**
+ * Extracts basis from all SphereMesh objects.
+ * The name of the element is extracted from the name of the corresponding 3D object.
+ */
+function extractBasisFromScene(scene, cell) {
     const elements = [];
     const coordinates = [];
-    sceneData.object.children[1].children.forEach(child => {
-        if (child.type === "Mesh") {
-            elements.push(child.name);
-            coordinates.push([child.matrix[12], child.matrix[13], child.matrix[14]])
+    scene.traverse((object) => {
+        if (object.type === "Mesh") {
+            elements.push(object.name.split("-")[0] || "Si");
+            coordinates.push(object.getWorldPosition().toArray())
         }
     });
     return new Made.Basis({
@@ -76,43 +82,50 @@ function extractBasis(sceneData, cell) {
     });
 }
 
-function validateSceneData(sceneData) {
-    // TODO
-}
-
-export function ThreeDSceneDataToMaterial(sceneData) {
-    validateSceneData(sceneData);
-    const lattice = extractLattice(sceneData);
-    const basis = extractBasis(sceneData, lattice.vectorArrays);
+/**
+ * Converts a given scene data to a material.
+ * Lattice is constructed from the LineSegments object.
+ * Basis is constructed based on all SphereMesh objects.
+ */
+export function ThreeDSceneDataToMaterial(scene) {
+    const lattice = extractLatticeFromScene(scene);
+    const basis = extractBasisFromScene(scene, lattice.vectorArrays);
     basis.toCrystal();
     return new Made.Material({
-        name: sceneData.object.children[1].name,
+        name: scene.getObjectByProperty("type", "Group").name,
         lattice: lattice.toJSON(),
         basis: basis.toJSON(),
     });
 }
 
-export function materialsToThreeDSceneData(materials) {
+/**
+ * Converts given materials to scene data.
+ * The first material is used as parent and it's unit cell is used in case multiple materials are passed.
+ * Other materials are added as a group under the first material with their cell hidden by default.
+ * Atoms are slightly shifted along X axis if multiple materials are passed.
+ */
+export function materialsToThreeDSceneData(materials, shift = [2, 0, 0]) {
     const wave = new Wave({
-        DOMElement: document.createElement("div"),
         structure: materials[0],
-        cell: materials[0].Lattice.unitCell
+        cell: materials[0].Lattice.unitCell,
+        DOMElement: document.createElement("div")
     });
-    wave.scene.remove(wave.camera);
-
-    const lightsGroup = new THREE.Group();
-    lightsGroup.name = "Lights - DO NOT MODIFY";
-    const directionalLight = new THREE.DirectionalLight("#FFFFFF");
-    directionalLight.name = "Directional - DO NOT MODIFY";
-    const ambientLight = new THREE.AmbientLight("#202020");
-    ambientLight.name = "Ambient - DO NOT MODIFY";
-    directionalLight.position.copy(new THREE.Vector3(0.2, 0.2, -1).normalize());
-    directionalLight.intensity = 1.2;
-    lightsGroup.add(directionalLight);
-    lightsGroup.add(ambientLight);
-    wave.scene.add(lightsGroup);
-    lightsGroup.position.set(-50, 0, 10);
-    wave.render();
-
+    if (materials.length > 1) {
+        wave.structureGroup.name = "New Material";
+        materials.slice(1).forEach(material => {
+            material.toCartesian();
+            const structureGroup = new THREE.Group();
+            structureGroup.name = material.name || material.formula;
+            const atomsGroup = wave.createAtomsGroup(material.Basis);
+            structureGroup.add(atomsGroup);
+            const unitCellObject = wave.createUnitCellObject(material.Lattice.unitCell);
+            unitCellObject.visible = false;
+            structureGroup.add(unitCellObject);
+            structureGroup.position.set(...shift); //slightly shift along x axis
+            wave.structureGroup.add(structureGroup);
+        });
+        wave.render();
+    }
+    wave.scene.remove(wave.orthographicCamera);
     return wave.scene.toJSON();
 }

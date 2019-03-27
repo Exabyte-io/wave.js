@@ -1,6 +1,8 @@
 import React from 'react';
+import swal from 'sweetalert';
 import * as THREE from "three";
 import {ModalBody} from "react-bootstrap";
+import ThreeOrbitControls from "three-orbit-controls";
 
 import {ShowIf} from "./ShowIf";
 import settings from "../settings";
@@ -31,34 +33,51 @@ export class ThreejsEditorModal extends ModalDialog {
     }
 
     /**
-     * Initialize threejs editor and add it to the dom.
+     * Initialize threejs editor and add it to the DOM.
      */
     initializeEditor() {
 
-        this.editor = new window.Editor();
+        // adjust the orientation to have Z-axis up/down
+        THREE.Object3D.DefaultUp.set(0, 0, 1);
+
+        // create a PerspectiveCamera at specific position and pass to the editor to override the default one.
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 20000);
+        camera.name = "Camera";
+        camera.position.copy(new THREE.Vector3(0, -20, 8));
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+        // initialize editor and set the scene background
+        this.editor = new window.Editor(camera);
         this.editor.scene.background = new THREE.Color(settings.backgroundColor);
 
+        // initialize viewport and add it to the DOM
         const viewport = new window.Viewport(this.editor);
-
         this.domElement.appendChild(viewport.dom);
 
+        // initialize UI elements and add them to the DOM
         const toolbar = new window.Toolbar(this.editor);
         this.domElement.appendChild(toolbar.dom);
-
         const script = new window.Script(this.editor);
         this.domElement.appendChild(script.dom);
-
         const player = new window.Player(this.editor);
         this.domElement.appendChild(player.dom);
-
         const menubar = new window.Menubar(this.editor);
         this.domElement.appendChild(menubar.dom);
-
         const sidebar = new window.Sidebar(this.editor);
         this.domElement.appendChild(sidebar.dom);
-
         const modal = new window.UI.Modal();
         this.domElement.appendChild(modal.dom);
+
+        // add OrbitControls to allow the camera to orbit around the scene.
+        const OrbitControls = ThreeOrbitControls(THREE);
+        const orbitControls = new OrbitControls(this.editor.camera, document.getElementById("viewport"));
+        orbitControls.enabled = true;
+        orbitControls.enableZoom = true;
+        orbitControls.enableKeys = false;
+        orbitControls.rotateSpeed = 2.0;
+        orbitControls.zoomSpeed = 2.0;
+        orbitControls.update();
+
     }
 
     /**
@@ -87,7 +106,7 @@ export class ThreejsEditorModal extends ModalDialog {
     }
 
     /**
-     * Inject threejs editor scripts into dom.
+     * Inject threejs editor scripts into DOM.
      * `areScriptsLoaded` flag is used to enable/disable a loader as it takes some time to load the scripts.
      */
     injectScripts() {
@@ -110,7 +129,33 @@ export class ThreejsEditorModal extends ModalDialog {
         });
     }
 
-    eventToOnHideArgs(e) {return ThreeDSceneDataToMaterial(this.editor.scene.toJSON())}
+    showAlert(error) {
+        swal({
+            icon: 'error',
+            buttons: {
+                cancel: "Cancel",
+                exit: "Exit",
+            },
+            text: 'Unable to extract a material from the editor!',
+        }).then((value) => {
+            switch (value) {
+                case "exit":
+                    super.onHide();
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+
+    onHide(e) {
+        try {
+            const material = ThreeDSceneDataToMaterial(this.editor.scene);
+            super.onHide(material);
+        } catch (e) {
+            this.showAlert(e);
+        }
+    }
 
     renderBody() {
         return <ModalBody>

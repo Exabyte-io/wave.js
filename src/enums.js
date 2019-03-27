@@ -103,6 +103,7 @@ export const THREE_D_SOURCES = [
     "examples/js/geometries/TeapotBufferGeometry.js",
     "editor/js/Sidebar.Geometry.TeapotBufferGeometry.js",
     "editor/js/Sidebar.Geometry.LatheGeometry.js",
+    "editor/js/Sidebar.Geometry.LineSegments.js",
     "editor/js/Sidebar.Material.js",
     "editor/js/Sidebar.Animation.js",
     "editor/js/Sidebar.Script.js",
