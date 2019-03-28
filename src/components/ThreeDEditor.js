@@ -5,7 +5,7 @@ import {Made} from "@exabyte-io/made.js";
 import Tooltip from "material-ui-next/Tooltip";
 import JssProvider from 'react-jss/lib/JssProvider';
 import {createGenerateClassName} from "material-ui-next/styles";
-import {getConventionalCellFromPrimitiveLattice} from "@exabyte-io/made.js/lib/cell/conventional_cell";
+import {CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS} from "@exabyte-io/made.js/lib/cell/conventional_cell";
 
 import {
     NotInterested, ImportExport, RemoveRedEye,
@@ -118,14 +118,13 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleToggleConventionalCell(e) {
-        const material = this.state.material;
-        const originalLattice = this.state.originalMaterial.Lattice;
-        const conventionalLatticeVectors = getConventionalCellFromPrimitiveLattice(originalLattice);
-        const conventionalLattice = Made.Lattice.fromVectorArrays(conventionalLatticeVectors, originalLattice.type);
-        material.lattice = (this.state.isConventionalCell ? originalLattice : conventionalLattice).toJSON();
+        const originalMaterial = this.state.originalMaterial;
+        const latticeType = originalMaterial.Lattice.type || Made.LATTICE_TYPE_CONFIGS.TRI;
+        const supercellMatrix = CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[latticeType];
+        const material = new Made.Material(Made.tools.supercell.generateConfig(originalMaterial, supercellMatrix));
         this.setState({
-            material: material,
-            isConventionalCell: !this.state.isConventionalCell
+            isConventionalCell: !this.state.isConventionalCell,
+            material: this.state.isConventionalCell ? originalMaterial.clone() : material
         });
     }
 
