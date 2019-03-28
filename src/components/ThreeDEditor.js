@@ -1,15 +1,17 @@
 import $ from 'jquery';
 import React from 'react';
 import setClass from "classnames";
+import {Made} from "@exabyte-io/made.js";
 import Tooltip from "material-ui-next/Tooltip";
 import JssProvider from 'react-jss/lib/JssProvider';
 import {createGenerateClassName} from "material-ui-next/styles";
+import {CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS} from "@exabyte-io/made.js/lib/cell/conventional_cell";
 
 import {
     NotInterested, ImportExport, RemoveRedEye,
     Replay, PictureInPicture, PowerSettingsNew,
     FileDownload, ThreeDRotation, Autorenew,
-    GpsFixed, Edit, SwitchCamera, Menu
+    GpsFixed, Edit, SwitchCamera, FormatShapes, Menu
 } from 'material-ui-icons-next';
 import {exportToDisk} from "../utils";
 import {IconToolbar} from "./IconToolbar";
@@ -47,6 +49,7 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: 0.2,
                 atomRepetitions: 1,
             },
+            isConventionalCell: false,
             // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
             originalMaterial: this.props.material,
             // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
@@ -59,6 +62,7 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleBonds = this.handleToggleBonds.bind(this);
         this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
+        this.handleToggleConventionalCell = this.handleToggleConventionalCell.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);
         this.handleTakeScreenshot = this.handleTakeScreenshot.bind(this);
         this.handleToggleOrbitControls = this.handleToggleOrbitControls.bind(this);
@@ -111,6 +115,17 @@ export class ThreeDEditor extends React.Component {
     handleToggleOrthographicCamera(e) {
         this.WaveComponent.wave.toggleOrthographicCamera();
         this._resetStateWaveComponent();
+    }
+
+    handleToggleConventionalCell(e) {
+        const originalMaterial = this.state.originalMaterial;
+        const latticeType = originalMaterial.Lattice.type || Made.LATTICE_TYPE_CONFIGS.TRI;
+        const supercellMatrix = CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[latticeType];
+        const material = new Made.Material(Made.tools.supercell.generateConfig(originalMaterial, supercellMatrix));
+        this.setState({
+            isConventionalCell: !this.state.isConventionalCell,
+            material: this.state.isConventionalCell ? originalMaterial.clone() : material
+        });
     }
 
     handleDownloadClick(e) {
@@ -271,6 +286,14 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleBonds}
             >
                 <Menu/>
+            </RoundIconButton>,
+
+            <RoundIconButton key="Toggle Conventional Cell" tooltipPlacement="top" mini
+                title="Toggle Conventional Cell"
+                isToggled={this.state.isConventionalCell}
+                onClick={this.handleToggleConventionalCell}
+            >
+                <FormatShapes/>
             </RoundIconButton>,
 
             <RoundIconButton key="Reset View" tooltipPlacement="top" mini

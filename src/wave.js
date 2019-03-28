@@ -73,6 +73,11 @@ class WaveBase {
         window.addEventListener('resize', () => {this.handleResize()}, false);
     }
 
+    /**
+     * Adds a camera with given type and args to the scene.
+     * @param type {String} camera type.
+     * @param args {Array} arguments passed to the camera constructor.
+     */
     addCameraToScene(type, ...args) {
         const camera = new THREE[type](...args);
         camera.name = type;
