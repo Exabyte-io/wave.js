@@ -21,12 +21,6 @@ test('zoomOut', async () => {
     return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "zoomOut");
 });
 
-test('toggleTransformControls', async () => {
-    const wave = getWaveInstance();
-    wave.toggleTransformControls();
-    return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "toggleTransformControls");
-});
-
 test('rotate', async () => {
     const wave = getWaveInstance();
     wave.toggleOrbitControls();

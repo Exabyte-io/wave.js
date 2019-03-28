@@ -1,0 +1,10 @@
+$exagray_semi-transparent: rgba(101, 101, 101, 0.23);
+$amber: #ffc107;
+$white: #ffffff;
+$black: #000000;
+$wave-background: #202020;
+$gray-base: #000 !default;
+$gray-darkest: lighten($wave-background, 3%) !default; // #222
+$gray-darker: lighten($gray-base, 13.5%) !default; // #222
+$gray-light: lighten($gray-base, 46.7%) !default; // #777
+$screen-md: 992px !default;

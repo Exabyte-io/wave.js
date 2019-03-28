@@ -15,7 +15,7 @@ export class RoundIconButton extends React.Component {
     }
 
     componentWillReceiveProps(newProps) {
-        if (this.props.isToggled !== newProps.isToggled) this.state.isToggled = newProps.isToggled || false;
+        if (this.props.isToggled !== newProps.isToggled) this.setState({isToggled: newProps.isToggled || false});
     }
 
     handleToggle() {
@@ -26,14 +26,14 @@ export class RoundIconButton extends React.Component {
         return (
             <Tooltip id={this.props.id} title={this.props.title.toUpperCase()} placement={this.props.tooltipPlacement}>
                 <Button
-                    aria-toggled={this.props.isToggleable && this.state.isToggled}
+                    aria-checked={this.props.isToggleable && this.state.isToggled}
                     aria-label={this.props.label || this.props.title.toLowerCase()}
                     variant="fab"
                     onClick={(...args) => {
                         this.props.onClick(...args);
                         this.handleToggle();
                     }}
-                    {..._.omit(this.props, "title", "tooltipPlacement", "id", "label", "onClick", "isToggleable")}
+                    {..._.omit(this.props, "title", "tooltipPlacement", "id", "label", "onClick", "isToggleable", "isToggled")}
                 />
             </Tooltip>
         );

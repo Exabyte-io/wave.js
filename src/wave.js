@@ -1,13 +1,12 @@
-import _ from "underscore";
 import {mix} from "mixwith";
 import * as THREE from "three";
 
 import SETTINGS from "./settings"
-import {saveImageDataToFile} from "./utils";
-import {AtomsMixin} from "./mixins/atoms";
 import {CellMixin} from "./mixins/cell";
+import {AtomsMixin} from "./mixins/atoms";
+import {BondsMixin} from "./mixins/bonds";
+import {saveImageDataToFile} from "./utils";
 import {ControlsMixin} from "./mixins/controls";
-import {MouseMixin} from "./mixins/mouse";
 
 const TV3 = THREE.Vector3, TCo = THREE.Color;
 
@@ -36,8 +35,9 @@ class WaveBase {
 
         this.initDimensions();
         this.initRenderer();
-        this.initCamera();
         this.initScene();
+        this.initCameras();
+        this.initStructureGroup();
         this.setupLights();
 
         this.handleResize = this.handleResize.bind(this);
@@ -45,7 +45,7 @@ class WaveBase {
 
     }
 
-    updateSettings(settings) {this.settings = Object.assign(SETTINGS, settings)}
+    updateSettings(settings) {this.settings = Object.assign({}, SETTINGS, settings)}
 
     initDimensions() {
         this.WIDTH = this.container.clientWidth;
@@ -73,18 +73,54 @@ class WaveBase {
         window.addEventListener('resize', () => {this.handleResize()}, false);
     }
 
-    initCamera() {
-        const initialPosition = [-50, 0, 10];
-        this.camera = new THREE.PerspectiveCamera(20, this.ASPECT, 1, 20000);
-        this.camera.position.copy(new TV3(...initialPosition));
-        this.camera.up = new TV3(0, 0, 1);
-        this.camera.lookAt(new TV3(0, 0, 0));
+    /**
+     * Adds a camera with given type and args to the scene.
+     * @param type {String} camera type.
+     * @param args {Array} arguments passed to the camera constructor.
+     */
+    addCameraToScene(type, ...args) {
+        const camera = new THREE[type](...args);
+        camera.name = type;
+        camera.position.copy(new TV3(...this.settings.initialCameraPosition));
+        camera.up = new TV3(0, 0, 1);
+        camera.lookAt(new TV3(0, 0, 0));
+        this.scene.add(camera);
+        return camera;
+    }
+
+    initCameras() {
+        const perspectiveCameraParams = [20, this.ASPECT, 1, 20000];
+        this.perspectiveCamera = this.addCameraToScene("PerspectiveCamera", ...perspectiveCameraParams);
+        const orthographicCameraParams = [-10 * this.ASPECT, 10 * this.ASPECT, 10, -10, 1, 1000];
+        this.orthographicCamera = this.addCameraToScene("OrthographicCamera", ...orthographicCameraParams);
+        this.camera = this.perspectiveCamera; // set default camera
+    }
+
+    get isCameraOrthographic() {return this.camera.isOrthographicCamera}
+
+    toggleOrthographicCamera() {
+        this.camera = this.isCameraOrthographic ? this.perspectiveCamera : this.orthographicCamera;
+        this.camera.add(this.directionalLight);
+        this.camera.add(this.ambientLight);
+        this.orbitControls.object = this.camera;
     }
 
     initScene() {
         this.scene = new THREE.Scene();
+        this.scene.name = "Scene";
         this.scene.background = new TCo(this.settings.backgroundColor);
         this.scene.fog = new THREE.FogExp2(this.settings.backgroundColor, 0.00025 / 100);
+    }
+
+    createStructureGroup(structure) {
+        const structureGroup = new THREE.Group();
+        structureGroup.name = structure.name || structure.formula;
+        return structureGroup;
+    }
+
+    initStructureGroup() {
+        this.structureGroup = this.createStructureGroup(this._structure);
+        this.scene.add(this.structureGroup);
     }
 
     /**
@@ -96,23 +132,24 @@ class WaveBase {
         this.HEIGHT = domElement.clientHeight;
         this.ASPECT = this.WIDTH / this.HEIGHT;
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
-        this.camera.aspect = this.ASPECT;
-        this.camera.updateProjectionMatrix();
+        this.perspectiveCamera.aspect = this.ASPECT;
+        this.perspectiveCamera.updateProjectionMatrix();
+        this.orthographicCamera.left = -10 * this.ASPECT;
+        this.orthographicCamera.right = 10 * this.ASPECT;
+        this.orthographicCamera.updateProjectionMatrix();
         this.render();
     }
 
     setupLights() {
-        const directionalLight = new THREE.DirectionalLight("#FFFFFF");
-        const ambientLight = new THREE.AmbientLight("#202020");
-        directionalLight.position.copy(new TV3(0.2, 0.2, -1).normalize());
-        directionalLight.intensity = 1.2;
-        this.scene.add(this.camera);
+        this.directionalLight = new THREE.DirectionalLight("#FFFFFF");
+        this.directionalLight.name = "DirectionalLight";
+        this.ambientLight = new THREE.AmbientLight("#202020");
+        this.ambientLight.name = "AmbientLight";
+        this.directionalLight.position.copy(new THREE.Vector3(0.2, 0.2, -1).normalize());
+        this.directionalLight.intensity = 1.2;
         // Dynamic lights - moving with camera while orbiting/rotating/zooming
-        this.camera.add(directionalLight);
-        this.camera.add(ambientLight);
-        // Uncomment the below to enable static lights instead
-        // this.scene.add(directionalLight);
-        // this.scene.add(ambientLight);
+        this.camera.add(this.directionalLight);
+        this.camera.add(this.ambientLight);
     }
 
     setBackground(hex, a) {
@@ -129,26 +166,18 @@ class WaveBase {
  */
 export class Wave extends mix(WaveBase).with(
     AtomsMixin,
+    BondsMixin,
     CellMixin,
     ControlsMixin,
-    MouseMixin,  // has to be last
 ) {
 
     /**
      *
      * @param {Object} config
-     * @param {Function} config.onUpdate - Function to be called when the underlying structure is update
      */
     constructor(config) {
         super(config);
-
-        this.onUpdate = config.onUpdate;
-
         this.rebuildScene();
-
-        this.onUpdate = _.debounce(this.onUpdate, 500);
-        this.onUpdate = this.onUpdate.bind(this);
-
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
@@ -160,7 +189,7 @@ export class Wave extends mix(WaveBase).with(
 
     /**
      * Helper to remove a 1-level group of 3D objects.
-     * @param {THREE.Object3D} group - Groupd of 3D objects
+     * @param {THREE.Object3D} group - Group of 3D objects
      * @private
      */
     _clearViewForGroup(group) {
@@ -170,22 +199,19 @@ export class Wave extends mix(WaveBase).with(
     }
 
     clearView() {
-        [this.atomsGroup, this.cellGroup].map(g => this._clearViewForGroup(g));
+        [this.structureGroup, this.bondsGroup].map(g => this._clearViewForGroup(g));
     }
 
     rebuildScene() {
         this.clearView();
         this.drawAtomsAsSpheres();
+        this.areBondsDrawn && this.addBonds();
         this.drawUnitCell();
         this.render();
     }
 
     render() {
         this.renderer.render(this.scene, this.camera);
-        if (this.callOnUpdate) {
-            this.onUpdate(this.structure);
-            this.callOnUpdate = false;
-        }
         this.renderer2 && this.renderer2.render(this.scene2, this.camera2);
     }
 

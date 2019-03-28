@@ -2,7 +2,6 @@ import * as THREE from "three";
 
 const TV3 = THREE.Vector3;
 
-
 /*
  * Mixin containing the logic for dealing with the calculation/unit cell.
  * Draws cell edges as lines.
@@ -12,11 +11,6 @@ export const CellMixin = (superclass) => class extends superclass {
 
     constructor(config) {
         super(config);
-
-        // group all cell lines/edges in the viewer together and treat as a 3D object
-        this.cellGroup = new THREE.Object3D();
-        this.scene.add(this.cellGroup);
-
         this.drawUnitCell = this.drawUnitCell.bind(this);
     }
 
@@ -26,7 +20,7 @@ export const CellMixin = (superclass) => class extends superclass {
 
     setCell(s) {this.cell = s}
 
-    drawUnitCell(cell = this.cell) {
+    createUnitCellObject(cell) {
         const vertices = [
             [0, 0, 0],
             [cell.ax, cell.ay, cell.az],
@@ -46,12 +40,19 @@ export const CellMixin = (superclass) => class extends superclass {
         edges.forEach(edge => geometry.vertices.push(new TV3(vertices[edge][0], vertices[edge][1], vertices[edge][2])));
 
         const lineMaterial = new THREE.LineBasicMaterial({
-            linewidth: this.settings.lineWidth || 2,
-            color: this.settings.lineColor || this.settings.defaultColor || "#CCCCCC",
+            linewidth: this.settings.lineWidth,
+            color: this.settings.defaultColor,
         });
 
-        const line = new THREE.LineSegments(geometry, lineMaterial);
-        this.cellGroup.add(line);
+        const unitCellObject = new THREE.LineSegments(geometry, lineMaterial);
+        unitCellObject.name = "Cell";
+        return unitCellObject;
+
     }
 
-}
+    drawUnitCell(cell = this.cell) {
+        const cellObject = this.createUnitCellObject(cell);
+        this.structureGroup.add(cellObject);
+    }
+
+};
