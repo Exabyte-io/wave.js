@@ -1,5 +1,5 @@
 import React from 'react';
-import CircularProgress from "material-ui-next/es/Progress/CircularProgress";
+import CircularProgress from "material-ui-next/Progress/CircularProgress";
 
 export class LoadingIndicator extends React.Component {
     render() {
