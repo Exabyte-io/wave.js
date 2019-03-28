@@ -1,4 +1,4 @@
-export const THREE_D_BASE_URL = "https://s3.us-west-2.amazonaws.com/threejs-editor";
+export const THREE_D_BASE_URL = "https://s3.us-west-2.amazonaws.com/exabyte-three-js";
 
 export const THREE_D_SOURCES = [
     "examples/js/libs/system.min.js",
@@ -10,7 +10,6 @@ export const THREE_D_SOURCES = [
     "examples/js/loaders/AWDLoader.js",
     "examples/js/loaders/BabylonLoader.js",
     "examples/js/loaders/ColladaLoader.js",
-    "examples/js/loaders/DRACOLoader.js",
     "examples/js/loaders/FBXLoader.js",
     "examples/js/loaders/GLTFLoader.js",
     "examples/js/loaders/deprecated/LegacyGLTFLoader.js",
@@ -29,7 +28,6 @@ export const THREE_D_SOURCES = [
     "examples/js/loaders/ctm/lzma.js",
     "examples/js/loaders/ctm/ctm.js",
     "examples/js/loaders/ctm/CTMLoader.js",
-    "examples/js/exporters/ColladaExporter.js",
     "examples/js/exporters/GLTFExporter.js",
     "examples/js/exporters/OBJExporter.js",
     "examples/js/exporters/STLExporter.js",
@@ -99,7 +97,6 @@ export const THREE_D_SOURCES = [
     "editor/js/Sidebar.Geometry.SphereGeometry.js",
     "editor/js/Sidebar.Geometry.TorusGeometry.js",
     "editor/js/Sidebar.Geometry.TorusKnotGeometry.js",
-    "editor/js/Sidebar.Geometry.TubeGeometry.js",
     "examples/js/geometries/TeapotBufferGeometry.js",
     "editor/js/Sidebar.Geometry.TeapotBufferGeometry.js",
     "editor/js/Sidebar.Geometry.LatheGeometry.js",
@@ -108,7 +105,6 @@ export const THREE_D_SOURCES = [
     "editor/js/Sidebar.Animation.js",
     "editor/js/Sidebar.Script.js",
     "editor/js/Sidebar.History.js",
-    "editor/js/Strings.js",
     "editor/js/Toolbar.js",
     "editor/js/Viewport.js",
     "editor/js/Viewport.Info.js",

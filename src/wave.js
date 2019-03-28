@@ -4,6 +4,7 @@ import * as THREE from "three";
 import SETTINGS from "./settings"
 import {CellMixin} from "./mixins/cell";
 import {AtomsMixin} from "./mixins/atoms";
+import {BondsMixin} from "./mixins/bonds";
 import {saveImageDataToFile} from "./utils";
 import {ControlsMixin} from "./mixins/controls";
 
@@ -72,6 +73,11 @@ class WaveBase {
         window.addEventListener('resize', () => {this.handleResize()}, false);
     }
 
+    /**
+     * Adds a camera with given type and args to the scene.
+     * @param type {String} camera type.
+     * @param args {Array} arguments passed to the camera constructor.
+     */
     addCameraToScene(type, ...args) {
         const camera = new THREE[type](...args);
         camera.name = type;
@@ -90,8 +96,10 @@ class WaveBase {
         this.camera = this.perspectiveCamera; // set default camera
     }
 
+    get isCameraOrthographic() {return this.camera.isOrthographicCamera}
+
     toggleOrthographicCamera() {
-        this.camera = this.camera.isPerspectiveCamera ? this.orthographicCamera : this.perspectiveCamera;
+        this.camera = this.isCameraOrthographic ? this.perspectiveCamera : this.orthographicCamera;
         this.camera.add(this.directionalLight);
         this.camera.add(this.ambientLight);
         this.orbitControls.object = this.camera;
@@ -158,6 +166,7 @@ class WaveBase {
  */
 export class Wave extends mix(WaveBase).with(
     AtomsMixin,
+    BondsMixin,
     CellMixin,
     ControlsMixin,
 ) {
@@ -190,12 +199,13 @@ export class Wave extends mix(WaveBase).with(
     }
 
     clearView() {
-        [this.structureGroup].map(g => this._clearViewForGroup(g));
+        [this.structureGroup, this.bondsGroup].map(g => this._clearViewForGroup(g));
     }
 
     rebuildScene() {
         this.clearView();
         this.drawAtomsAsSpheres();
+        this.areBondsDrawn && this.addBonds();
         this.drawUnitCell();
         this.render();
     }

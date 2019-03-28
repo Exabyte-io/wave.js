@@ -71,15 +71,15 @@ export const AtomsMixin = (superclass) => class extends superclass {
     createAtomsGroup(basis, atomRadiiScale) {
         const atomsGroup = new THREE.Group();
         atomsGroup.name = "Atoms";
-        atomsGroup.add(...basis.coordinates.map((atomicCoordinate, atomicIndex) => {
+        basis.coordinates.forEach((atomicCoordinate, atomicIndex) => {
             const element = basis.getElementByIndex(atomicIndex);
             const sphereMesh = this.getSphereMeshObject({
                 ...this._getDefaultSettingsForElement(element, atomRadiiScale),
                 coordinate: atomicCoordinate.value,
             });
             sphereMesh.name = `${element}-${atomicIndex}`;
-            return sphereMesh;
-        }));
+            atomsGroup.add(sphereMesh);
+        });
         return atomsGroup;
     }
 

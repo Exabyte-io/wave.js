@@ -26,10 +26,13 @@ export class ThreejsEditorModal extends ModalDialog {
         window.localStorage.removeItem("threejs-editor");
     }
 
+    /**
+     * `Number.prototype.format` is used inside three.js editor codebase to format the numbers.
+     * The editor does not start without it. The ESLint line is a way to turn off the warning shown in the console.
+     */
     setNumberFormat() {
-        Number.prototype.format = function () {
-            return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-        };
+        /*eslint no-extend-native: [0, { "exceptions": ["Object"] }]*/
+        Number.prototype.format = function () {return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")};
     }
 
     /**
@@ -49,6 +52,9 @@ export class ThreejsEditorModal extends ModalDialog {
         // initialize editor and set the scene background
         this.editor = new window.Editor(camera);
         this.editor.scene.background = new THREE.Color(settings.backgroundColor);
+
+        // pass onHide handler to editor
+        this.editor.onHide = this.onHide;
 
         // initialize viewport and add it to the DOM
         const viewport = new window.Viewport(this.editor);
@@ -77,7 +83,6 @@ export class ThreejsEditorModal extends ModalDialog {
         orbitControls.rotateSpeed = 2.0;
         orbitControls.zoomSpeed = 2.0;
         orbitControls.update();
-
     }
 
     /**
@@ -103,6 +108,7 @@ export class ThreejsEditorModal extends ModalDialog {
         const loader = new THREE.ObjectLoader();
         const scene = loader.parse(materialsToThreeDSceneData(this.props.materials));
         this.editor.execute(new window.SetSceneCommand(scene));
+        this.editor.signals.objectSelected.dispatch(this.editor.camera);
     }
 
     /**
@@ -148,7 +154,7 @@ export class ThreejsEditorModal extends ModalDialog {
         });
     }
 
-    onHide(e) {
+    onHide() {
         try {
             const material = ThreeDSceneDataToMaterial(this.editor.scene);
             super.onHide(material);
