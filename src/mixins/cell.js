@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import {Made} from "@exabyte-io/made.js";
 
 const TV3 = THREE.Vector3;
 
@@ -19,6 +20,15 @@ export const CellMixin = (superclass) => class extends superclass {
     set cell(s) {this._cell = s}
 
     setCell(s) {this.cell = s}
+
+    get latticePoints() {
+        const basis = new Made.Basis({
+            ...this.basis.toJSON(),
+            elements: ["Si"],
+            coordinates: [[0, 0, 0]],
+        });
+        return Made.tools.basis.repeat(basis, Array(3).fill(this.settings.atomRepetitions)).coordinates.map(c => c.value);
+    }
 
     createUnitCellObject(cell) {
         const vertices = [

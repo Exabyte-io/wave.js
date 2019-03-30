@@ -84,9 +84,13 @@ export const AtomsMixin = (superclass) => class extends superclass {
     }
 
     drawAtomsAsSpheres(atomRadiiScale) {
-        const basisWithRepetitions = Made.tools.basis.repeat(this.basis, Array(3).fill(this.settings.atomRepetitions));
-        const atomsGroup = this.createAtomsGroup(basisWithRepetitions, atomRadiiScale);
+        const atomsGroup = this.createAtomsGroup(this.basis, atomRadiiScale);
         this.structureGroup.add(atomsGroup);
+        this.latticePoints.slice(1).forEach(point => {
+            const atomsGroupClone = atomsGroup.clone();
+            atomsGroupClone.position.add(new THREE.Vector3(...point));
+            this.structureGroup.add(atomsGroupClone);
+        });
     }
 
     getAtomColorByElement(element, pallette = this.settings.elementColors) {

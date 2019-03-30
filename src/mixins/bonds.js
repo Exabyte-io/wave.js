@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import {Made} from "@exabyte-io/made.js";
-import {areElementsBonded} from "@exabyte-io/periodic-table.js";
+import {getElementsBondsData} from "@exabyte-io/periodic-table.js";
 
 /*
  * Mixin containing the logic for dealing with bonds.
@@ -18,34 +18,51 @@ export const BondsMixin = (superclass) => class extends superclass {
     /**
      * Whether to draw a bond between given elements.
      */
-    areElementsBonded(element1, coordinate1, element2, coordinate2) {
-        return areElementsBonded(element1, element2, Made.math.vDist(coordinate1.value, coordinate2.value));
+    areElementsBonded(element1, coordinate1, element2, coordinate2, bondsData) {
+        const distance = Made.math.vDist(coordinate1, coordinate2);
+        return Boolean(bondsData.find(b => b.length.value && b.length.value >= distance));
+    }
+
+    getBondsData() {
+        const bonds = [];
+        const uniqueElements = this.basis.uniqueElements;
+        uniqueElements.forEach((element1, index1) => {
+            uniqueElements.forEach((element2, index2) => {
+                if (index2 >= index1) Array.prototype.push.apply(bonds, getElementsBondsData(element1, element2));
+            })
+        });
+        return bonds;
     }
 
     /**
      * Iterates over all combination of atoms and draws bonds.
      */
     addBonds() {
-        const basis = Made.tools.basis.repeat(this.basis, Array(3).fill(this.settings.atomRepetitions));
-        basis.coordinates.forEach((coordinate1, index1) => {
-            const element1 = basis.getElementByIndex(index1);
-            basis.coordinates.forEach((coordinate2, index2) => {
-                const element2 = basis.getElementByIndex(index2);
+        const bondsData = this.getBondsData();
+        const elementsAndCoordinatesArray = this.basis.elementsAndCoordinatesArray;
+        elementsAndCoordinatesArray.forEach(([element1, coordinate1], index1) => {
+            elementsAndCoordinatesArray.forEach(([element2, coordinate2], index2) => {
                 // skip if elements pair is already examined or elements are not bonded.
-                if (index2 <= index1 || !this.areElementsBonded(element1, coordinate1, element2, coordinate2)) return;
+                if (index2 <= index1 || !this.areElementsBonded(element1, coordinate1, element2, coordinate2, bondsData)) return;
                 const bond = this.getBondObject(element1, index1, coordinate1, element2, index2, coordinate2);
                 this.bondsGroup.add(bond);
             });
         });
         this.structureGroup.add(this.bondsGroup);
+        this.latticePoints.slice(1).forEach(point => {
+            const bondsGroupClone = this.bondsGroup.clone();
+            bondsGroupClone.position.add(new THREE.Vector3(...point));
+            this.structureGroup.add(bondsGroupClone);
+        });
+
     }
 
     /**
      * Draw bond as cylinder geometry.
      */
     getBondObject(element1, index1, coordinate1, element2, index2, coordinate2) {
-        const vector1 = new THREE.Vector3(...coordinate1.value);
-        const vector2 = new THREE.Vector3(...coordinate2.value);
+        const vector1 = new THREE.Vector3(...coordinate1);
+        const vector2 = new THREE.Vector3(...coordinate2);
         const direction = new THREE.Vector3().subVectors(vector2, vector1);
         const height = direction.length();
         direction.normalize();
@@ -60,6 +77,19 @@ export const BondsMixin = (superclass) => class extends superclass {
         // rotate the cylinder
         bond.applyQuaternion(quaternion);
         bond.position.set(vector1.x, vector1.y, vector1.z);
+        bond.name = `${element1}-${index1}:${element2}-${index2}`;
+        return bond;
+    }
+
+    /**
+     * Draw bond with line geometry.
+     */
+    getBondObjectAsLine(element1, index1, coordinate1, element2, index2, coordinate2) {
+        const material = new THREE.LineBasicMaterial();
+        const geometry = new THREE.Geometry();
+        geometry.vertices.push(new THREE.Vector3(...coordinate1));
+        geometry.vertices.push(new THREE.Vector3(...coordinate2));
+        const bond = new THREE.Line(geometry, material);
         bond.name = `${element1}-${index1}:${element2}-${index2}`;
         return bond;
     }
