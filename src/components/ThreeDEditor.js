@@ -5,6 +5,7 @@ import {Made} from "@exabyte-io/made.js";
 import Tooltip from "material-ui-next/Tooltip";
 import JssProvider from 'react-jss/lib/JssProvider';
 import {createGenerateClassName} from "material-ui-next/styles";
+import {LATTICE_TYPE} from "@exabyte-io/made.js/lib/lattice/types";
 import {CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS} from "@exabyte-io/made.js/lib/cell/conventional_cell";
 
 import {
@@ -119,12 +120,18 @@ export class ThreeDEditor extends React.Component {
 
     handleToggleConventionalCell(e) {
         const originalMaterial = this.state.originalMaterial;
-        const latticeType = originalMaterial.Lattice.type || Made.LATTICE_TYPE_CONFIGS.TRI;
+        const latticeType = originalMaterial.Lattice.type || LATTICE_TYPE.TRI;
         const supercellMatrix = CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[latticeType];
-        const material = new Made.Material(Made.tools.supercell.generateConfig(originalMaterial, supercellMatrix));
+
+        // skip if conventional and primitive cells are the same (supercellMatrix is unity).
+        let material = originalMaterial.clone();
+        if (supercellMatrix !== CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[LATTICE_TYPE.TRI]) {
+            material = new Made.Material(Made.tools.supercell.generateConfig(originalMaterial, supercellMatrix));
+        }
+
         this.setState({
-            isConventionalCell: !this.state.isConventionalCell,
-            material: this.state.isConventionalCell ? originalMaterial.clone() : material
+            material: material,
+            isConventionalCell: !this.state.isConventionalCell
         });
     }
 
