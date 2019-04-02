@@ -125,8 +125,8 @@ export class ThreeDEditor extends React.Component {
 
         // skip if conventional and primitive cells are the same (supercellMatrix is unity).
         let material = originalMaterial.clone();
-        if (supercellMatrix !== CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[LATTICE_TYPE.TRI]) {
-            material = new Made.Material(Made.tools.supercell.generateConfig(originalMaterial, supercellMatrix));
+        if (!this.state.isConventionalCell && supercellMatrix !== CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[LATTICE_TYPE.TRI]) {
+            material = new Made.Material(Made.tools.supercell.generateConfig(originalMaterial, supercellMatrix, 1));
         }
 
         this.setState({
