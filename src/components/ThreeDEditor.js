@@ -48,7 +48,7 @@ export class ThreeDEditor extends React.Component {
             // Settings of the wave viewer
             viewerSettings: {
                 atomRadiiScale: 0.2,
-                atomRepetitions: 1,
+                repetitions: 1,
             },
             isConventionalCell: false,
             // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
@@ -106,7 +106,7 @@ export class ThreeDEditor extends React.Component {
     };
 
     handleCellRepetitionsChange(e) {
-        this.handleSetSetting({atomRepetitions: parseFloat($(e.target).val())});
+        this.handleSetSetting({repetitions: parseFloat($(e.target).val())});
     }
 
     handleSphereRadiusChange(e) {
@@ -145,7 +145,8 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleToggleBonds(e) {
-        this.WaveComponent.wave.toggleBonds();
+        const wave = this.WaveComponent.wave;
+        wave.isDrawBondsEnabled = !wave.isDrawBondsEnabled; // toggle value;
         this._resetStateWaveComponent();
     }
 
@@ -289,7 +290,7 @@ export class ThreeDEditor extends React.Component {
 
             <RoundIconButton key="Toggle Bonds" tooltipPlacement="top" mini
                 title="Toggle Bonds"
-                isToggled={this._getWaveProperty('areBondsDrawn')}
+                isToggled={this._getWaveProperty('isDrawBondsEnabled')}
                 onClick={this.handleToggleBonds}
             >
                 <Menu/>
@@ -323,7 +324,7 @@ export class ThreeDEditor extends React.Component {
             <Tooltip key="REPETITIONS" title="REPETITIONS" placement="top">
                 <input className="inverse stepper cell-repetitions"
                     id="cell-repetitions"
-                    value={this.state.viewerSettings.atomRepetitions}
+                    value={this.state.viewerSettings.repetitions}
                     type="number" max="10" min="1" step="1"
                     onChange={this.handleCellRepetitionsChange}
                 />
@@ -395,6 +396,7 @@ export class ThreeDEditor extends React.Component {
         if (!material || material.hash === this.state.originalMaterial.hash) {
             this.setState({isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown});
         } else {
+            material.Lattice.type = this.state.originalMaterial.Lattice.type; // preserve lattice type
             this.setState({
                 material: material.clone(),
                 originalMaterial: material,

@@ -38,6 +38,7 @@
         "react-bootstrap": "^0.30.7",
         "react-jss": "^8.6.1",
         "sprintf-js": "^1.1.2",
+        "static-kdtree": "^1.0.2",
         "sweetalert": "^2.1.2",
         "three": "^0.90.0",
         "three-orbit-controls": "^82.1.0",
