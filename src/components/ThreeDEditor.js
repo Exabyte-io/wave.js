@@ -397,7 +397,11 @@ export class ThreeDEditor extends React.Component {
         if (!material || material.hash === this.state.originalMaterial.hash) {
             this.setState({isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown});
         } else {
-            material.Lattice.type = this.state.originalMaterial.Lattice.type; // preserve lattice type
+            // preserve lattice type
+            material.lattice = {
+                ...material.Lattice.toJSON(),
+                type: this.state.originalMaterial.Lattice.type,
+            };
             this.setState({
                 material: material.clone(),
                 originalMaterial: material,
