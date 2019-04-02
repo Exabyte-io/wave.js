@@ -45,7 +45,9 @@ export const BondsMixin = (superclass) => class extends superclass {
         const uniqueElements = this.basis.uniqueElements;
         uniqueElements.forEach((element1, index1) => {
             uniqueElements.forEach((element2, index2) => {
-                if (index2 >= index1) Array.prototype.push.apply(bonds, getElementsBondsData(element1, element2));
+                if (element1 && element2 && index2 >= index1) {
+                    Array.prototype.push.apply(bonds, getElementsBondsData(element1, element2));
+                }
             })
         });
         return bonds;
