@@ -50,7 +50,7 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: 0.2,
                 repetitions: 1,
             },
-            isConventionalCell: false,
+            isConventionalCell: this.props.isConventionalCell || false,
             // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
             originalMaterial: this.props.material,
             // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
@@ -82,14 +82,6 @@ export class ThreeDEditor extends React.Component {
         }
     }
 
-    /**
-     * TODO: remove the need for it
-     * Lattice vectors for the Unit cell of a crystal
-     */
-    get unitCell() {
-        return this.state.material.Lattice.unitCell;
-    }
-
     _resetStateWaveComponent() {
         // a workaround to re-render the component and update the buttons on clicks
         this.setState({wave: this.WaveComponent.wave});
@@ -118,20 +110,28 @@ export class ThreeDEditor extends React.Component {
         this._resetStateWaveComponent();
     }
 
-    handleToggleConventionalCell(e) {
+    getMaterialWithConventionalCell() {
         const originalMaterial = this.state.originalMaterial;
         const latticeType = originalMaterial.Lattice.type || LATTICE_TYPE.TRI;
         const supercellMatrix = CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[latticeType];
 
         // skip if conventional and primitive cells are the same (supercellMatrix is unity).
         let material = originalMaterial.clone();
-        if (!this.state.isConventionalCell && supercellMatrix !== CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[LATTICE_TYPE.TRI]) {
+        if (supercellMatrix !== CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[LATTICE_TYPE.TRI]) {
             material = new Made.Material(Made.tools.supercell.generateConfig(originalMaterial, supercellMatrix, 1));
         }
 
+        return material;
+    }
+
+    getPrimitiveOrConventionalMaterial(material, isConventionalCell = false) {
+        return !isConventionalCell ? material.clone() : this.getMaterialWithConventionalCell(material);
+    }
+
+    handleToggleConventionalCell(e) {
         this.setState({
-            material: material,
-            isConventionalCell: !this.state.isConventionalCell
+            isConventionalCell: !this.state.isConventionalCell,
+            material: this.getPrimitiveOrConventionalMaterial(this.state.originalMaterial, !this.state.isConventionalCell)
         });
     }
 
@@ -362,11 +362,12 @@ export class ThreeDEditor extends React.Component {
     }
 
     renderWaveComponent() {
+        const material = this.getPrimitiveOrConventionalMaterial(this.state.material, this.state.isConventionalCell);
         return <WaveComponent
             ref={(el) => {this.WaveComponent = el}}
             triggerHandleResize={this.state.viewerTriggerResize}
-            structure={this.state.material}
-            cell={this.unitCell}
+            structure={material}
+            cell={material.Lattice.unitCell}
             name={this.state.material.name}
             settings={this.state.viewerSettings}
         />
@@ -438,6 +439,7 @@ export class ThreeDEditor extends React.Component {
 
 ThreeDEditor.propTypes = {
     material: React.PropTypes.object,
+    isConventionalCell: React.PropTypes.bool,
     onUpdate: React.PropTypes.func,
     editable: React.PropTypes.bool
 };
