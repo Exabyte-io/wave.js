@@ -50,7 +50,7 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: 0.2,
                 repetitions: 1,
             },
-            isConventionalCell: this.props.isConventionalCell || false,
+            isConventionalCellShown: this.props.isConventionalCellShown || false,
             // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
             originalMaterial: this.props.material,
             // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
@@ -124,14 +124,14 @@ export class ThreeDEditor extends React.Component {
         return material;
     }
 
-    getPrimitiveOrConventionalMaterial(material, isConventionalCell = false) {
-        return !isConventionalCell ? material.clone() : this.getMaterialWithConventionalCell(material);
+    getPrimitiveOrConventionalMaterial(material, isConventionalCellShown = false) {
+        return !isConventionalCellShown ? material.clone() : this.getMaterialWithConventionalCell(material);
     }
 
     handleToggleConventionalCell(e) {
         this.setState({
-            isConventionalCell: !this.state.isConventionalCell,
-            material: this.getPrimitiveOrConventionalMaterial(this.state.originalMaterial, !this.state.isConventionalCell)
+            isConventionalCellShown: !this.state.isConventionalCellShown,
+            material: this.getPrimitiveOrConventionalMaterial(this.state.originalMaterial, !this.state.isConventionalCellShown)
         });
     }
 
@@ -189,7 +189,7 @@ export class ThreeDEditor extends React.Component {
             width: '100%',
         };
         if (this.state.isInteractive) style.display = 'none';
-        return <div className="atom-view-cover" style={style}></div>
+        return <div className="atom-view-cover" style={style}/>
     }
 
     get classNamesForTopToolbar() {return "buttons-toolbar buttons-toolbar-top pull-left"}
@@ -298,7 +298,7 @@ export class ThreeDEditor extends React.Component {
 
             <RoundIconButton key="Toggle Conventional Cell" tooltipPlacement="top" mini
                 title="Toggle Conventional Cell"
-                isToggled={this.state.isConventionalCell}
+                isToggled={this.state.isConventionalCellShown}
                 onClick={this.handleToggleConventionalCell}
             >
                 <FormatShapes/>
@@ -362,7 +362,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     renderWaveComponent() {
-        const material = this.getPrimitiveOrConventionalMaterial(this.state.material, this.state.isConventionalCell);
+        const material = this.getPrimitiveOrConventionalMaterial(this.state.material, this.state.isConventionalCellShown);
         return <WaveComponent
             ref={(el) => {this.WaveComponent = el}}
             triggerHandleResize={this.state.viewerTriggerResize}
@@ -439,7 +439,7 @@ export class ThreeDEditor extends React.Component {
 
 ThreeDEditor.propTypes = {
     material: React.PropTypes.object,
-    isConventionalCell: React.PropTypes.bool,
+    isConventionalCellShown: React.PropTypes.bool,
     onUpdate: React.PropTypes.func,
     editable: React.PropTypes.bool
 };
