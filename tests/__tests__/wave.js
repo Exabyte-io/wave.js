@@ -13,9 +13,9 @@ test('atomRadiiScale', async () => {
     return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "atomRadiiScale");
 });
 
-test('atomRepetitions', async () => {
+test('repetitions', async () => {
     const wave = getWaveInstance();
-    wave.updateSettings({atomRepetitions: 2});
+    wave.updateSettings({repetitions: 2});
     wave.rebuildScene();
-    return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "atomRepetitions");
+    return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "repetitions");
 });

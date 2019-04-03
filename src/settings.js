@@ -4,7 +4,7 @@ export default {
     // atoms
     // atoms.user-controllable
     atomRadiiScale: 0.2,
-    atomRepetitions: 1,
+    repetitions: 1,
     // atoms.non-user-controllable
     defaultElement: "Si",
     sphereRadius: 1.5,

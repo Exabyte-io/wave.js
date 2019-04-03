@@ -23,7 +23,7 @@ export const MATERIAL_CONFIG = JSON.parse(fs.readFileSync(materialJsonFilePath))
 
 export const WAVE_SETTINGS = {
     atomRadiiScale: 0.2,
-    atomRepetitions: 1,
+    repetitions: 1,
 };
 
 export function getWaveInstance() {

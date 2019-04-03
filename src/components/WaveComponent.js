@@ -19,7 +19,10 @@ export class WaveComponent extends React.Component {
 
     componentDidUpdate(prevProps, prevState) {
         this.props.triggerHandleResize && this._handleResizeTransition();
-        this.wave && this.reloadViewer();
+        if (this.wave) {
+            // recreate bonds asynchronously if structure is changed.
+            this.reloadViewer(prevProps.structure !== this.props.structure);
+        }
     }
 
     _cleanViewer() {
@@ -49,13 +52,14 @@ export class WaveComponent extends React.Component {
         setTimeout(() => this.wave.handleResize(), 500);
     }
 
-    reloadViewer() {
+    reloadViewer(createBondsAsync) {
         // When running in headless mode in tests the browser does not support
         // WebGL, so exception will be thrown. It may get in a way with other events => catching it.
         try {
             this.wave.updateSettings(this.props.settings);
             this.wave.setStructure(this.props.structure);
             this.wave.setCell(this.props.cell);
+            if (createBondsAsync) this.wave.createBondsAsync();
             this.wave.rebuildScene();
         } catch (e) {
             console.warn('exception caught when rendering atomic viewer', e);

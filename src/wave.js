@@ -7,6 +7,7 @@ import {AtomsMixin} from "./mixins/atoms";
 import {BondsMixin} from "./mixins/bonds";
 import {saveImageDataToFile} from "./utils";
 import {ControlsMixin} from "./mixins/controls";
+import {RepetitionMixin} from "./mixins/repetition";
 
 const TV3 = THREE.Vector3, TCo = THREE.Color;
 
@@ -168,6 +169,7 @@ export class Wave extends mix(WaveBase).with(
     AtomsMixin,
     BondsMixin,
     CellMixin,
+    RepetitionMixin,
     ControlsMixin,
 ) {
 
@@ -187,26 +189,17 @@ export class Wave extends mix(WaveBase).with(
         saveImageDataToFile(this.renderer.domElement.toDataURL("image/png"))
     }
 
-    /**
-     * Helper to remove a 1-level group of 3D objects.
-     * @param {THREE.Object3D} group - Group of 3D objects
-     * @private
-     */
-    _clearViewForGroup(group) {
-        for (let i = group.children.length - 1; i >= 0; i--) {
-            group.remove(group.children[i])
-        }
-    }
-
     clearView() {
-        [this.structureGroup, this.bondsGroup].map(g => this._clearViewForGroup(g));
+        while (this.structureGroup.children.length) {
+            this.structureGroup.remove(this.structureGroup.children[0]);
+        }
     }
 
     rebuildScene() {
         this.clearView();
         this.drawAtomsAsSpheres();
-        this.areBondsDrawn && this.addBonds();
         this.drawUnitCell();
+        this.isDrawBondsEnabled && this.drawBonds();
         this.render();
     }
 

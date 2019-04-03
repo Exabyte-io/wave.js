@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import {Made} from "@exabyte-io/made.js";
 
 /*
  * Mixin containing the logic for dealing with atoms.
@@ -84,9 +83,7 @@ export const AtomsMixin = (superclass) => class extends superclass {
     }
 
     drawAtomsAsSpheres(atomRadiiScale) {
-        const basisWithRepetitions = Made.tools.basis.repeat(this.basis, Array(3).fill(this.settings.atomRepetitions));
-        const atomsGroup = this.createAtomsGroup(basisWithRepetitions, atomRadiiScale);
-        this.structureGroup.add(atomsGroup);
+        this.repeatObject3DAtRepetitionCoordinates(this.createAtomsGroup(this.basis, atomRadiiScale));
     }
 
     getAtomColorByElement(element, pallette = this.settings.elementColors) {
