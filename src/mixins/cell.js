@@ -62,6 +62,9 @@ export const CellMixin = (superclass) => class extends superclass {
         this.structureGroup.add(cellObject);
     }
 
+    /**
+     * Returns an array of THREE.Plane corresponding to the cell's faces.
+     */
     getCellPlanes(cell) {
         const vertices = this.getCellVertices(cell).map(a => new THREE.Vector3(...a));
         return [[0, 1, 2], [0, 1, 4], [1, 3, 5], [3, 2, 7], [0, 2, 4], [4, 6, 5]].map(face => {
