@@ -220,7 +220,6 @@ export const ControlsMixin = (superclass) => UtilsMixin(OrbitControlsMixin(class
         super(config);
         this.toggleOrbitControls = this.toggleOrbitControls.bind(this);
         this.initControls();
-        this.initControlsSwitchFromKeyboard();
     }
 
     initControls() {
@@ -241,25 +240,6 @@ export const ControlsMixin = (superclass) => UtilsMixin(OrbitControlsMixin(class
         const initialState = this.getControlsState();
         this.toggleBoolean("areOrbitControlsEnabled");
         !skipStateUpdate && this.updateControlsFromState(initialState, this.getControlsState());
-    }
-
-    initControlsSwitchFromKeyboard() {
-        window.addEventListener('keydown', (event) => {
-
-            const initialState = this.getControlsState();
-
-            switch (event.keyCode) {
-                case 79: // O
-                    this.toggleOrbitControls(true);
-                    break;
-                default:
-                    this.setControlsState();
-            }
-
-            const finalState = this.getControlsState();
-            this.updateControlsFromState(initialState, finalState);
-
-        });
     }
 
     updateControlsFromState(initialState, finalState) {

@@ -20,8 +20,11 @@ export const CellMixin = (superclass) => class extends superclass {
 
     setCell(s) {this.cell = s}
 
-    createUnitCellObject(cell) {
-        const vertices = [
+    /**
+     * Returns an array of vertices in 3D space forming the cell.
+     */
+    getCellVertices(cell) {
+        return [
             [0, 0, 0],
             [cell.ax, cell.ay, cell.az],
             [cell.bx, cell.by, cell.bz],
@@ -30,7 +33,11 @@ export const CellMixin = (superclass) => class extends superclass {
             [(cell.cx + cell.ax), (cell.cy + cell.ay), (cell.cz + cell.az)],
             [(cell.cx + cell.bx), (cell.cy + cell.by), (cell.cz + cell.bz)],
             [(cell.cx + cell.ax + cell.bx), (cell.cy + cell.ay + cell.by), (cell.cz + cell.az + cell.bz)]
-        ];
+        ]
+    }
+
+    createUnitCellObject(cell) {
+        const vertices = this.getCellVertices(cell);
 
         // edges of the cell forming a continuous line
         const edges = [0, 1, 0, 2, 1, 3, 2, 3, 4, 5, 4, 6, 5, 7, 6, 7, 0, 4, 1, 5, 2, 6, 3, 7];
@@ -44,15 +51,27 @@ export const CellMixin = (superclass) => class extends superclass {
             color: this.settings.defaultColor,
         });
 
-        const unitCellObject = new THREE.LineSegments(geometry, lineMaterial);
-        unitCellObject.name = "Cell";
-        return unitCellObject;
+        this.unitCellObject = new THREE.LineSegments(geometry, lineMaterial);
+        this.unitCellObject.name = "Cell";
+        return this.unitCellObject;
 
     }
 
     drawUnitCell(cell = this.cell) {
         const cellObject = this.createUnitCellObject(cell);
         this.structureGroup.add(cellObject);
+    }
+
+    /**
+     * Returns an array of THREE.Plane corresponding to the cell's faces.
+     */
+    getCellPlanes(cell) {
+        const vertices = this.getCellVertices(cell).map(a => new THREE.Vector3(...a));
+        return [[0, 1, 2], [0, 1, 4], [1, 3, 5], [3, 2, 7], [0, 2, 4], [4, 6, 5]].map(face => {
+            const slide1 = new THREE.Vector3().subVectors(vertices[face[0]], vertices[face[1]]);
+            const slide2 = new THREE.Vector3().subVectors(vertices[face[0]], vertices[face[2]]);
+            return new THREE.Plane(new THREE.Vector3().crossVectors(slide1, slide2));
+        });
     }
 
 };
