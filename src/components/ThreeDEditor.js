@@ -110,7 +110,7 @@ export class ThreeDEditor extends React.Component {
         this._resetStateWaveComponent();
     }
 
-    getMaterialWithConventionalCell() {
+    getMaterialWithPrimitiveOrConventionalCell() {
         const originalMaterial = this.state.originalMaterial;
         const latticeType = originalMaterial.Lattice.type || LATTICE_TYPE.TRI;
         const supercellMatrix = CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[latticeType];
@@ -125,7 +125,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     getPrimitiveOrConventionalMaterial(material, isConventionalCellShown = false) {
-        return !isConventionalCellShown ? material.clone() : this.getMaterialWithConventionalCell(material);
+        return !isConventionalCellShown ? material.clone() : this.getMaterialWithPrimitiveOrConventionalCell(material);
     }
 
     handleToggleConventionalCell(e) {
