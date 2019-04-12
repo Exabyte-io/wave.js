@@ -27,6 +27,8 @@ export const BoundaryMixin = (superclass) => class extends superclass {
 
         var material = new THREE.MeshBasicMaterial({
             color: color,
+            opacity: 0.5,
+            transparent: true,
             side: THREE.DoubleSide
         });
 
@@ -37,8 +39,9 @@ export const BoundaryMixin = (superclass) => class extends superclass {
     drawBoundaries() {
         if (this.areBoundariesEnabled) {
             const vertices = this.getCellVertices(this.cell);
-            const offset = this.boundaryConditions.offset * Made.coefficients.BOHR_TO_ANGSTROM;
+            const LZ = new THREE.Vector3(...vertices[4]).length();
             const colors = this.settings.boundaryConditionTypeColors[this.boundaryConditions.type];
+            const offset = this.boundaryConditions.offset * Made.coefficients.BOHR_TO_ANGSTROM + LZ / 2;
             const plane1 = this.getPlaneObject(colors[0], vertices[0], vertices[1], vertices[3], vertices[2], -offset);
             const plane2 = this.getPlaneObject(colors[1], vertices[4], vertices[5], vertices[7], vertices[6], offset);
             this.repeatObject3DAtRepetitionCoordinates(plane1);
