@@ -12,7 +12,7 @@ import {
     NotInterested, ImportExport, RemoveRedEye,
     Replay, PictureInPicture, PowerSettingsNew,
     FileDownload, ThreeDRotation, Autorenew,
-    GpsFixed, Edit, SwitchCamera, FormatShapes, Menu
+    GpsFixed, Edit, SwitchCamera, FormatShapes, Menu, BubbleChart
 } from 'material-ui-icons-next';
 import {exportToDisk} from "../utils";
 import {IconToolbar} from "./IconToolbar";
@@ -50,6 +50,7 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: 0.2,
                 repetitions: 1,
             },
+            boundaryConditions: this.props.boundaryConditions || {},
             isConventionalCellShown: this.props.isConventionalCellShown || false,
             // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
             originalMaterial: this.props.material,
@@ -78,6 +79,8 @@ export class ThreeDEditor extends React.Component {
             this.setState({
                 originalMaterial: material,
                 material: material.clone(),
+                boundaryConditions: nextProps.boundaryConditions || {},
+                isConventionalCellShown: nextProps.isConventionalCellShown || false,
             })
         }
     }
@@ -311,6 +314,24 @@ export class ThreeDEditor extends React.Component {
             >
                 <Replay/>
             </RoundIconButton>,
+        ]
+    }
+
+    renderViewToolbar(className = "") {
+        return (
+            <IconToolbar
+                className={className}
+                title="View"
+                iconComponent={RemoveRedEye}
+                isHidden={!this.state.isInteractive}
+            >
+                {this.getViewToolbarItems()}
+            </IconToolbar>
+        )
+    }
+
+    getParametersToolbarItems() {
+        return [
 
             <Tooltip key="RADIUS" title="RADIUS" placement="top">
                 <input className="inverse stepper sphere-radius"
@@ -333,15 +354,15 @@ export class ThreeDEditor extends React.Component {
         ]
     }
 
-    renderViewToolbar(className = "") {
+    renderParametersToolbar(className = "") {
         return (
             <IconToolbar
                 className={className}
-                title="View"
-                iconComponent={RemoveRedEye}
+                title="Parameters"
+                iconComponent={BubbleChart}
                 isHidden={!this.state.isInteractive}
             >
-                {this.getViewToolbarItems()}
+                {this.getParametersToolbarItems()}
             </IconToolbar>
         )
     }
@@ -367,6 +388,7 @@ export class ThreeDEditor extends React.Component {
             ref={(el) => {this.WaveComponent = el}}
             triggerHandleResize={this.state.viewerTriggerResize}
             structure={material}
+            boundaryConditions={this.state.boundaryConditions}
             cell={material.Lattice.unitCell}
             name={this.state.material.name}
             settings={this.state.viewerSettings}
@@ -400,7 +422,7 @@ export class ThreeDEditor extends React.Component {
             // preserve lattice type
             material.lattice = {
                 ...material.Lattice.toJSON(),
-                type: this.state.originalMaterial.Lattice.type,
+                type: this.state.originalMaterial.Lattice.type
             };
             this.setState({
                 material: material.clone(),
@@ -426,7 +448,8 @@ export class ThreeDEditor extends React.Component {
                 {this.renderInteractiveSwitch()}
                 {this.renderWaveComponent()}
                 {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
-                {this.props.editable && this.render3DEditToggle(this.classNamesForTopToolbar + " third-row")}
+                {this.renderParametersToolbar(this.classNamesForTopToolbar + " third-row")}
+                {this.props.editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fourth-row")}
                 {this.renderExportToolbar(this.classNamesForBottomToolbar)}
             </div>;
         }

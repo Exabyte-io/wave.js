@@ -12,7 +12,9 @@ export const RepetitionMixin = (superclass) => class extends superclass {
             elements: ["Si"],
             coordinates: [[0, 0, 0]],
         });
-        return Made.tools.basis.repeat(basis, Array(3).fill(this.settings.repetitions)).coordinates.map(c => c.value);
+        const value = this.settings.repetitions;
+        const repetitions = [value, value, this.areBoundariesEnabled ? 1 : value];
+        return Made.tools.basis.repeat(basis, repetitions).coordinates.map(c => c.value);
     }
 
     /**
