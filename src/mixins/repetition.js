@@ -13,6 +13,7 @@ export const RepetitionMixin = (superclass) => class extends superclass {
             coordinates: [[0, 0, 0]],
         });
         const value = this.settings.repetitions;
+        // avoid repeating in z direction if boundaries are enabled.
         const repetitions = [value, value, this.areBoundariesEnabled ? 1 : value];
         return Made.tools.basis.repeat(basis, repetitions).coordinates.map(c => c.value);
     }

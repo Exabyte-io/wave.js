@@ -7,8 +7,14 @@ export const BoundaryMixin = (superclass) => class extends superclass {
         this.boundaryConditions = config.boundaryConditions || {};
     }
 
+    /**
+     * Boundaries are drawn only if type is "bc1", "bc2", or "bc3".
+     */
     get areBoundariesEnabled() {return ["bc1", "bc2", "bc3"].includes(this.boundaryConditions.type)}
 
+    /**
+     * Returns a plane-like mesh object with given corner vertices in counterclockwise order.
+     */
     getPlaneObject(color, coordinates1, coordinates2, coordinates3, coordinates4, zOffset = 0) {
 
         const point1 = new THREE.Vector3(...coordinates1).add(new THREE.Vector3(0, 0, zOffset));
@@ -35,11 +41,14 @@ export const BoundaryMixin = (superclass) => class extends superclass {
 
     }
 
+    /**
+     * Draw boundaries with +/- [L_z/2 + offset] z coordinates.
+     */
     drawBoundaries() {
         if (this.areBoundariesEnabled) {
             const vertices = this.getCellVertices(this.cell);
-            const LZ = new THREE.Vector3(...vertices[4]).length();
-            const offset = this.boundaryConditions.offset + LZ / 2;
+            const L_z = new THREE.Vector3(...vertices[4]).length();
+            const offset = this.boundaryConditions.offset + L_z / 2;
             const colors = this.settings.boundaryConditionTypeColors[this.boundaryConditions.type];
             const plane1 = this.getPlaneObject(colors[0], vertices[0], vertices[1], vertices[3], vertices[2], -offset);
             const plane2 = this.getPlaneObject(colors[1], vertices[4], vertices[5], vertices[7], vertices[6], offset);
