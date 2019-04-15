@@ -38,8 +38,8 @@ export const CellMixin = (superclass) => class extends superclass {
         ]
     }
 
-    getUnitCellObjectByEdges(cell, edges, zOffset = 1, lineColor = this.settings.defaultColor) {
-        const vertices = this.getCellVertices(cell, zOffset);
+    getUnitCellObjectByEdges(cell, edges, zMultiplier = 1, lineColor = this.settings.defaultColor) {
+        const vertices = this.getCellVertices(cell, zMultiplier);
 
         const geometry = new THREE.Geometry();
 
@@ -62,7 +62,7 @@ export const CellMixin = (superclass) => class extends superclass {
 
     drawUnitCell(cell = this.cell) {
         if (this.areNonPeriodicBoundariesPresent) {
-            const zMultiplier = 1 / this.boundaryMeshObjectZOffset;
+            const zMultiplier = this.boundaryMeshObjectZOffset / cell.cz;
             const edges = [0, 1, 0, 2, 1, 3, 2, 3, 0, 4, 1, 5, 2, 6, 3, 7];
             const cellObject = this.getUnitCellObjectByEdges(cell, edges, zMultiplier);
             const cellObjectClone = this.getUnitCellObjectByEdges(cell, edges, -zMultiplier, this.settings.colors.gray);
