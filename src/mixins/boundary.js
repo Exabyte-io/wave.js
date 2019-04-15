@@ -64,7 +64,7 @@ export const BoundaryMixin = (superclass) => class extends superclass {
             const colors = this.settings.boundaryConditionTypeColors[this.boundaryConditions.type];
             const boundaryMeshObjectVertices = [vertices[0], vertices[1], vertices[3], vertices[2]];
             const plane1 = this.getBoundaryMeshObject(colors[0], ...boundaryMeshObjectVertices, this.boundaryMeshObjectZOffset);
-            const plane2 = this.getBoundaryMeshObject(colors[0], ...boundaryMeshObjectVertices, -this.boundaryMeshObjectZOffset);
+            const plane2 = this.getBoundaryMeshObject(colors[1], ...boundaryMeshObjectVertices, -this.boundaryMeshObjectZOffset);
             this.repeatObject3DAtRepetitionCoordinates(plane1);
             this.repeatObject3DAtRepetitionCoordinates(plane2);
         }
