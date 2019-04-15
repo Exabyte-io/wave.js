@@ -21,11 +21,17 @@ export const BoundaryMixin = (superclass) => class extends superclass {
      *  bc3 : Immerse the slab between one semi-infinite vacuum region (left) and one semi-infinite metallic electrode (right).
      */
     get areNonPeriodicBoundariesPresent() {
-        return BOUNDARY_CONDITIONS.filter(e => e.enabled).map(e => e.type).includes(this.boundaryConditions.type);
+        return BOUNDARY_CONDITIONS.filter(e => e.isNonPeriodic).map(e => e.type).includes(this.boundaryConditions.type);
     }
 
     /**
      * Returns a plane-like mesh object with given corner vertices in counterclockwise order.
+     * @param color {Number} mesh object color.
+     * @param coordinates1 {Array} first point.
+     * @param coordinates2 {Array} second point.
+     * @param coordinates3 {Array} third point.
+     * @param coordinates4 {Array} fourth point.
+     * @param zOffset {Number} offset to add to the z coordinate of points forming the object.
      */
     getBoundaryMeshObject(color, coordinates1, coordinates2, coordinates3, coordinates4, zOffset = 0) {
 
@@ -53,7 +59,11 @@ export const BoundaryMixin = (superclass) => class extends superclass {
 
     }
 
-    get boundaryMeshObjectZOffset() {return this.boundaryConditions.offset + this.latticeCConstant / 2}
+    /**
+     * Returns the z offset to add to the boundary planes. Note that the c axis of the cell and z axis of coordinate system
+     * are always aligned by convention, hence this.cVectorLength / 2.
+     */
+    get boundaryMeshObjectZOffset() {return this.boundaryConditions.offset + this.cVectorLength / 2}
 
     /**
      * Draw boundaries with +/- [L_z/2 + this.boundaryConditions.offset] z coordinates.
@@ -84,8 +94,6 @@ export const BoundaryMixin = (superclass) => class extends superclass {
         newBasis.toCrystal();
         basisCloneInCrystalCoordinates.toCrystal();
 
-        const threshold = this.boundaryMeshObjectZOffset / this.latticeCConstant;
-
         basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
             const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index);
             newBasis.addAtom({
@@ -93,7 +101,7 @@ export const BoundaryMixin = (superclass) => class extends superclass {
                 coordinate: [
                     coord[0],
                     coord[1],
-                    Made.math.abs(coord[2]) <= threshold ? coord[2] : coord[2] - 1
+                    Made.math.abs(coord[2]) <= 0.5 ? coord[2] : coord[2] - 1
                 ]
             });
         });

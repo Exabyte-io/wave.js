@@ -23,7 +23,7 @@ export const CellMixin = (superclass) => class extends superclass {
     /**
      * Returns an array of vertices in 3D space forming the cell.
      * @param cell {Object} unitCell class instance.
-     * @param zMultiplier {Number} specifies a multiplier to adjust the z coordinates of the cell vertices.
+     * @param zMultiplier {Number} specifies a multiplier to adjust the z coordinates of the cell vertices with.
      */
     getCellVertices(cell, zMultiplier = 1) {
         return [
@@ -38,6 +38,14 @@ export const CellMixin = (superclass) => class extends superclass {
         ]
     }
 
+    /**
+     * Returns a LineSegments object representing the cell with given edges.
+     * @param cell {Object} unitCell class instance.
+     * @param edges {Array} an array of vertex indices used to form the line segments.
+     * @param zMultiplier {Number} specifies a multiplier to adjust the z coordinates of the cell vertices with.
+     * @param lineColor {Number} line segment color
+     * @returns {LineSegments}
+     */
     getUnitCellObjectByEdges(cell, edges, zMultiplier = 1, lineColor = this.settings.defaultColor) {
         const vertices = this.getCellVertices(cell, zMultiplier);
 
@@ -53,6 +61,9 @@ export const CellMixin = (superclass) => class extends superclass {
         return new THREE.LineSegments(geometry, lineMaterial);
     }
 
+    /**
+     * Returns a LineSegments object representing the full unitCell (with all edges).
+     */
     getUnitCellObject(cell) {
         const edges = [0, 1, 0, 2, 1, 3, 2, 3, 4, 5, 4, 6, 5, 7, 6, 7, 0, 4, 1, 5, 2, 6, 3, 7];
         this.unitCellObject = this.getUnitCellObjectByEdges(cell, edges);
@@ -60,12 +71,14 @@ export const CellMixin = (superclass) => class extends superclass {
         return this.unitCellObject;
     }
 
+    /**
+     * Draw unitCell in canvas. 2 half up/down cells (without top edges) are drawn if boundary conditions are present.
+     */
     drawUnitCell(cell = this.cell) {
         if (this.areNonPeriodicBoundariesPresent) {
-            const zMultiplier = this.boundaryMeshObjectZOffset / cell.cz;
             const edges = [0, 1, 0, 2, 1, 3, 2, 3, 0, 4, 1, 5, 2, 6, 3, 7];
-            const cellObjectUp = this.getUnitCellObjectByEdges(cell, edges, zMultiplier);
-            const cellObjectDown = this.getUnitCellObjectByEdges(cell, edges, -zMultiplier, this.settings.colors.gray);
+            const cellObjectUp = this.getUnitCellObjectByEdges(cell, edges, 0.5);
+            const cellObjectDown = this.getUnitCellObjectByEdges(cell, edges, -0.5, this.settings.colors.gray);
             this.structureGroup.add(cellObjectDown);
             this.structureGroup.add(cellObjectUp);
         } else {
@@ -87,10 +100,8 @@ export const CellMixin = (superclass) => class extends superclass {
     }
 
     /**
-     * Return Lattice C constant.
+     * Return the length of unitCell c vector.
      */
-    get latticeCConstant() {
-        return new THREE.Vector3(this.cell.cx, this.cell.cy, this.cell.cz).length();
-    }
+    get cVectorLength() {return new THREE.Vector3(this.cell.cx, this.cell.cy, this.cell.cz).length()}
 
 };
