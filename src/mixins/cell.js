@@ -23,7 +23,7 @@ export const CellMixin = (superclass) => class extends superclass {
     /**
      * Returns an array of vertices in 3D space forming the cell.
      * @param cell {Object} unitCell class instance.
-     * @param zMultiplier {Number} specifies a multiplier to adjust the z coordinates of the cell.
+     * @param zMultiplier {Number} specifies a multiplier to adjust the z coordinates of the cell vertices.
      */
     getCellVertices(cell, zMultiplier = 1) {
         return [
@@ -64,10 +64,10 @@ export const CellMixin = (superclass) => class extends superclass {
         if (this.areNonPeriodicBoundariesPresent) {
             const zMultiplier = this.boundaryMeshObjectZOffset / cell.cz;
             const edges = [0, 1, 0, 2, 1, 3, 2, 3, 0, 4, 1, 5, 2, 6, 3, 7];
-            const cellObject = this.getUnitCellObjectByEdges(cell, edges, zMultiplier);
-            const cellObjectClone = this.getUnitCellObjectByEdges(cell, edges, -zMultiplier, this.settings.colors.gray);
-            this.structureGroup.add(cellObjectClone);
-            this.structureGroup.add(cellObject);
+            const cellObjectUp = this.getUnitCellObjectByEdges(cell, edges, zMultiplier);
+            const cellObjectDown = this.getUnitCellObjectByEdges(cell, edges, -zMultiplier, this.settings.colors.gray);
+            this.structureGroup.add(cellObjectDown);
+            this.structureGroup.add(cellObjectUp);
         } else {
             const unitCellObject = this.getUnitCellObject(cell);
             this.structureGroup.add(unitCellObject);
