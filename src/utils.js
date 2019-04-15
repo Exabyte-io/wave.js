@@ -118,7 +118,7 @@ export function materialsToThreeDSceneData(materials, shift = [2, 0, 0]) {
             structureGroup.name = material.name || material.formula;
             const atomsGroup = wave.createAtomsGroup(material.Basis);
             structureGroup.add(atomsGroup);
-            const unitCellObject = wave.createUnitCellObject(material.Lattice.unitCell);
+            const unitCellObject = wave.getUnitCellObject(material.Lattice.unitCell);
             unitCellObject.visible = false;
             structureGroup.add(unitCellObject);
             structureGroup.position.set(...shift); //slightly shift along x axis

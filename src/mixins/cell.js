@@ -22,44 +22,56 @@ export const CellMixin = (superclass) => class extends superclass {
 
     /**
      * Returns an array of vertices in 3D space forming the cell.
+     * @param cell {Object} unitCell class instance.
+     * @param zMultiplier {Number} specifies a multiplier to adjust the z coordinates of the cell.
      */
-    getCellVertices(cell) {
+    getCellVertices(cell, zMultiplier = 1) {
         return [
             [0, 0, 0],
             [cell.ax, cell.ay, cell.az],
             [cell.bx, cell.by, cell.bz],
             [(cell.ax + cell.bx), (cell.ay + cell.by), (cell.az + cell.bz)],
-            [cell.cx, cell.cy, cell.cz],
-            [(cell.cx + cell.ax), (cell.cy + cell.ay), (cell.cz + cell.az)],
-            [(cell.cx + cell.bx), (cell.cy + cell.by), (cell.cz + cell.bz)],
-            [(cell.cx + cell.ax + cell.bx), (cell.cy + cell.ay + cell.by), (cell.cz + cell.az + cell.bz)]
+            [cell.cx, cell.cy, cell.cz * zMultiplier],
+            [(cell.cx + cell.ax), (cell.cy + cell.ay), (cell.cz * zMultiplier + cell.az)],
+            [(cell.cx + cell.bx), (cell.cy + cell.by), (cell.cz * zMultiplier + cell.bz)],
+            [(cell.cx + cell.ax + cell.bx), (cell.cy + cell.ay + cell.by), (cell.cz * zMultiplier + cell.az + cell.bz)]
         ]
     }
 
-    createUnitCellObject(cell) {
-        const vertices = this.getCellVertices(cell);
-
-        // edges of the cell forming a continuous line
-        const edges = [0, 1, 0, 2, 1, 3, 2, 3, 4, 5, 4, 6, 5, 7, 6, 7, 0, 4, 1, 5, 2, 6, 3, 7];
+    getUnitCellObjectByEdges(cell, edges, zOffset = 1, lineColor = this.settings.defaultColor) {
+        const vertices = this.getCellVertices(cell, zOffset);
 
         const geometry = new THREE.Geometry();
 
         edges.forEach(edge => geometry.vertices.push(new TV3(vertices[edge][0], vertices[edge][1], vertices[edge][2])));
 
         const lineMaterial = new THREE.LineBasicMaterial({
+            color: lineColor,
             linewidth: this.settings.lineWidth,
-            color: this.settings.defaultColor,
         });
 
-        this.unitCellObject = new THREE.LineSegments(geometry, lineMaterial);
+        return new THREE.LineSegments(geometry, lineMaterial);
+    }
+
+    getUnitCellObject(cell) {
+        const edges = [0, 1, 0, 2, 1, 3, 2, 3, 4, 5, 4, 6, 5, 7, 6, 7, 0, 4, 1, 5, 2, 6, 3, 7];
+        this.unitCellObject = this.getUnitCellObjectByEdges(cell, edges);
         this.unitCellObject.name = "Cell";
         return this.unitCellObject;
-
     }
 
     drawUnitCell(cell = this.cell) {
-        const cellObject = this.createUnitCellObject(cell);
-        this.structureGroup.add(cellObject);
+        if (this.areNonPeriodicBoundariesPresent) {
+            const zMultiplier = 1 / this.boundaryMeshObjectZOffset;
+            const edges = [0, 1, 0, 2, 1, 3, 2, 3, 0, 4, 1, 5, 2, 6, 3, 7];
+            const cellObject = this.getUnitCellObjectByEdges(cell, edges, zMultiplier);
+            const cellObjectClone = this.getUnitCellObjectByEdges(cell, edges, -zMultiplier, this.settings.colors.gray);
+            this.structureGroup.add(cellObjectClone);
+            this.structureGroup.add(cellObject);
+        } else {
+            const unitCellObject = this.getUnitCellObject(cell);
+            this.structureGroup.add(unitCellObject);
+        }
     }
 
     /**
