@@ -130,3 +130,26 @@ export const THREE_D_SOURCES = [
     "editor/js/commands/SetMaterialMapCommand.js",
     "editor/js/commands/SetSceneCommand.js",
 ];
+
+export const BOUNDARY_CONDITIONS = [
+    {
+        type: "pbc",
+        name: "Periodic Boundary Condition (pbc)",
+        enabled: false
+    },
+    {
+        type: "bc1",
+        name: "Vacuum-Slab-Vacuum (bc1)",
+        enabled: true
+    },
+    {
+        type: "bc2",
+        name: "Metal-Slab-Metal (bc2)",
+        enabled: true
+    },
+    {
+        type: "bc3",
+        name: "Vacuum-Slab-Metal (bc3)",
+        enabled: true
+    }
+];

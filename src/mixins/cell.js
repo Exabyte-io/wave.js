@@ -74,4 +74,11 @@ export const CellMixin = (superclass) => class extends superclass {
         });
     }
 
+    /**
+     * Return Lattice C constant.
+     */
+    get latticeCConstant() {
+        return new THREE.Vector3(this.cell.cx, this.cell.cy, this.cell.cz).length();
+    }
+
 };
