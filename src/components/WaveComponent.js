@@ -38,7 +38,8 @@ export class WaveComponent extends React.Component {
             DOMElement: this.rendererDomElement,
             structure: this.props.structure,
             cell: this.props.cell,
-            settings: this.props.settings
+            settings: this.props.settings,
+            boundaryConditions: this.props.boundaryConditions
         });
         // The height of the dom element is initially zero as css is loaded after component is rendered, hence below.
         this._handleResizeTransition();
@@ -58,6 +59,7 @@ export class WaveComponent extends React.Component {
         try {
             this.wave.updateSettings(this.props.settings);
             this.wave.setStructure(this.props.structure);
+            this.wave.boundaryConditions = this.props.boundaryConditions;
             this.wave.setCell(this.props.cell);
             if (createBondsAsync) this.wave.createBondsAsync();
             this.wave.rebuildScene();
@@ -85,4 +87,5 @@ WaveComponent.propTypes = {
     structure: React.PropTypes.object,
     // Expects "cell" property to represent the crystal unit cell for the atomic arrangement. Made.js UnitCell object.
     cell: React.PropTypes.object,
+    boundaryConditions: React.PropTypes.object,
 };

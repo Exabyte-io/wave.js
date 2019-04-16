@@ -27,4 +27,10 @@ export default {
     backgroundColor: "#202020",
     defaultColor: "#CCCCCC",
     initialCameraPosition: [-50, 0, 10],
+
+    boundaryConditionTypeColors: {
+        "bc1": [0xffff00, 0xffff00],
+        "bc2": [0x0000FF, 0x0000FF],
+        "bc3": [0xffff00, 0x0000FF],
+    }
 }

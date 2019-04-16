@@ -7,6 +7,7 @@ import {AtomsMixin} from "./mixins/atoms";
 import {BondsMixin} from "./mixins/bonds";
 import {saveImageDataToFile} from "./utils";
 import {ControlsMixin} from "./mixins/controls";
+import {BoundaryMixin} from "./mixins/boundary";
 import {RepetitionMixin} from "./mixins/repetition";
 
 const TV3 = THREE.Vector3, TCo = THREE.Color;
@@ -171,6 +172,7 @@ export class Wave extends mix(WaveBase).with(
     CellMixin,
     RepetitionMixin,
     ControlsMixin,
+    BoundaryMixin,
 ) {
 
     /**
@@ -199,6 +201,7 @@ export class Wave extends mix(WaveBase).with(
         this.clearView();
         this.drawAtomsAsSpheres();
         this.drawUnitCell();
+        this.drawBoundaries();
         this.isDrawBondsEnabled && this.drawBonds();
         this.render();
     }

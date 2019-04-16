@@ -83,7 +83,8 @@ export const AtomsMixin = (superclass) => class extends superclass {
     }
 
     drawAtomsAsSpheres(atomRadiiScale) {
-        this.repeatObject3DAtRepetitionCoordinates(this.createAtomsGroup(this.basis, atomRadiiScale));
+        const basis = this.areNonPeriodicBoundariesPresent ? this.basisWithElementsInsideNonPeriodicBoundaries : this.basis;
+        this.repeatObject3DAtRepetitionCoordinates(this.createAtomsGroup(basis, atomRadiiScale));
     }
 
     getAtomColorByElement(element, pallette = this.settings.elementColors) {
