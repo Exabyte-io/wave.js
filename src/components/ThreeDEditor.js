@@ -49,6 +49,7 @@ export class ThreeDEditor extends React.Component {
             viewerSettings: {
                 atomRadiiScale: 0.2,
                 repetitions: 1,
+                chemicalConnectivityFactor: 1.0
             },
             boundaryConditions: this.props.boundaryConditions || {},
             isConventionalCellShown: this.props.isConventionalCellShown || false,
@@ -71,6 +72,7 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleOrbitControlsAnimation = this.handleToggleOrbitControlsAnimation.bind(this);
         this.handleToggleAxes = this.handleToggleAxes.bind(this);
         this.onThreejsEditorModalHide = this.onThreejsEditorModalHide.bind(this);
+        this.handleChemicalConnectivityFactorChange = this.handleChemicalConnectivityFactorChange.bind(this);
     }
 
     componentWillReceiveProps(nextProps, nextContext) {
@@ -111,6 +113,10 @@ export class ThreeDEditor extends React.Component {
     handleToggleOrthographicCamera(e) {
         this.WaveComponent.wave.toggleOrthographicCamera();
         this._resetStateWaveComponent();
+    }
+
+    handleChemicalConnectivityFactorChange(e) {
+        this.handleSetSetting({chemicalConnectivityFactor: parseFloat($(e.target).val())});
     }
 
     getMaterialWithPrimitiveOrConventionalCell() {
@@ -348,6 +354,15 @@ export class ThreeDEditor extends React.Component {
                     value={this.state.viewerSettings.repetitions}
                     type="number" max="10" min="1" step="1"
                     onChange={this.handleCellRepetitionsChange}
+                />
+            </Tooltip>,
+
+            <Tooltip key="CHEMICAL_CONNECTIVITY_FACTOR" title="CHEMICAL_CONNECTIVITY_FACTOR" placement="top">
+                <input className="inverse stepper cell-repetitions"
+                    id="chemical-connectivity-factor"
+                    value={this.state.viewerSettings.chemicalConnectivityFactor}
+                    type="number" min="0" step="1"
+                    onChange={this.handleChemicalConnectivityFactorChange}
                 />
             </Tooltip>
 

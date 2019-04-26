@@ -33,7 +33,8 @@ export const BondsMixin = (superclass) => class extends superclass {
      */
     areElementsBonded(element1, coordinate1, element2, coordinate2, bondsData) {
         const distance = Made.math.vDist(coordinate1, coordinate2);
-        return Boolean(bondsData.find(b => b.length.value && b.length.value >= distance));
+        const connectivityFactor = this.settings.chemicalConnectivityFactor;
+        return Boolean(bondsData.find(b => b.length.value && (b.length.value * connectivityFactor) >= distance));
     }
 
     /**

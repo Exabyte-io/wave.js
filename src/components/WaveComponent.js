@@ -21,7 +21,10 @@ export class WaveComponent extends React.Component {
         this.props.triggerHandleResize && this._handleResizeTransition();
         if (this.wave) {
             // recreate bonds asynchronously if structure is changed.
-            this.reloadViewer(prevProps.structure.hash !== this.props.structure.hash);
+            this.reloadViewer(
+                prevProps.structure.hash !== this.props.structure.hash ||
+                prevProps.settings.chemicalConnectivityFactor !== this.props.settings.chemicalConnectivityFactor
+            );
         }
     }
 
