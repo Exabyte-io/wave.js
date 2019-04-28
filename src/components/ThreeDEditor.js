@@ -357,11 +357,11 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip key="CHEMICAL_CONNECTIVITY_FACTOR" title="CHEMICAL_CONNECTIVITY_FACTOR" placement="top">
+            <Tooltip key="CHEMICAL_CONNECTIVITY_FACTOR" title="CHEMICAL CONNECTIVITY FACTOR" placement="top">
                 <input className="inverse stepper cell-repetitions"
                     id="chemical-connectivity-factor"
                     value={this.state.viewerSettings.chemicalConnectivityFactor}
-                    type="number" min="0" step="1"
+                    type="number" max="2" min="0" step="0.01"
                     onChange={this.handleChemicalConnectivityFactorChange}
                 />
             </Tooltip>
