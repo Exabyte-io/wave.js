@@ -5,7 +5,7 @@ export default {
     // atoms.user-controllable
     atomRadiiScale: 0.2,
     repetitions: 1,
-    chemicalConnectivityFactor: 1.0,
+    chemicalConnectivityFactor: 1.05,
     // atoms.non-user-controllable
     defaultElement: "Si",
     sphereRadius: 1.5,

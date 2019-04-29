@@ -1,8 +1,7 @@
-import _ from "underscore";
 import * as THREE from "three";
 import createKDTree from "static-kdtree";
 import {Made} from "@exabyte-io/made.js";
-import {getElementsBondsData} from "@exabyte-io/periodic-table.js";
+import {filterBondsDataByElementsAndOrder, getElementsBondsData} from "@exabyte-io/periodic-table.js";
 
 /*
  * Mixin containing the logic for dealing with bonds.
@@ -35,9 +34,8 @@ export const BondsMixin = (superclass) => class extends superclass {
     areElementsBonded(element1, coordinate1, element2, coordinate2, bondsData) {
         const distance = Made.math.vDist(coordinate1, coordinate2);
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
-        return Boolean(bondsData.find(b => {
-            return [element1, element2].every(e => b.elements.includes(e)) &&
-                b.length.value && ((b.length.value * connectivityFactor) >= distance)
+        return Boolean(filterBondsDataByElementsAndOrder(bondsData, element1, element2).find(b => {
+            return b.length.value && (b.length.value * connectivityFactor) >= distance
         }));
     }
 
@@ -51,9 +49,7 @@ export const BondsMixin = (superclass) => class extends superclass {
         uniqueElements.forEach((element1, index1) => {
             uniqueElements.forEach((element2, index2) => {
                 if (element1 && element2 && index2 >= index1) {
-                    const bondsData = getElementsBondsData(element1, element2, undefined, 1);
-                    // Exclude default covalent radius bond (last item in array) if there is bond data for the elements.
-                    Array.prototype.push.apply(bonds, bondsData.length > 1 ? bondsData.slice(0, [bondsData.length - 1]) : bondsData);
+                    Array.prototype.push.apply(bonds, getElementsBondsData(element1, element2));
                 }
             })
         });
