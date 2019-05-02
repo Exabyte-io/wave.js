@@ -29,19 +29,27 @@ export const BondsMixin = (superclass) => class extends superclass {
     }
 
     /**
-     * Whether to draw a bond between given elements.
+     * Whether to draw the bond between given elements.
+     * The elements are considered bonded if their distance <= bond length * connectivity factor
+     * @param element1 {String} symbol of the first element
+     * @param coordinate1 {Array} coordinates of the first element
+     * @param element2 {String} symbol of the second element
+     * @param coordinate2 {Array} coordinates of the second element
+     * @param bondsData {Array} an array of bond data entries for unique element pairs inside structure.
+     * @returns {Boolean}
      */
     areElementsBonded(element1, coordinate1, element2, coordinate2, bondsData) {
         const distance = Made.math.vDist(coordinate1, coordinate2);
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
         return Boolean(filterBondsDataByElementsAndOrder(bondsData, element1, element2).find(b => {
-            return b.length.value && (b.length.value * connectivityFactor) >= distance
+            return b.length.value && (distance <= (b.length.value * connectivityFactor));
         }));
     }
 
     /**
-     * Returns bonds data for unique element pairs.
-     * This is to avoid calling getElementsBondsData for all elements combinations.
+     * Returns bonds data for unique element pairs. This is to avoid calling getElementsBondsData for all elements
+     * combinations as it is required to repeat the cell in all directions to determine the bonds.
+     * @returns {Array} an array of bond data entries for unique element pairs inside structure.
      */
     getBondsDataForUniqueElementPairs() {
         const bonds = [];
@@ -57,7 +65,9 @@ export const BondsMixin = (superclass) => class extends superclass {
     }
 
     /**
-     * Returns the maximum bond length for the structure.
+     * Returns the maximum bond length in the structure.
+     * @param bondsData {Array} an array of bond data entries for unique element pairs inside structure.
+     * @returns {Number}
      */
     getMaxBondLength(bondsData) {
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
@@ -66,8 +76,11 @@ export const BondsMixin = (superclass) => class extends superclass {
 
     /**
      * Returns an array of [element, coordinate] for all elements and their neighbors.
-     * The basis is repeated once in all directions (-x,x,-y,y,-z,z) to find whether the elements at the edges have bonds
-     * to neighbors cells elements. Only elements with distance to edge less or equal than the maximum bond length are repeated.
+     * The basis is repeated in all directions to find whether the elements at the edges have bonds to neighbors cells
+     * elements. Only elements with distance to edge less or equal than the maximum bond length are repeated as the other
+     * elements can not have bond with the elements in repeated cells.
+     * @param maxBondLength {Number}
+     * @return {Array}
      */
     getElementsAndCoordinatesArrayWithEdgeNeighbors(maxBondLength) {
 
@@ -134,7 +147,8 @@ export const BondsMixin = (superclass) => class extends superclass {
     }
 
     /**
-     * Iterates over all combination of atoms and draws bonds.
+     * Draw bonds. Bonds are created synchronously if the asynchronous callback (createBondsAsync) to draw bonds
+     * in background has not returned yet. This may happen if the structure is large and draw bonds is toggled quickly.
      */
     drawBonds() {
         if (!this.areBondsCreated) {
@@ -145,7 +159,8 @@ export const BondsMixin = (superclass) => class extends superclass {
     }
 
     /**
-     * Draw bond as cylinder geometry.
+     * Returns a bond as cylinder geometry object.
+     * @return {THREE.Mesh}
      */
     getBondObject(element1, index1, coordinate1, element2, index2, coordinate2) {
         const vector1 = new THREE.Vector3(...coordinate1);
