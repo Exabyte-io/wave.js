@@ -1,12 +1,9 @@
 import $ from 'jquery';
 import React from 'react';
 import setClass from "classnames";
-import {Made} from "@exabyte-io/made.js";
 import Tooltip from "material-ui-next/Tooltip";
 import JssProvider from 'react-jss/lib/JssProvider';
 import {createGenerateClassName} from "material-ui-next/styles";
-import {LATTICE_TYPE} from "@exabyte-io/made.js/lib/lattice/types";
-import {CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS} from "@exabyte-io/made.js/lib/cell/conventional_cell";
 
 import {
     NotInterested, ImportExport, RemoveRedEye,
@@ -122,22 +119,8 @@ export class ThreeDEditor extends React.Component {
         this.handleSetSetting({chemicalConnectivityFactor: parseFloat($(e.target).val())});
     }
 
-    getMaterialWithPrimitiveOrConventionalCell() {
-        const originalMaterial = this.state.originalMaterial;
-        const latticeType = originalMaterial.Lattice.type || LATTICE_TYPE.TRI;
-        const supercellMatrix = CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[latticeType];
-
-        // skip if conventional and primitive cells are the same (supercellMatrix is unity).
-        let material = originalMaterial.clone();
-        if (supercellMatrix !== CONVENTIONAL_TO_PRIMITIVE_CELL_MULTIPLIERS[LATTICE_TYPE.TRI]) {
-            material = new Made.Material(Made.tools.supercell.generateConfig(originalMaterial, supercellMatrix, 1));
-        }
-
-        return material;
-    }
-
     getPrimitiveOrConventionalMaterial(material, isConventionalCellShown = false) {
-        return !isConventionalCellShown ? material.clone() : this.getMaterialWithPrimitiveOrConventionalCell(material);
+        return isConventionalCellShown ? material.getACopyWithConventionalCell() : material.clone();
     }
 
     handleToggleConventionalCell(e) {
