@@ -94,7 +94,7 @@ sh run-tests.sh
 
 ## Dependencies
 
-This package depends on [Made.js](https://github.com/Exabyte-io/made.js) and [Wave.js](https://github.com/Exabyte-io/wave.js), as well as a slightly [modified version of Three.js](https://github.com/Exabyte-io/three.js/commits/v0.90.0). See [package.json](package.json) for the full list.
+This package depends on [Made.js](https://github.com/Exabyte-io/made.js), as well as a slightly [modified version of Three.js](https://github.com/Exabyte-io/three.js/commits/v0.90.0). See [package.json](package.json) for the full list.
 
 ## Links
 
