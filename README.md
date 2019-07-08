@@ -2,7 +2,7 @@
 
 **W**eb-based **A**tomic **V**iewer and **E**ditor in **J**ava**S**cript. Wave.js is a library for atomic visualization and editing written in JavaScript enabling visualization of material structures from atoms up on the web. The library is aimed to be used for the development of web applications in JavaScript.
 
-The library was originally designed as part of and presently powers materials design capabilities of the [Exabyte.io](https://exabyte.io) platform. For example, [this page](https://platform.exabyte.io/demo/materials/n3HSzCmyoctgJFGGE) representing a crystal of Silicon online uses Made.js.
+The library was originally designed as part of and presently powers materials design capabilities of the [Exabyte.io](https://exabyte.io) platform. For example, [this page](https://platform.exabyte.io/demo/materials/n3HSzCmyoctgJFGGE) representing a crystal of Silicon online uses Wave.js.
 
 Exabyte.io believe in a collaborative future of materials design on the web.
 
@@ -92,6 +92,9 @@ sh run-tests.sh
 
 5. Make sure to use `async` keyword for Wave class tests as they are asynchronous.
 
+## Dependencies
+
+This package depends on [Made.js](https://github.com/Exabyte-io/made.js) and [Wave.js](https://github.com/Exabyte-io/wave.js), as well as a slightly [modified version of Three.js](https://github.com/Exabyte-io/three.js/commits/v0.90.0). See [package.json](package.json) for the full list.
 
 ## Links
 
