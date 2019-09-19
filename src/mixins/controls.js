@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import {CSS2DRenderer, CSS2DObject} from "three-css2drender"
 import {UtilsMixin} from "./utils";
 
 const OrbitControls = require('three-orbit-controls')(THREE);
@@ -146,7 +147,47 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         this.renderer2 = this.getWebGLRenderer({alpha: true});
         this.renderer2.setClearColor("#FFFFFF", 0);
         this.renderer2.setSize(containerDimension, containerDimension);
+				this.renderer2.domElement.style.position = 'absolute';
+				this.renderer2.domElement.style.right = '10px';
         this.container.prepend(this.renderer2.domElement);
+
+        //For axis labels
+				this.labelRenderer = new CSS2DRenderer();
+        this.labelRenderer.setSize(containerDimension, containerDimension);
+				this.labelRenderer.domElement.style.position = 'absolute';
+				this.labelRenderer.domElement.style.right = '10px';
+				this.labelRenderer.domElement.style.pointerEvents = 'none';
+        this.container.prepend(this.labelRenderer.domElement);
+
+        //axis label X
+				const textX = document.createElement( 'div' );
+				textX.className = 'label';
+				textX.style.color = 'rgb(255,255,255)';
+				textX.textContent = 'X';
+				const labelX = new CSS2DObject( textX );
+				labelX.position.x = length * 1.2;
+				labelX.position.y = 0;
+				labelX.position.z = 0;
+
+        //axis label Y
+				const textY = document.createElement( 'div' );
+				textY.className = 'label';
+				textY.style.color = 'rgb(255,255,255)';
+				textY.textContent = 'Y';
+				const labelY = new CSS2DObject( textY );
+				labelY.position.x = 0;
+				labelY.position.y = length * 1.2;
+				labelY.position.z = 0;
+
+        //axis label Z
+				const textZ = document.createElement( 'div' );
+				textZ.className = 'label';
+				textZ.style.color = 'rgb(255,255,255)';
+				textZ.textContent = 'Z';
+				const labelZ = new CSS2DObject( textZ );
+				labelZ.position.x = 0;
+				labelZ.position.y = 0;
+				labelZ.position.z = length * 1.2;
 
         const origin = new TV3(0, 0, 0);
         const [x, y, z] = [
@@ -163,6 +204,11 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         this.scene2.x = x;
         this.scene2.y = y;
         this.scene2.z = z;
+
+        //axis labels
+        this.scene2.labelX = labelX;
+        this.scene2.labelY = labelY;
+        this.scene2.labelZ = labelZ;
     }
 
     updateSecondAxes() {
@@ -174,12 +220,12 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
     }
 
     showSecondAxes() {
-        const secondAxes = [this.scene2.x, this.scene2.y, this.scene2.z].filter(x => x);  // assert no `undefined`;
+        const secondAxes = [this.scene2.x, this.scene2.y, this.scene2.z, this.scene2.labelX, this.scene2.labelY, this.scene2.labelZ].filter(x => x);  // assert no `undefined`;
         this.scene2.add(...secondAxes);
     }
 
     hideSecondAxes() {
-        const secondAxes = [this.scene2.x, this.scene2.y, this.scene2.z].filter(x => x);  // assert no `undefined`;
+        const secondAxes = [this.scene2.x, this.scene2.y, this.scene2.z, this.scene2.labelX, this.scene2.labelY, this.scene2.labelZ].filter(x => x);  // assert no `undefined`;
         this.scene2.remove(...secondAxes);
     }
 
