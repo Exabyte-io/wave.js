@@ -108,6 +108,14 @@ export class ThreejsEditorModal extends ModalDialog {
         const loader = new THREE.ObjectLoader();
         const scene = loader.parse(materialsToThreeDSceneData(this.props.materials));
         this.editor.execute(new window.SetSceneCommand(scene));
+
+        // Add a light on the other side
+        const directionalLight = new THREE.DirectionalLight("#FFFFFF");
+        directionalLight.name = "DirectionalLight_2";
+        directionalLight.position.copy(new THREE.Vector3(50, 0, 10));
+        directionalLight.intensity = 1.2;
+        this.editor.scene.add(directionalLight);
+
         this.editor.signals.objectSelected.dispatch(this.editor.camera);
     }
 
