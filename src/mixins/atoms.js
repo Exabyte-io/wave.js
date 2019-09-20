@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import {CSS2DObject} from "three-css2drender"
 
 /*
  * Mixin containing the logic for dealing with atoms.
@@ -11,6 +12,10 @@ export const AtomsMixin = (superclass) => class extends superclass {
 
         // to draw atoms as spheres
         this.initSphereParameters();
+
+        // 
+        this.isDrawLabelsEnabled = false;
+        this.drawAtomLabels = this.drawAtomLabels.bind(this);
 
         this.drawAtomsAsSpheres = this.drawAtomsAsSpheres.bind(this);
         this.getAtomColorByElement = this.getAtomColorByElement.bind(this);
@@ -85,6 +90,29 @@ export const AtomsMixin = (superclass) => class extends superclass {
     drawAtomsAsSpheres(atomRadiiScale) {
         const basis = this.areNonPeriodicBoundariesPresent ? this.basisWithElementsInsideNonPeriodicBoundaries : this.basis;
         this.repeatObject3DAtRepetitionCoordinates(this.createAtomsGroup(basis, atomRadiiScale));
+    }
+
+    drawAtomLabels() {
+        const labelsGroup = new THREE.Group();
+        labelsGroup.name = "Labels";
+
+        for (const child1 of this.structureGroup.children) {
+            if (child1.name === "Atoms") {
+                for (const child2 of child1.children) {
+                    const [element, atomicIndex] = child2.name.split('-');
+				            const text = document.createElement( 'div' );
+				            text.className = 'label';
+				            text.style.color = 'rgb(255,255,255)';
+				            text.textContent = element + '-' + (parseInt(atomicIndex) + 1).toString();
+				            const label = new CSS2DObject( text );
+				            label.position.copy(child2.position);
+                    labelsGroup.add(label);
+                }
+                break;
+            }
+        }
+
+        this.structureGroup.add(labelsGroup);
     }
 
     getAtomColorByElement(element, pallette = this.settings.elementColors) {
