@@ -103,6 +103,7 @@ export const AtomsMixin = (superclass) => class extends superclass {
 				            const text = document.createElement( 'div' );
 				            text.className = 'label';
 				            text.style.color = 'rgb(255,255,255)';
+				            text.style.backgroundColor = 'rgba(0,0,0,0.25)';
 				            text.textContent = element + '-' + (parseInt(atomicIndex) + 1).toString();
 				            const label = new CSS2DObject( text );
 				            label.position.copy(child2.position);

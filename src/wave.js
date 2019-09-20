@@ -73,12 +73,10 @@ class WaveBase {
         this.container.appendChild(this.renderer.domElement);
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
 
+        // for atom labels
 				this.labelRenderer = new CSS2DRenderer();
 				this.labelRenderer.domElement.style.position = 'absolute';
 				this.labelRenderer.domElement.style.top = '0px';
-				//this.labelRenderer.domElement.style.left = '0px';
-        //this.labelRenderer.domElement.style.width = "100%";
-        //this.labelRenderer.domElement.style.height = "100%";
 				this.labelRenderer.domElement.style.pointerEvents = 'none';
         this.container.appendChild(this.labelRenderer.domElement);
         this.labelRenderer.setSize(this.WIDTH, this.HEIGHT);
