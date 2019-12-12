@@ -209,6 +209,9 @@ export class Wave extends mix(WaveBase).with(
     render() {
         this.renderer.render(this.scene, this.camera);
         this.renderer2 && this.renderer2.render(this.scene2, this.camera2);
+
+        //For axis labels
+        this.renderer2CSS2D && this.renderer2CSS2D.render(this.scene2, this.camera2);
     }
 
     doFunc(func) {func(this)} // for scripting
