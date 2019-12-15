@@ -1,4 +1,4 @@
-import {CSS2DObject} from "three-css2drender"
+import {CSS2DObject} from "three/examples/jsm/renderers/CSS2DRenderer.js"
 
 export const addAxisLabels = function(symbol, coord, color, background) {
     const text = document.createElement('div');
