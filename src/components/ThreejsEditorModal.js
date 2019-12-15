@@ -100,6 +100,17 @@ export class ThreejsEditorModal extends ModalDialog {
         window.addEventListener('resize', onWindowResize, false);
         onWindowResize();
     }
+    
+    /**
+     * Add a light on the other side for better viewing.
+     */
+    addDirectionalLight() {
+        const directionalLight = new THREE.DirectionalLight("#FFFFFF");
+        directionalLight.name = "DirectionalLight_2";
+        directionalLight.position.copy(new THREE.Vector3(...settings.secondDirectionalLightPosition));
+        directionalLight.intensity = 1.2;
+        this.editor.scene.add(directionalLight);
+    }
 
     /**
      * Load the scene based on the given materials.
@@ -108,6 +119,7 @@ export class ThreejsEditorModal extends ModalDialog {
         const loader = new THREE.ObjectLoader();
         const scene = loader.parse(materialsToThreeDSceneData(this.props.materials));
         this.editor.execute(new window.SetSceneCommand(scene));
+        this.addDirectionalLight();
         this.editor.signals.objectSelected.dispatch(this.editor.camera);
     }
 
