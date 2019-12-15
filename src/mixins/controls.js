@@ -272,7 +272,7 @@ export const ControlsMixin = (superclass) => UtilsMixin(OrbitControlsMixin(class
             const diffObject = this.getTwoObjectsShallowDifferentKeys(initialState, finalState);
 
             diffObject.areOrbitControlsEnabled &&
-                (this.areOrbitControlsEnabled ? this.enableOrbitControls() : this.disableOrbitControls());
+            (this.areOrbitControlsEnabled ? this.enableOrbitControls() : this.disableOrbitControls());
         }
         this.render();
     }
