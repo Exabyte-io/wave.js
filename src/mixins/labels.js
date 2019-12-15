@@ -11,3 +11,4 @@ export const addAxisLabels = function(symbol, coord, color, background) {
 
     return label;
 }
+
