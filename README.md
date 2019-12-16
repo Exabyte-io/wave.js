@@ -33,6 +33,7 @@ From NPM for use within a software project:
 npm install @exabyte-io/wave.js
 
 ```
+Use node version 8.11.4.
 
 From source to contribute to development:
 
