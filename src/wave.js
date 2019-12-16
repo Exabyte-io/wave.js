@@ -1,5 +1,6 @@
 import {mix} from "mixwith";
 import * as THREE from "three";
+import {CSS2DRenderer} from "three/examples/jsm/renderers/CSS2DRenderer.js";
 
 import SETTINGS from "./settings"
 import {CellMixin} from "./mixins/cell";
@@ -71,6 +72,15 @@ class WaveBase {
         this.renderer.domElement.style.height = "100%";
         this.container.appendChild(this.renderer.domElement);
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
+
+        // for atom labels
+        this.rendererCSS2D = new CSS2DRenderer();
+        this.rendererCSS2D.domElement.style.position = 'absolute';
+        this.rendererCSS2D.domElement.style.top = '0px';
+        this.rendererCSS2D.domElement.style.pointerEvents = 'none';
+        this.container.appendChild(this.rendererCSS2D.domElement);
+        this.rendererCSS2D.setSize(this.WIDTH, this.HEIGHT);
+
         // TODO: detach listener on exit
         window.addEventListener('resize', () => {this.handleResize()}, false);
     }
@@ -134,6 +144,7 @@ class WaveBase {
         this.HEIGHT = domElement.clientHeight;
         this.ASPECT = this.WIDTH / this.HEIGHT;
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
+        this.rendererCSS2D.setSize(this.WIDTH, this.HEIGHT);
         this.perspectiveCamera.aspect = this.ASPECT;
         this.perspectiveCamera.updateProjectionMatrix();
         this.orthographicCamera.left = -10 * this.ASPECT;
@@ -195,11 +206,15 @@ export class Wave extends mix(WaveBase).with(
         while (this.structureGroup.children.length) {
             this.structureGroup.remove(this.structureGroup.children[0]);
         }
+        while (this.rendererCSS2D.domElement.firstChild) {
+            this.rendererCSS2D.domElement.removeChild(this.rendererCSS2D.domElement.firstChild);
+        }
     }
 
     rebuildScene() {
         this.clearView();
         this.drawAtomsAsSpheres();
+        this.isDrawLabelsEnabled && this.drawAtomLabels();
         this.drawUnitCell();
         this.drawBoundaries();
         this.isDrawBondsEnabled && this.drawBonds();
@@ -208,10 +223,8 @@ export class Wave extends mix(WaveBase).with(
 
     render() {
         this.renderer.render(this.scene, this.camera);
+        this.rendererCSS2D.render(this.scene, this.camera);
         this.renderer2 && this.renderer2.render(this.scene2, this.camera2);
-
-        //For axis labels
-        this.renderer2CSS2D && this.renderer2CSS2D.render(this.scene2, this.camera2);
     }
 
     doFunc(func) {func(this)} // for scripting
