@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export NVM_DIR="/root/.nvm"
+export NVM_DIR="~/.nvm"
 [[ -s "$NVM_DIR/nvm.sh" ]] && . "$NVM_DIR/nvm.sh"
 
 yum install -y libXext-devel libXi-devel mesa-libGL-devel mesa-dri-drivers xorg-x11-server-Xvfb
