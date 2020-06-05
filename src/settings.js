@@ -28,6 +28,8 @@ export default {
     backgroundColor: "#202020",
     defaultColor: "#CCCCCC",
     initialCameraPosition: [-50, 0, 10],
+    labelColor: "rgb(255,255,255)",
+    labelbackgroundColor: "rgba(0,0,0,0.25)",
 
     boundaryConditionTypeColors: {
         "bc1": [0xffff00, 0xffff00],

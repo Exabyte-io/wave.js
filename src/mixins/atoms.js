@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import {addAxisLabels} from "./labels.js"
 
 /*
  * Mixin containing the logic for dealing with atoms.
@@ -11,6 +12,10 @@ export const AtomsMixin = (superclass) => class extends superclass {
 
         // to draw atoms as spheres
         this.initSphereParameters();
+
+        // for atom labels 
+        this.isDrawLabelsEnabled = false;
+        this.drawAtomLabels = this.drawAtomLabels.bind(this);
 
         this.drawAtomsAsSpheres = this.drawAtomsAsSpheres.bind(this);
         this.getAtomColorByElement = this.getAtomColorByElement.bind(this);
@@ -79,12 +84,25 @@ export const AtomsMixin = (superclass) => class extends superclass {
             sphereMesh.name = `${element}-${atomicIndex}`;
             atomsGroup.add(sphereMesh);
         });
+        this.atomsGroup = atomsGroup;
         return atomsGroup;
     }
 
     drawAtomsAsSpheres(atomRadiiScale) {
         const basis = this.areNonPeriodicBoundariesPresent ? this.basisWithElementsInsideNonPeriodicBoundaries : this.basis;
         this.repeatObject3DAtRepetitionCoordinates(this.createAtomsGroup(basis, atomRadiiScale));
+    }
+
+    drawAtomLabels() {
+        const labelsGroup = new THREE.Group();
+        labelsGroup.name = "Labels";
+        for (const child2 of this.atomsGroup.children) {
+            const [element, atomicIndex] = child2.name.split('-');
+            const symbol = element + '-' + (parseInt(atomicIndex) + 1).toString();
+            const label = addAxisLabels(symbol, child2.position, this.settings.labelColor, this.settings.labelbackgroundColor);
+            labelsGroup.add(label);
+        }
+        this.structureGroup.add(labelsGroup);
     }
 
     getAtomColorByElement(element, pallette = this.settings.elementColors) {

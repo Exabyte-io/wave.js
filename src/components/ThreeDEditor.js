@@ -10,7 +10,7 @@ import {
     Replay, PictureInPicture, PowerSettingsNew,
     FileDownload, ThreeDRotation, Autorenew,
     GpsFixed, Edit, SwitchCamera, FormatShapes,
-    Menu, BubbleChart
+    Menu, BubbleChart, Spellcheck
 } from 'material-ui-icons-next';
 
 import settings from "../settings";
@@ -63,6 +63,7 @@ export class ThreeDEditor extends React.Component {
         this.handleDownloadClick = this.handleDownloadClick.bind(this);
         this.handleToggleInteractive = this.handleToggleInteractive.bind(this);
         this.handleToggleBonds = this.handleToggleBonds.bind(this);
+        this.handleToggleLabels = this.handleToggleLabels.bind(this);
         this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
         this.handleToggleConventionalCell = this.handleToggleConventionalCell.bind(this);
@@ -142,6 +143,13 @@ export class ThreeDEditor extends React.Component {
     handleToggleBonds(e) {
         const wave = this.WaveComponent.wave;
         wave.isDrawBondsEnabled = !wave.isDrawBondsEnabled; // toggle value;
+        this._resetStateWaveComponent();
+    }
+
+    //for atom labels 
+    handleToggleLabels(e) {
+        const wave = this.WaveComponent.wave;
+        wave.isDrawLabelsEnabled = !wave.isDrawLabelsEnabled; // toggle value;
         this._resetStateWaveComponent();
     }
 
@@ -297,6 +305,14 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleConventionalCell}
             >
                 <FormatShapes/>
+            </RoundIconButton>,
+
+            <RoundIconButton key="Toggle Labels" tooltipPlacement="top" mini
+                title="Toggle Labels"
+                isToggled={this._getWaveProperty('isDrawLabelsEnabled')}
+                onClick={this.handleToggleLabels}
+            >
+                <Spellcheck/>
             </RoundIconButton>,
 
             <RoundIconButton key="Reset View" tooltipPlacement="top" mini
