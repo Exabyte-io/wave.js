@@ -10,7 +10,8 @@ import {
     Replay, PictureInPicture, PowerSettingsNew,
     FileDownload, ThreeDRotation, Autorenew,
     GpsFixed, Edit, SwitchCamera, FormatShapes,
-    Menu, BubbleChart
+    Menu, BubbleChart, Straighten, SignalWifi4Bar,
+    Transform
 } from 'material-ui-icons-next';
 
 import settings from "../settings";
@@ -57,12 +58,20 @@ export class ThreeDEditor extends React.Component {
             originalMaterial: this.props.material,
             // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
             material: this.props.material.clone(),
+
+            // This variable was added because the toggle state cannot be set correctly with _getWaveProperty.
+            isDistanceEnabled : false,
+            isAngleEnabled : false,
+            isTorsionEnabled :false,
         };
         this.handleCellRepetitionsChange = this.handleCellRepetitionsChange.bind(this);
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
         this.handleDownloadClick = this.handleDownloadClick.bind(this);
         this.handleToggleInteractive = this.handleToggleInteractive.bind(this);
         this.handleToggleBonds = this.handleToggleBonds.bind(this);
+        this.handleToggleDistance = this.handleToggleDistance.bind(this);
+        this.handleToggleAngle = this.handleToggleAngle.bind(this);
+        this.handleToggleTorsion = this.handleToggleTorsion.bind(this);
         this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
         this.handleToggleConventionalCell = this.handleToggleConventionalCell.bind(this);
@@ -147,6 +156,49 @@ export class ThreeDEditor extends React.Component {
 
     toggleThreejsEditorModal(e) {
         this.setState({isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown});
+
+        // Reset toggle state when returning from ThreejsEditor.
+        this.setState({
+            isDistanceEnabled: false,
+            isAngleEnabled: false,
+            isTorsionEnabled: false
+        });
+    }
+
+    handleToggleDistance(e) {
+        const wave = this.WaveComponent.wave;
+        wave.isDistanceEnabled = !wave.isDistanceEnabled;
+        wave.isAngleEnabled = false;
+        wave.isTorsionEnabled = false;
+        this.setState({
+            isDistanceEnabled: wave.isDistanceEnabled,
+            isAngleEnabled: false,
+            isTorsionEnabled: false
+        });
+    }
+
+    handleToggleAngle(e) {
+        const wave = this.WaveComponent.wave;
+        wave.isDistanceEnabled = false;
+        wave.isAngleEnabled = !wave.isAngleEnabled;
+        wave.isTorsionEnabled = false;
+        this.setState({
+            isDistanceEnabled: false,
+            isAngleEnabled: wave.isAngleEnabled,
+            isTorsionEnabled: false
+        });
+    }
+
+    handleToggleTorsion(e) {
+        const wave = this.WaveComponent.wave;
+        wave.isDistanceEnabled = false;
+        wave.isAngleEnabled = false;
+        wave.isTorsionEnabled = !wave.isTorsionEnabled;
+        this.setState({
+            isDistanceEnabled: false,
+            isAngleEnabled: false,
+            isTorsionEnabled: wave.isTorsionEnabled
+        });
     }
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
@@ -297,6 +349,30 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleConventionalCell}
             >
                 <FormatShapes/>
+            </RoundIconButton>,
+
+            <RoundIconButton key="Toggle Distance" tooltipPlacement="top" mini
+                title="Toggle Distance"
+                isToggled={this.state.isDistanceEnabled}
+                onClick={this.handleToggleDistance}
+            >
+                <Straighten/>
+            </RoundIconButton>,
+
+            <RoundIconButton key="Toggle Angle" tooltipPlacement="top" mini
+                title="Toggle Angle"
+                isToggled={this.state.isAngleEnabled}
+                onClick={this.handleToggleAngle}
+            >
+                <SignalWifi4Bar/>
+            </RoundIconButton>,
+
+            <RoundIconButton key="Toggle Torsion" tooltipPlacement="top" mini
+                title="Toggle Torsion"
+                isToggled={this.state.isTorsionEnabled}
+                onClick={this.handleToggleTorsion}
+            >
+                <Transform/>
             </RoundIconButton>,
 
             <RoundIconButton key="Reset View" tooltipPlacement="top" mini
