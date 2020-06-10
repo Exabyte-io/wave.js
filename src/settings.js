@@ -29,6 +29,7 @@ export default {
     defaultColor: "#CCCCCC",
     initialCameraPosition: [-50, 0, 10],
     secondDirectionalLightPosition: [50, 0, 10],
+    secondDirectionalLightIntensity: 0.4,
 
     boundaryConditionTypeColors: {
         "bc1": [0xffff00, 0xffff00],

@@ -100,15 +100,15 @@ export class ThreejsEditorModal extends ModalDialog {
         window.addEventListener('resize', onWindowResize, false);
         onWindowResize();
     }
-    
+
     /**
-     * Add a light on the other side for better viewing.
+     Add the second directional light, so that the atom is more visible
      */
     addDirectionalLight() {
-        const directionalLight = new THREE.DirectionalLight("#FFFFFF");
+        const directionalLight = new THREE.DirectionalLight();
         directionalLight.name = "DirectionalLight_2";
         directionalLight.position.copy(new THREE.Vector3(...settings.secondDirectionalLightPosition));
-        directionalLight.intensity = 1.2;
+        directionalLight.intensity = settings.secondDirectionalLightIntensity;
         this.editor.scene.add(directionalLight);
     }
 
