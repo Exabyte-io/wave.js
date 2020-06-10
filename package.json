@@ -60,7 +60,7 @@
         "pngjs2": "^2.0.0",
         "react": "^15.6.2",
         "react-dom": "^15.6.2",
-        "react-scripts": "^2.1.5",
+        "react-scripts": "^3.4.1",
         "react-test-renderer": "^15.6.2"
     },
     "browserslist": [
