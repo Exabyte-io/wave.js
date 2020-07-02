@@ -102,12 +102,24 @@ export class ThreejsEditorModal extends ModalDialog {
     }
 
     /**
+     Add the second directional light, so that the atom is more visible
+     */
+    addDirectionalLight() {
+        const directionalLight = new THREE.DirectionalLight();
+        directionalLight.name = "DirectionalLight_2";
+        directionalLight.position.copy(new THREE.Vector3(...settings.secondDirectionalLightPosition));
+        directionalLight.intensity = settings.secondDirectionalLightIntensity;
+        this.editor.scene.add(directionalLight);
+    }
+
+    /**
      * Load the scene based on the given materials.
      */
     loadScene() {
         const loader = new THREE.ObjectLoader();
         const scene = loader.parse(materialsToThreeDSceneData(this.props.materials));
         this.editor.execute(new window.SetSceneCommand(scene));
+        this.addDirectionalLight();
         this.editor.signals.objectSelected.dispatch(this.editor.camera);
     }
 

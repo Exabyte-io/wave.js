@@ -17,5 +17,5 @@ test('atomRepetitions', async () => {
     const wave = getWaveInstance();
     wave.updateSettings({repetitions: 2});
     wave.rebuildScene();
-    return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "repetitions");
+    return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "atomRepetitions");
 });
