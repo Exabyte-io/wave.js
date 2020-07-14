@@ -27,7 +27,6 @@ export default {
     // general
     backgroundColor: "#202020",
     defaultColor: "#CCCCCC",
-    labelColor: "rgb(255,255,255)",
     initialCameraPosition: [-50, 0, 10],
 
     boundaryConditionTypeColors: {

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import {CSS2DRenderer} from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import {CSS2DRenderer} from "three-css2drender";
 import {UtilsMixin} from "./utils";
 import {addAxisLabels} from "./labels";
 
@@ -51,7 +51,7 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
 
     enableOrbitControls() {
         this.orbitControls.enabled = true;
-        this.scene2.add(this.scene2.secondAxesGroup);
+        this.showSecondAxes();
         this.updateSecondAxes();  // align second camera wrt the first one and thus make it visible
         this.updateSecondAxesBound = e => this.updateSecondAxes(e);
         this.orbitControls.addEventListener('change', this.updateSecondAxesBound, false);
@@ -143,31 +143,31 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
      */
     initSecondAxes() {
         const length = 100;
-        const containerDimension = 100;
+        this.containerDimension = 100;
+        this.initRenderer2();
+        this.initRendered2CSS2D();
 
-        this.renderer2 = this.getWebGLRenderer({alpha: true});
-        this.renderer2.setClearColor("#FFFFFF", 0);
-        this.renderer2.setSize(containerDimension, containerDimension);
-        this.renderer2.domElement.style.position = 'absolute';
-        this.renderer2.domElement.style.right = '10px';
-        this.container.prepend(this.renderer2.domElement);
-        //For axis labels
-        this.renderer2CSS2D = new CSS2DRenderer();
-        this.renderer2CSS2D.setSize(containerDimension, containerDimension);
-        this.renderer2CSS2D.domElement.style.position = 'absolute';
-        this.renderer2CSS2D.domElement.style.right = '10px';
-        this.renderer2CSS2D.domElement.style.pointerEvents = 'none';
-        this.container.prepend(this.renderer2CSS2D.domElement);
-
-        //axis label
-        const coordX = { x: length * 1.2, y: 0, z: 0 }
-        const coordY = { x: 0, y: length * 1.2, z: 0 }
-        const coordZ = { x: 0, y: 0, z: length * 1.2 }
+        // for axis label
+        const labelcoordinateX = {
+            x: length * 1.2,
+            y: 0,
+            z: 0
+        };
+        const labelcoordinateY = {
+            x: 0,
+            y: length * 1.2,
+            z: 0
+        };
+        const labelcoordinateZ = {
+            x: 0,
+            y: 0,
+            z: length * 1.2
+        };
         const [labelX, labelY, labelZ] = [
-            new addAxisLabels('X', coordX, this.settings.labelColor),
-            new addAxisLabels('Y', coordY, this.settings.labelColor),
-            new addAxisLabels('Z', coordZ, this.settings.labelColor)
-        ]
+            new addAxisLabels('X', labelcoordinateX, "#FFFFFF"),
+            new addAxisLabels('Y', labelcoordinateY, "#FFFFFF"),
+            new addAxisLabels('Z', labelcoordinateZ, "#FFFFFF")
+        ];
 
         const origin = new TV3(0, 0, 0);
         const [x, y, z] = [
@@ -181,15 +181,26 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         this.camera2 = new THREE.PerspectiveCamera(50, 1, 1, 1000);
         this.camera2.up = this.camera.up;
         // saving axes helpers inside the scene object itself for further re-use in `hide*` method
-        const secondAxesGroup = new THREE.Group();
-        secondAxesGroup.add(x);
-        secondAxesGroup.add(y);
-        secondAxesGroup.add(z);
-        secondAxesGroup.add(labelX);
-        secondAxesGroup.add(labelY);
-        secondAxesGroup.add(labelZ);
-        this.scene2.secondAxesGroup = secondAxesGroup;
-        console.log(this.scene2);
+        this.secondAxesGroup = new THREE.Group();
+        this.secondAxesGroup.add(...[x, y, z, labelX, labelY, labelZ]);
+    }
+
+    initRenderer2() {
+        this.renderer2 = this.getWebGLRenderer({alpha: true});
+        this.renderer2.setClearColor("#FFFFFF", 0);
+        this.renderer2.setSize(this.containerDimension, this.containerDimension);
+        this.renderer2.domElement.style.position = 'absolute';
+        this.renderer2.domElement.style.right = '10px';
+        this.container.prepend(this.renderer2.domElement);
+    }
+
+    initRendered2CSS2D() {
+        this.renderer2CSS2D = new CSS2DRenderer();
+        this.renderer2CSS2D.setSize(this.containerDimension, this.containerDimension);
+        this.renderer2CSS2D.domElement.style.position = 'absolute';
+        this.renderer2CSS2D.domElement.style.right = '10px';
+        this.renderer2CSS2D.domElement.style.pointerEvents = 'none';
+        this.container.prepend(this.renderer2CSS2D.domElement);
     }
 
     updateSecondAxes() {
@@ -200,6 +211,10 @@ const OrbitControlsMixin = (superclass) => class extends superclass {
         this.render();
     }
 
+    showSecondAxes() {
+        this.scene2.secondAxesGroup = this.secondAxesGroup;
+        this.scene2.add(this.scene2.secondAxesGroup);
+    }
 
     hideSecondAxes() {
         this.scene2.remove(this.scene2.secondAxesGroup);
