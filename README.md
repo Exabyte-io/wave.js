@@ -27,12 +27,15 @@ The package is written in a modular way easy to extend. Contributions can be in 
 
 ## Installation
 
+Use node version 8.11.4.
+
 From NPM for use within a software project:
 
 ```bash
 npm install @exabyte-io/wave.js
 
 ```
+Use node version 8.11.4.
 
 From source to contribute to development:
 
