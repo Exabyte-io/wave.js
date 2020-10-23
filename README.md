@@ -1,4 +1,4 @@
-[![npm version](https://badge.fury.io/js/%40exabyte-io%2Fmade.js.svg)](https://badge.fury.io/js/%40exabyte-io%2Fmade.js)
+[![npm version](https://badge.fury.io/js/%40exabyte-io%2Fwave.js.svg)](https://badge.fury.io/js/%40exabyte-io%2Fwave.js)
 
 # Wave.js
 
