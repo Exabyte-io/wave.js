@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/%40exabyte-io%2Fmade.js.svg)](https://badge.fury.io/js/%40exabyte-io%2Fmade.js)
+
 # Wave.js
 
 **W**eb-based **A**tomic **V**iewer and **E**ditor in **J**ava**S**cript. Wave.js is a library for atomic visualization and editing written in JavaScript enabling visualization of material structures from atoms up on the web. The library is aimed to be used for the development of web applications in JavaScript.
