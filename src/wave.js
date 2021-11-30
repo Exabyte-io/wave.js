@@ -1,5 +1,6 @@
 import {mix} from "mixwith";
 import * as THREE from "three";
+import {CSS2DRenderer} from "three-css2drender"
 
 import SETTINGS from "./settings"
 import {CellMixin} from "./mixins/cell";
@@ -71,6 +72,15 @@ class WaveBase {
         this.renderer.domElement.style.height = "100%";
         this.container.appendChild(this.renderer.domElement);
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
+
+        // for atom labels
+				this.labelRenderer = new CSS2DRenderer();
+				this.labelRenderer.domElement.style.position = 'absolute';
+				this.labelRenderer.domElement.style.top = '0px';
+				this.labelRenderer.domElement.style.pointerEvents = 'none';
+        this.container.appendChild(this.labelRenderer.domElement);
+        this.labelRenderer.setSize(this.WIDTH, this.HEIGHT);
+
         // TODO: detach listener on exit
         window.addEventListener('resize', () => {this.handleResize()}, false);
     }
@@ -134,6 +144,7 @@ class WaveBase {
         this.HEIGHT = domElement.clientHeight;
         this.ASPECT = this.WIDTH / this.HEIGHT;
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
+        this.labelRenderer.setSize(this.WIDTH, this.HEIGHT);
         this.perspectiveCamera.aspect = this.ASPECT;
         this.perspectiveCamera.updateProjectionMatrix();
         this.orthographicCamera.left = -10 * this.ASPECT;
@@ -195,11 +206,14 @@ export class Wave extends mix(WaveBase).with(
         while (this.structureGroup.children.length) {
             this.structureGroup.remove(this.structureGroup.children[0]);
         }
+
+        while (this.labelRenderer.domElement.firstChild) this.labelRenderer.domElement.removeChild(this.labelRenderer.domElement.firstChild);
     }
 
     rebuildScene() {
         this.clearView();
         this.drawAtomsAsSpheres();
+        this.isDrawLabelsEnabled && this.drawAtomLabels();
         this.drawUnitCell();
         this.drawBoundaries();
         this.isDrawBondsEnabled && this.drawBonds();
@@ -208,6 +222,7 @@ export class Wave extends mix(WaveBase).with(
 
     render() {
         this.renderer.render(this.scene, this.camera);
+        this.labelRenderer.render(this.scene, this.camera);
         this.renderer2 && this.renderer2.render(this.scene2, this.camera2);
     }
 
