@@ -15,6 +15,8 @@ export const AtomsMixin = (superclass) => class extends superclass {
         this.drawAtomsAsSpheres = this.drawAtomsAsSpheres.bind(this);
         this.getAtomColorByElement = this.getAtomColorByElement.bind(this);
 
+        this.createSelectObjectsAsSpheres = this.createSelectObjectsAsSpheres.bind(this);
+
         this.setStructure(this._structure);
     }
 
@@ -85,6 +87,35 @@ export const AtomsMixin = (superclass) => class extends superclass {
     drawAtomsAsSpheres(atomRadiiScale) {
         const basis = this.areNonPeriodicBoundariesPresent ? this.basisWithElementsInsideNonPeriodicBoundaries : this.basis;
         this.repeatObject3DAtRepetitionCoordinates(this.createAtomsGroup(basis, atomRadiiScale));
+    }
+
+    // for measurement select atom
+    createSelectObjectsAsSpheres() {
+        const selectObjectsGroup = new THREE.Group();
+        selectObjectsGroup.name = "SelectObjects";
+
+        for (const child1 of this.structureGroup.children) {
+            if (child1.name === "Atoms") {
+                for (const child2 of child1.children) {
+                    const sphereMesh = child2.clone();
+                    sphereMesh.scale.x += 0.05;
+                    sphereMesh.scale.y += 0.05;
+                    sphereMesh.scale.z += 0.05;
+
+                    sphereMesh.material = child2.material.clone();
+                    sphereMesh.material.transparent = true;
+                    sphereMesh.material.opacity = 0.5;
+                    sphereMesh.material.visible = false;
+                    sphereMesh.material.color.r = 0.0;
+                    sphereMesh.material.color.g = 1.0;
+                    sphereMesh.material.color.b = 1.0;
+                    selectObjectsGroup.add(sphereMesh);
+                }
+                break;
+            }
+        }
+
+        this.structureGroup.add(selectObjectsGroup);
     }
 
     getAtomColorByElement(element, pallette = this.settings.elementColors) {
