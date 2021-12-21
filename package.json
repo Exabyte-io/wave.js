@@ -6,7 +6,7 @@
         "prepublishOnly": "rm -rf dist; npm run transpile",
         "start": "PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
         "transpile": "babel --out-dir dist src; node-sass -r src/stylesheets -o dist/stylesheets",
-        "test": "jest --config=tests/config.js --env=jsdom tests/"
+        "test": "npx jest --config=tests/config.js tests/"
     },
     "repository": {
         "type": "git",

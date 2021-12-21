@@ -32,3 +32,12 @@ Wave.prototype.getWebGLRenderer = (config) => {
         canvas
     })
 };
+
+document.createRange = () => ({
+    setStart: () => {},
+    setEnd: () => {},
+    commonAncestorContainer: {
+        nodeName: 'BODY',
+        ownerDocument: document,
+    },
+});
