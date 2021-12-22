@@ -7,14 +7,14 @@ runs:
       shell: bash -l {0}
       run: |
         xvfb_pids=`ps aux | grep tmp/xvfb-run | grep -v grep | awk '{print $2}'`
-        if [ "$xvfb_pids" != ""]; then
+        if [[ "$xvfb_pids" != "" ]]; then
           echo "Killing xvfb-run processes: $xvfb_pids"
           sudo kill $xvfb_pids
         else
           echo "No xvfb processes to kill"
         fi
         xvfb_pids=`ps aux | grep Xvfb | grep -v grep | awk '{print $2}'`
-        if [ "$xvfb_pids" != ""]; then
+        if [[ "$xvfb_pids" != "" ]]; then
           echo "Killing Xvfb processes: $xvfb_pids"
           sudo kill $xvfb_pids
         else
