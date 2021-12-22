@@ -4,6 +4,7 @@
     "description": "Web-based Atomic Viewer and Editor in JavaScript.",
     "scripts": {
         "prepublishOnly": "rm -rf dist; npm run transpile",
+        "postinstall": "bash fix-corejs.sh",
         "start": "PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
         "transpile": "babel --out-dir dist src; node-sass -r src/stylesheets -o dist/stylesheets",
         "test": "npx jest --config=tests/config.js tests/"
