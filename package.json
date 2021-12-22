@@ -7,7 +7,7 @@
         "postinstall": "bash fix-corejs.sh",
         "start": "PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
         "transpile": "babel --out-dir dist src; node-sass -r src/stylesheets -o dist/stylesheets",
-        "test": "npx jest --config=tests/config.js tests/"
+        "test": "npx jest --config=tests/config.js --env=jsdom tests/"
     },
     "repository": {
         "type": "git",
