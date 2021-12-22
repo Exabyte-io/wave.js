@@ -1,0 +1,15 @@
+name: Cleanup Xvfb
+
+runs:
+  using: "composite"
+  steps:
+    - name: Cleanup Xvfb
+      shell: bash -l {0}
+      run: |
+        xvfb_pids=`ps aux | grep tmp/xvfb-run | grep -v grep | awk '{print $2}'`
+        if [ "$xvfb_pids" != ""]; then
+          echo "Killing xvfb processes: $xvfb_pids"
+          sudo kill $xvfb_pids
+        else
+          echo "No xvfb processes to kill"
+        fi
