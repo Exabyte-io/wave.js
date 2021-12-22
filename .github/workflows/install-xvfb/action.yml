@@ -6,7 +6,7 @@ runs:
     - name: Install Xvfb
       shell: bash -l {0}
       run: |
-        sudo apt-get install -y xvfb
+        sudo apt-get install -y xvfb libgl1-mesa-dev
         echo `which Xvfb`
         echo `which xvfb-run`
         xvfb_pids=`ps aux | grep tmp/xvfb-run | grep -v grep | awk '{print $2}'`
