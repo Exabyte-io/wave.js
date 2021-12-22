@@ -4,6 +4,7 @@ import * as THREE from "three";
 import {configure} from 'enzyme';
 import {Made} from "@exabyte-io/made.js";
 import Adapter from 'enzyme-adapter-react-15';
+import 'jest-canvas-mock';
 import {toBeDeepCloseTo, toMatchCloseTo} from 'jest-matcher-deep-close-to';
 
 import {Wave} from "../src/wave";
