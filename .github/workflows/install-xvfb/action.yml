@@ -10,5 +10,18 @@ runs:
         echo `which Xvfb`
         echo `which xvfb-run`
         xvfb_pids=`ps aux | grep tmp/xvfb-run | grep -v grep | awk '{print $2}'`
-        echo "xvfb_pids=${xvfb_pids}"
-        ps aux | grep Xvfb
+        echo "xvfb-run xvfb_pids=${xvfb_pids}"
+        if [ "$xvfb_pids" != ""]; then
+          echo "Killing xvfb processes: $xvfb_pids"
+          sudo kill $xvfb_pids
+        else
+          echo "No xvfb-run processes to kill"
+        fi
+        xvfb_pids=`ps aux | grep Xvfb | grep -v grep | awk '{print $2}'`
+        echo "Xvfb xvfb_pids=${xvfb_pids}"
+        if [ "$xvfb_pids" != ""]; then
+          echo "Killing xvfb processes: $xvfb_pids"
+          sudo kill $xvfb_pids
+        else
+          echo "No Xvfb processes to kill"
+        fi
