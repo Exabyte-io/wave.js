@@ -5,4 +5,10 @@ runs:
   steps:
     - name: Install Xvfb
       shell: bash -l {0}
-      run: sudo apt-get install -y xvfb
+      run: |
+        sudo apt-get install -y xvfb
+        echo `which Xvfb`
+        echo `which xvfb-run`
+        xvfb_pids=`ps aux | grep tmp/xvfb-run | grep -v grep | awk '{print $2}'`
+        echo "xvfb_pids=${xvfb_pids}"
+        ps aux | grep Xvfb
