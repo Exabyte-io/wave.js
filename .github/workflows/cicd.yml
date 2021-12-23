@@ -20,11 +20,11 @@ jobs:
 
       - name: Build test container
         shell: bash -l {0}
-        run: docker build -t wave:centos -f dockerfiles/centos/Dockerfile .
+        run: docker build -t wave:ubuntu -f dockerfiles/ubuntu/Dockerfile .
 
       - name: Run Tests
         shell: bash -l {0}
-        run: docker run wave:centos
+        run: docker run wave:ubuntu
 
   publish:
     needs: run-tests
