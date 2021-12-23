@@ -14,10 +14,7 @@ RUN yum update -y && \
         scl-utils \
         centos-release-scl
 
-# RUN yum-config-manager --add-repo http://mirror.centos.org/centos/7/sclo/x86_64/rh/
-# Install headless-gl dependencies
-# RUN yum install -y \
-# Broken into two steps so gpg key is available
+# Broken into two steps so scl gpg key is available from above
 RUN yum install -y \
         devtoolset-8-gcc \
         devtoolset-8-gcc-c++
