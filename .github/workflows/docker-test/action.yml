@@ -3,4 +3,4 @@ description: 'Runs tests in docker'
 
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: '../../../Dockerfile'
