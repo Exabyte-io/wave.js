@@ -1,4 +1,4 @@
-name: CICD
+name: Run containerized tests and publish to NPM on branch == 'dev'
 
 on: [push]
 
@@ -18,13 +18,10 @@ jobs:
         with:
           lfs: true
 
-      - name: Build test container
-        shell: bash -l {0}
-        run: docker build -t wave:ubuntu -f dockerfiles/ubuntu/Dockerfile .
-
-      - name: Run Tests
-        shell: bash -l {0}
-        run: docker run wave:ubuntu test
+      - name: Build and test
+        uses: ./.github/workflows/docker-build-test
+        with:
+            base-os: ubuntu
 
   publish:
     needs: run-tests
@@ -37,13 +34,10 @@ jobs:
         with:
           lfs: true
 
-      - name: Build test container
-        shell: bash -l {0}
-        run: docker build -t wave:centos -f dockerfiles/centos/Dockerfile .
-
-      - name: Run Tests
-        shell: bash -l {0}
-        run: docker run wave:centos
+      - name: Build and test
+        uses: ./.github/workflows/docker-build-test
+        with:
+            base-os: centos
 
       - name: Checkout actions repository
         uses: actions/checkout@v2
@@ -59,4 +53,3 @@ jobs:
           npm-token: ${{ secrets.NPM_TOKEN }}
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           verify-tests: 'false'
-

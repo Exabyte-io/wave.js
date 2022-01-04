@@ -1,0 +1,16 @@
+name: Build docker container and run tests
+inputs:
+  base-os:
+    description: Which OS Dockerfile to use
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Build container
+      shell: bash -l {0}
+      run: docker build -t wave:${{ inputs.base-os }} -f dockerfiles/${{ inputs.base-os }}/Dockerfile .
+
+    - name: Run tests
+      shell: bash -l {0}
+      run: docker run wave:${{ inputs.base-os }} test
