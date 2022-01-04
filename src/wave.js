@@ -1,24 +1,24 @@
-import {mix} from "mixwith";
+import { mix } from "mixwith";
 import * as THREE from "three";
 
-import SETTINGS from "./settings"
-import {CellMixin} from "./mixins/cell";
-import {AtomsMixin} from "./mixins/atoms";
-import {BondsMixin} from "./mixins/bonds";
-import {saveImageDataToFile} from "./utils";
-import {ControlsMixin} from "./mixins/controls";
-import {BoundaryMixin} from "./mixins/boundary";
-import {RepetitionMixin} from "./mixins/repetition";
+import { AtomsMixin } from "./mixins/atoms";
+import { BondsMixin } from "./mixins/bonds";
+import { BoundaryMixin } from "./mixins/boundary";
+import { CellMixin } from "./mixins/cell";
+import { ControlsMixin } from "./mixins/controls";
+import { RepetitionMixin } from "./mixins/repetition";
+import SETTINGS from "./settings";
+import { saveImageDataToFile } from "./utils";
 
-const TV3 = THREE.Vector3, TCo = THREE.Color;
+const TV3 = THREE.Vector3;
+const TCo = THREE.Color;
 
 /*
  * WaveBase is a helper class to initialize three js variables, settings and dimensions.
-*  Initializes a renderer, camera and scene.
+ *  Initializes a renderer, camera and scene.
  */
 
 class WaveBase {
-
     /**
      * Create a WaveBase class.
      * @params DOMElement {Object} The container DOM element to attach three.js <canvas> to.
@@ -26,8 +26,7 @@ class WaveBase {
      * @params cell {Object} Lattice vectors forming the unit cell (to draw the unit cell).
      * @params settings {Object} Setting object to override the default values.
      */
-    constructor({DOMElement, structure, cell, settings = {}}) {
-
+    constructor({ DOMElement, structure, cell, settings = {} }) {
         this._structure = structure;
 
         this._cell = cell;
@@ -44,10 +43,11 @@ class WaveBase {
 
         this.handleResize = this.handleResize.bind(this);
         this.setBackground = this.setBackground.bind(this);
-
     }
 
-    updateSettings(settings) {this.settings = Object.assign({}, SETTINGS, settings)}
+    updateSettings(settings) {
+        this.settings = { ...SETTINGS, ...settings };
+    }
 
     initDimensions() {
         this.WIDTH = this.container.clientWidth;
@@ -72,7 +72,13 @@ class WaveBase {
         this.container.appendChild(this.renderer.domElement);
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
         // TODO: detach listener on exit
-        window.addEventListener('resize', () => {this.handleResize()}, false);
+        window.addEventListener(
+            "resize",
+            () => {
+                this.handleResize();
+            },
+            false,
+        );
     }
 
     /**
@@ -92,13 +98,21 @@ class WaveBase {
 
     initCameras() {
         const perspectiveCameraParams = [20, this.ASPECT, 1, 20000];
-        this.perspectiveCamera = this.addCameraToScene("PerspectiveCamera", ...perspectiveCameraParams);
+        this.perspectiveCamera = this.addCameraToScene(
+            "PerspectiveCamera",
+            ...perspectiveCameraParams,
+        );
         const orthographicCameraParams = [-10 * this.ASPECT, 10 * this.ASPECT, 10, -10, 1, 1000];
-        this.orthographicCamera = this.addCameraToScene("OrthographicCamera", ...orthographicCameraParams);
+        this.orthographicCamera = this.addCameraToScene(
+            "OrthographicCamera",
+            ...orthographicCameraParams,
+        );
         this.camera = this.perspectiveCamera; // set default camera
     }
 
-    get isCameraOrthographic() {return this.camera.isOrthographicCamera}
+    get isCameraOrthographic() {
+        return this.camera.isOrthographicCamera;
+    }
 
     toggleOrthographicCamera() {
         this.camera = this.isCameraOrthographic ? this.perspectiveCamera : this.orthographicCamera;
@@ -155,12 +169,11 @@ class WaveBase {
     }
 
     setBackground(hex, a) {
-        a = a | 1.0;
+        a |= 1.0;
         this.settings.backgroundColor = hex;
         this.renderer.setClearColor(hex, a);
         this.scene.fog.color = new TCo(hex);
     }
-
 }
 
 /**
@@ -174,7 +187,6 @@ export class Wave extends mix(WaveBase).with(
     ControlsMixin,
     BoundaryMixin,
 ) {
-
     /**
      *
      * @param {Object} config
@@ -188,7 +200,7 @@ export class Wave extends mix(WaveBase).with(
     }
 
     takeScreenshot() {
-        saveImageDataToFile(this.renderer.domElement.toDataURL("image/png"))
+        saveImageDataToFile(this.renderer.domElement.toDataURL("image/png"));
     }
 
     clearView() {
@@ -211,6 +223,7 @@ export class Wave extends mix(WaveBase).with(
         this.renderer2 && this.renderer2.render(this.scene2, this.camera2);
     }
 
-    doFunc(func) {func(this)} // for scripting
-
+    doFunc(func) {
+        func(this);
+    } // for scripting
 }

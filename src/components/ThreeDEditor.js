@@ -1,38 +1,44 @@
-import $ from 'jquery';
-import React from 'react';
-import PropTypes from 'prop-types';
-import setClass from "classnames";
-import { Tooltip } from "@material-ui/core";
-import { JssProvider } from 'react-jss';
-import { createGenerateClassName } from "@material-ui/core";
-
+import { createGenerateClassName, Tooltip } from "@material-ui/core";
 import {
-    NotInterested, ImportExport, RemoveRedEye,
-    Replay, PictureInPicture, PowerSettingsNew,
-    CloudDownload, ThreeDRotation, Autorenew,
-    GpsFixed, Edit, SwitchCamera, FormatShapes,
-    Menu, BubbleChart
+    Autorenew,
+    BubbleChart,
+    CloudDownload,
+    Edit,
+    FormatShapes,
+    GpsFixed,
+    ImportExport,
+    Menu,
+    NotInterested,
+    PictureInPicture,
+    PowerSettingsNew,
+    RemoveRedEye,
+    Replay,
+    SwitchCamera,
+    ThreeDRotation,
 } from "@material-ui/icons";
+import setClass from "classnames";
+import $ from "jquery";
+import PropTypes from "prop-types";
+import React from "react";
+import { JssProvider } from "react-jss";
 
 import settings from "../settings";
-import {exportToDisk} from "../utils";
-import {IconToolbar} from "./IconToolbar";
-import {WaveComponent} from './WaveComponent';
-import {RoundIconButton} from "./RoundIconButton";
-
-import {ThreejsEditorModal} from "./ThreejsEditorModal";
+import { exportToDisk } from "../utils";
+import { IconToolbar } from "./IconToolbar";
+import { RoundIconButton } from "./RoundIconButton";
+import { ThreejsEditorModal } from "./ThreejsEditorModal";
+import { WaveComponent } from "./WaveComponent";
 
 /**
  * This is to avoid class name conflicts when the component is used inside other material-ui dependent components.
  * See https://material-ui.com/customization/css-in-js/#creategenerateclassname-options-class-name-generator for more information.
  */
-const generateClassName = createGenerateClassName({productionPrefix: 'wave'});
+const generateClassName = createGenerateClassName({ productionPrefix: "wave" });
 
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
  */
 export class ThreeDEditor extends React.Component {
-
     /**
      * Create a ThreeDEditor component
      * @param props Properties as explained below
@@ -50,7 +56,7 @@ export class ThreeDEditor extends React.Component {
             viewerSettings: {
                 atomRadiiScale: settings.atomRadiiScale,
                 repetitions: settings.repetitions,
-                chemicalConnectivityFactor: settings.chemicalConnectivityFactor
+                chemicalConnectivityFactor: settings.chemicalConnectivityFactor,
             },
             boundaryConditions: this.props.boundaryConditions || {},
             isConventionalCellShown: this.props.isConventionalCellShown || false,
@@ -70,45 +76,46 @@ export class ThreeDEditor extends React.Component {
         this.handleResetViewer = this.handleResetViewer.bind(this);
         this.handleTakeScreenshot = this.handleTakeScreenshot.bind(this);
         this.handleToggleOrbitControls = this.handleToggleOrbitControls.bind(this);
-        this.handleToggleOrbitControlsAnimation = this.handleToggleOrbitControlsAnimation.bind(this);
+        this.handleToggleOrbitControlsAnimation =
+            this.handleToggleOrbitControlsAnimation.bind(this);
         this.handleToggleAxes = this.handleToggleAxes.bind(this);
         this.onThreejsEditorModalHide = this.onThreejsEditorModalHide.bind(this);
-        this.handleChemicalConnectivityFactorChange = this.handleChemicalConnectivityFactorChange.bind(this);
+        this.handleChemicalConnectivityFactorChange =
+            this.handleChemicalConnectivityFactorChange.bind(this);
     }
 
     componentWillReceiveProps(nextProps, nextContext) {
-        const material = nextProps.material;
+        const { material } = nextProps;
         if (material) {
             this.setState({
                 originalMaterial: material,
                 material: material.clone(),
                 boundaryConditions: nextProps.boundaryConditions || {},
                 isConventionalCellShown: nextProps.isConventionalCellShown || false,
-            })
+            });
         }
     }
 
     _resetStateWaveComponent() {
         // a workaround to re-render the component and update the buttons on clicks
-        this.setState({wave: this.WaveComponent.wave});
+        this.setState({ wave: this.WaveComponent.wave });
     }
 
     handleSetSetting = (setting) => {
         this.setState({
             viewerSettings: {
                 ...this.state.viewerSettings,
-                ...setting
-            }
+                ...setting,
+            },
         });
-
     };
 
     handleCellRepetitionsChange(e) {
-        this.handleSetSetting({repetitions: parseFloat($(e.target).val())});
+        this.handleSetSetting({ repetitions: parseFloat($(e.target).val()) });
     }
 
     handleSphereRadiusChange(e) {
-        this.handleSetSetting({atomRadiiScale: parseFloat($(e.target).val())})
+        this.handleSetSetting({ atomRadiiScale: parseFloat($(e.target).val()) });
     }
 
     handleToggleOrthographicCamera(e) {
@@ -117,7 +124,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleChemicalConnectivityFactorChange(e) {
-        this.handleSetSetting({chemicalConnectivityFactor: parseFloat($(e.target).val())});
+        this.handleSetSetting({ chemicalConnectivityFactor: parseFloat($(e.target).val()) });
     }
 
     getPrimitiveOrConventionalMaterial(material, isConventionalCellShown = false) {
@@ -127,27 +134,30 @@ export class ThreeDEditor extends React.Component {
     handleToggleConventionalCell(e) {
         this.setState({
             isConventionalCellShown: !this.state.isConventionalCellShown,
-            material: this.getPrimitiveOrConventionalMaterial(this.state.originalMaterial, !this.state.isConventionalCellShown)
+            material: this.getPrimitiveOrConventionalMaterial(
+                this.state.originalMaterial,
+                !this.state.isConventionalCellShown,
+            ),
         });
     }
 
     handleDownloadClick(e) {
         const material = this.state.originalMaterial;
-        exportToDisk(material.getAsPOSCAR(), material.name, 'poscar')
+        exportToDisk(material.getAsPOSCAR(), material.name, "poscar");
     }
 
     handleToggleInteractive(e) {
-        this.setState({isInteractive: !this.state.isInteractive})
+        this.setState({ isInteractive: !this.state.isInteractive });
     }
 
     handleToggleBonds(e) {
-        const wave = this.WaveComponent.wave;
+        const { wave } = this.WaveComponent;
         wave.isDrawBondsEnabled = !wave.isDrawBondsEnabled; // toggle value;
         this._resetStateWaveComponent();
     }
 
     toggleThreejsEditorModal(e) {
-        this.setState({isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown});
+        this.setState({ isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown });
     }
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
@@ -156,7 +166,9 @@ export class ThreeDEditor extends React.Component {
         this._resetStateWaveComponent();
     }
 
-    handleTakeScreenshot(e) {this.WaveComponent.wave.takeScreenshot()}
+    handleTakeScreenshot(e) {
+        this.WaveComponent.wave.takeScreenshot();
+    }
 
     handleToggleOrbitControls(e) {
         this.WaveComponent.wave.toggleOrbitControls();
@@ -173,42 +185,47 @@ export class ThreeDEditor extends React.Component {
         this._resetStateWaveComponent();
     }
 
-    _getWaveProperty(name) {return this.WaveComponent && this.WaveComponent.wave[name]}
+    _getWaveProperty(name) {
+        return this.WaveComponent && this.WaveComponent.wave[name];
+    }
 
     /**
      * Returns a cover div to cover the area and prevent user interaction with component
      */
     renderCoverDiv() {
         const style = {
-            position: 'absolute',
-            height: '100%',
-            width: '100%',
+            position: "absolute",
+            height: "100%",
+            width: "100%",
         };
-        if (this.state.isInteractive) style.display = 'none';
-        return <div className="atom-view-cover" style={style}/>
+        if (this.state.isInteractive) style.display = "none";
+        return <div className="atom-view-cover" style={style} />;
     }
 
-    get classNamesForTopToolbar() {return "buttons-toolbar buttons-toolbar-top pull-left"}
+    get classNamesForTopToolbar() {
+        return "buttons-toolbar buttons-toolbar-top pull-left";
+    }
 
-    get classNamesForBottomToolbar() {return "buttons-toolbar buttons-toolbar-bottom pull-left"}
+    get classNamesForBottomToolbar() {
+        return "buttons-toolbar buttons-toolbar-bottom pull-left";
+    }
 
     /**
      * ON/OFF switch button
      */
     renderInteractiveSwitch() {
         return (
-            <div className={setClass(this.classNamesForTopToolbar)}
-                data-name="Interactive"
-            >
-                <RoundIconButton tooltipPlacement="top"
+            <div className={setClass(this.classNamesForTopToolbar)} data-name="Interactive">
+                <RoundIconButton
+                    tooltipPlacement="top"
                     title="Interactive"
                     isToggled={this.state.isInteractive}
                     onClick={this.handleToggleInteractive}
                 >
-                    {this.state.isInteractive ? <NotInterested/> : <PowerSettingsNew/>}
+                    {this.state.isInteractive ? <NotInterested /> : <PowerSettingsNew />}
                 </RoundIconButton>
             </div>
-        )
+        );
     }
 
     /**
@@ -216,22 +233,26 @@ export class ThreeDEditor extends React.Component {
      */
     getExportToolbarItems() {
         return [
-            <RoundIconButton key="Screenshot" tooltipPlacement="top"
+            <RoundIconButton
+                key="Screenshot"
+                tooltipPlacement="top"
                 title="Screenshot"
                 isToggleable={false}
                 onClick={this.handleTakeScreenshot}
             >
-                <PictureInPicture/>
+                <PictureInPicture />
             </RoundIconButton>,
 
-            <RoundIconButton key="Download" tooltipPlacement="top"
+            <RoundIconButton
+                key="Download"
+                tooltipPlacement="top"
                 title="Download"
                 isToggleable={false}
                 onClick={this.handleDownloadClick}
             >
-                <CloudDownload/>
-            </RoundIconButton>
-        ]
+                <CloudDownload />
+            </RoundIconButton>,
+        ];
     }
 
     renderExportToolbar(className = "") {
@@ -244,7 +265,7 @@ export class ThreeDEditor extends React.Component {
             >
                 {this.getExportToolbarItems()}
             </IconToolbar>
-        )
+        );
     }
 
     /**
@@ -252,62 +273,76 @@ export class ThreeDEditor extends React.Component {
      */
     getViewToolbarItems() {
         return [
-            <RoundIconButton key="Rotate/Zoom View [O]" tooltipPlacement="top"
-                isToggled={this._getWaveProperty('areOrbitControlsEnabled')}
+            <RoundIconButton
+                key="Rotate/Zoom View [O]"
+                tooltipPlacement="top"
+                isToggled={this._getWaveProperty("areOrbitControlsEnabled")}
                 title="Rotate/Zoom View [O]"
                 onClick={this.handleToggleOrbitControls}
             >
-                <ThreeDRotation/>
+                <ThreeDRotation />
             </RoundIconButton>,
 
-            <RoundIconButton key="Toggle Auto Rotate" tooltipPlacement="top"
-                isToggled={this._getWaveProperty('isOrbitControlsAnimationEnabled')}
+            <RoundIconButton
+                key="Toggle Auto Rotate"
+                tooltipPlacement="top"
+                isToggled={this._getWaveProperty("isOrbitControlsAnimationEnabled")}
                 title="Toggle Auto Rotate"
                 onClick={this.handleToggleOrbitControlsAnimation}
             >
-                <Autorenew/>
+                <Autorenew />
             </RoundIconButton>,
 
-            <RoundIconButton key="Toggle Axes" tooltipPlacement="top"
-                isToggled={this._getWaveProperty('areAxesEnabled')}
+            <RoundIconButton
+                key="Toggle Axes"
+                tooltipPlacement="top"
+                isToggled={this._getWaveProperty("areAxesEnabled")}
                 title="Toggle Axes"
                 onClick={this.handleToggleAxes}
             >
-                <GpsFixed/>
+                <GpsFixed />
             </RoundIconButton>,
 
-            <RoundIconButton key="Toggle Orthographic Camera" tooltipPlacement="top"
+            <RoundIconButton
+                key="Toggle Orthographic Camera"
+                tooltipPlacement="top"
                 title="Toggle Orthographic Camera"
-                isToggled={this._getWaveProperty('isCameraOrthographic')}
+                isToggled={this._getWaveProperty("isCameraOrthographic")}
                 onClick={this.handleToggleOrthographicCamera}
             >
-                <SwitchCamera/>
+                <SwitchCamera />
             </RoundIconButton>,
 
-            <RoundIconButton key="Toggle Bonds" tooltipPlacement="top"
+            <RoundIconButton
+                key="Toggle Bonds"
+                tooltipPlacement="top"
                 title="Toggle Bonds"
-                isToggled={this._getWaveProperty('isDrawBondsEnabled')}
+                isToggled={this._getWaveProperty("isDrawBondsEnabled")}
                 onClick={this.handleToggleBonds}
             >
-                <Menu/>
+                <Menu />
             </RoundIconButton>,
 
-            <RoundIconButton key="Toggle Conventional Cell" tooltipPlacement="top"
+            <RoundIconButton
+                key="Toggle Conventional Cell"
+                tooltipPlacement="top"
                 title="Toggle Conventional Cell"
                 isToggled={this.state.isConventionalCellShown}
                 onClick={this.handleToggleConventionalCell}
             >
-                <FormatShapes/>
+                <FormatShapes />
             </RoundIconButton>,
 
-            <RoundIconButton key="Reset View" tooltipPlacement="top"
+            <RoundIconButton
+                key="Reset View"
+                tooltipPlacement="top"
                 title="Reset View"
                 isToggleable={false}
                 onClick={this.handleResetViewer}
             >
-                <Replay/>
+                <Replay />
             </RoundIconButton>,
-        ]
+        ];
     }
 
     renderViewToolbar(className = "") {
@@ -320,40 +355,54 @@ export class ThreeDEditor extends React.Component {
             >
                 {this.getViewToolbarItems()}
             </IconToolbar>
-        )
+        );
     }
 
     getParametersToolbarItems() {
         return [
-
             <Tooltip key="RADIUS" title="RADIUS" placement="top">
-                <input className="inverse stepper sphere-radius"
+                <input
+                    className="inverse stepper sphere-radius"
                     id="sphere-radius"
                     value={this.state.viewerSettings.atomRadiiScale}
-                    type="number" max="10" min="0.1" step="0.1"
+                    type="number"
+                    max="10"
+                    min="0.1"
+                    step="0.1"
                     onChange={this.handleSphereRadiusChange}
                 />
             </Tooltip>,
 
             <Tooltip key="REPETITIONS" title="REPETITIONS" placement="top">
-                <input className="inverse stepper cell-repetitions"
+                <input
+                    className="inverse stepper cell-repetitions"
                     id="cell-repetitions"
                     value={this.state.viewerSettings.repetitions}
-                    type="number" max="10" min="1" step="1"
+                    type="number"
+                    max="10"
+                    min="1"
+                    step="1"
                     onChange={this.handleCellRepetitionsChange}
                 />
             </Tooltip>,
 
-            <Tooltip key="CHEMICAL_CONNECTIVITY_FACTOR" title="CHEMICAL CONNECTIVITY FACTOR" placement="top">
-                <input className="inverse stepper cell-repetitions"
+            <Tooltip
+                key="CHEMICAL_CONNECTIVITY_FACTOR"
+                title="CHEMICAL CONNECTIVITY FACTOR"
+                placement="top"
+            >
+                <input
+                    className="inverse stepper cell-repetitions"
                     id="chemical-connectivity-factor"
                     value={this.state.viewerSettings.chemicalConnectivityFactor}
-                    type="number" max="2" min="0" step="0.01"
+                    type="number"
+                    max="2"
+                    min="0"
+                    step="0.01"
                     onChange={this.handleChemicalConnectivityFactorChange}
                 />
-            </Tooltip>
-
-        ]
+            </Tooltip>,
+        ];
     }
 
     renderParametersToolbar(className = "") {
@@ -366,35 +415,45 @@ export class ThreeDEditor extends React.Component {
             >
                 {this.getParametersToolbarItems()}
             </IconToolbar>
-        )
+        );
     }
 
     render3DEditToggle(className = "") {
         return (
-            <div className={setClass(className, {'hidden': !this.state.isInteractive})}
+            <div
+                className={setClass(className, { hidden: !this.state.isInteractive })}
                 data-name="3DEdit"
             >
-                <RoundIconButton key="3D Editor" tooltipPlacement="top"
+                <RoundIconButton
+                    key="3D Editor"
+                    tooltipPlacement="top"
                     title="3D Editor"
                     onClick={this.toggleThreejsEditorModal}
                 >
-                    <Edit/>
+                    <Edit />
                 </RoundIconButton>
             </div>
-        )
+        );
     }
 
     renderWaveComponent() {
-        const material = this.getPrimitiveOrConventionalMaterial(this.state.material, this.state.isConventionalCellShown);
-        return <WaveComponent
-            ref={(el) => {this.WaveComponent = el}}
-            triggerHandleResize={this.state.viewerTriggerResize}
-            structure={material}
-            boundaryConditions={this.state.boundaryConditions}
-            cell={material.Lattice.unitCell}
-            name={this.state.material.name}
-            settings={this.state.viewerSettings}
-        />
+        const material = this.getPrimitiveOrConventionalMaterial(
+            this.state.material,
+            this.state.isConventionalCellShown,
+        );
+        return (
+            <WaveComponent
+                ref={(el) => {
+                    this.WaveComponent = el;
+                }}
+                triggerHandleResize={this.state.viewerTriggerResize}
+                structure={material}
+                boundaryConditions={this.state.boundaryConditions}
+                cell={material.Lattice.unitCell}
+                name={this.state.material.name}
+                settings={this.state.viewerSettings}
+            />
+        );
     }
 
     /**
@@ -402,34 +461,37 @@ export class ThreeDEditor extends React.Component {
      * TODO: adjust the code above to use this
      * */
     getRoundIconButton(title, tooltipPlacement, onClick, icon) {
-        return <RoundIconButton tooltipPlacement={tooltipPlacement}
-            title={title}
-            isToggleable={false}
-            onClick={onClick}
-        >
-            {icon}
-        </RoundIconButton>
+        return (
+            <RoundIconButton
+                tooltipPlacement={tooltipPlacement}
+                title={title}
+                isToggleable={false}
+                onClick={onClick}
+            >
+                {icon}
+            </RoundIconButton>
+        );
     }
 
     /** Helper to construct a compound CSS classname based on interactivity state */
     getThreeDEditorClassNames() {
         const isInteractiveCls = this.state.isInteractive ? "" : "non-interactive";
-        return setClass('materials-designer-3d-editor', isInteractiveCls);
+        return setClass("materials-designer-3d-editor", isInteractiveCls);
     }
 
     onThreejsEditorModalHide(material) {
         if (!material || material.hash === this.state.originalMaterial.hash) {
-            this.setState({isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown});
+            this.setState({ isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown });
         } else {
             // preserve lattice type
             material.lattice = {
                 ...material.Lattice.toJSON(),
-                type: this.state.originalMaterial.Lattice.type
+                type: this.state.originalMaterial.Lattice.type,
             };
             this.setState({
                 material: material.clone(),
                 originalMaterial: material,
-                isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown
+                isThreejsEditorModalShown: !this.state.isThreejsEditorModalShown,
             });
             this.props.onUpdate && this.props.onUpdate(material);
         }
@@ -437,24 +499,27 @@ export class ThreeDEditor extends React.Component {
 
     renderWaveOrThreejsEditorModal() {
         if (this.state.isThreejsEditorModalShown) {
-            return <ThreejsEditorModal
-                show={this.state.isThreejsEditorModalShown}
-                onHide={this.onThreejsEditorModalHide}
-                materials={[this.state.originalMaterial]}
-                modalId="threejs-editor"
-            />
-        } else {
-            return <div className={this.getThreeDEditorClassNames()}
-            >
+            return (
+                <ThreejsEditorModal
+                    show={this.state.isThreejsEditorModalShown}
+                    onHide={this.onThreejsEditorModalHide}
+                    materials={[this.state.originalMaterial]}
+                    modalId="threejs-editor"
+                />
+            );
+        }
+        return (
+            <div className={this.getThreeDEditorClassNames()}>
                 {this.renderCoverDiv()}
                 {this.renderInteractiveSwitch()}
                 {this.renderWaveComponent()}
                 {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
                 {this.renderParametersToolbar(this.classNamesForTopToolbar + " third-row")}
-                {this.props.editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fourth-row")}
+                {this.props.editable &&
+                    this.render3DEditToggle(this.classNamesForTopToolbar + " fourth-row")}
                 {this.renderExportToolbar(this.classNamesForBottomToolbar)}
-            </div>;
-        }
+            </div>
+        );
     }
 
     render() {
@@ -462,7 +527,7 @@ export class ThreeDEditor extends React.Component {
             <JssProvider generateClassName={generateClassName}>
                 {this.renderWaveOrThreejsEditorModal()}
             </JssProvider>
-        )
+        );
     }
 }
 
@@ -470,5 +535,5 @@ ThreeDEditor.propTypes = {
     material: PropTypes.object,
     isConventionalCellShown: PropTypes.bool,
     onUpdate: PropTypes.func,
-    editable: PropTypes.bool
+    editable: PropTypes.bool,
 };

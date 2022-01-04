@@ -1,8 +1,9 @@
 import fs from "fs";
-import path from "path";
-import {PNG} from "pngjs2";
 import looksSame from "looks-same";
-import {WIDTH, HEIGHT} from "./enums";
+import path from "path";
+import { PNG } from "pngjs2";
+
+import { HEIGHT, WIDTH } from "./enums";
 
 /**
  * Creates a DOM element with given properties.
@@ -15,9 +16,9 @@ export function createElement(name, elementProperties) {
     for (const key in elementProperties) {
         const properties = {
             ...elementProperties[key],
-            writable: true
+            writable: true,
         };
-        Object.defineProperty(element, key, properties)
+        Object.defineProperty(element, key, properties);
     }
     return element;
 }
@@ -28,14 +29,14 @@ export function createElement(name, elementProperties) {
  * Source: https://stackoverflow.com/questions/41969562/how-can-i-flip-the-result-of-webglrenderingcontext-readpixels
  */
 export function flipPixels(pixels) {
-    var halfHeight = HEIGHT / 2 | 0;  // the | 0 keeps the result an int
-    var bytesPerRow = WIDTH * 4;
+    const halfHeight = (HEIGHT / 2) | 0; // the | 0 keeps the result an int
+    const bytesPerRow = WIDTH * 4;
 
     // make a temp buffer to hold one row
-    var temp = new Uint8Array(WIDTH * 4);
-    for (var y = 0; y < halfHeight; ++y) {
-        var topOffset = y * bytesPerRow;
-        var bottomOffset = (HEIGHT - y - 1) * bytesPerRow;
+    const temp = new Uint8Array(WIDTH * 4);
+    for (let y = 0; y < halfHeight; ++y) {
+        const topOffset = y * bytesPerRow;
+        const bottomOffset = (HEIGHT - y - 1) * bytesPerRow;
 
         // make copy of a row on the top half
         temp.set(pixels.subarray(topOffset, topOffset + bytesPerRow));
@@ -57,18 +58,26 @@ export function flipPixels(pixels) {
  */
 export function takeSnapshot(webGLContext, imagePath) {
     const pixels = new Uint8Array(WIDTH * HEIGHT * 4);
-    webGLContext.readPixels(0, 0, WIDTH, HEIGHT, webGLContext.RGBA, webGLContext.UNSIGNED_BYTE, pixels);
+    webGLContext.readPixels(
+        0,
+        0,
+        WIDTH,
+        HEIGHT,
+        webGLContext.RGBA,
+        webGLContext.UNSIGNED_BYTE,
+        pixels,
+    );
     flipPixels(pixels);
-    let png = new PNG({
+    const png = new PNG({
         width: WIDTH,
-        height: HEIGHT
+        height: HEIGHT,
     });
     png.data = pixels;
     return new Promise((resolve, reject) => {
         png.pack()
             .pipe(fs.createWriteStream(imagePath))
-            .on('finish', () => resolve(true))
-    })
+            .on("finish", () => resolve(true));
+    });
 }
 
 /**
@@ -84,7 +93,7 @@ export async function takeSnapshotAndAssertEqualityAsync(webGLContext, imagePref
     await expect(takeSnapshot(webGLContext, actualImageFilePath)).resolves.toBe(true);
     const promise = new Promise((resolve, reject) => {
         try {
-            looksSame(actualImageFilePath, expectedImageFilePath, (err, {equal}) => {
+            looksSame(actualImageFilePath, expectedImageFilePath, (err, { equal }) => {
                 if (err) reject(false);
                 resolve(equal);
             });
@@ -96,9 +105,11 @@ export async function takeSnapshotAndAssertEqualityAsync(webGLContext, imagePref
 }
 
 export function dispatchMouseDownMoveOrUpEvent(element, type, clientX, clientY, button = 0) {
-    element.dispatchEvent(new MouseEvent(type, {
-        button,
-        clientX,
-        clientY
-    }))
+    element.dispatchEvent(
+        new MouseEvent(type, {
+            button,
+            clientX,
+            clientY,
+        }),
+    );
 }

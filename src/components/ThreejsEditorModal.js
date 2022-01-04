@@ -1,25 +1,24 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import swal from 'sweetalert';
+import PropTypes from "prop-types";
+import React from "react";
+import { ModalBody } from "react-bootstrap";
+import swal from "sweetalert";
 import * as THREE from "three";
-import {ModalBody} from "react-bootstrap";
 import ThreeOrbitControls from "three-orbit-controls";
 
-import {ShowIf} from "./ShowIf";
+import { THREE_D_BASE_URL, THREE_D_SOURCES } from "../enums";
 import settings from "../settings";
-import {ModalDialog} from "./ModalDialog";
-import {LoadingIndicator} from "./LoadingIndicator";
-import {THREE_D_BASE_URL, THREE_D_SOURCES} from "../enums";
-import {materialsToThreeDSceneData, ThreeDSceneDataToMaterial} from "../utils";
+import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
+import { LoadingIndicator } from "./LoadingIndicator";
+import { ModalDialog } from "./ModalDialog";
+import { ShowIf } from "./ShowIf";
 
 export class ThreejsEditorModal extends ModalDialog {
-
     constructor(props) {
         super(props);
         window.THREE = THREE;
         this.editor = undefined;
         this.domElement = undefined;
-        this.state = {areScriptsLoaded: false};
+        this.state = { areScriptsLoaded: false };
         this.injectScripts();
     }
 
@@ -32,15 +31,16 @@ export class ThreejsEditorModal extends ModalDialog {
      * The editor does not start without it. The ESLint line is a way to turn off the warning shown in the console.
      */
     setNumberFormat() {
-        /*eslint no-extend-native: [0, { "exceptions": ["Object"] }]*/
-        Number.prototype.format = function () {return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")};
+        /* eslint no-extend-native: [0, { "exceptions": ["Object"] }] */
+        Number.prototype.format = function () {
+            return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+        };
     }
 
     /**
      * Initialize threejs editor and add it to the DOM.
      */
     initializeEditor() {
-
         // adjust the orientation to have Z-axis up/down
         THREE.Object3D.DefaultUp.set(0, 0, 1);
 
@@ -77,7 +77,10 @@ export class ThreejsEditorModal extends ModalDialog {
 
         // add OrbitControls to allow the camera to orbit around the scene.
         const OrbitControls = ThreeOrbitControls(THREE);
-        const orbitControls = new OrbitControls(this.editor.camera, document.getElementById("viewport"));
+        const orbitControls = new OrbitControls(
+            this.editor.camera,
+            document.getElementById("viewport"),
+        );
         orbitControls.enabled = true;
         orbitControls.enableZoom = true;
         orbitControls.enableKeys = false;
@@ -91,14 +94,20 @@ export class ThreejsEditorModal extends ModalDialog {
      */
     addEventListeners() {
         const clsInstance = this;
-        document.addEventListener('dragover', function (event) {
-            event.preventDefault();
-            event.dataTransfer.dropEffect = 'copy';
-        }, false);
+        document.addEventListener(
+            "dragover",
+            (event) => {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "copy";
+            },
+            false,
+        );
 
-        function onWindowResize(event) {clsInstance.editor.signals.windowResize.dispatch()}
+        function onWindowResize(event) {
+            clsInstance.editor.signals.windowResize.dispatch();
+        }
 
-        window.addEventListener('resize', onWindowResize, false);
+        window.addEventListener("resize", onWindowResize, false);
         onWindowResize();
     }
 
@@ -118,19 +127,19 @@ export class ThreejsEditorModal extends ModalDialog {
      */
     injectScripts() {
         const clsInstance = this;
-        THREE_D_SOURCES.forEach(src => {
+        THREE_D_SOURCES.forEach((src) => {
             const script = document.createElement("script");
             script.src = `${THREE_D_BASE_URL}/${src}`;
             script.async = false;
             script.defer = false;
             if (src.includes("SetSceneCommand")) {
                 script.onload = () => {
-                    clsInstance.setState({areScriptsLoaded: true});
+                    clsInstance.setState({ areScriptsLoaded: true });
                     clsInstance.setNumberFormat();
                     clsInstance.initializeEditor();
                     clsInstance.addEventListeners();
                     clsInstance.loadScene();
-                }
+                };
             }
             document.head.appendChild(script);
         });
@@ -138,12 +147,12 @@ export class ThreejsEditorModal extends ModalDialog {
 
     showAlert(error) {
         swal({
-            icon: 'error',
+            icon: "error",
             buttons: {
                 cancel: "Cancel",
                 exit: "Exit",
             },
-            text: 'Unable to extract a material from the editor!',
+            text: "Unable to extract a material from the editor!",
         }).then((value) => {
             switch (value) {
                 case "exit":
@@ -165,14 +174,19 @@ export class ThreejsEditorModal extends ModalDialog {
     }
 
     renderBody() {
-        return <ModalBody>
-            <div ref={el => {this.domElement = el}}/>
-            <ShowIf condition={!this.state.areScriptsLoaded}>
-                <LoadingIndicator/>
-            </ShowIf>
-        </ModalBody>
+        return (
+            <ModalBody>
+                <div
+                    ref={(el) => {
+                        this.domElement = el;
+                    }}
+                />
+                <ShowIf condition={!this.state.areScriptsLoaded}>
+                    <LoadingIndicator />
+                </ShowIf>
+            </ModalBody>
+        );
     }
-
 }
 
 ThreejsEditorModal.propTypes = {

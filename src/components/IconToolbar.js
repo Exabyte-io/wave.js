@@ -1,46 +1,46 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import setClass from 'classnames';
 import { Close } from "@material-ui/icons";
+import setClass from "classnames";
+import PropTypes from "prop-types";
+import React from "react";
 
-import {ShowIf} from "./ShowIf";
-import {RoundIconButton} from "./RoundIconButton";
+import { RoundIconButton } from "./RoundIconButton";
+import { ShowIf } from "./ShowIf";
 
 /**
  * Icon toolbar that can be activated/deactivated
  */
 export class IconToolbar extends React.Component {
-
     constructor(props) {
         super(props);
-        this.state = {isActive: false};
+        this.state = { isActive: false };
         this.handleToggleActive = this.handleToggleActive.bind(this);
     }
 
     handleToggleActive(e) {
-        this.setState({isActive: !this.state.isActive})
+        this.setState({ isActive: !this.state.isActive });
     }
 
     render() {
         return (
-            <div className={setClass(this.props.className, {'hidden': this.props.isHidden})}
+            <div
+                className={setClass(this.props.className, { hidden: this.props.isHidden })}
                 data-name={this.props.title}
             >
-
                 <RoundIconButton
                     tooltipPlacement="top"
                     title={this.props.title}
                     onClick={this.handleToggleActive}
                 >
-                    {this.state.isActive ? <Close/> : <this.props.iconComponent/>}
+                    {this.state.isActive ? <Close /> : <this.props.iconComponent />}
                 </RoundIconButton>
 
-                {(this.props.children || []).map((el, idx) => <ShowIf condition={this.state.isActive} key={idx}>
-                    {el}
-                </ShowIf>)}
+                {(this.props.children || []).map((el, idx) => (
+                    <ShowIf condition={this.state.isActive} key={idx}>
+                        {el}
+                    </ShowIf>
+                ))}
             </div>
-
-        )
+        );
     }
 }
 
