@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import swal from 'sweetalert';
 import * as THREE from "three";
 import {ModalBody} from "react-bootstrap";
@@ -175,5 +176,5 @@ export class ThreejsEditorModal extends ModalDialog {
 }
 
 ThreejsEditorModal.propTypes = {
-    materials: React.PropTypes.array,
+    materials: PropTypes.array,
 };

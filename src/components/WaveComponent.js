@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 import {Wave} from "../wave";
 
@@ -83,12 +84,12 @@ export class WaveComponent extends React.Component {
 
 WaveComponent.propTypes = {
     // Whether to trigger handleResizeTransition() on update
-    triggerHandleResize: React.PropTypes.bool,
+    triggerHandleResize: PropTypes.bool,
     // Wave settings
-    settings: React.PropTypes.object,
+    settings: PropTypes.object,
     // Material structure to be visualized
-    structure: React.PropTypes.object,
+    structure: PropTypes.object,
     // Expects "cell" property to represent the crystal unit cell for the atomic arrangement. Made.js UnitCell object.
-    cell: React.PropTypes.object,
-    boundaryConditions: React.PropTypes.object,
+    cell: PropTypes.object,
+    boundaryConditions: PropTypes.object,
 };

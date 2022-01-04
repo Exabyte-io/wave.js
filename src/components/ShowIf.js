@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * Renders children depending on a Boolean condition
@@ -12,8 +13,8 @@ class ShowIf extends React.Component {
 }
 
 ShowIf.propTypes = {
-    condition: React.PropTypes.bool.isRequired,
-    children: React.PropTypes.node.isRequired
+    condition: PropTypes.bool.isRequired,
+    children: PropTypes.node.isRequired
 };
 
 export {ShowIf}

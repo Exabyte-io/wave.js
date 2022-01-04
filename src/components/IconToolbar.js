@@ -1,6 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import setClass from 'classnames';
-import {Close} from 'material-ui-icons-next';
+import { Close } from "@material-ui/icons";
 
 import {ShowIf} from "./ShowIf";
 import {RoundIconButton} from "./RoundIconButton";
@@ -27,7 +28,7 @@ export class IconToolbar extends React.Component {
             >
 
                 <RoundIconButton
-                    tooltipPlacement="top" mini
+                    tooltipPlacement="top"
                     title={this.props.title}
                     onClick={this.handleToggleActive}
                 >
@@ -44,7 +45,7 @@ export class IconToolbar extends React.Component {
 }
 
 IconToolbar.propTypes = {
-    title: React.PropTypes.string,
-    iconComponent: React.PropTypes.func,
-    isHidden: React.PropTypes.bool,
+    title: PropTypes.string,
+    iconComponent: PropTypes.object,
+    isHidden: PropTypes.bool,
 };

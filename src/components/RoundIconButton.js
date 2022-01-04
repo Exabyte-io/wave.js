@@ -1,7 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from "underscore";
-import Button from 'material-ui-next/Button';
-import Tooltip from 'material-ui-next/Tooltip';
+import { IconButton } from '@material-ui/core';
+import { Tooltip } from '@material-ui/core';
 
 /**
  * Round icon button with toggle logic
@@ -25,7 +26,7 @@ export class RoundIconButton extends React.Component {
     render() {
         return (
             <Tooltip id={this.props.id} title={this.props.title.toUpperCase()} placement={this.props.tooltipPlacement}>
-                <Button
+                <IconButton
                     aria-checked={this.props.isToggleable && this.state.isToggled}
                     aria-label={this.props.label || this.props.title.toLowerCase()}
                     variant="fab"
@@ -41,12 +42,12 @@ export class RoundIconButton extends React.Component {
 }
 
 RoundIconButton.propTypes = {
-    title: React.PropTypes.string,
-    id: React.PropTypes.string,
-    label: React.PropTypes.string,
-    tooltipPlacement: React.PropTypes.string,
-    isToggleable: React.PropTypes.bool,
-    isToggled: React.PropTypes.bool,
+    title: PropTypes.string,
+    id: PropTypes.string,
+    label: PropTypes.string,
+    tooltipPlacement: PropTypes.string,
+    isToggleable: PropTypes.bool,
+    isToggled: PropTypes.bool,
 };
 
 RoundIconButton.defaultProps = {

@@ -1,17 +1,18 @@
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 import setClass from "classnames";
-import Tooltip from "material-ui-next/Tooltip";
-import JssProvider from 'react-jss/lib/JssProvider';
-import {createGenerateClassName} from "material-ui-next/styles";
+import { Tooltip } from "@material-ui/core";
+import { JssProvider } from 'react-jss';
+import { createGenerateClassName } from "@material-ui/core";
 
 import {
     NotInterested, ImportExport, RemoveRedEye,
     Replay, PictureInPicture, PowerSettingsNew,
-    FileDownload, ThreeDRotation, Autorenew,
+    CloudDownload, ThreeDRotation, Autorenew,
     GpsFixed, Edit, SwitchCamera, FormatShapes,
     Menu, BubbleChart
-} from 'material-ui-icons-next';
+} from "@material-ui/icons";
 
 import settings from "../settings";
 import {exportToDisk} from "../utils";
@@ -199,7 +200,7 @@ export class ThreeDEditor extends React.Component {
             <div className={setClass(this.classNamesForTopToolbar)}
                 data-name="Interactive"
             >
-                <RoundIconButton tooltipPlacement="top" mini
+                <RoundIconButton tooltipPlacement="top"
                     title="Interactive"
                     isToggled={this.state.isInteractive}
                     onClick={this.handleToggleInteractive}
@@ -215,7 +216,7 @@ export class ThreeDEditor extends React.Component {
      */
     getExportToolbarItems() {
         return [
-            <RoundIconButton key="Screenshot" tooltipPlacement="top" mini
+            <RoundIconButton key="Screenshot" tooltipPlacement="top"
                 title="Screenshot"
                 isToggleable={false}
                 onClick={this.handleTakeScreenshot}
@@ -223,12 +224,12 @@ export class ThreeDEditor extends React.Component {
                 <PictureInPicture/>
             </RoundIconButton>,
 
-            <RoundIconButton key="Download" tooltipPlacement="top" mini
+            <RoundIconButton key="Download" tooltipPlacement="top"
                 title="Download"
                 isToggleable={false}
                 onClick={this.handleDownloadClick}
             >
-                <FileDownload/>
+                <CloudDownload/>
             </RoundIconButton>
         ]
     }
@@ -251,7 +252,7 @@ export class ThreeDEditor extends React.Component {
      */
     getViewToolbarItems() {
         return [
-            <RoundIconButton key="Rotate/Zoom View [O]" tooltipPlacement="top" mini
+            <RoundIconButton key="Rotate/Zoom View [O]" tooltipPlacement="top"
                 isToggled={this._getWaveProperty('areOrbitControlsEnabled')}
                 title="Rotate/Zoom View [O]"
                 onClick={this.handleToggleOrbitControls}
@@ -259,7 +260,7 @@ export class ThreeDEditor extends React.Component {
                 <ThreeDRotation/>
             </RoundIconButton>,
 
-            <RoundIconButton key="Toggle Auto Rotate" tooltipPlacement="top" mini
+            <RoundIconButton key="Toggle Auto Rotate" tooltipPlacement="top"
                 isToggled={this._getWaveProperty('isOrbitControlsAnimationEnabled')}
                 title="Toggle Auto Rotate"
                 onClick={this.handleToggleOrbitControlsAnimation}
@@ -267,7 +268,7 @@ export class ThreeDEditor extends React.Component {
                 <Autorenew/>
             </RoundIconButton>,
 
-            <RoundIconButton key="Toggle Axes" tooltipPlacement="top" mini
+            <RoundIconButton key="Toggle Axes" tooltipPlacement="top"
                 isToggled={this._getWaveProperty('areAxesEnabled')}
                 title="Toggle Axes"
                 onClick={this.handleToggleAxes}
@@ -275,7 +276,7 @@ export class ThreeDEditor extends React.Component {
                 <GpsFixed/>
             </RoundIconButton>,
 
-            <RoundIconButton key="Toggle Orthographic Camera" tooltipPlacement="top" mini
+            <RoundIconButton key="Toggle Orthographic Camera" tooltipPlacement="top"
                 title="Toggle Orthographic Camera"
                 isToggled={this._getWaveProperty('isCameraOrthographic')}
                 onClick={this.handleToggleOrthographicCamera}
@@ -283,7 +284,7 @@ export class ThreeDEditor extends React.Component {
                 <SwitchCamera/>
             </RoundIconButton>,
 
-            <RoundIconButton key="Toggle Bonds" tooltipPlacement="top" mini
+            <RoundIconButton key="Toggle Bonds" tooltipPlacement="top"
                 title="Toggle Bonds"
                 isToggled={this._getWaveProperty('isDrawBondsEnabled')}
                 onClick={this.handleToggleBonds}
@@ -291,7 +292,7 @@ export class ThreeDEditor extends React.Component {
                 <Menu/>
             </RoundIconButton>,
 
-            <RoundIconButton key="Toggle Conventional Cell" tooltipPlacement="top" mini
+            <RoundIconButton key="Toggle Conventional Cell" tooltipPlacement="top"
                 title="Toggle Conventional Cell"
                 isToggled={this.state.isConventionalCellShown}
                 onClick={this.handleToggleConventionalCell}
@@ -299,7 +300,7 @@ export class ThreeDEditor extends React.Component {
                 <FormatShapes/>
             </RoundIconButton>,
 
-            <RoundIconButton key="Reset View" tooltipPlacement="top" mini
+            <RoundIconButton key="Reset View" tooltipPlacement="top"
                 title="Reset View"
                 isToggleable={false}
                 onClick={this.handleResetViewer}
@@ -373,7 +374,7 @@ export class ThreeDEditor extends React.Component {
             <div className={setClass(className, {'hidden': !this.state.isInteractive})}
                 data-name="3DEdit"
             >
-                <RoundIconButton key="3D Editor" tooltipPlacement="top" mini
+                <RoundIconButton key="3D Editor" tooltipPlacement="top"
                     title="3D Editor"
                     onClick={this.toggleThreejsEditorModal}
                 >
@@ -401,7 +402,7 @@ export class ThreeDEditor extends React.Component {
      * TODO: adjust the code above to use this
      * */
     getRoundIconButton(title, tooltipPlacement, onClick, icon) {
-        return <RoundIconButton tooltipPlacement={tooltipPlacement} mini
+        return <RoundIconButton tooltipPlacement={tooltipPlacement}
             title={title}
             isToggleable={false}
             onClick={onClick}
@@ -466,8 +467,8 @@ export class ThreeDEditor extends React.Component {
 }
 
 ThreeDEditor.propTypes = {
-    material: React.PropTypes.object,
-    isConventionalCellShown: React.PropTypes.bool,
-    onUpdate: React.PropTypes.func,
-    editable: React.PropTypes.bool
+    material: PropTypes.object,
+    isConventionalCellShown: PropTypes.bool,
+    onUpdate: PropTypes.func,
+    editable: PropTypes.bool
 };
