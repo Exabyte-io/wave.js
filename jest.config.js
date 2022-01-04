@@ -8,14 +8,22 @@ module.exports = {
     // Tell Jest to stop running tests after first failure.
     bail: false,
 
+    // use jsdom env
+    testEnvironment: "jsdom",
+
+    // coverage reports
+    collectCoverage: true,
+    collectCoverageFrom: ["src/**/*.js"],
+    coverageDirectory: "tests/coverage",
+
     // Jest 27 migrated to jest-circus as default
     testRunner: "jest-jasmine2",
 
     // A list of paths to modules that run some code to configure or set up the testing environment.
-    setupFiles: ["./setupFiles.js"],
+    setupFiles: ["./tests/setupFiles.js"],
 
     // A list of paths to modules that run some code to configure or set up the testing framework before each test.
-    setupFilesAfterEnv: ["./setupFilesAfterEnv.js"],
+    setupFilesAfterEnv: ["./tests/setupFilesAfterEnv.js"],
 
     // mock css files: https://jestjs.io/docs/en/webpack#handling-static-assets
     moduleNameMapper: {
