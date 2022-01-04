@@ -8,6 +8,9 @@ module.exports = {
     // Tell Jest to stop running tests after first failure.
     bail: false,
 
+    // Jest 27 migrated to jest-circus as default
+    testRunner: "jest-jasmine2",
+
     // A list of paths to modules that run some code to configure or set up the testing environment.
     setupFiles: ["./setupFiles.js"],
 
