@@ -24,7 +24,7 @@ jobs:
 
       - name: Run Tests
         shell: bash -l {0}
-        run: docker run wave:ubuntu
+        run: docker run wave:ubuntu test
 
   publish:
     needs: run-tests

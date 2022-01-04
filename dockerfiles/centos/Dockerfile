@@ -39,4 +39,6 @@ COPY . .
 RUN source scl_source enable devtoolset-8 && \
     npm install
 
+EXPOSE 3002
+
 ENTRYPOINT ["/opt/app/entrypoint.sh"]

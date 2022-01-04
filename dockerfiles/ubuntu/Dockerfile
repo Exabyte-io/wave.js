@@ -32,4 +32,6 @@ COPY . .
 
 RUN npm install
 
+EXPOSE 3002
+
 ENTRYPOINT ["/opt/app/entrypoint.sh"]
