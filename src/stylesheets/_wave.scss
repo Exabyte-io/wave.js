@@ -2,9 +2,10 @@
 
 // material-ui v1.00-beta.37 dark theme
 $material-ui-expansion-panels-color: #424242;
-$material-ui-menu-box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
-$material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2), 0px 0px 1px 1px rgba(255, 255, 255, 0.14), 0px 0px 1px 1px rgba(255, 255, 255, 0.12);
-
+$material-ui-menu-box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2),
+    0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
+$material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2),
+    0px 0px 1px 1px rgba(255, 255, 255, 0.14), 0px 0px 1px 1px rgba(255, 255, 255, 0.12);
 
 .hidden {
     display: none !important;
@@ -15,11 +16,16 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
     color: $exagray_darker;
     border-color: $exagray_darker;
     background-color: variables.$wave-background;
-    p, h1, h2, h3, h4, h5, h6 {
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
         color: $exagray-darker;
     }
 }
-
 
 @mixin darkScrollbar($width) {
     &::-webkit-scrollbar {
@@ -36,7 +42,6 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
 }
 
 .materials-designer-3d-editor {
-
     padding: 0;
 
     .buttons-toolbar {
@@ -92,7 +97,8 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
             margin: 10px 20px;
         }
 
-        .sphere-radius, .cell-repetitions {
+        .sphere-radius,
+        .cell-repetitions {
             border: none;
             width: 50px;
             height: 35px;
@@ -114,7 +120,6 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
             background: rgba(variables.$gray-darkest, 0.35);
         }
     }
-
 }
 
 .materials-designer-3d-editor {
@@ -144,7 +149,6 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
     &:hover.non-interactive .atom-view-cover {
         background: rgba(variables.$gray-darkest, 0.35);
     }
-
 }
 
 .three-renderer {
