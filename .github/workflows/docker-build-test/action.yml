@@ -9,8 +9,8 @@ runs:
   steps:
     - name: Build container
       shell: bash -l {0}
-      run: docker build -t wave:${{ inputs.base-os }} -f dockerfiles/${{ inputs.base-os }}/Dockerfile .
+      run: BASE_OS=${{ inputs.base-os }} docker-compose build
 
     - name: Run tests
       shell: bash -l {0}
-      run: docker run wave:${{ inputs.base-os }} test
+      run: BASE_OS=${{ inputs.base-os }} docker-compose run test
