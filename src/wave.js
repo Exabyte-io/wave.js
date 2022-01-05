@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import { mix } from "mixwith";
 import * as THREE from "three";
 

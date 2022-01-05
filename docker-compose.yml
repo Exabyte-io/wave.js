@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: ./dockerfiles/${BASE_OS}/Dockerfile
+    ports:
+      - ${PORT}:${PORT}
 
   test:
     image: wave-${BASE_OS}:${IMAGE_TAG}

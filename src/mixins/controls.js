@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import * as THREE from "three";
 
 import { UtilsMixin } from "./utils";

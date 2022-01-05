@@ -40,7 +40,7 @@ export function saveImageDataToFile(imgData, type = "png") {
  * @param mime {String} type of the content.
  * Source: https://github.com/kennethjiang/js-file-download/blob/master/file-download.js
  */
-export const exportToDisk = function (
+export const exportToDisk = function exportToDisk(
     content,
     name = "file",
     extension = "txt",
