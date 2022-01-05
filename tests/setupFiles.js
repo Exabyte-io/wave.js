@@ -1,4 +1,3 @@
-import { Made } from "@exabyte-io/made.js";
 import { configure } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 import expect from "expect";
@@ -7,8 +6,8 @@ import { toBeDeepCloseTo, toMatchCloseTo } from "jest-matcher-deep-close-to";
 import * as THREE from "three";
 
 import { Wave } from "../src/wave";
-import { ELEMENT_PROPERTIES, HEIGHT, WIDTH } from "./enums";
-import { createElement } from "./utils";
+import { ELEMENT_PROPERTIES } from "./enums";
+import { createElement, HEIGHT, WIDTH } from "./utils";
 
 // configure enzyme adapter
 configure({ adapter: new Adapter() });

@@ -4,10 +4,8 @@ import path from "path";
 
 // canvas element width/height
 import { Wave } from "../src/wave";
-import { createElement } from "./utils";
-
-export const WIDTH = 500;
-export const HEIGHT = 1000;
+// move width, height to utils to avoid import cycle
+import { createElement, HEIGHT, WIDTH } from "./utils";
 
 // used to override width/height element getters.
 export const ELEMENT_PROPERTIES = {

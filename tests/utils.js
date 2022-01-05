@@ -1,9 +1,11 @@
+/* eslint-disable prefer-promise-reject-errors */
 import fs from "fs";
 import looksSame from "looks-same";
 import path from "path";
 import { PNG } from "pngjs2";
 
-import { HEIGHT, WIDTH } from "./enums";
+export const WIDTH = 500;
+export const HEIGHT = 1000;
 
 /**
  * Creates a DOM element with given properties.
@@ -13,6 +15,7 @@ import { HEIGHT, WIDTH } from "./enums";
  */
 export function createElement(name, elementProperties) {
     const element = document.createElement(name);
+    // eslint-disable-next-line no-restricted-syntax, guard-for-in
     for (const key in elementProperties) {
         const properties = {
             ...elementProperties[key],
@@ -29,6 +32,7 @@ export function createElement(name, elementProperties) {
  * Source: https://stackoverflow.com/questions/41969562/how-can-i-flip-the-result-of-webglrenderingcontext-readpixels
  */
 export function flipPixels(pixels) {
+    // eslint-disable-next-line no-bitwise
     const halfHeight = (HEIGHT / 2) | 0; // the | 0 keeps the result an int
     const bytesPerRow = WIDTH * 4;
 
@@ -74,9 +78,13 @@ export function takeSnapshot(webGLContext, imagePath) {
     });
     png.data = pixels;
     return new Promise((resolve, reject) => {
-        png.pack()
-            .pipe(fs.createWriteStream(imagePath))
-            .on("finish", () => resolve(true));
+        try {
+            png.pack()
+                .pipe(fs.createWriteStream(imagePath))
+                .on("finish", () => resolve(true));
+        } catch (err) {
+            reject(false);
+        }
     });
 }
 
