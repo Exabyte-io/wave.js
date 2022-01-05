@@ -66,6 +66,7 @@ export const AtomsMixin = (superclass) =>
             sphereMesh.material = sphereMesh.material.clone();
             sphereMesh.material.setValues({ color });
 
+            // eslint-disable-next-line no-multi-assign
             sphereMesh.scale.x = sphereMesh.scale.y = sphereMesh.scale.z = radius;
             sphereMesh.position.set(...coordinate);
 

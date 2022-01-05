@@ -8,6 +8,7 @@ import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
+// eslint-disable-next-line import/no-cycle
 import { saveImageDataToFile } from "./utils";
 
 const TV3 = THREE.Vector3;
@@ -55,6 +56,7 @@ class WaveBase {
         this.ASPECT = this.WIDTH / this.HEIGHT;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     getWebGLRenderer(config) {
         return new THREE.WebGLRenderer(config);
     }
@@ -128,6 +130,7 @@ class WaveBase {
         this.scene.fog = new THREE.FogExp2(this.settings.backgroundColor, 0.00025 / 100);
     }
 
+    // eslint-disable-next-line class-methods-use-this
     createStructureGroup(structure) {
         const structureGroup = new THREE.Group();
         structureGroup.name = structure.name || structure.formula;
@@ -169,6 +172,7 @@ class WaveBase {
     }
 
     setBackground(hex, a) {
+        // eslint-disable-next-line no-bitwise, no-param-reassign
         a |= 1.0;
         this.settings.backgroundColor = hex;
         this.renderer.setClearColor(hex, a);
@@ -214,13 +218,13 @@ export class Wave extends mix(WaveBase).with(
         this.drawAtomsAsSpheres();
         this.drawUnitCell();
         this.drawBoundaries();
-        this.isDrawBondsEnabled && this.drawBonds();
+        if (this.isDrawBondsEnabled) this.drawBonds();
         this.render();
     }
 
     render() {
         this.renderer.render(this.scene, this.camera);
-        this.renderer2 && this.renderer2.render(this.scene2, this.camera2);
+        if (this.renderer2) this.renderer2.render(this.scene2, this.camera2);
     }
 
     doFunc(func) {

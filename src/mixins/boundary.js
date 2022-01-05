@@ -35,6 +35,7 @@ export const BoundaryMixin = (superclass) =>
          * @param coordinates4 {Array} fourth point.
          * @param zOffset {Number} offset to add to the z coordinate of points forming the object.
          */
+        // eslint-disable-next-line class-methods-use-this
         getBoundaryMeshObject(
             color,
             coordinates1,

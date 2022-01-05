@@ -84,9 +84,11 @@ const OrbitControlsMixin = (superclass) =>
         }
 
         toggleOrbitControlsAnimation() {
-            this.animationFrameId
-                ? this.disableOrbitControlsAnimation()
-                : this.enableOrbitControlsAnimation();
+            if (this.animationFrameId) {
+                this.disableOrbitControlsAnimation();
+            } else {
+                this.enableOrbitControlsAnimation();
+            }
         }
 
         /*
@@ -143,7 +145,11 @@ const OrbitControlsMixin = (superclass) =>
         }
 
         toggleAxes() {
-            this.areAxesEnabled ? this.deleteAxes() : this.initAxes();
+            if (this.areAxesEnabled) {
+                this.deleteAxes();
+            } else {
+                this.initAxes();
+            }
             this.render();
         }
 
@@ -274,8 +280,9 @@ export const ControlsMixin = (superclass) =>
                 toggleOrbitControls(skipStateUpdate = false) {
                     const initialState = this.getControlsState();
                     this.toggleBoolean("areOrbitControlsEnabled");
-                    !skipStateUpdate &&
+                    if (!skipStateUpdate) {
                         this.updateControlsFromState(initialState, this.getControlsState());
+                    }
                 }
 
                 updateControlsFromState(initialState, finalState) {
@@ -285,10 +292,13 @@ export const ControlsMixin = (superclass) =>
                             finalState,
                         );
 
-                        diffObject.areOrbitControlsEnabled &&
-                            (this.areOrbitControlsEnabled
-                                ? this.enableOrbitControls()
-                                : this.disableOrbitControls());
+                        if (diffObject.areOrbitControlsEnabled) {
+                            if (this.areOrbitControlsEnabled) {
+                                this.enableOrbitControls();
+                            } else {
+                                this.disableOrbitControls();
+                            }
+                        }
                     }
                     this.render();
                 }

@@ -12,12 +12,14 @@ export const UtilsMixin = (superclass) =>
             }
         }
 
+        // eslint-disable-next-line class-methods-use-this
         areTwoObjectsShallowEqual(o1, o2) {
             return Object.keys(o1)
                 .map((key) => o1[key] === o2[key])
                 .reduce((a, b) => a && b);
         }
 
+        // eslint-disable-next-line class-methods-use-this
         getTwoObjectsShallowDifferentKeys(o1, o2) {
             const resultingObject = {};
             const differentKeysArray = Object.keys(o1).filter((key) => o1[key] !== o2[key]);
