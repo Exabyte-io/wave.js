@@ -10,4 +10,6 @@ services:
   test:
     image: wave-${BASE_OS}:${IMAGE_TAG}
     command: ["test"]
+    environment:
+      REACT_APP_BASE_OS: ${BASE_OS}
 

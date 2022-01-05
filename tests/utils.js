@@ -2,7 +2,7 @@
 import fs from "fs";
 import looksSame from "looks-same";
 import path from "path";
-import { PNG } from "pngjs2";
+import { PNG } from "pngjs";
 
 export const WIDTH = 500;
 export const HEIGHT = 1000;
@@ -88,6 +88,12 @@ export function takeSnapshot(webGLContext, imagePath) {
     });
 }
 
+export function getExpectedImageFilePath(snapshotDir, imagePrefix) {
+    let os = process.env.REACT_APP_BASE_OS;
+    if (!os) os = "macos";
+    return path.resolve(snapshotDir, `${os}/${imagePrefix}.expected.png`);
+}
+
 /**
  * Takes snapshot, saves the image and compares it with the reference.
  * @param webGLContext {Object} WebGLRenderer context
@@ -97,16 +103,22 @@ export function takeSnapshot(webGLContext, imagePath) {
 export async function takeSnapshotAndAssertEqualityAsync(webGLContext, imagePrefix) {
     const snapshotDir = path.resolve(__dirname, "__tests__", "__snapshots__");
     const actualImageFilePath = path.resolve(snapshotDir, `${imagePrefix}.actual.png`);
-    const expectedImageFilePath = path.resolve(snapshotDir, `${imagePrefix}.expected.png`);
+    const expectedImageFilePath = getExpectedImageFilePath(snapshotDir, imagePrefix);
     await expect(takeSnapshot(webGLContext, actualImageFilePath)).resolves.toBe(true);
     const promise = new Promise((resolve, reject) => {
         try {
-            looksSame(actualImageFilePath, expectedImageFilePath, (err, { equal }) => {
-                if (err) reject(false);
-                resolve(equal);
+            looksSame(actualImageFilePath, expectedImageFilePath, (err, result) => {
+                if (err) {
+                    reject(`looksSame returned error: ${err}`);
+                } else if (result && result.equal) {
+                    resolve(result.equal);
+                } else {
+                    reject(`looksSame returned result: ${result}`);
+                };
             });
         } catch (err) {
-            reject(false);
+            reject(`looksSame threw unhandled exception: ${err}`);
+
         }
     });
     return expect(promise).resolves.toBe(true);

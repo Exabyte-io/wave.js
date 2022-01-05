@@ -1,2 +1,2 @@
 *.snap filter=lfs diff=lfs merge=lfs -text
-*.expected.png filter=lfs diff=lfs merge=lfs -text
+**.expected.png filter=lfs diff=lfs merge=lfs -text
