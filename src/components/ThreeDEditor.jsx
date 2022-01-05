@@ -566,7 +566,7 @@ export class ThreeDEditor extends React.Component {
 
 ThreeDEditor.propTypes = {
     material: PropTypes.instanceOf(Made.Material).isRequired,
-    editable: PropTypes.bool.isRequired,
+    editable: PropTypes.bool,
     isConventionalCellShown: PropTypes.bool,
     // eslint-disable-next-line react/forbid-prop-types
     boundaryConditions: PropTypes.object,
@@ -577,4 +577,5 @@ ThreeDEditor.defaultProps = {
     boundaryConditions: {},
     isConventionalCellShown: false,
     onUpdate: undefined,
+    editable: false,
 };
