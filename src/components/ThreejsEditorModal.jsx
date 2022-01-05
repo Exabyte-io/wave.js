@@ -5,6 +5,7 @@ import swal from "sweetalert";
 import * as THREE from "three";
 import ThreeOrbitControls from "three-orbit-controls";
 
+import { Made } from "@exabyte-io/made.js";
 import { THREE_D_BASE_URL, THREE_D_SOURCES } from "../enums";
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
@@ -22,6 +23,7 @@ export class ThreejsEditorModal extends ModalDialog {
         this.injectScripts();
     }
 
+    // eslint-disable-next-line no-unused-vars
     componentDidUpdate(prevProps, prevState, snapshot) {
         window.localStorage.removeItem("threejs-editor");
     }
@@ -30,6 +32,7 @@ export class ThreejsEditorModal extends ModalDialog {
      * `Number.prototype.format` is used inside three.js editor codebase to format the numbers.
      * The editor does not start without it. The ESLint line is a way to turn off the warning shown in the console.
      */
+    // eslint-disable-next-line class-methods-use-this
     setNumberFormat() {
         /* eslint no-extend-native: [0, { "exceptions": ["Object"] }] */
         Number.prototype.format = function () {
@@ -103,7 +106,7 @@ export class ThreejsEditorModal extends ModalDialog {
             false,
         );
 
-        function onWindowResize(event) {
+        function onWindowResize() {
             clsInstance.editor.signals.windowResize.dispatch();
         }
 
@@ -145,7 +148,7 @@ export class ThreejsEditorModal extends ModalDialog {
         });
     }
 
-    showAlert(error) {
+    showAlert() {
         swal({
             icon: "error",
             buttons: {
@@ -190,5 +193,5 @@ export class ThreejsEditorModal extends ModalDialog {
 }
 
 ThreejsEditorModal.propTypes = {
-    materials: PropTypes.array,
+    materials: PropTypes.arrayOf(Made.Material).isRequired,
 };

@@ -16,26 +16,28 @@ export class IconToolbar extends React.Component {
         this.handleToggleActive = this.handleToggleActive.bind(this);
     }
 
+    // eslint-disable-next-line no-unused-vars
     handleToggleActive(e) {
-        this.setState({ isActive: !this.state.isActive });
+        const { isActive } = this.state;
+        this.setState({ isActive: !isActive });
     }
 
     render() {
+        const { className, children, isHidden, title } = this.props;
+        const { isActive } = this.state;
         return (
-            <div
-                className={setClass(this.props.className, { hidden: this.props.isHidden })}
-                data-name={this.props.title}
-            >
+            <div className={setClass(className, { hidden: isHidden })} data-name={title}>
                 <RoundIconButton
                     tooltipPlacement="top"
-                    title={this.props.title}
+                    title={title}
                     onClick={this.handleToggleActive}
                 >
-                    {this.state.isActive ? <Close /> : <this.props.iconComponent />}
+                    {isActive ? <Close /> : <this.props.iconComponent />}
                 </RoundIconButton>
 
-                {(this.props.children || []).map((el, idx) => (
-                    <ShowIf condition={this.state.isActive} key={idx}>
+                {children.map((el, idx) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <ShowIf condition={isActive} key={idx}>
                         {el}
                     </ShowIf>
                 ))}
@@ -45,7 +47,14 @@ export class IconToolbar extends React.Component {
 }
 
 IconToolbar.propTypes = {
-    title: PropTypes.string,
-    iconComponent: PropTypes.object,
-    isHidden: PropTypes.bool,
+    title: PropTypes.string.isRequired,
+    // eslint-disable-next-line react/no-unused-prop-types, react/forbid-prop-types
+    iconComponent: PropTypes.object.isRequired,
+    isHidden: PropTypes.bool.isRequired,
+    className: PropTypes.string.isRequired,
+    children: PropTypes.node,
+};
+
+IconToolbar.defaultProps = {
+    children: [],
 };

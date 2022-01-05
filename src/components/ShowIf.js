@@ -8,7 +8,8 @@ import React from "react";
  */
 class ShowIf extends React.Component {
     render() {
-        return this.props.condition ? this.props.children : null;
+        const { condition, children } = this.props;
+        return condition ? children : null;
     }
 }
 

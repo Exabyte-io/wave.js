@@ -10,34 +10,35 @@ export class ModalDialog extends React.Component {
         this.renderBody = this.renderBody.bind(this);
     }
 
+    onHide(e) {
+        const { onHide } = this.props;
+        onHide(e);
+        this.removeStylingFromBody();
+    }
+
+    removeStylingFromBody() {
+        const { backdropColor } = this.props;
+        document.body.classList.remove("modal-backdrop-color-" + backdropColor);
+    }
+
+    // eslint-disable-next-line class-methods-use-this
     renderBody() {
         return null;
     }
 
-    removeStylingFromBody() {
-        document.body.classList.remove("modal-backdrop-color-" + this.props.backdropColor);
-    }
-
-    onHide(e) {
-        this.props.onHide(e);
-        this.removeStylingFromBody();
-    }
-
     render() {
-        const className = setClass(
-            this.props.className,
-            this.props.isFullWidth ? "full-page-overlay" : "",
-        );
-        if (this.props.show) {
-            document.body.classList.add("modal-backdrop-color-" + this.props.backdropColor);
+        const { className, isFullWidth, show, backdropColor, modalId } = this.props;
+        const setClassName = setClass(className, isFullWidth ? "full-page-overlay" : "");
+        if (show) {
+            document.body.classList.add("modal-backdrop-color-" + backdropColor);
         }
         return (
             <Modal
-                id={this.props.modalId}
+                id={modalId}
                 animation={false}
-                show={this.props.show}
+                show={show}
                 onHide={this.onHide}
-                className={className}
+                className={setClassName}
             >
                 {this.renderBody()}
             </Modal>
@@ -46,11 +47,10 @@ export class ModalDialog extends React.Component {
 }
 
 ModalDialog.propTypes = {
-    modalId: PropTypes.string,
-    show: PropTypes.bool,
-    onHide: PropTypes.func,
-    title: PropTypes.string,
-    className: PropTypes.string,
+    modalId: PropTypes.string.isRequired,
+    show: PropTypes.bool.isRequired,
+    onHide: PropTypes.func.isRequired,
+    className: PropTypes.string.isRequired,
     isFullWidth: PropTypes.bool,
     backdropColor: PropTypes.string,
 };

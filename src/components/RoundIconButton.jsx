@@ -9,34 +9,36 @@ import _ from "underscore";
 export class RoundIconButton extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { isToggled: this.props.isToggled || false };
+        const { isToggled } = this.props;
+        this.state = { isToggled };
         this.handleToggle = this.handleToggle.bind(this);
     }
 
-    componentWillReceiveProps(newProps) {
-        if (this.props.isToggled !== newProps.isToggled)
-            this.setState({ isToggled: newProps.isToggled || false });
+    // eslint-disable-next-line no-unused-vars
+    UNSAFE_componentWillReceiveProps({ isToggled: newToggled }, newContext) {
+        const { isToggled } = this.props;
+        if (isToggled !== newToggled) this.setState({ isToggled: newToggled || false });
     }
 
     handleToggle() {
-        this.setState({ isToggled: !this.state.isToggled });
+        const { isToggled } = this.state;
+        this.setState({ isToggled: !isToggled });
     }
 
     render() {
+        const { id, label, title, onClick, tooltipPlacement, isToggleable } = this.props;
+        const { isToggled } = this.state;
         return (
-            <Tooltip
-                id={this.props.id}
-                title={this.props.title.toUpperCase()}
-                placement={this.props.tooltipPlacement}
-            >
+            <Tooltip id={id} title={title.toUpperCase()} placement={tooltipPlacement}>
                 <IconButton
-                    aria-checked={this.props.isToggleable && this.state.isToggled}
-                    aria-label={this.props.label || this.props.title.toLowerCase()}
+                    aria-checked={isToggleable && isToggled}
+                    aria-label={label || title.toLowerCase()}
                     variant="fab"
                     onClick={(...args) => {
-                        this.props.onClick(...args);
+                        onClick(...args);
                         this.handleToggle();
                     }}
+                    // eslint-disable-next-line react/jsx-props-no-spreading
                     {..._.omit(
                         this.props,
                         "title",
@@ -54,14 +56,18 @@ export class RoundIconButton extends React.Component {
 }
 
 RoundIconButton.propTypes = {
-    title: PropTypes.string,
+    title: PropTypes.string.isRequired,
     id: PropTypes.string,
     label: PropTypes.string,
-    tooltipPlacement: PropTypes.string,
+    onClick: PropTypes.func.isRequired,
+    tooltipPlacement: PropTypes.string.isRequired,
     isToggleable: PropTypes.bool,
     isToggled: PropTypes.bool,
 };
 
 RoundIconButton.defaultProps = {
     isToggleable: true,
+    isToggled: false,
+    label: undefined,
+    id: undefined,
 };
