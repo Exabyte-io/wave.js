@@ -16,14 +16,8 @@ module.exports = {
     collectCoverageFrom: ["src/**/*.js"],
     coverageDirectory: "tests/coverage",
 
-    // Jest 27 migrated to jest-circus as default
-    testRunner: "jest-jasmine2",
-
     // A list of paths to modules that run some code to configure or set up the testing environment.
     setupFiles: ["./tests/setupFiles.js"],
-
-    // A list of paths to modules that run some code to configure or set up the testing framework before each test.
-    setupFilesAfterEnv: ["./tests/setupFilesAfterEnv.js"],
 
     // mock css files: https://jestjs.io/docs/en/webpack#handling-static-assets
     moduleNameMapper: {
