@@ -5,7 +5,7 @@
     "scripts": {
         "prepublishOnly": "rm -rf dist; npm run transpile",
         "start": "PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
-        "transpile": "babel --out-dir dist src --copy-files",
+        "transpile": "babel --out-dir dist src; sass src/stylesheets:dist/stylesheets",
         "postinstall": "npm run transpile",
         "test": "npx jest",
         "lint": "eslint src tests && prettier --write src tests",
@@ -25,7 +25,6 @@
     "license": "Apache-2.0",
     "homepage": "https://github.com/Exabyte-io/wave",
     "dependencies": {
-        "@babel/cli": "7.16.0",
         "@babel/core": "7.16.0",
         "@babel/eslint-parser": "7.16.3",
         "@babel/plugin-proposal-class-properties": "7.16.0",
@@ -40,9 +39,7 @@
         "jquery": "3.6.0",
         "mixwith": "^0.1.1",
         "prop-types": "^15.8.0",
-        "react": "16.14.0",
         "react-bootstrap": "2.1.0",
-        "react-dom": "16.14.0",
         "react-jss": "10.9.0",
         "react-scripts": "5.0.0",
         "sass": "1.45.2",
@@ -55,7 +52,12 @@
         "underscore": "^1.8.3",
         "underscore.string": "^3.3.4"
     },
+    "peerDependencies": {
+        "react": "16.14.0",
+        "react-dom": "16.14.0"
+    },
     "devDependencies": {
+        "@babel/cli": "7.16.0",
         "enzyme": "3.11.0",
         "enzyme-adapter-react-16": "1.15.6",
         "eslint": "7.32.0",
@@ -75,6 +77,8 @@
         "looks-same": "7.3.0",
         "pngjs": "6.0.0",
         "prettier": "2.5.1",
+        "react": "16.14.0",
+        "react-dom": "16.14.0",
         "react-test-renderer": "16.4.0"
     },
     "engines": {
