@@ -1,5 +1,5 @@
 /* eslint-disable react/sort-comp */
-import { createGenerateClassName, Tooltip } from "@material-ui/core";
+import { createGenerateClassName, Tooltip } from "material-ui";
 import {
     Autorenew,
     BubbleChart,

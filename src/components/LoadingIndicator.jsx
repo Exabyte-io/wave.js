@@ -1,4 +1,4 @@
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "material-ui";
 import React from "react";
 
 export const LoadingIndicator = function LoadingIndicator() {

@@ -1,5 +1,5 @@
 import { configure } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
+import Adapter from "enzyme-adapter-react-15";
 import expect from "expect";
 import GL from "gl";
 import { toBeDeepCloseTo, toMatchCloseTo } from "jest-matcher-deep-close-to";
