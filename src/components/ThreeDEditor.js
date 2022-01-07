@@ -2,9 +2,9 @@ import $ from 'jquery';
 import React from 'react';
 import PropTypes from 'prop-types';
 import setClass from "classnames";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "material-ui";
 import { JssProvider } from 'react-jss';
-import { createGenerateClassName } from "@material-ui/core";
+import { createGenerateClassName } from "material-ui";
 
 import {
     NotInterested, ImportExport, RemoveRedEye,

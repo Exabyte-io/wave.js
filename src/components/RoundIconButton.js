@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from "underscore";
-import { IconButton } from '@material-ui/core';
-import { Tooltip } from '@material-ui/core';
+import { IconButton } from 'material-ui';
+import { Tooltip } from 'material-ui';
 
 /**
  * Round icon button with toggle logic
