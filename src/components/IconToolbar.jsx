@@ -49,7 +49,7 @@ export class IconToolbar extends React.Component {
 IconToolbar.propTypes = {
     title: PropTypes.string.isRequired,
     // eslint-disable-next-line react/no-unused-prop-types, react/forbid-prop-types
-    iconComponent: PropTypes.object.isRequired,
+    iconComponent: PropTypes.func.isRequired,
     isHidden: PropTypes.bool.isRequired,
     className: PropTypes.string.isRequired,
     children: PropTypes.node,
