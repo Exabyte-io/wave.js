@@ -29,7 +29,6 @@ export class RoundIconButton extends React.Component {
                 <IconButton
                     aria-checked={this.props.isToggleable && this.state.isToggled}
                     aria-label={this.props.label || this.props.title.toLowerCase()}
-                    variant="fab"
                     onClick={(...args) => {
                         this.props.onClick(...args);
                         this.handleToggle();

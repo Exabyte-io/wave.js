@@ -46,6 +46,6 @@ export class IconToolbar extends React.Component {
 
 IconToolbar.propTypes = {
     title: PropTypes.string,
-    iconComponent: PropTypes.object,
+    iconComponent: PropTypes.func,
     isHidden: PropTypes.bool,
 };
