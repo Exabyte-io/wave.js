@@ -1,3 +1,7 @@
 dist/
 build/
 node_modules/
+.eslintcache
+.husky/
+.nyc_output/
+tests/coverage/

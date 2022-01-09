@@ -135,21 +135,21 @@ export const BOUNDARY_CONDITIONS = [
     {
         type: "pbc",
         name: "Periodic Boundary Condition (pbc)",
-        isNonPeriodic: false
+        isNonPeriodic: false,
     },
     {
         type: "bc1",
         name: "Vacuum-Slab-Vacuum (bc1)",
-        isNonPeriodic: true
+        isNonPeriodic: true,
     },
     {
         type: "bc2",
         name: "Metal-Slab-Metal (bc2)",
-        isNonPeriodic: true
+        isNonPeriodic: true,
     },
     {
         type: "bc3",
         name: "Vacuum-Slab-Metal (bc3)",
-        isNonPeriodic: true
-    }
+        isNonPeriodic: true,
+    },
 ];

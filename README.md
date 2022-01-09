@@ -75,12 +75,32 @@ Desirable features for implementation:
 
 ## Tests
 
-There are two types of tests: asserting Wave class functionality and testing React components. Wave class tests use snapshot testing in which an snapshot of the WebGL [[3]](#links) context is taken and compared with the reference. The test will fail if the two snapshots do not match. React component tests use Enzyme [[4]](#links) that makes DOM manipulation and traversal easier.
+There are two types of tests: asserting Wave class functionality and testing React components.
+Wave class tests use snapshot testing in which an snapshot of the WebGL [[3]](#links) context
+is taken and compared with the reference. The test will fail if the two snapshots do not match.
+This is admittedly a bit fragile, and future work may improve the test coverage such that this
+is no longer necessary. React component tests use Enzyme [[4]](#links) that makes DOM manipulation
+and traversal easier.
 
-In order to make the tests continuously pass locally and on the CI, the tests should be executed in the same environment as the snapshots may be slightly different on different operating systems. We recommend to use Docker container or Vagrant VM with CentOS 7.2 as OS to execute the tests. Wave tests are written based on Jest [[5]](#links) framework and can be executed as below.
+Since snapshots may be slightly different depending on operating systems, they are versioned by
+the operating system on which they were generated. We currently support `macos`, `ubuntu`, and
+`centos`. This can be picked up in a test run by setting `REACT_APP_BASE_OS=(current OS)` and are
+tested both on `ubuntu` (on branches) and `centos` (on dev) in CI. A `docker-compose.yml` is provided
+for convenience which defaults to using `ubuntu` (see `.env`) so that there are 3 options for running
+tests:
 
 ```bash
-sh run-tests.sh
+# In an ubuntu container
+docker-compose build
+docker-compose run test
+
+# OR in a centos container
+BASE_OS=centos docker-compose build
+BASE_OS=centos docker-compose run test
+
+# OR if you're on a mac
+npm install
+npm test
 ```
 
 ### Important Notes
