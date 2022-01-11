@@ -1,29 +1,34 @@
+import PropTypes from "prop-types";
 import React from "react";
 
-import {Wave} from "../wave";
+import { Wave } from "../wave";
 
 /*
  * Wrapper component for materials visualizer. Uses Wave class to render a material structure.
  * See below for property description.
  */
 export class WaveComponent extends React.Component {
-
     constructor(props) {
         super(props);
         this.state = {
+            // eslint-disable-next-line react/no-unused-state
             isFullscreen: false,
         };
     }
 
-    componentDidMount() {this.initViewer()}
+    componentDidMount() {
+        this.initViewer();
+    }
 
-    componentDidUpdate(prevProps, prevState) {
-        this.props.triggerHandleResize && this._handleResizeTransition();
+    // eslint-disable-next-line no-unused-vars
+    componentDidUpdate({ structure: prevStructure, settings: prevSettings }, prevState, snapshot) {
+        const { settings, structure, triggerHandleResize } = this.props;
+        if (triggerHandleResize) this._handleResizeTransition();
         if (this.wave) {
             // recreate bonds asynchronously if structure is changed.
             this.reloadViewer(
-                prevProps.structure.hash !== this.props.structure.hash ||
-                prevProps.settings.chemicalConnectivityFactor !== this.props.settings.chemicalConnectivityFactor
+                prevStructure.hash !== structure.hash ||
+                    prevSettings.chemicalConnectivityFactor !== settings.chemicalConnectivityFactor,
             );
         }
     }
@@ -31,18 +36,19 @@ export class WaveComponent extends React.Component {
     _cleanViewer() {
         const el = this.rendererDomElement;
         while (el.firstChild) {
-            el.removeChild(el.firstChild)
+            el.removeChild(el.firstChild);
         }
     }
 
     initViewer() {
         this._cleanViewer();
+        const { structure, cell, settings, boundaryConditions } = this.props;
         this.wave = new Wave({
             DOMElement: this.rendererDomElement,
-            structure: this.props.structure,
-            cell: this.props.cell,
-            settings: this.props.settings,
-            boundaryConditions: this.props.boundaryConditions
+            structure,
+            cell,
+            settings,
+            boundaryConditions,
         });
         // The height of the dom element is initially zero as css is loaded after component is rendered, hence below.
         this._handleResizeTransition();
@@ -60,35 +66,43 @@ export class WaveComponent extends React.Component {
         // When running in headless mode in tests the browser does not support
         // WebGL, so exception will be thrown. It may get in a way with other events => catching it.
         try {
-            this.wave.updateSettings(this.props.settings);
-            this.wave.setStructure(this.props.structure);
-            this.wave.boundaryConditions = this.props.boundaryConditions;
-            this.wave.setCell(this.props.cell);
+            const { settings, structure, boundaryConditions, cell } = this.props;
+            this.wave.updateSettings(settings);
+            this.wave.setStructure(structure);
+            this.wave.boundaryConditions = boundaryConditions;
+            this.wave.setCell(cell);
             if (createBondsAsync) this.wave.createBondsAsync();
             this.wave.rebuildScene();
         } catch (e) {
-            console.warn('exception caught when rendering atomic viewer', e);
+            console.warn("exception caught when rendering atomic viewer", e);
         }
     }
 
     render() {
         return (
-            <div id={this.id}
+            <div
+                id={this.id}
                 className="three-renderer"
-                ref={(el) => {this.rendererDomElement = el}}
+                ref={(el) => {
+                    this.rendererDomElement = el;
+                }}
             />
-        )
+        );
     }
 }
 
 WaveComponent.propTypes = {
     // Whether to trigger handleResizeTransition() on update
-    triggerHandleResize: React.PropTypes.bool,
+    triggerHandleResize: PropTypes.bool.isRequired,
     // Wave settings
-    settings: React.PropTypes.object,
+    // eslint-disable-next-line react/forbid-prop-types
+    settings: PropTypes.object.isRequired,
     // Material structure to be visualized
-    structure: React.PropTypes.object,
+    // eslint-disable-next-line react/forbid-prop-types
+    structure: PropTypes.object.isRequired,
     // Expects "cell" property to represent the crystal unit cell for the atomic arrangement. Made.js UnitCell object.
-    cell: React.PropTypes.object,
-    boundaryConditions: React.PropTypes.object,
+    // eslint-disable-next-line react/forbid-prop-types
+    cell: PropTypes.object.isRequired,
+    // eslint-disable-next-line react/forbid-prop-types
+    boundaryConditions: PropTypes.object.isRequired,
 };

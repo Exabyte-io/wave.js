@@ -1,8 +1,11 @@
+/* eslint-disable prefer-promise-reject-errors */
 import fs from "fs";
-import path from "path";
-import {PNG} from "pngjs2";
 import looksSame from "looks-same";
-import {WIDTH, HEIGHT} from "./enums";
+import path from "path";
+import { PNG } from "pngjs";
+
+export const WIDTH = 500;
+export const HEIGHT = 1000;
 
 /**
  * Creates a DOM element with given properties.
@@ -12,12 +15,13 @@ import {WIDTH, HEIGHT} from "./enums";
  */
 export function createElement(name, elementProperties) {
     const element = document.createElement(name);
+    // eslint-disable-next-line no-restricted-syntax, guard-for-in
     for (const key in elementProperties) {
         const properties = {
             ...elementProperties[key],
-            writable: true
+            writable: true,
         };
-        Object.defineProperty(element, key, properties)
+        Object.defineProperty(element, key, properties);
     }
     return element;
 }
@@ -28,14 +32,15 @@ export function createElement(name, elementProperties) {
  * Source: https://stackoverflow.com/questions/41969562/how-can-i-flip-the-result-of-webglrenderingcontext-readpixels
  */
 export function flipPixels(pixels) {
-    var halfHeight = HEIGHT / 2 | 0;  // the | 0 keeps the result an int
-    var bytesPerRow = WIDTH * 4;
+    // eslint-disable-next-line no-bitwise
+    const halfHeight = (HEIGHT / 2) | 0; // the | 0 keeps the result an int
+    const bytesPerRow = WIDTH * 4;
 
     // make a temp buffer to hold one row
-    var temp = new Uint8Array(WIDTH * 4);
-    for (var y = 0; y < halfHeight; ++y) {
-        var topOffset = y * bytesPerRow;
-        var bottomOffset = (HEIGHT - y - 1) * bytesPerRow;
+    const temp = new Uint8Array(WIDTH * 4);
+    for (let y = 0; y < halfHeight; ++y) {
+        const topOffset = y * bytesPerRow;
+        const bottomOffset = (HEIGHT - y - 1) * bytesPerRow;
 
         // make copy of a row on the top half
         temp.set(pixels.subarray(topOffset, topOffset + bytesPerRow));
@@ -57,18 +62,36 @@ export function flipPixels(pixels) {
  */
 export function takeSnapshot(webGLContext, imagePath) {
     const pixels = new Uint8Array(WIDTH * HEIGHT * 4);
-    webGLContext.readPixels(0, 0, WIDTH, HEIGHT, webGLContext.RGBA, webGLContext.UNSIGNED_BYTE, pixels);
+    webGLContext.readPixels(
+        0,
+        0,
+        WIDTH,
+        HEIGHT,
+        webGLContext.RGBA,
+        webGLContext.UNSIGNED_BYTE,
+        pixels,
+    );
     flipPixels(pixels);
-    let png = new PNG({
+    const png = new PNG({
         width: WIDTH,
-        height: HEIGHT
+        height: HEIGHT,
     });
     png.data = pixels;
     return new Promise((resolve, reject) => {
-        png.pack()
-            .pipe(fs.createWriteStream(imagePath))
-            .on('finish', () => resolve(true))
-    })
+        try {
+            png.pack()
+                .pipe(fs.createWriteStream(imagePath))
+                .on("finish", () => resolve(true));
+        } catch (err) {
+            reject(false);
+        }
+    });
+}
+
+export function getExpectedImageFilePath(snapshotDir, imagePrefix) {
+    let os = process.env.REACT_APP_BASE_OS;
+    if (!os) os = "macos";
+    return path.resolve(snapshotDir, `${os}/${imagePrefix}.expected.png`);
 }
 
 /**
@@ -80,25 +103,32 @@ export function takeSnapshot(webGLContext, imagePath) {
 export async function takeSnapshotAndAssertEqualityAsync(webGLContext, imagePrefix) {
     const snapshotDir = path.resolve(__dirname, "__tests__", "__snapshots__");
     const actualImageFilePath = path.resolve(snapshotDir, `${imagePrefix}.actual.png`);
-    const expectedImageFilePath = path.resolve(snapshotDir, `${imagePrefix}.expected.png`);
+    const expectedImageFilePath = getExpectedImageFilePath(snapshotDir, imagePrefix);
     await expect(takeSnapshot(webGLContext, actualImageFilePath)).resolves.toBe(true);
     const promise = new Promise((resolve, reject) => {
         try {
-            looksSame(actualImageFilePath, expectedImageFilePath, (err, {equal}) => {
-                if (err) reject(false);
-                resolve(equal);
+            looksSame(actualImageFilePath, expectedImageFilePath, (err, result) => {
+                if (err) {
+                    reject(`looksSame returned error: ${err}`);
+                } else if (result && result.equal) {
+                    resolve(result.equal);
+                } else {
+                    reject(`looksSame returned result: ${result}`);
+                }
             });
         } catch (err) {
-            reject(false);
+            reject(`looksSame threw unhandled exception: ${err}`);
         }
     });
     return expect(promise).resolves.toBe(true);
 }
 
 export function dispatchMouseDownMoveOrUpEvent(element, type, clientX, clientY, button = 0) {
-    element.dispatchEvent(new MouseEvent(type, {
-        button,
-        clientX,
-        clientY
-    }))
+    element.dispatchEvent(
+        new MouseEvent(type, {
+            button,
+            clientX,
+            clientY,
+        }),
+    );
 }

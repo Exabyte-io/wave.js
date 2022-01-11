@@ -1,4 +1,4 @@
-import {ELEMENT_VDW_RADII, ELEMENT_COLORS} from "@exabyte-io/periodic-table.js";
+import { ELEMENT_COLORS, ELEMENT_VDW_RADII } from "@exabyte-io/periodic-table.js";
 
 export default {
     // atoms
@@ -30,8 +30,8 @@ export default {
     initialCameraPosition: [-50, 0, 10],
 
     boundaryConditionTypeColors: {
-        "bc1": [0xffff00, 0xffff00],
-        "bc2": [0x0000FF, 0x0000FF],
-        "bc3": [0xffff00, 0x0000FF],
-    }
-}
+        bc1: [0xffff00, 0xffff00],
+        bc2: [0x0000ff, 0x0000ff],
+        bc3: [0xffff00, 0x0000ff],
+    },
+};

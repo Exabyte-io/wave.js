@@ -1,5 +1,4 @@
 #threejs-editor {
-
     button {
         color: #555;
         background-color: #ddd;
@@ -18,7 +17,8 @@
         background-color: #fff;
     }
 
-    input, textarea {
+    input,
+    textarea {
         border: 1px solid;
         //color: #444;
     }
@@ -250,7 +250,6 @@
     /* */
 
     @media all and (max-width: 600px) {
-
         #menubar .menu .options {
             max-height: calc(100% - 372px);
         }
@@ -292,7 +291,6 @@
             width: 280px;
             top: 52px;
         }
-
     }
 
     .ContextMenu {

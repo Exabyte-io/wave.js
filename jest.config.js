@@ -8,11 +8,16 @@ module.exports = {
     // Tell Jest to stop running tests after first failure.
     bail: false,
 
-    // A list of paths to modules that run some code to configure or set up the testing environment.
-    setupFiles: ["./setupFiles.js"],
+    // use jsdom env
+    testEnvironment: "jsdom",
 
-    // A list of paths to modules that run some code to configure or set up the testing framework before each test.
-    setupFilesAfterEnv: ["./setupFilesAfterEnv.js"],
+    // coverage reports
+    collectCoverage: true,
+    collectCoverageFrom: ["src/**/*.js"],
+    coverageDirectory: "tests/coverage",
+
+    // A list of paths to modules that run some code to configure or set up the testing environment.
+    setupFiles: ["./tests/setupFiles.js"],
 
     // mock css files: https://jestjs.io/docs/en/webpack#handling-static-assets
     moduleNameMapper: {

@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  wave:
+    image: wave-${BASE_OS}:${IMAGE_TAG}
+    build:
+      context: .
+      dockerfile: ./dockerfiles/${BASE_OS}/Dockerfile
+    ports:
+      - ${PORT}:${PORT}
+
+  test:
+    image: wave-${BASE_OS}:${IMAGE_TAG}
+    command: ["test"]
+    environment:
+      REACT_APP_BASE_OS: ${BASE_OS}
+

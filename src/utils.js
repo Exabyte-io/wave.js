@@ -1,8 +1,9 @@
+import { Made } from "@exabyte-io/made.js";
+import { sprintf } from "sprintf-js";
 import * as THREE from "three";
-import {sprintf} from 'sprintf-js';
-import {Made} from "@exabyte-io/made.js";
 
-import {Wave} from "./wave";
+// eslint-disable-next-line import/no-cycle
+import { Wave } from "./wave";
 
 /**
  * Helper to save textual/bitmap data to a file.
@@ -10,7 +11,7 @@ import {Wave} from "./wave";
  * @param {String} filename
  */
 export function saveFile(strData, filename) {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     document.body.appendChild(link);
     link.download = filename;
     link.href = strData;
@@ -23,10 +24,9 @@ export function saveFile(strData, filename) {
  * @param {String} imgData
  * @param {String} type
  */
-export function saveImageDataToFile(imgData, type = 'png') {
+export function saveImageDataToFile(imgData, type = "png") {
     try {
         saveFile(imgData, `screenshot.${type}`);
-
     } catch (e) {
         console.error(e);
     }
@@ -40,10 +40,15 @@ export function saveImageDataToFile(imgData, type = 'png') {
  * @param mime {String} type of the content.
  * Source: https://github.com/kennethjiang/js-file-download/blob/master/file-download.js
  */
-export const exportToDisk = function (content, name = 'file', extension = 'txt', mime = 'application/octet-stream') {
-    const blob = new Blob([content], {type: mime});
+export const exportToDisk = function exportToDisk(
+    content,
+    name = "file",
+    extension = "txt",
+    mime = "application/octet-stream",
+) {
+    const blob = new Blob([content], { type: mime });
     const filename = sprintf(`%s.${extension}`, name);
-    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+    if (typeof window.navigator.msSaveBlob !== "undefined") {
         // IE workaround for "HTML7007: One or more blob URLs were
         // revoked by closing the blob for which they were created.
         // These URLs will no longer resolve as the data backing
@@ -51,16 +56,16 @@ export const exportToDisk = function (content, name = 'file', extension = 'txt',
         window.navigator.msSaveBlob(blob, filename);
     } else {
         const blobURL = window.URL.createObjectURL(blob);
-        const tempLink = document.createElement('a');
-        tempLink.style.display = 'none';
+        const tempLink = document.createElement("a");
+        tempLink.style.display = "none";
         tempLink.href = blobURL;
-        tempLink.setAttribute('download', filename);
+        tempLink.setAttribute("download", filename);
 
         // Safari thinks _blank anchor are pop ups. We only want to set _blank
         // target if the browser does not support the HTML5 download attribute.
         // This allows you to download files in desktop safari if pop up blocking
         // is enabled.
-        if (typeof tempLink.download === 'undefined') tempLink.setAttribute('target', '_blank');
+        if (typeof tempLink.download === "undefined") tempLink.setAttribute("target", "_blank");
 
         document.body.appendChild(tempLink);
         tempLink.click();
@@ -74,14 +79,14 @@ export const exportToDisk = function (content, name = 'file', extension = 'txt',
  */
 function extractLatticeFromScene(scene) {
     const unitCellObject = scene.getObjectByProperty("type", "LineSegments");
-    const vertices = unitCellObject.geometry.vertices;
+    const { vertices } = unitCellObject.geometry;
     const a = vertices[1].sub(vertices[0]).toArray();
     const b = vertices[3].sub(vertices[0]).toArray();
     const c = vertices[17].sub(vertices[0]).toArray();
     return Made.Lattice.fromVectors({
         a,
         b,
-        c
+        c,
     });
 }
 
@@ -95,14 +100,14 @@ function extractBasisFromScene(scene, cell) {
     scene.traverse((object) => {
         if (object.type === "Mesh") {
             elements.push(object.name.split("-")[0] || "Si");
-            coordinates.push(object.getWorldPosition().toArray())
+            coordinates.push(object.getWorldPosition().toArray());
         }
     });
     return new Made.Basis({
         cell,
         elements,
         coordinates,
-        units: "cartesian"
+        units: "cartesian",
     });
 }
 
@@ -132,11 +137,11 @@ export function materialsToThreeDSceneData(materials, shift = [2, 0, 0]) {
     const wave = new Wave({
         structure: materials[0],
         cell: materials[0].Lattice.unitCell,
-        DOMElement: document.createElement("div")
+        DOMElement: document.createElement("div"),
     });
     if (materials.length > 1) {
         wave.structureGroup.name = "New Material";
-        materials.slice(1).forEach(material => {
+        materials.slice(1).forEach((material) => {
             material.toCartesian();
             const structureGroup = new THREE.Group();
             structureGroup.name = material.name || material.formula;
@@ -145,7 +150,7 @@ export function materialsToThreeDSceneData(materials, shift = [2, 0, 0]) {
             const unitCellObject = wave.getUnitCellObject(material.Lattice.unitCell);
             unitCellObject.visible = false;
             structureGroup.add(unitCellObject);
-            structureGroup.position.set(...shift); //slightly shift along x axis
+            structureGroup.position.set(...shift); // slightly shift along x axis
             wave.structureGroup.add(structureGroup);
         });
         wave.render();
