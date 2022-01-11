@@ -1,3 +1,5 @@
+@use "variables";
+
 .modal {
     &.full-page-overlay {
         padding-right: 0px !important;
@@ -21,11 +23,11 @@
         }
 
         .close i {
-            color: $gray-light;
+            color: variables.$gray-light;
             font-size: 32px;
 
             &:hover {
-                color: $gray-darker;
+                color: variables.$gray-darker;
             }
         }
 
@@ -51,14 +53,15 @@
 }
 
 .modal-backdrop-color-white .modal-backdrop.in {
-    background-color: $white !important;
+    background-color: variables.$white !important;
     filter: alpha(opacity=100);
     opacity: 1;
 }
 
 .modal-header {
     .close {
-        i, span {
+        i,
+        span {
             font-size: 36px;
         }
     }

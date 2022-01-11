@@ -1,8 +1,11 @@
+@use "variables";
+
 // material-ui v1.00-beta.37 dark theme
 $material-ui-expansion-panels-color: #424242;
-$material-ui-menu-box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
-$material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2), 0px 0px 1px 1px rgba(255, 255, 255, 0.14), 0px 0px 1px 1px rgba(255, 255, 255, 0.12);
-
+$material-ui-menu-box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2),
+    0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
+$material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2),
+    0px 0px 1px 1px rgba(255, 255, 255, 0.14), 0px 0px 1px 1px rgba(255, 255, 255, 0.12);
 
 .hidden {
     display: none !important;
@@ -12,12 +15,17 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
 @mixin inverse {
     color: $exagray_darker;
     border-color: $exagray_darker;
-    background-color: $wave-background;
-    p, h1, h2, h3, h4, h5, h6 {
+    background-color: variables.$wave-background;
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
         color: $exagray-darker;
     }
 }
-
 
 @mixin darkScrollbar($width) {
     &::-webkit-scrollbar {
@@ -29,12 +37,11 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
     }
     &::-webkit-scrollbar-thumb {
         border-radius: 10px;
-        -webkit-box-shadow: inset 0 0 #{$width}px $gray-light;
+        -webkit-box-shadow: inset 0 0 #{$width}px variables.$gray-light;
     }
 }
 
 .materials-designer-3d-editor {
-
     padding: 0;
 
     .buttons-toolbar {
@@ -86,11 +93,12 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
             }
         }
 
-        @media (min-width: $screen-md) {
+        @media (min-width: variables.$screen-md) {
             margin: 10px 20px;
         }
 
-        .sphere-radius, .cell-repetitions {
+        .sphere-radius,
+        .cell-repetitions {
             border: none;
             width: 50px;
             height: 35px;
@@ -105,14 +113,13 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
         padding: 0;
 
         button {
-            background-color: $exagray_semi-transparent;
+            background-color: variables.$exagray_semi-transparent;
         }
 
         &:hover.non-interactive .atom-view-cover {
-            background: rgba($gray-darkest, 0.35);
+            background: rgba(variables.$gray-darkest, 0.35);
         }
     }
-
 }
 
 .materials-designer-3d-editor {
@@ -134,15 +141,14 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
             margin: 5px;
 
             &[aria-checked="true"] {
-                color: $amber;
+                color: variables.$amber;
             }
         }
     }
 
     &:hover.non-interactive .atom-view-cover {
-        background: rgba($gray-darkest, 0.35);
+        background: rgba(variables.$gray-darkest, 0.35);
     }
-
 }
 
 .three-renderer {
