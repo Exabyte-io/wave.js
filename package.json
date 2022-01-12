@@ -1,6 +1,6 @@
 {
     "name": "@exabyte-io/wave.js",
-    "version": "2022.1.11-0",
+    "version": "2022.1.12-0",
     "description": "Web-based Atomic Viewer and Editor in JavaScript.",
     "scripts": {
         "prepublishOnly": "rm -rf dist; npm run transpile",
