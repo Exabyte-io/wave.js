@@ -19,7 +19,8 @@
     },
     "main": "dist/exports.js",
     "files": [
-        "/dist"
+        "/dist",
+        "/src"
     ],
     "author": "Exabyte Inc.",
     "bugs": {
