@@ -18,6 +18,7 @@
         "url": "https://github.com/Exabyte-io/wave.js.git"
     },
     "main": "dist/exports.js",
+    "files": ["/dist", "/lib", "/src"],
     "author": "Exabyte Inc.",
     "bugs": {
         "url": "https://github.com/Exabyte-io/wave/issues"
