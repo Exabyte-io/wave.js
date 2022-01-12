@@ -67,7 +67,7 @@ export class ThreeDEditor extends React.Component {
             // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
             originalMaterial: material,
             // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
-            material: material.clone(),
+            // material: props.material.clone(),
         };
         this.handleCellRepetitionsChange = this.handleCellRepetitionsChange.bind(this);
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
@@ -96,7 +96,7 @@ export class ThreeDEditor extends React.Component {
         if (material) {
             this.setState({
                 originalMaterial: material,
-                material: material.clone(),
+                // material: material.clone(),
                 boundaryConditions: nextProps.boundaryConditions || {},
                 isConventionalCellShown: nextProps.isConventionalCellShown || false,
             });
@@ -145,7 +145,7 @@ export class ThreeDEditor extends React.Component {
         const { isConventionalCellShown, originalMaterial } = this.state;
         this.setState({
             isConventionalCellShown: !isConventionalCellShown,
-            material: this.getPrimitiveOrConventionalMaterial(
+            originalMaterial: this.getPrimitiveOrConventionalMaterial(
                 originalMaterial,
                 !isConventionalCellShown,
             ),
@@ -457,13 +457,9 @@ export class ThreeDEditor extends React.Component {
     }
 
     renderWaveComponent() {
-        const {
-            material,
-            isConventionalCellShown,
-            viewerSettings,
-            viewerTriggerResize,
-            boundaryConditions,
-        } = this.state;
+        const { isConventionalCellShown, viewerSettings, viewerTriggerResize, boundaryConditions } =
+            this.state;
+        const { material } = this.props;
         // TODO material is copied here but state.material is referenced below
         const materialCopy = this.getPrimitiveOrConventionalMaterial(
             material,
@@ -521,7 +517,7 @@ export class ThreeDEditor extends React.Component {
                 type: originalMaterial.Lattice.type,
             };
             this.setState({
-                material: material.clone(),
+                // material: material.clone(),
                 originalMaterial: material,
                 isThreejsEditorModalShown: !isThreejsEditorModalShown,
             });
