@@ -50,7 +50,7 @@
         "sprintf-js": "^1.1.2",
         "static-kdtree": "^1.0.2",
         "sweetalert": "^2.1.2",
-        "three": "^0.90.0",
+        "three": "^0.137.0",
         "three-orbit-controls": "^82.1.0",
         "three-transform-controls": "^1.0.4",
         "underscore": "^1.8.3",
