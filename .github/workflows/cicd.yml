@@ -21,7 +21,7 @@ jobs:
       - name: Build and test
         uses: ./.github/workflows/docker-build-test
         with:
-            base-os: ubuntu
+            base-os: centos
 
   publish:
     needs: run-tests
