@@ -1,5 +1,3 @@
-@use "variables";
-
 // material-ui v1.00-beta.37 dark theme
 $material-ui-expansion-panels-color: #424242;
 $material-ui-menu-box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2),
@@ -15,7 +13,7 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
 @mixin inverse {
     color: $exagray_darker;
     border-color: $exagray_darker;
-    background-color: variables.$wave-background;
+    background-color: $wave-background;
     p,
     h1,
     h2,
@@ -37,7 +35,7 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
     }
     &::-webkit-scrollbar-thumb {
         border-radius: 10px;
-        -webkit-box-shadow: inset 0 0 #{$width}px variables.$gray-light;
+        -webkit-box-shadow: inset 0 0 #{$width}px $gray-light;
     }
 }
 
@@ -93,7 +91,7 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
             }
         }
 
-        @media (min-width: variables.$screen-md) {
+        @media (min-width: $screen-md) {
             margin: 10px 20px;
         }
 
@@ -113,11 +111,11 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
         padding: 0;
 
         button {
-            background-color: variables.$exagray_semi-transparent;
+            background-color: $exagray_semi-transparent;
         }
 
         &:hover.non-interactive .atom-view-cover {
-            background: rgba(variables.$gray-darkest, 0.35);
+            background: rgba($gray-darkest, 0.35);
         }
     }
 }
@@ -141,13 +139,13 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
             margin: 5px;
 
             &[aria-checked="true"] {
-                color: variables.$amber;
+                color: $amber;
             }
         }
     }
 
     &:hover.non-interactive .atom-view-cover {
-        background: rgba(variables.$gray-darkest, 0.35);
+        background: rgba($gray-darkest, 0.35);
     }
 }
 
