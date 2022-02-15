@@ -31,3 +31,6 @@ Wave.prototype.getWebGLRenderer = (config) => {
         canvas,
     });
 };
+
+window.setImmediate = window.setTimeout;
+window.clearImmediate = window.clearTimeout;
