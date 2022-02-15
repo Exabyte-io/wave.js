@@ -5,3 +5,4 @@ node_modules/
 .husky/
 .nyc_output/
 tests/coverage/
+.idea/
