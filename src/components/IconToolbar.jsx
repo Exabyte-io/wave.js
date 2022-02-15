@@ -1,4 +1,4 @@
-import { Close } from "@material-ui/icons";
+import { Close } from "material-ui-icons-next";
 import setClass from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
