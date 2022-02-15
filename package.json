@@ -5,7 +5,7 @@
     "scripts": {
         "prepublishOnly": "rm -rf dist; npm run transpile",
         "start": "PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
-        "transpile": "babel --out-dir dist src; sass src/stylesheets:dist/stylesheets",
+        "transpile": "babel --out-dir dist src; node-sass -r src/stylesheets -o dist/stylesheets",
         "postinstall": "npm run transpile",
         "test": "npx jest",
         "lint": "eslint src tests && prettier --write src tests",
@@ -46,7 +46,7 @@
         "react-bootstrap": "0.32.4",
         "react-jss": "^8.6.1",
         "react-scripts": "5.0.0",
-        "sass": "1.45.2",
+        "node-sass": "^4.11.0",
         "sprintf-js": "^1.1.2",
         "static-kdtree": "^1.0.2",
         "sweetalert": "^2.1.2",
