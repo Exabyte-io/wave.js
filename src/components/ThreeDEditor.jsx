@@ -16,7 +16,7 @@ import {
     Replay,
     SwitchCamera,
     ThreeDRotation,
-} from "@material-ui/icons";
+} from "material-ui-icons-next";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";

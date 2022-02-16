@@ -20,7 +20,8 @@
     "main": "dist/exports.js",
     "files": [
         "/dist",
-        "/src"
+        "/src",
+        ".babelrc"
     ],
     "author": "Exabyte Inc.",
     "bugs": {
@@ -39,13 +40,14 @@
         "@exabyte-io/periodic-table.js": "2021.12.21-0",
         "classnames": "2.3.1",
         "jquery": "3.6.0",
-        "@material-ui/icons": "1.0.0-beta.43",
+        "material-ui-icons-next": "^1.0.0-beta.17-next",
+        "material-ui-next": "1.0.0-beta.47",
         "material-ui": "1.0.0-beta.47",
         "mixwith": "^0.1.1",
         "prop-types": "^15.8.0",
         "react-bootstrap": "0.32.4",
         "react-jss": "^8.6.1",
-        "react-scripts": "5.0.0",
+        "react-scripts": "2.1.5",
         "sass": "1.45.2",
         "sprintf-js": "^1.1.2",
         "static-kdtree": "^1.0.2",
