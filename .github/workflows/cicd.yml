@@ -18,10 +18,19 @@ jobs:
         with:
           lfs: true
 
+      - name: Checkout actions repository
+        uses: actions/checkout@v2
+        with:
+          repository: Exabyte-io/actions
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          ref: feature/SOF-5466
+          path: actions
+
+      - name: Validate JS package
+        uses: ./actions/js/validate
+
       - name: Build and test
         uses: ./.github/workflows/docker-build-test
-        with:
-            base-os: centos
 
   publish:
     needs: run-tests
@@ -36,8 +45,6 @@ jobs:
 
       - name: Build and test
         uses: ./.github/workflows/docker-build-test
-        with:
-            base-os: centos
 
       - name: Checkout actions repository
         uses: actions/checkout@v2
