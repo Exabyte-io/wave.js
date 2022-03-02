@@ -24,9 +24,7 @@ runs:
       with:
         image-name: wave-test
         dockerfile: ./dockerfiles/app/Dockerfile
-        # yamllint disable rule:line-length
-        cli-args: --build-arg BASE_IMAGE=${{ steps.login-ecr.outputs.registry }}/centos-7.9-base:latest
-        # yamllint enable rule:line-length
+        cli-args: --build-arg BASE_IMAGE=${{ steps.login-ecr.outputs.registry }}/centos-7.9-base
 
     - name: Run tests
       shell: bash -l {0}

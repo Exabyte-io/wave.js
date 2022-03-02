@@ -29,6 +29,12 @@ jobs:
       - name: Validate JS package
         uses: ./actions/js/validate
 
+      - name: Validate Dockerfile
+        uses: ./actions/docker/validate
+        with:
+          dockerfile: ./dockerfiles/app/Dockerfile
+
+
       - name: Build and test
         uses: ./.github/workflows/docker-build-test
         with:
@@ -65,4 +71,4 @@ jobs:
           node-version: 12.21.x
           npm-token: ${{ secrets.NPM_TOKEN }}
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
-          verify-tests: 'false'
+          verify-tests: false
