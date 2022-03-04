@@ -18,10 +18,27 @@ jobs:
         with:
           lfs: true
 
+      - name: Checkout actions repository
+        uses: actions/checkout@v2
+        with:
+          repository: Exabyte-io/actions
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          path: actions
+
+      - name: Validate JS package
+        uses: ./actions/js/validate
+
+      - name: Validate Dockerfile
+        uses: ./actions/docker/validate
+        with:
+          dockerfile: ./dockerfiles/app/Dockerfile
+
+
       - name: Build and test
         uses: ./.github/workflows/docker-build-test
         with:
-            base-os: centos
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ECR }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ECR }}
 
   publish:
     needs: run-tests
@@ -34,11 +51,6 @@ jobs:
         with:
           lfs: true
 
-      - name: Build and test
-        uses: ./.github/workflows/docker-build-test
-        with:
-            base-os: centos
-
       - name: Checkout actions repository
         uses: actions/checkout@v2
         with:
@@ -46,10 +58,16 @@ jobs:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           path: actions
 
+      - name: Build and test
+        uses: ./.github/workflows/docker-build-test
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ECR }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ECR }}
+
       - name: Publish release
         uses: ./actions/js/publish
         with:
           node-version: 12.21.x
           npm-token: ${{ secrets.NPM_TOKEN }}
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
-          verify-tests: 'false'
+          verify-tests: false
