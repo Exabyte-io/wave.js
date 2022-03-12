@@ -14,4 +14,6 @@ services:
     command: ["test"]
     environment:
       REACT_APP_BASE_OS: ${BASE_OS}
-
+    volumes:
+      - ./src/:/opt/app/src
+      - ./tests/:/opt/app/tests
