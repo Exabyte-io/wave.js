@@ -17,3 +17,5 @@ services:
     volumes:
       - ./src/:/opt/app/src
       - ./tests/:/opt/app/tests
+      - ./jest.config.js:/opt/app/jest.config.js
+      - ./jest.setup.js:/opt/app/jest.setup.js
