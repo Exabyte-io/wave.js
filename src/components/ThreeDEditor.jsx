@@ -1,5 +1,5 @@
 /* eslint-disable react/sort-comp */
-import { createGenerateClassName, Tooltip } from "material-ui";
+import { createGenerateClassName, Tooltip } from "@material-ui/core";
 import {
     Autorenew,
     BubbleChart,
@@ -16,7 +16,7 @@ import {
     Replay,
     SwitchCamera,
     ThreeDRotation,
-} from "material-ui-icons-next";
+} from "@material-ui/icons";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
