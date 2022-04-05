@@ -50,6 +50,27 @@ export const CellMixin = (superclass) =>
         }
 
         /**
+         * Returns the cell's center point in 3D space in the form of coordinate array.
+         * @param cell {Object} unitCell class instance.
+         */
+        getCellCenter(cell = this.cell) {
+            let diagonal;
+            if (this.areNonPeriodicBoundariesPresent) {
+                const verticesUp = this.getCellVertices(cell, 0.5);
+                const verticesDown = this.getCellVertices(cell, -0.5);
+                diagonal = [verticesUp[4], verticesDown[7]];
+            } else {
+                const vertices = this.getCellVertices(cell);
+                diagonal = [vertices[0], vertices[7]];
+            }
+            return [
+                (diagonal[0][0] + diagonal[1][0]) / 2,
+                (diagonal[0][1] + diagonal[1][1]) / 2,
+                (diagonal[0][2] + diagonal[1][2]) / 2,
+            ];
+        }
+
+        /**
          * Returns a LineSegments object representing the cell with given edges.
          * @param cell {Object} unitCell class instance.
          * @param edges {Array} an array of vertex indices used to form the line segments.

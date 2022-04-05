@@ -32,6 +32,9 @@ class WaveBase {
         this._structure = structure;
 
         this._cell = cell;
+
+        this.FRUSTUM_HALF_WIDTH = 10;
+
         this.container = DOMElement;
 
         this.updateSettings(settings);
@@ -105,12 +108,27 @@ class WaveBase {
             "PerspectiveCamera",
             ...perspectiveCameraParams,
         );
-        const orthographicCameraParams = [-10 * this.ASPECT, 10 * this.ASPECT, 10, -10, 1, 1000];
+        const orthographicCameraParams = [
+            -this.FRUSTUM_HALF_WIDTH * this.ASPECT,
+            this.FRUSTUM_HALF_WIDTH * this.ASPECT,
+            this.FRUSTUM_HALF_WIDTH,
+            -this.FRUSTUM_HALF_WIDTH,
+            1,
+            1000,
+        ];
         this.orthographicCamera = this.addCameraToScene(
             "OrthographicCamera",
             ...orthographicCameraParams,
         );
         this.camera = this.perspectiveCamera; // set default camera
+    }
+
+    adjustCamerasTarget(viewCenter) {
+        this.perspectiveCamera.position.copy(new TV3(-50, viewCenter[1], viewCenter[2] + 10));
+        this.perspectiveCamera.lookAt(new TV3(...viewCenter));
+
+        this.orthographicCamera.position.copy(new TV3(-50, viewCenter[1], viewCenter[2]));
+        this.orthographicCamera.lookAt(new TV3(...viewCenter));
     }
 
     get isCameraOrthographic() {
@@ -154,8 +172,8 @@ class WaveBase {
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
         this.perspectiveCamera.aspect = this.ASPECT;
         this.perspectiveCamera.updateProjectionMatrix();
-        this.orthographicCamera.left = -10 * this.ASPECT;
-        this.orthographicCamera.right = 10 * this.ASPECT;
+        this.orthographicCamera.left = -this.FRUSTUM_HALF_WIDTH * this.ASPECT;
+        this.orthographicCamera.right = this.FRUSTUM_HALF_WIDTH * this.ASPECT;
         this.orthographicCamera.updateProjectionMatrix();
         this.render();
     }
@@ -214,10 +232,17 @@ export class Wave extends mix(WaveBase).with(
         }
     }
 
+    adjustCamerasAndOrbitControlsToCell() {
+        const cellCenter = this.getCellCenter();
+        this.adjustCamerasTarget(cellCenter);
+        this.adjustOrbitControlsTarget(cellCenter);
+    }
+
     rebuildScene() {
         this.clearView();
         this.drawAtomsAsSpheres();
         this.drawUnitCell();
+        this.adjustCamerasAndOrbitControlsToCell();
         this.drawBoundaries();
         if (this.isDrawBondsEnabled) this.drawBonds();
         this.render();

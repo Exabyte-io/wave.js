@@ -40,6 +40,10 @@ const OrbitControlsMixin = (superclass) =>
             this.orbitControls.update();
         }
 
+        adjustOrbitControlsTarget(newTarget) {
+            this.orbitControls.target.copy(new TV3(...newTarget));
+        }
+
         disableOrbitControls() {
             if (!this.orbitControls) return;
             this.orbitControls.enabled = false;
