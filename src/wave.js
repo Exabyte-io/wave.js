@@ -7,6 +7,7 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
+import { LabelsMixin } from "./mixins/labels";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
@@ -38,6 +39,7 @@ class WaveBase {
         this.container = DOMElement;
 
         this.updateSettings(settings);
+        this.areLabelsShown = this.settings.areLabelsInitiallyShown;
 
         this.initDimensions();
         this.initRenderer();
@@ -209,6 +211,7 @@ export class Wave extends mix(WaveBase).with(
     RepetitionMixin,
     ControlsMixin,
     BoundaryMixin,
+    LabelsMixin,
 ) {
     /**
      *
@@ -249,6 +252,7 @@ export class Wave extends mix(WaveBase).with(
     }
 
     render() {
+        this.adjustLabelsToCameraPosition(this.scene, this.camera);
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2) this.renderer2.render(this.scene2, this.camera2);
     }

@@ -153,3 +153,5 @@ export const BOUNDARY_CONDITIONS = [
         isNonPeriodic: true,
     },
 ];
+
+export const ATOM_GROUP_NAME = "Atoms";

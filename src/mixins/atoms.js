@@ -1,5 +1,7 @@
 import * as THREE from "three";
 
+import { ATOM_GROUP_NAME } from "../enums";
+
 /*
  * Mixin containing the logic for dealing with atoms.
  * Draws atoms as spheres and handles actions performed on them.
@@ -85,7 +87,7 @@ export const AtomsMixin = (superclass) =>
 
         createAtomsGroup(basis, atomRadiiScale) {
             const atomsGroup = new THREE.Group();
-            atomsGroup.name = "Atoms";
+            atomsGroup.name = ATOM_GROUP_NAME;
             basis.coordinates.forEach((atomicCoordinate, atomicIndex) => {
                 const element = basis.getElementByIndex(atomicIndex);
                 const sphereMesh = this.getSphereMeshObject({
@@ -94,6 +96,11 @@ export const AtomsMixin = (superclass) =>
                 });
                 sphereMesh.name = `${element}-${atomicIndex}`;
                 atomsGroup.add(sphereMesh);
+
+                const text = sphereMesh.name.split("-")[0];
+                const label = this.createLabel(text, `label-for-${sphereMesh.uuid}`);
+                label.position.set(...atomicCoordinate.value);
+                atomsGroup.add(label);
             });
             return atomsGroup;
         }
