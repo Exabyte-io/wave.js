@@ -16,8 +16,8 @@ describe("Atom labels", () => {
         expect(atoms.length).toEqual(basisAtomsNumber);
         expect(labels.length).toEqual(basisAtomsNumber);
         expect(
-            labels.every((label) =>
-                atoms.find((atom) => atom.uuid === label.name.replace("label-for-", "")),
+            atoms.every((atom) =>
+                labels.find((label) => atom.uuid === label.name.replace("label-for-", "")),
             ),
         );
     });
@@ -34,6 +34,7 @@ describe("Atom labels", () => {
     });
 
     test("Label center is positioned on the atom surface", () => {
+        wave.toggleLabels();
         expect(
             labels.every((label) => {
                 const atom = atoms.find((a) => a.uuid === label.name.replace("label-for-", ""));

@@ -73,8 +73,8 @@ export const LabelsMixin = (superclass) =>
         }
 
         /**
-         * Adjusts the label sprite position so that its center is always
-         * in the point where the atom's bound sphere is intersected
+         * Adjusts the label sprites' positions so that the center of every sprite
+         * is always in the point where the atom's bound sphere is intersected
          * by the line joining the atom's center with the camera.
          */
         adjustLabelsToCameraPosition() {
@@ -96,9 +96,9 @@ export const LabelsMixin = (superclass) =>
         }
 
         /**
-         * Calculates a vector from atom to camera clamped to atom sphere radius
-         * @param {THREE.Group} group - the instance of THREE group containing the atom mesh
-         * @param {THREE.Mesh} atom - the instance of THREE mesh representing the atom
+         * Calculates a vector from the atom center to the camera clamped to the atom sphere radius.
+         * @param {THREE.Group} group - the instance of THREE group containing the atom mesh;
+         * @param {THREE.Mesh} atom - the instance of THREE mesh representing the atom;
          */
         getClampedVectorToCamera(group, atom) {
             const cellCenter = this.getCellCenter();
