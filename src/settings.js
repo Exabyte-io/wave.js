@@ -30,13 +30,13 @@ export default {
     initialCameraPosition: [-50, 0, 10],
 
     areLabelsInitiallyShown: false,
-    labels: {
+    labelsConfig: {
         fontFace: "Arial",
         fontSize: 96,
         fontWeight: "Bold",
-        fillColor: "#EEEEEE",
-        strokeColor: "#454545",
-        strokeLineWidth: 2,
+        fillStyle: "#EEEEEE",
+        strokeStyle: "#454545",
+        lineWidth: 2,
         textAlign: "center",
         textBaseline: "middle",
     },
