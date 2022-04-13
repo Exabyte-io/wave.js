@@ -477,8 +477,8 @@ export class ThreeDEditor extends React.Component {
                 triggerHandleResize={viewerTriggerResize}
                 structure={materialCopy}
                 boundaryConditions={boundaryConditions}
-                cell={material.Lattice.unitCell}
-                name={material.name}
+                cell={materialCopy.Lattice.unitCell}
+                name={materialCopy.name}
                 settings={viewerSettings}
             />
         );
