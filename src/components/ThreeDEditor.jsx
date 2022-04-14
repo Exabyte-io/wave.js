@@ -144,7 +144,11 @@ export class ThreeDEditor extends React.Component {
 
     // eslint-disable-next-line class-methods-use-this
     getPrimitiveOrConventionalMaterial(material, isConventionalCellShown = false) {
-        return isConventionalCellShown ? material.getACopyWithConventionalCell() : material.clone();
+        const primitiveOrConventionalMaterial = isConventionalCellShown
+            ? material.getACopyWithConventionalCell()
+            : material.clone();
+        primitiveOrConventionalMaterial.hash = primitiveOrConventionalMaterial.calculateHash();
+        return primitiveOrConventionalMaterial;
     }
 
     handleToggleConventionalCell() {
@@ -489,8 +493,8 @@ export class ThreeDEditor extends React.Component {
                 triggerHandleResize={viewerTriggerResize}
                 structure={materialCopy}
                 boundaryConditions={boundaryConditions}
-                cell={material.Lattice.unitCell}
-                name={material.name}
+                cell={materialCopy.Lattice.unitCell}
+                name={materialCopy.name}
                 settings={viewerSettings}
             />
         );
