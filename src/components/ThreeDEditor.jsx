@@ -16,6 +16,7 @@ import {
     Replay,
     SwitchCamera,
     ThreeDRotation,
+    Spellcheck,
 } from "@material-ui/icons";
 import setClass from "classnames";
 import $ from "jquery";
@@ -76,6 +77,7 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleBonds = this.handleToggleBonds.bind(this);
         this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
+        this.handleToggleLabels = this.handleToggleLabels.bind(this);
         this.handleToggleConventionalCell = this.handleToggleConventionalCell.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);
         this.handleTakeScreenshot = this.handleTakeScreenshot.bind(this);
@@ -130,6 +132,10 @@ export class ThreeDEditor extends React.Component {
     handleToggleOrthographicCamera() {
         this.WaveComponent.wave.toggleOrthographicCamera();
         this._resetStateWaveComponent();
+    }
+
+    handleToggleLabels() {
+        this.WaveComponent.wave.toggleLabels();
     }
 
     handleChemicalConnectivityFactorChange(e) {
@@ -350,6 +356,16 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleConventionalCell}
             >
                 <FormatShapes />
+            </RoundIconButton>,
+
+            <RoundIconButton
+                key="Toggle Labels"
+                tooltipPlacement="top"
+                title="Toggle Labels"
+                isToggled={this._getWaveProperty("areLabelsShown")}
+                onClick={this.handleToggleLabels}
+            >
+                <Spellcheck />
             </RoundIconButton>,
 
             <RoundIconButton
