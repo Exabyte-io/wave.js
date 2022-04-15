@@ -29,6 +29,18 @@ export default {
     defaultColor: "#CCCCCC",
     initialCameraPosition: [-50, 0, 10],
 
+    areLabelsInitiallyShown: false,
+    labelsConfig: {
+        fontFace: "Arial",
+        fontSize: 96,
+        fontWeight: "Bold",
+        fillStyle: "#EEEEEE",
+        strokeStyle: "#454545",
+        lineWidth: 2,
+        textAlign: "center",
+        textBaseline: "middle",
+    },
+
     boundaryConditionTypeColors: {
         bc1: [0xffff00, 0xffff00],
         bc2: [0x0000ff, 0x0000ff],
