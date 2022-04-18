@@ -1,23 +1,21 @@
 /* eslint-disable react/sort-comp */
 import { createGenerateClassName, Tooltip } from "@material-ui/core";
-import {
-    Autorenew,
-    BubbleChart,
-    CloudDownload,
-    Edit,
-    FormatShapes,
-    GpsFixed,
-    ImportExport,
-    Menu,
-    NotInterested,
-    PictureInPicture,
-    PowerSettingsNew,
-    RemoveRedEye,
-    Replay,
-    SwitchCamera,
-    ThreeDRotation,
-    Spellcheck,
-} from "@material-ui/icons";
+import Autorenew from "@material-ui/icons/Autorenew";
+import BubbleChart from "@material-ui/icons/BubbleChart";
+import CloudDownload from "@material-ui/icons/CloudDownload";
+import Edit from "@material-ui/icons/Edit";
+import FormatShapes from "@material-ui/icons/FormatShapes";
+import GpsFixed from "@material-ui/icons/GpsFixed";
+import ImportExport from "@material-ui/icons/ImportExport";
+import Menu from "@material-ui/icons/Menu";
+import NotInterested from "@material-ui/icons/NotInterested";
+import PictureInPicture from "@material-ui/icons/PictureInPicture";
+import PowerSettingsNew from "@material-ui/icons/PowerSettingsNew";
+import RemoveRedEye from "@material-ui/icons/RemoveRedEye";
+import Replay from "@material-ui/icons/Replay";
+import SwitchCamera from "@material-ui/icons/SwitchCamera";
+import ThreeDRotation from "@material-ui/icons/ThreeDRotation";
+import Spellcheck from "@material-ui/icons/Spellcheck";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
