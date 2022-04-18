@@ -7,6 +7,7 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
+// eslint-disable-next-line import/no-cycle
 import { LabelsMixin } from "./mixins/labels";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
