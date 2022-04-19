@@ -145,7 +145,16 @@ export class ThreeDEditor extends React.Component {
         const primitiveOrConventionalMaterial = isConventionalCellShown
             ? material.getACopyWithConventionalCell()
             : material.clone();
-        primitiveOrConventionalMaterial.hash = primitiveOrConventionalMaterial.calculateHash();
+        try {
+            // TODO : For materials with isNonPeriodic === true, calculateHash fails
+            //        because the derivedProperty InChI is not guaranteed to be set.
+            //        Either isNonPeriodic needs to set the InChI automatically or
+            //        we should avoid dealing with unit cells entirely when isNonPeriodic.
+            primitiveOrConventionalMaterial.hash = primitiveOrConventionalMaterial.calculateHash();
+        } catch (err) {
+            console.log(err);
+            primitiveOrConventionalMaterial.hash = "";
+        }
         return primitiveOrConventionalMaterial;
     }
 
