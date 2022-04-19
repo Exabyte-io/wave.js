@@ -21,14 +21,29 @@ export class WaveComponent extends React.Component {
     }
 
     // eslint-disable-next-line no-unused-vars
-    componentDidUpdate({ structure: prevStructure, settings: prevSettings }, prevState, snapshot) {
-        const { settings, structure, triggerHandleResize } = this.props;
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const {
+            structure: prevStructure,
+            settings: prevSettings,
+            isConventionalCellShown: prevIsConventionalCellShown,
+            isDrawBondsEnabled: prevIsDrawBondsEnabled,
+        } = prevProps;
+        const {
+            settings,
+            structure,
+            triggerHandleResize,
+            isConventionalCellShown,
+            isDrawBondsEnabled,
+        } = this.props;
         if (triggerHandleResize) this._handleResizeTransition();
         if (this.wave) {
             // recreate bonds asynchronously if structure is changed.
             this.reloadViewer(
                 prevStructure.hash !== structure.hash ||
-                    prevSettings.chemicalConnectivityFactor !== settings.chemicalConnectivityFactor,
+                    prevSettings.chemicalConnectivityFactor !==
+                        settings.chemicalConnectivityFactor ||
+                    prevIsConventionalCellShown !== isConventionalCellShown ||
+                    prevIsDrawBondsEnabled !== isDrawBondsEnabled,
             );
         }
     }
@@ -105,4 +120,6 @@ WaveComponent.propTypes = {
     cell: PropTypes.object.isRequired,
     // eslint-disable-next-line react/forbid-prop-types
     boundaryConditions: PropTypes.object.isRequired,
+    isConventionalCellShown: PropTypes.bool.isRequired,
+    isDrawBondsEnabled: PropTypes.bool.isRequired,
 };
