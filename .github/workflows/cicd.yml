@@ -58,12 +58,6 @@ jobs:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           path: actions
 
-      - name: Build and test
-        uses: ./.github/workflows/docker-build-test
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ECR }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ECR }}
-
       - name: Publish release
         uses: ./actions/js/publish
         with:
