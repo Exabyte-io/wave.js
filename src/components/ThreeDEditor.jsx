@@ -145,16 +145,6 @@ export class ThreeDEditor extends React.Component {
         const primitiveOrConventionalMaterial = isConventionalCellShown
             ? material.getACopyWithConventionalCell()
             : material.clone();
-        try {
-            // TODO : For materials with isNonPeriodic === true, calculateHash fails
-            //        because the derivedProperty InChI is not guaranteed to be set.
-            //        Either isNonPeriodic needs to set the InChI automatically or
-            //        we should avoid dealing with unit cells entirely when isNonPeriodic.
-            primitiveOrConventionalMaterial.hash = primitiveOrConventionalMaterial.calculateHash();
-        } catch (err) {
-            console.log(err);
-            primitiveOrConventionalMaterial.hash = "";
-        }
         return primitiveOrConventionalMaterial;
     }
 
@@ -492,12 +482,15 @@ export class ThreeDEditor extends React.Component {
             material,
             isConventionalCellShown,
         );
+        const isDrawBondsEnabled = this._getWaveProperty("isDrawBondsEnabled") || false;
         return (
             <WaveComponent
                 ref={(el) => {
                     this.WaveComponent = el;
                 }}
                 triggerHandleResize={viewerTriggerResize}
+                isConventionalCellShown={isConventionalCellShown}
+                isDrawBondsEnabled={isDrawBondsEnabled}
                 structure={materialCopy}
                 boundaryConditions={boundaryConditions}
                 cell={materialCopy.Lattice.unitCell}
