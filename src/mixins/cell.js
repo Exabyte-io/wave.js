@@ -51,7 +51,7 @@ export const CellMixin = (superclass) =>
 
         /**
          * Returns the cell's center point in 3D space in the form of coordinate array,
-         * as well as cell height, width, and max of height and width.
+         * as well as cell height, width, and the maximum between the height and width.
          * @param cell {Object} unitCell class instance.
          * @returns {{center:Array<Number>, width:Number, height:Number, maxSize:Number}}
          */

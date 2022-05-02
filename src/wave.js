@@ -35,8 +35,10 @@ class WaveBase {
 
         this._cell = cell;
 
-        this.FRUSTUM_HALF_WIDTH = 10;
-        this.PADDING_RATIO = 1.2;
+        // Visible Scene Height = (Max between cell height and width) x PADDING_RATIO,
+        // e.g. when PADDING_RATIO = 1.25 and the cell height is more than its width,
+        // the top and bottom padding within viewport equals half of 25% of cell height.
+        this.PADDING_RATIO = 1.25;
 
         this.container = DOMElement;
 
@@ -106,20 +108,18 @@ class WaveBase {
         return camera;
     }
 
+    /**
+     * Initializes the cameras; frustum size and distance to camera
+     * are set only for initialization;
+     * on the next step, they are adjusted to cell geometry
+     */
     initCameras() {
         const perspectiveCameraParams = [20, this.ASPECT, 1, 20000];
         this.perspectiveCamera = this.addCameraToScene(
             "PerspectiveCamera",
             ...perspectiveCameraParams,
         );
-        const orthographicCameraParams = [
-            -this.FRUSTUM_HALF_WIDTH * this.ASPECT,
-            this.FRUSTUM_HALF_WIDTH * this.ASPECT,
-            this.FRUSTUM_HALF_WIDTH,
-            -this.FRUSTUM_HALF_WIDTH,
-            1,
-            1000,
-        ];
+        const orthographicCameraParams = [-10 * this.ASPECT, 10 * this.ASPECT, 10, -10, 1, 1000];
         this.orthographicCamera = this.addCameraToScene(
             "OrthographicCamera",
             ...orthographicCameraParams,
@@ -127,6 +127,14 @@ class WaveBase {
         this.camera = this.perspectiveCamera; // set default camera
     }
 
+    /**
+     * Places both cameras in the point displaced from the cell center along the negative X-axis
+     * and adjusts perspective camera position and orthographic camera frustum so that
+     * the viewport contains the entire cell with the padding set by PADDING_RATIO;
+     * takes the cell's center point in the form of a coordinate array and
+     * the maximum between the height and width.
+     * @param {{center:Array<Number>, maxSize:Number}}
+     */
     adjustCamerasTargetAndFrustum({ center, maxSize }) {
         const fovInRadians = (this.perspectiveCamera.fov * Math.PI) / 180;
         const distanceToCamera = (this.PADDING_RATIO * maxSize) / Math.tan(fovInRadians);
@@ -150,6 +158,11 @@ class WaveBase {
         this.orbitControls.object = this.camera;
     }
 
+    /**
+     * Helper method to set the orthographic frustum dimensions based on
+     * the required scene size and the aspect ratio of the viewport
+     * @param {number} sceneSize
+     */
     setOrthographicCameraFrustum(sceneSize) {
         this.orthographicCamera.left = (-sceneSize / 2) * this.ASPECT;
         this.orthographicCamera.right = (sceneSize / 2) * this.ASPECT;
@@ -178,6 +191,7 @@ class WaveBase {
 
     /**
      * Helper method to trigger the reconstruction of the visual on parent node resize
+     * to avoid image deformation when the user resizes the browser window
      * @param {node} domElement
      */
     handleResize(domElement = this.container) {
