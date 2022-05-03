@@ -35,7 +35,10 @@ class WaveBase {
 
         this._cell = cell;
 
-        this.FRUSTUM_HALF_WIDTH = 10;
+        // Visible Scene Height = (Max between cell height and width) x PADDING_RATIO,
+        // e.g. when PADDING_RATIO = 1.25 and the cell height is more than its width,
+        // the top and bottom padding within viewport equals half of 25% of cell height.
+        this.PADDING_RATIO = 1.25;
 
         this.container = DOMElement;
 
@@ -105,20 +108,18 @@ class WaveBase {
         return camera;
     }
 
+    /**
+     * Initializes the cameras; frustum size and distance to camera
+     * are set only for initialization;
+     * on the next step, they are adjusted to cell geometry
+     */
     initCameras() {
         const perspectiveCameraParams = [20, this.ASPECT, 1, 20000];
         this.perspectiveCamera = this.addCameraToScene(
             "PerspectiveCamera",
             ...perspectiveCameraParams,
         );
-        const orthographicCameraParams = [
-            -this.FRUSTUM_HALF_WIDTH * this.ASPECT,
-            this.FRUSTUM_HALF_WIDTH * this.ASPECT,
-            this.FRUSTUM_HALF_WIDTH,
-            -this.FRUSTUM_HALF_WIDTH,
-            1,
-            1000,
-        ];
+        const orthographicCameraParams = [-10 * this.ASPECT, 10 * this.ASPECT, 10, -10, 1, 1000];
         this.orthographicCamera = this.addCameraToScene(
             "OrthographicCamera",
             ...orthographicCameraParams,
@@ -126,12 +127,24 @@ class WaveBase {
         this.camera = this.perspectiveCamera; // set default camera
     }
 
-    adjustCamerasTarget(viewCenter) {
-        this.perspectiveCamera.position.copy(new TV3(-50, viewCenter[1], viewCenter[2] + 10));
-        this.perspectiveCamera.lookAt(new TV3(...viewCenter));
+    /**
+     * Places both cameras in the point displaced from the cell center along the negative X-axis
+     * and adjusts perspective camera position and orthographic camera frustum so that
+     * the viewport contains the entire cell with the padding set by PADDING_RATIO;
+     * takes the cell's center point in the form of a coordinate array and
+     * the maximum between the height and width.
+     * @param {{center:Array<Number>, maxSize:Number}}
+     */
+    adjustCamerasTargetAndFrustum({ center, maxSize }) {
+        const fovInRadians = (this.perspectiveCamera.fov * Math.PI) / 180;
+        const distanceToCamera = (this.PADDING_RATIO * maxSize) / Math.tan(fovInRadians);
 
-        this.orthographicCamera.position.copy(new TV3(-50, viewCenter[1], viewCenter[2]));
-        this.orthographicCamera.lookAt(new TV3(...viewCenter));
+        this.perspectiveCamera.position.copy(new TV3(-distanceToCamera, center[1], center[2] + 10));
+        this.perspectiveCamera.lookAt(new TV3(...center));
+
+        this.orthographicCamera.position.copy(new TV3(-500, center[1], center[2]));
+        this.setOrthographicCameraFrustum(this.PADDING_RATIO * maxSize);
+        this.orthographicCamera.lookAt(new TV3(...center));
     }
 
     get isCameraOrthographic() {
@@ -143,6 +156,18 @@ class WaveBase {
         this.camera.add(this.directionalLight);
         this.camera.add(this.ambientLight);
         this.orbitControls.object = this.camera;
+    }
+
+    /**
+     * Helper method to set the orthographic frustum dimensions based on
+     * the required scene size and the aspect ratio of the viewport
+     * @param {number} sceneSize
+     */
+    setOrthographicCameraFrustum(sceneSize) {
+        this.orthographicCamera.left = (-sceneSize / 2) * this.ASPECT;
+        this.orthographicCamera.right = (sceneSize / 2) * this.ASPECT;
+        this.orthographicCamera.top = sceneSize / 2;
+        this.orthographicCamera.bottom = -sceneSize / 2;
     }
 
     initScene() {
@@ -166,17 +191,20 @@ class WaveBase {
 
     /**
      * Helper method to trigger the reconstruction of the visual on parent node resize
+     * to avoid image deformation when the user resizes the browser window
      * @param {node} domElement
      */
     handleResize(domElement = this.container) {
+        const { maxSize } = this.getCellViewParams();
+
         this.WIDTH = domElement.clientWidth;
         this.HEIGHT = domElement.clientHeight;
         this.ASPECT = this.WIDTH / this.HEIGHT;
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
         this.perspectiveCamera.aspect = this.ASPECT;
         this.perspectiveCamera.updateProjectionMatrix();
-        this.orthographicCamera.left = -this.FRUSTUM_HALF_WIDTH * this.ASPECT;
-        this.orthographicCamera.right = this.FRUSTUM_HALF_WIDTH * this.ASPECT;
+
+        this.setOrthographicCameraFrustum(this.PADDING_RATIO * maxSize);
         this.orthographicCamera.updateProjectionMatrix();
         this.render();
     }
@@ -237,9 +265,9 @@ export class Wave extends mix(WaveBase).with(
     }
 
     adjustCamerasAndOrbitControlsToCell() {
-        const cellCenter = this.getCellCenter();
-        this.adjustCamerasTarget(cellCenter);
-        this.adjustOrbitControlsTarget(cellCenter);
+        const cellViewParams = this.getCellViewParams();
+        this.adjustCamerasTargetAndFrustum(cellViewParams);
+        this.adjustOrbitControlsTarget(cellViewParams.center);
     }
 
     rebuildScene() {

@@ -50,10 +50,12 @@ export const CellMixin = (superclass) =>
         }
 
         /**
-         * Returns the cell's center point in 3D space in the form of coordinate array.
+         * Returns the cell's center point in 3D space in the form of coordinate array,
+         * as well as cell height, width, and the maximum between the height and width.
          * @param cell {Object} unitCell class instance.
+         * @returns {{center:Array<Number>, width:Number, height:Number, maxSize:Number}}
          */
-        getCellCenter(cell = this.cell) {
+        getCellViewParams(cell = this.cell) {
             let diagonal;
             if (this.areNonPeriodicBoundariesPresent) {
                 const verticesUp = this.getCellVertices(cell, 0.5);
@@ -63,11 +65,15 @@ export const CellMixin = (superclass) =>
                 const vertices = this.getCellVertices(cell);
                 diagonal = [vertices[0], vertices[7]];
             }
-            return [
+            const center = [
                 (diagonal[0][0] + diagonal[1][0]) / 2,
                 (diagonal[0][1] + diagonal[1][1]) / 2,
                 (diagonal[0][2] + diagonal[1][2]) / 2,
             ];
+            const width = Math.abs(diagonal[0][1] + diagonal[1][1]);
+            const height = Math.abs(diagonal[0][2] + diagonal[1][2]);
+            const maxSize = Math.max(width, height);
+            return { center, width, height, maxSize };
         }
 
         /**

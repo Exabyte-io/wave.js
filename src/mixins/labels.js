@@ -101,7 +101,7 @@ export const LabelsMixin = (superclass) =>
          * @param {THREE.Mesh} atom - the instance of THREE mesh representing the atom;
          */
         getClampedVectorToCamera(group, atom) {
-            const cellCenter = this.getCellCenter();
+            const { center: cellCenter } = this.getCellViewParams();
             const atomRadius = atom.geometry.parameters.radius;
             const atomPosition = atom.position.clone().add(group.position);
             const vectorToCamera = this.isCameraOrthographic
