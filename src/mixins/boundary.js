@@ -44,18 +44,13 @@ export const BoundaryMixin = (superclass) =>
             coordinates4,
             zOffset = 0,
         ) {
-            const point1 = new THREE.Vector3(...coordinates1).add(new THREE.Vector3(0, 0, zOffset));
-            const point2 = new THREE.Vector3(...coordinates2).add(new THREE.Vector3(0, 0, zOffset));
-            const point3 = new THREE.Vector3(...coordinates3).add(new THREE.Vector3(0, 0, zOffset));
-            const point4 = new THREE.Vector3(...coordinates4).add(new THREE.Vector3(0, 0, zOffset));
-
-            const geometry = new THREE.Geometry();
-            geometry.vertices.push(point1, point2, point3, point4);
-            const face1 = new THREE.Face3(0, 1, 2);
-            const face2 = new THREE.Face3(2, 3, 0);
-            geometry.faces.push(face1, face2);
-            geometry.computeFaceNormals();
-            geometry.computeVertexNormals();
+            const geometry = new THREE.BufferGeometry();
+            const vertices = new Float32Array(
+                [coordinates1, coordinates2, coordinates3, coordinates3, coordinates4, coordinates1]
+                    .map(([x, y, z]) => [x, y, z + zOffset])
+                    .flat(),
+            );
+            geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
 
             const material = new THREE.MeshBasicMaterial({
                 color,

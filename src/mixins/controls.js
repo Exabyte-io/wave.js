@@ -1,9 +1,8 @@
 /* eslint-disable max-classes-per-file */
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { UtilsMixin } from "./utils";
-
-const OrbitControls = require("three-orbit-controls")(THREE);
 
 const TV3 = THREE.Vector3;
 
@@ -112,14 +111,17 @@ const OrbitControlsMixin = (superclass) =>
                 ...this.settings.lineMaterial,
                 color: this.settings.colors.amber,
             });
-            const geometry = new THREE.Geometry();
-            const [origin, x, y, z] = [
-                new TV3(0, 0, 0),
-                new TV3(length, 0, 0),
-                new TV3(0, length, 0),
-                new TV3(0, 0, length),
+
+            const points = [
+                new THREE.Vector3(-length / 2, 0, 0),
+                new THREE.Vector3(length / 2, 0, 0),
+                new THREE.Vector3(0, -length / 2, 0),
+                new THREE.Vector3(0, length / 2, 0),
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, 0, length / 2),
             ];
-            geometry.vertices.push(origin, x, origin, y, origin, z);
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
             const line = new THREE.LineSegments(geometry, lineMaterial);
             line.computeLineDistances();
             // group axes vertices in the viewer together and treat as a 3D object

@@ -3,7 +3,7 @@ import React from "react";
 import { ModalBody } from "react-bootstrap";
 import swal from "sweetalert";
 import * as THREE from "three";
-import ThreeOrbitControls from "three-orbit-controls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { Made } from "@exabyte-io/made.js";
 import { THREE_D_BASE_URL, THREE_D_SOURCES } from "../enums";
@@ -79,7 +79,6 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(modal.dom);
 
         // add OrbitControls to allow the camera to orbit around the scene.
-        const OrbitControls = ThreeOrbitControls(THREE);
         const orbitControls = new OrbitControls(
             this.editor.camera,
             document.getElementById("viewport"),
