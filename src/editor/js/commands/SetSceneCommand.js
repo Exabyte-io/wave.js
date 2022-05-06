@@ -37,7 +37,7 @@ class SetSceneCommand extends Command {
 	}
 
 	execute() {
-
+		
 		this.editor.signals.sceneGraphChanged.active = false;
 
 		for ( let i = 0; i < this.cmdArray.length; i ++ ) {

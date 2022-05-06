@@ -1,11 +1,22 @@
+/* eslint-disable */ 
+
 import PropTypes from "prop-types";
 import React from "react";
 import { ModalBody } from "react-bootstrap";
 import swal from "sweetalert";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-
 import { Made } from "@exabyte-io/made.js";
+
+import { Viewport } from "../editor/js/Viewport";
+import { Editor } from "../editor/js/Editor";
+import { Toolbar } from "../editor/js/Toolbar";
+import { Script } from "../editor/js/Script";
+import { Player } from "../editor/js/Player";
+import { Menubar } from "../editor/js/Menubar";
+import { Sidebar } from "../editor/js/Sidebar";
+import { SetSceneCommand } from "../editor/js/commands/SetSceneCommand";
+
 import { THREE_D_BASE_URL, THREE_D_SOURCES } from "../enums";
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
@@ -21,6 +32,13 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement = undefined;
         this.state = { areScriptsLoaded: false };
         this.injectScripts();
+    }
+
+    initialize(){
+        this.setNumberFormat();
+        this.initializeEditor();
+        this.addEventListeners();
+        this.loadScene();
     }
 
     // eslint-disable-next-line no-unused-vars
@@ -54,29 +72,29 @@ export class ThreejsEditorModal extends ModalDialog {
         camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         // initialize editor and set the scene background
-        this.editor = new window.Editor(camera);
+        this.editor = new Editor(camera);
         this.editor.scene.background = new THREE.Color(settings.backgroundColor);
 
         // pass onHide handler to editor
         this.editor.onHide = this.onHide;
 
         // initialize viewport and add it to the DOM
-        const viewport = new window.Viewport(this.editor);
+        const viewport = new Viewport(this.editor);
         this.domElement.appendChild(viewport.dom);
 
         // initialize UI elements and add them to the DOM
-        const toolbar = new window.Toolbar(this.editor);
+        const toolbar = new Toolbar(this.editor);
         this.domElement.appendChild(toolbar.dom);
-        const script = new window.Script(this.editor);
+        const script = new Script(this.editor);
         this.domElement.appendChild(script.dom);
-        const player = new window.Player(this.editor);
+        const player = new Player(this.editor);
         this.domElement.appendChild(player.dom);
-        const menubar = new window.Menubar(this.editor);
+        const menubar = new Menubar(this.editor);
         this.domElement.appendChild(menubar.dom);
-        const sidebar = new window.Sidebar(this.editor);
+        const sidebar = new Sidebar(this.editor);
         this.domElement.appendChild(sidebar.dom);
-        const modal = new window.UI.Modal();
-        this.domElement.appendChild(modal.dom);
+        // const modal = new UI.Modal();
+        // this.domElement.appendChild(modal.dom);
 
         // add OrbitControls to allow the camera to orbit around the scene.
         const orbitControls = new OrbitControls(
@@ -119,7 +137,7 @@ export class ThreejsEditorModal extends ModalDialog {
     loadScene() {
         const loader = new THREE.ObjectLoader();
         const scene = loader.parse(materialsToThreeDSceneData(this.props.materials));
-        this.editor.execute(new window.SetSceneCommand(scene));
+        this.editor.execute(new SetSceneCommand(this.editor, scene));
         this.editor.signals.objectSelected.dispatch(this.editor.camera);
     }
 
@@ -134,17 +152,11 @@ export class ThreejsEditorModal extends ModalDialog {
             script.src = `${THREE_D_BASE_URL}/${src}`;
             script.async = false;
             script.defer = false;
-            if (src.includes("SetSceneCommand")) {
-                script.onload = () => {
-                    clsInstance.setState({ areScriptsLoaded: true });
-                    clsInstance.setNumberFormat();
-                    clsInstance.initializeEditor();
-                    clsInstance.addEventListeners();
-                    clsInstance.loadScene();
-                };
-            }
             document.head.appendChild(script);
         });
+        setTimeout(() => {
+            clsInstance.setState({ areScriptsLoaded: true });
+        }, 3000); // temporary hack to get all dependencies loaded
     }
 
     showAlert() {
@@ -180,7 +192,9 @@ export class ThreejsEditorModal extends ModalDialog {
             <ModalBody>
                 <div
                     ref={(el) => {
+                        if (!el || !this.state.areScriptsLoaded) return;
                         this.domElement = el;
+                        this.initialize();
                     }}
                 />
                 <ShowIf condition={!this.state.areScriptsLoaded}>

@@ -14,6 +14,7 @@
         "jest": true
     },
     "plugins": ["prettier", "simple-import-sort", "jsdoc"],
+    "ignorePatterns": ["src/editor/**/*"],
     "rules": {
         "prettier/prettier": "error",
         "comma-dangle": ["error", "always-multiline"],

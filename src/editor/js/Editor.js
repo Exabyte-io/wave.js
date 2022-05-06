@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Signal } from "signals";
 
 import { Config } from './Config.js';
 import { Loader } from './Loader.js';
@@ -13,8 +14,6 @@ _DEFAULT_CAMERA.lookAt( new THREE.Vector3() );
 
 var Editor = function (providedDefaultCamera) {
 	this.DEFAULT_CAMERA = providedDefaultCamera || _DEFAULT_CAMERA;
-
-	var Signal = signals.Signal;
 
 	this.signals = {
 
@@ -88,6 +87,8 @@ var Editor = function (providedDefaultCamera) {
 		viewportCameraChanged: new Signal()
 
 	};
+
+	console.log('editor this.signals', this.signals)
 
 	this.config = new Config();
 	this.history = new _History( this );
