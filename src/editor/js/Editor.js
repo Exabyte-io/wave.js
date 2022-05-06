@@ -11,7 +11,8 @@ _DEFAULT_CAMERA.name = 'Camera';
 _DEFAULT_CAMERA.position.set( 0, 5, 10 );
 _DEFAULT_CAMERA.lookAt( new THREE.Vector3() );
 
-function Editor() {
+var Editor = function (providedDefaultCamera) {
+	this.DEFAULT_CAMERA = providedDefaultCamera || _DEFAULT_CAMERA;
 
 	var Signal = signals.Signal;
 
@@ -95,7 +96,7 @@ function Editor() {
 
 	this.loader = new Loader( this );
 
-	this.camera = _DEFAULT_CAMERA.clone();
+	this.camera = this.DEFAULT_CAMERA.clone();
 
 	this.scene = new THREE.Scene();
 	this.scene.name = 'Scene';
@@ -608,7 +609,7 @@ Editor.prototype = {
 		this.history.clear();
 		this.storage.clear();
 
-		this.camera.copy( _DEFAULT_CAMERA );
+		this.camera.copy( this.DEFAULT_CAMERA );
 		this.signals.cameraResetted.dispatch();
 
 		this.scene.name = 'Scene';

@@ -191,7 +191,11 @@ function SidebarGeometry( editor ) {
 
 				parameters.clear();
 
-				if ( geometry.type === 'BufferGeometry' ) {
+				if (object.type === "LineSegments") {
+
+					parameters.add(new Sidebar.Geometry.LineSegments(editor, object));
+	
+				} else if ( geometry.type === 'BufferGeometry' || geometry.type === 'Geometry' ) {
 
 					parameters.add( new SidebarGeometryModifiers( editor, object ) );
 
