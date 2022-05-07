@@ -88,8 +88,6 @@ var Editor = function (providedDefaultCamera) {
 
 	};
 
-	console.log('editor this.signals', this.signals)
-
 	this.config = new Config();
 	this.history = new _History( this );
 	this.storage = new _Storage();
