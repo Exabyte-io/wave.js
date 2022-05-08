@@ -13,18 +13,18 @@ Exabyte.io believe in a collaborative future of materials design on the web.
 
 As below:
 
-- the package provides a web environment for the visualization of atomic structures and is written in ECMAScript 2015 (ES6) for use on the web
-- ESSE Data Convention is employed to organize and store information [[1]](#links) via [Made.js](https://github.com/exabyte-io/made-js)
-- [THREE.js](https://threejs.org/) is used for 3d visualization purposes
-- High-level classes for the representation of the [viewer](src/wave.js) and modular ES6-compatible mixins for the associated functionality, ie:
-    - [Atoms](src/mixins/atoms.js), 
-    - [Cell](src/mixins/cell.js),
-    - [Controls](src/mixins/controls.js),
-    - [Mouse](src/mixins/mouse.js),
-    - and others to be added.
-- wrapper components for [React](https://reactjs.org/):
-    - [ThreeDEditor](src/components/ThreeDEditor.js), with control trigger button panels
-    - [WaveComponent](src/components/WaveComponent.js),
+-   the package provides a web environment for the visualization of atomic structures and is written in ECMAScript 2015 (ES6) for use on the web
+-   ESSE Data Convention is employed to organize and store information [[1]](#links) via [Made.js](https://github.com/exabyte-io/made-js)
+-   [THREE.js](https://threejs.org/) is used for 3d visualization purposes
+-   High-level classes for the representation of the [viewer](src/wave.js) and modular ES6-compatible mixins for the associated functionality, ie:
+    -   [Atoms](src/mixins/atoms.js),
+    -   [Cell](src/mixins/cell.js),
+    -   [Controls](src/mixins/controls.js),
+    -   [Mouse](src/mixins/mouse.js),
+    -   and others to be added.
+-   wrapper components for [React](https://reactjs.org/):
+    -   [ThreeDEditor](src/components/ThreeDEditor.js), with control trigger button panels
+    -   [WaveComponent](src/components/WaveComponent.js),
 
 The package is written in a modular way easy to extend. Contributions can be in the form of additional functionality modules developed, or feature requests and [bug/issue reports](https://help.github.com/articles/creating-an-issue/).
 
@@ -59,19 +59,17 @@ We suggest forking this repository and introducing the adjustments there to be c
 
 Wave.js is written in EcmaScript 6th edition [[2]](#links) with the application of object-oriented design patterns encapsulating key concepts following the conventions below.
 
-1. One main class exposing the functionality with a set of mixins (implemented through [mixwith](https://www.npmjs.com/package/mixwith)) containing domain-specific functionality inside `mixins` folder 
+1. One main class exposing the functionality with a set of mixins (implemented through [mixwith](https://www.npmjs.com/package/mixwith)) containing domain-specific functionality inside `mixins` folder
 
 2. The implementation of the viewer uses a native HTML node to initialize a Three.js rendering context, `components` folder further contains the wrapper React components for convenient use in web applications.
-
 
 ### TODO list
 
 Desirable features for implementation:
 
-- selection buffers
-- scripting console
-- other (TBA)
-    
+-   selection buffers
+-   scripting console
+-   other (TBA)
 
 ## Tests
 
