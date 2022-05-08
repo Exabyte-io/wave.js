@@ -228,6 +228,11 @@ class WaveBase {
         this.renderer.setClearColor(hex, a);
         this.scene.fog.color = new TCo(hex);
     }
+
+    // eslint-disable-next-line class-methods-use-this
+    get coordinatesOfRepetitions() {
+        return this.repetitionCoordinates;
+    }
 }
 
 /**

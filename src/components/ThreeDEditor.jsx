@@ -1,4 +1,5 @@
 /* eslint-disable react/sort-comp */
+import { Made } from "@exabyte-io/made.js";
 import { createGenerateClassName, Tooltip } from "@material-ui/core";
 import Autorenew from "@material-ui/icons/Autorenew";
 import BubbleChart from "@material-ui/icons/BubbleChart";
@@ -13,15 +14,14 @@ import PictureInPicture from "@material-ui/icons/PictureInPicture";
 import PowerSettingsNew from "@material-ui/icons/PowerSettingsNew";
 import RemoveRedEye from "@material-ui/icons/RemoveRedEye";
 import Replay from "@material-ui/icons/Replay";
+import Spellcheck from "@material-ui/icons/Spellcheck";
 import SwitchCamera from "@material-ui/icons/SwitchCamera";
 import ThreeDRotation from "@material-ui/icons/ThreeDRotation";
-import Spellcheck from "@material-ui/icons/Spellcheck";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
 import { JssProvider } from "react-jss";
-import { Made } from "@exabyte-io/made.js";
 
 import settings from "../settings";
 import { exportToDisk } from "../utils";
@@ -60,6 +60,7 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: settings.atomRadiiScale,
                 repetitions: settings.repetitions,
                 chemicalConnectivityFactor: settings.chemicalConnectivityFactor,
+                coordinates: [],
             },
             boundaryConditions,
             isConventionalCellShown,
@@ -473,6 +474,10 @@ export class ThreeDEditor extends React.Component {
         );
     }
 
+    componentDidUpdate() {
+        console.log(this.state);
+    }
+
     renderWaveComponent() {
         const { isConventionalCellShown, viewerSettings, viewerTriggerResize, boundaryConditions } =
             this.state;
@@ -488,6 +493,8 @@ export class ThreeDEditor extends React.Component {
                 ref={(el) => {
                     this.WaveComponent = el;
                 }}
+                /* eslint-disable-next-line react/jsx-no-bind */
+                setCoordinatesOfRepetitions={this.setCoordinatesOfRepetitions.bind(this)}
                 triggerHandleResize={viewerTriggerResize}
                 isConventionalCellShown={isConventionalCellShown}
                 isDrawBondsEnabled={isDrawBondsEnabled}
@@ -498,6 +505,13 @@ export class ThreeDEditor extends React.Component {
                 settings={viewerSettings}
             />
         );
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    setCoordinatesOfRepetitions(coordinates) {
+        const { viewerSettings } = this.state;
+        if (viewerSettings && viewerSettings.coordinates.toString() !== coordinates.toString())
+            this.setState({ viewerSettings: { ...viewerSettings, coordinates } });
     }
 
     /**

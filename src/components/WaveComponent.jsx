@@ -17,7 +17,9 @@ export class WaveComponent extends React.Component {
     }
 
     componentDidMount() {
+        const { setCoordinatesOfRepetitions } = this.props;
         this.initViewer();
+        setCoordinatesOfRepetitions(this.wave.coordinatesOfRepetitions);
     }
 
     // eslint-disable-next-line no-unused-vars
@@ -34,6 +36,7 @@ export class WaveComponent extends React.Component {
             triggerHandleResize,
             isConventionalCellShown,
             isDrawBondsEnabled,
+            setCoordinatesOfRepetitions,
         } = this.props;
         if (triggerHandleResize) this._handleResizeTransition();
         if (this.wave) {
@@ -45,6 +48,7 @@ export class WaveComponent extends React.Component {
                     prevIsConventionalCellShown !== isConventionalCellShown ||
                     prevIsDrawBondsEnabled !== isDrawBondsEnabled,
             );
+            setCoordinatesOfRepetitions(this.wave.coordinatesOfRepetitions);
         }
     }
 
@@ -122,4 +126,5 @@ WaveComponent.propTypes = {
     boundaryConditions: PropTypes.object.isRequired,
     isConventionalCellShown: PropTypes.bool.isRequired,
     isDrawBondsEnabled: PropTypes.bool.isRequired,
+    setCoordinatesOfRepetitions: PropTypes.func.isRequired,
 };
