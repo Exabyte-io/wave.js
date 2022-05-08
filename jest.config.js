@@ -4,7 +4,6 @@
  */
 
 module.exports = {
-
     // Tell Jest to stop running tests after first failure.
     bail: false,
 
@@ -21,6 +20,6 @@ module.exports = {
 
     // mock css files: https://jestjs.io/docs/en/webpack#handling-static-assets
     moduleNameMapper: {
-        "\\.(css|sass|scss)$": "<rootDir>/__tests__/__mocks__/styleMock.js"
-    }
+        "\\.(css|sass|scss)$": "<rootDir>/__tests__/__mocks__/styleMock.js",
+    },
 };
