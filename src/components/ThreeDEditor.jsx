@@ -474,10 +474,6 @@ export class ThreeDEditor extends React.Component {
         );
     }
 
-    componentDidUpdate() {
-        console.log(this.state);
-    }
-
     renderWaveComponent() {
         const { isConventionalCellShown, viewerSettings, viewerTriggerResize, boundaryConditions } =
             this.state;

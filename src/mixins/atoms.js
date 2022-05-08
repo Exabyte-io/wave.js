@@ -111,6 +111,7 @@ export const AtomsMixin = (superclass) =>
                 : this.basis;
             this.repeatObject3DAtRepetitionCoordinates(
                 this.createAtomsGroup(basis, atomRadiiScale),
+                this.settings.coordinates,
             );
         }
 

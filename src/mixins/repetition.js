@@ -21,9 +21,9 @@ export const RepetitionMixin = (superclass) =>
         /**
          * Repeats a given 3D object at the lattice points given by repetitionCoordinates function.
          */
-        repeatObject3DAtRepetitionCoordinates(object3D) {
+        repeatObject3DAtRepetitionCoordinates(object3D, coordinates) {
             this.structureGroup.add(object3D);
-            this.repetitionCoordinates.slice(1).forEach((point) => {
+            coordinates.forEach((point) => {
                 const object3DClone = object3D.clone();
                 object3DClone.position.add(new THREE.Vector3(...point));
                 this.structureGroup.add(object3DClone);
