@@ -48,7 +48,10 @@ export class WaveComponent extends React.Component {
                     prevIsConventionalCellShown !== isConventionalCellShown ||
                     prevIsDrawBondsEnabled !== isDrawBondsEnabled,
             );
-            setCoordinatesOfRepetitions(this.wave.coordinatesOfRepetitions);
+            // eslint-disable-next-line react/destructuring-assignment
+            if (prevProps.settings.repetitions !== this.props.settings.repetitions) {
+                setCoordinatesOfRepetitions(this.wave.coordinatesOfRepetitions);
+            }
         }
     }
 

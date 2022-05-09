@@ -1,6 +1,6 @@
 /* eslint-disable react/sort-comp */
 import { Made } from "@exabyte-io/made.js";
-import { createGenerateClassName, Tooltip } from "@material-ui/core";
+import { createGenerateClassName, MenuItem, TextField, Tooltip } from "@material-ui/core";
 import Autorenew from "@material-ui/icons/Autorenew";
 import BubbleChart from "@material-ui/icons/BubbleChart";
 import CloudDownload from "@material-ui/icons/CloudDownload";
@@ -51,7 +51,9 @@ export class ThreeDEditor extends React.Component {
         this.state = {
             // on/off switch for the component
             isInteractive: false,
+            isRepetitionsEditor: false,
             isThreejsEditorModalShown: false,
+            indexOfChosenRepetition: 0,
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -126,6 +128,21 @@ export class ThreeDEditor extends React.Component {
 
     handleSphereRadiusChange(e) {
         this.handleSetSetting({ atomRadiiScale: parseFloat($(e.target).val()) });
+    }
+
+    handleRepetitionInput(e, index) {
+        const { viewerSettings } = this.state;
+        const indexOfDimension =
+            (e.target.id === "X" && "0") ||
+            (e.target.id === "Y" && "1") ||
+            (e.target.id === "Z" && "2");
+        const value = +e.target.value;
+        if (typeof value === "number") {
+            viewerSettings.coordinates[index][+indexOfDimension] = value;
+            this.setState({
+                viewerSettings: { ...viewerSettings, coordinates: [...viewerSettings.coordinates] },
+            });
+        }
     }
 
     handleToggleOrthographicCamera() {
@@ -474,6 +491,102 @@ export class ThreeDEditor extends React.Component {
         );
     }
 
+    renderRepetitionsHandler(className = "") {
+        const {
+            isInteractive,
+            isRepetitionsEditor,
+            indexOfChosenRepetition,
+            viewerSettings: { coordinates },
+        } = this.state;
+        return (
+            <div
+                className={setClass(className, {
+                    hidden: !isInteractive,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                })}
+                data-name="Repetitions Editor"
+            >
+                <RoundIconButton
+                    key="Repetitions Editor"
+                    tooltipPlacement="top"
+                    title="Repetitions Editor"
+                    onClick={() => this.setState({ isRepetitionsEditor: !isRepetitionsEditor })}
+                >
+                    <Edit />
+                </RoundIconButton>
+                {isRepetitionsEditor && (
+                    <TextField
+                        select
+                        label="ID"
+                        value={indexOfChosenRepetition}
+                        onChange={(e) => this.setState({ indexOfChosenRepetition: e.target.value })}
+                    >
+                        {coordinates.map((item, index) => (
+                            // eslint-disable-next-line react/no-array-index-key
+                            <MenuItem key={index} value={index}>
+                                {index}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                )}
+                {isRepetitionsEditor &&
+                    coordinates[indexOfChosenRepetition] &&
+                    this.getRepetitionsInputs(
+                        coordinates[indexOfChosenRepetition],
+                        indexOfChosenRepetition,
+                    )}
+            </div>
+        );
+    }
+
+    getRepetitionsInputs(coordinates, index) {
+        return [
+            <Tooltip key="X" title="X" placement="top">
+                <input
+                    className="inverse stepper sphere-radius"
+                    id="X"
+                    value={coordinates[0]}
+                    readOnly={!index}
+                    type="number"
+                    max="100"
+                    min="0"
+                    step="0.001"
+                    onChange={(e) => this.handleRepetitionInput(e, index)}
+                />
+            </Tooltip>,
+
+            <Tooltip key="Y" title="Y" placement="top">
+                <input
+                    className="inverse stepper cell-repetitions"
+                    id="Y"
+                    value={coordinates[1]}
+                    readOnly={!index}
+                    type="number"
+                    max="100"
+                    min="0"
+                    step="0.001"
+                    onChange={(e) => this.handleRepetitionInput(e, index)}
+                />
+            </Tooltip>,
+
+            <Tooltip key="Z" title="Z" placement="top">
+                <input
+                    className="inverse stepper cell-repetitions"
+                    id="Z"
+                    value={coordinates[2]}
+                    readOnly={!index}
+                    type="number"
+                    max="100"
+                    min="0"
+                    step="0.001"
+                    onChange={(e) => this.handleRepetitionInput(e, index)}
+                />
+            </Tooltip>,
+        ];
+    }
+
     renderWaveComponent() {
         const { isConventionalCellShown, viewerSettings, viewerTriggerResize, boundaryConditions } =
             this.state;
@@ -503,7 +616,6 @@ export class ThreeDEditor extends React.Component {
         );
     }
 
-    // eslint-disable-next-line class-methods-use-this
     setCoordinatesOfRepetitions(coordinates) {
         const { viewerSettings } = this.state;
         if (viewerSettings && viewerSettings.coordinates.toString() !== coordinates.toString())
@@ -576,6 +688,7 @@ export class ThreeDEditor extends React.Component {
                 {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
                 {this.renderParametersToolbar(this.classNamesForTopToolbar + " third-row")}
                 {editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fourth-row")}
+                {this.renderRepetitionsHandler(this.classNamesForTopToolbar + " fifth-row")}
                 {this.renderExportToolbar(this.classNamesForBottomToolbar)}
             </div>
         );
