@@ -52,7 +52,6 @@ function Viewport(editor) {
 	grid2.material.vertexColors = false;
 	grid.add(grid2);
 
-	console.log(grid);
 	grid.rotateX(Math.PI / 2);
 
 	const length = 30;
@@ -78,6 +77,7 @@ function Viewport(editor) {
 	sceneHelpers.add(line);
 
 	const viewHelper = new ViewHelper(camera, container);
+	window.VIEW_HELPER = viewHelper;
 	const vr = new VR(editor);
 
 	const box = new THREE.Box3();
@@ -680,6 +680,8 @@ function Viewport(editor) {
 			container.dom.offsetWidth,
 			container.dom.offsetHeight
 		);
+
+		
 		renderer.render(scene, editor.viewportCamera);
 		scene.remove(grid);
 

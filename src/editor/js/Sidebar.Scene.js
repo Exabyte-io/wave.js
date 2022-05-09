@@ -329,13 +329,13 @@ function SidebarScene( editor ) {
 	var copiedObject;
 	function refreshUI() {
 
-		const camera = editor.camera;
+		// const camera = editor.camera;
 		const scene = editor.scene;
 
 		const options = [];
 
-		options.push( buildOption( camera, false ) );
-		options.push( buildOption( scene, false ) );
+		// options.push( buildOption( camera, false ) );
+		// options.push( buildOption( scene, false ) );
 
 		( function addObjects( objects, pad ) {
 
@@ -349,11 +349,19 @@ function SidebarScene( editor ) {
 
 				}
 
-				if (!["PerspectiveCamera", "AmbientLight", "DirectionalLight"].includes(object.type)) {
-					const option = buildOption( object, true );
-					option.style.paddingLeft = ( pad * 18 ) + 'px';
-					options.push( option );
-				}
+				if (
+                    ![
+                        "OrthographicCamera",
+                        "PerspectiveCamera",
+                        "AmbientLight",
+                        "DirectionalLight",
+                    ].includes(object.type) &&
+                    !object.name.includes("label-for-")
+                ) {
+                    const option = buildOption(object, true);
+                    option.style.paddingLeft = pad * 18 + "px";
+                    options.push(option);
+                }
 
 				if ( nodeStates.get( object ) === true ) {
 

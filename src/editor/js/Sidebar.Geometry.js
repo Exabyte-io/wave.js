@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { UIPanel, UIRow, UIText, UIInput, UIButton, UISpan } from './libs/ui.js';
 
 import { SetGeometryValueCommand } from './commands/SetGeometryValueCommand.js';
-
 import { SidebarGeometryBufferGeometry } from './Sidebar.Geometry.BufferGeometry.js';
 import { SidebarGeometryModifiers } from './Sidebar.Geometry.Modifiers.js';
 
@@ -191,11 +190,7 @@ function SidebarGeometry( editor ) {
 
 				parameters.clear();
 
-				if (object.type === "LineSegments") {
-
-					parameters.add(new Sidebar.Geometry.LineSegments(editor, object));
-	
-				} else if ( geometry.type === 'BufferGeometry' || geometry.type === 'Geometry' ) {
+				if ( geometry.type === 'BufferGeometry' || geometry.type === 'Geometry' ) {
 
 					parameters.add( new SidebarGeometryModifiers( editor, object ) );
 

@@ -195,14 +195,19 @@
         background-color: #eee;
     }
 
+    // TODO: compare the updated main.css with _light.scss
     #toolbar {
         position: absolute;
-        left: calc(50% - 290px); /* ( ( 100% - 300px ) / 2.0 ) - 140px */
-        width: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        // left: calc(50% - 180px / 2); /* ( ( 100% - 300px ) / 2.0 ) - 140px */
+        width: auto;
         bottom: 16px;
         height: 32px;
         background: #eee;
         color: #333;
+        padding: 4px 8px;
     }
 
     #toolbar * {

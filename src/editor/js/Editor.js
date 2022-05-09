@@ -7,6 +7,8 @@ import { History as _History } from './History.js';
 import { Strings } from './Strings.js';
 import { Storage as _Storage } from './Storage.js';
 
+import "../css/main.css";
+
 var _DEFAULT_CAMERA = new THREE.PerspectiveCamera( 50, 1, 0.01, 1000 );
 _DEFAULT_CAMERA.name = 'Camera';
 _DEFAULT_CAMERA.position.set( 0, 5, 10 );
@@ -153,9 +155,9 @@ Editor.prototype = {
 	//
 
 	addObject: function ( object, parent, index ) {
-
+		
 		var scope = this;
-
+		
 		object.traverse( function ( child ) {
 
 			if ( child.geometry !== undefined ) scope.addGeometry( child.geometry );
@@ -398,11 +400,13 @@ Editor.prototype = {
 
 			if ( helper === undefined ) {
 
-				if ( object.isCamera ) {
+				// if ( object.isCamera ) {
 
-					helper = new THREE.CameraHelper( object );
+				// 	helper = new THREE.CameraHelper( object );
 
-				} else if ( object.isPointLight ) {
+				// } else 
+
+				if ( object.isPointLight ) {
 
 					helper = new THREE.PointLightHelper( object, 1 );
 

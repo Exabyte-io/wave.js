@@ -5,7 +5,7 @@ import React from "react";
 import { ModalBody } from "react-bootstrap";
 import swal from "sweetalert";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Made } from "@exabyte-io/made.js";
 
 import { Viewport } from "../editor/js/Viewport";
@@ -96,17 +96,20 @@ export class ThreejsEditorModal extends ModalDialog {
         // const modal = new UI.Modal();
         // this.domElement.appendChild(modal.dom);
 
+
+        // FIXME: check if editor's orbit contols are not enough;
+        // external controls affect translating/rotating/stretching operations
         // add OrbitControls to allow the camera to orbit around the scene.
-        const orbitControls = new OrbitControls(
-            this.editor.camera,
-            document.getElementById("viewport"),
-        );
-        orbitControls.enabled = true;
-        orbitControls.enableZoom = true;
-        orbitControls.enableKeys = false;
-        orbitControls.rotateSpeed = 2.0;
-        orbitControls.zoomSpeed = 2.0;
-        orbitControls.update();
+        // const orbitControls = new OrbitControls(
+        //     this.editor.camera,
+        //     document.getElementById("viewport"),
+        // );
+        // orbitControls.enabled = true;
+        // orbitControls.enableZoom = true;
+        // orbitControls.enableKeys = false;
+        // orbitControls.rotateSpeed = 2.0;
+        // orbitControls.zoomSpeed = 2.0;
+        // orbitControls.update();
     }
 
     /**
@@ -139,6 +142,9 @@ export class ThreejsEditorModal extends ModalDialog {
         const scene = loader.parse(materialsToThreeDSceneData(this.props.materials));
         this.editor.execute(new SetSceneCommand(this.editor, scene));
         this.editor.signals.objectSelected.dispatch(this.editor.camera);
+        
+        // FIXME: remove debug EDITOR reference
+        window.EDITOR = this.editor;
     }
 
     /**
