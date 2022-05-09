@@ -195,7 +195,10 @@ export class ThreeDEditor extends React.Component {
 
     toggleThreejsEditorModal() {
         const { isThreejsEditorModalShown } = this.state;
-        this.setState({ isThreejsEditorModalShown: !isThreejsEditorModalShown });
+        this.setState({
+            isThreejsEditorModalShown: !isThreejsEditorModalShown,
+            isRepetitionsEditor: false,
+        });
     }
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
@@ -500,11 +503,9 @@ export class ThreeDEditor extends React.Component {
         } = this.state;
         return (
             <div
+                style={{ display: "flex" }}
                 className={setClass(className, {
                     hidden: !isInteractive,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
                 })}
                 data-name="Repetitions Editor"
             >
@@ -517,28 +518,42 @@ export class ThreeDEditor extends React.Component {
                     <Edit />
                 </RoundIconButton>
                 {isRepetitionsEditor && (
-                    <TextField
-                        select
-                        label="ID"
-                        value={indexOfChosenRepetition}
-                        onChange={(e) => this.setState({ indexOfChosenRepetition: e.target.value })}
-                    >
-                        {coordinates.map((item, index) => (
-                            // eslint-disable-next-line react/no-array-index-key
-                            <MenuItem key={index} value={index}>
-                                {index}
-                            </MenuItem>
-                        ))}
-                    </TextField>
+                    <div className="select-view">
+                        <TextField
+                            select
+                            value={indexOfChosenRepetition}
+                            onChange={(e) =>
+                                this.setState({ indexOfChosenRepetition: e.target.value })
+                            }
+                        >
+                            {coordinates.map((item, index) => (
+                                // eslint-disable-next-line react/no-array-index-key
+                                <MenuItem key={index} value={index}>
+                                    {index}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </div>
                 )}
-                {isRepetitionsEditor &&
-                    coordinates[indexOfChosenRepetition] &&
-                    this.getRepetitionsInputs(
-                        coordinates[indexOfChosenRepetition],
-                        indexOfChosenRepetition,
-                    )}
+                {isRepetitionsEditor && coordinates[indexOfChosenRepetition] && (
+                    <div>
+                        {this.getRepetitionsInputs(
+                            coordinates[indexOfChosenRepetition],
+                            indexOfChosenRepetition,
+                        )}
+                    </div>
+                )}
             </div>
         );
+    }
+
+    componentDidUpdate() {
+        const {
+            viewerSettings: { coordinates },
+            indexOfChosenRepetition,
+        } = this.state;
+        if (coordinates && indexOfChosenRepetition > coordinates.length)
+            this.setState({ indexOfChosenRepetition: 0 });
     }
 
     getRepetitionsInputs(coordinates, index) {
@@ -552,7 +567,7 @@ export class ThreeDEditor extends React.Component {
                     type="number"
                     max="100"
                     min="0"
-                    step="0.001"
+                    step="0.1"
                     onChange={(e) => this.handleRepetitionInput(e, index)}
                 />
             </Tooltip>,
@@ -566,7 +581,7 @@ export class ThreeDEditor extends React.Component {
                     type="number"
                     max="100"
                     min="0"
-                    step="0.001"
+                    step="0.1"
                     onChange={(e) => this.handleRepetitionInput(e, index)}
                 />
             </Tooltip>,
@@ -580,7 +595,7 @@ export class ThreeDEditor extends React.Component {
                     type="number"
                     max="100"
                     min="0"
-                    step="0.001"
+                    step="0.1"
                     onChange={(e) => this.handleRepetitionInput(e, index)}
                 />
             </Tooltip>,
@@ -688,7 +703,9 @@ export class ThreeDEditor extends React.Component {
                 {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
                 {this.renderParametersToolbar(this.classNamesForTopToolbar + " third-row")}
                 {editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fourth-row")}
-                {this.renderRepetitionsHandler(this.classNamesForTopToolbar + " fifth-row")}
+                {this.renderRepetitionsHandler(
+                    this.classNamesForTopToolbar + " repetitions-editor-view fifth-row",
+                )}
                 {this.renderExportToolbar(this.classNamesForBottomToolbar)}
             </div>
         );

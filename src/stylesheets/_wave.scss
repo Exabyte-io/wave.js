@@ -44,6 +44,17 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
 .materials-designer-3d-editor {
     padding: 0;
 
+    .repetitions-editor-view {
+        align-items: center
+    }
+
+    .select-view {
+        background-color: #424242;
+        border-radius: 5px;
+        padding: 0 5px 5px;
+        margin: 0 5px;
+    }
+
     .buttons-toolbar {
         position: absolute;
         right: 10px;
