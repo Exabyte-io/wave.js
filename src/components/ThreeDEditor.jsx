@@ -398,7 +398,7 @@ export class ThreeDEditor extends React.Component {
 
     getParametersToolbarItems() {
         const { viewerSettings } = this.state;
-        const axisValues = ['XYZ', 'X', 'Y', 'Z']
+        const axisValues = ['XYZ', 'X', 'Y', 'Z', 'XY', 'XZ', 'YZ']
         return [
             <Tooltip key="RADIUS" title="RADIUS" placement="top">
                 <input

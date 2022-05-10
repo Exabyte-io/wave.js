@@ -20,23 +20,46 @@ export const RepetitionMixin = (superclass) =>
 
         // eslint-disable-next-line class-methods-use-this
         coordinatesByAxis(axis, coordinates, repetitions) {
-            if (axis === 'X')
-                return coordinates.reduce((res, item, index) => {
-                    if (item[1] === 0 && index%repetitions === 0 && res.length < repetitions) {
-                        res.push(item)
-                    }
-                    return res
-                }, [])
-            if (axis === 'Y')
-                return coordinates.reduce((res, item, index) => {
-                    if (index % repetitions === 0 && res.length < repetitions) {
-                        res.push(item)
-                    }
-                    return res
-                }, [])
-            if (axis === 'Z')
-                return coordinates.filter(item => item[0] === 0)
-            return coordinates
+            switch (axis) {
+                case 'X':
+                    return [...this.getCoordinatesByXAxis(coordinates, repetitions)]
+                case 'Y':
+                    return [...this.getCoordinatesByYAxis(coordinates, repetitions)]
+                case 'Z':
+                    return [...this.getCoordinatesByZAxis(coordinates, repetitions)]
+                case 'XY':
+                    return [...this.getCoordinatesByXAxis(coordinates, repetitions), ...this.getCoordinatesByYAxis(coordinates, repetitions)]
+                case 'XZ':
+                    return [...this.getCoordinatesByXAxis(coordinates, repetitions), ...this.getCoordinatesByZAxis(coordinates, repetitions)]
+                case 'YZ':
+                    return [...this.getCoordinatesByYAxis(coordinates, repetitions), ...this.getCoordinatesByZAxis(coordinates, repetitions)]
+                default: return coordinates
+            }
+        }
+
+        // eslint-disable-next-line class-methods-use-this
+        getCoordinatesByXAxis(coordinates, repetitions) {
+            return coordinates.reduce((res, item, index) => {
+                if (item[1] === 0 && index%repetitions === 0 && res.length < repetitions) {
+                    res.push(item)
+                }
+                return res
+            }, [])
+        }
+
+        // eslint-disable-next-line class-methods-use-this
+        getCoordinatesByYAxis(coordinates, repetitions) {
+            return coordinates.reduce((res, item, index) => {
+                if (index % repetitions === 0 && res.length < repetitions) {
+                    res.push(item)
+                }
+                return res
+            }, [])
+        }
+
+        // eslint-disable-next-line class-methods-use-this
+        getCoordinatesByZAxis(coordinates) {
+            return coordinates.filter(item => item[0] === 0)
         }
 
         /**
