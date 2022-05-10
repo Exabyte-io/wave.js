@@ -81,6 +81,7 @@ function GeometryParametersPanel( editor, object ) {
 
 };
 
+
 Sidebar.Geometry.LineSegments = GeometryParametersPanel;
 
 export { GeometryParametersPanel };

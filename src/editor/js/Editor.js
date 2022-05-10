@@ -9,12 +9,12 @@ import { Storage as _Storage } from './Storage.js';
 
 import "../css/main.css";
 
-var _DEFAULT_CAMERA = new THREE.PerspectiveCamera( 50, 1, 0.01, 1000 );
+const _DEFAULT_CAMERA = new THREE.PerspectiveCamera( 50, 1, 0.01, 1000 );
 _DEFAULT_CAMERA.name = 'Camera';
 _DEFAULT_CAMERA.position.set( 0, 5, 10 );
 _DEFAULT_CAMERA.lookAt( new THREE.Vector3() );
 
-var Editor = function (providedDefaultCamera) {
+function Editor (providedDefaultCamera) {
 	this.DEFAULT_CAMERA = providedDefaultCamera || _DEFAULT_CAMERA;
 
 	this.signals = {
