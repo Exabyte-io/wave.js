@@ -426,7 +426,7 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip key="AXIS" title="AXIS" placement="top">
+            <Tooltip key="REPETITION_AXIS" title="REPETITION AXIS" placement="top">
                 <TextField
                     className="axis-select"
                     select
