@@ -43,10 +43,10 @@ export const RepetitionMixin = (superclass) =>
          * Repeats a given 3D object at the lattice points given by repetitionCoordinates function.
          */
         repeatObject3DAtRepetitionCoordinates(object3D) {
-            const { settings: {repetitions} } = this
+            const { settings: {repetitions, axisOfRepetitions} } = this
             const coordinates = this.repetitionCoordinates;
             this.structureGroup.add(object3D);
-            this.coordinatesByAxis('X', coordinates, repetitions).forEach((point) => {
+            this.coordinatesByAxis(axisOfRepetitions, coordinates, repetitions).forEach((point) => {
                 const object3DClone = object3D.clone();
                 object3DClone.position.add(new THREE.Vector3(...point));
                 this.structureGroup.add(object3DClone);

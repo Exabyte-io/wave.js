@@ -1,6 +1,6 @@
 /* eslint-disable react/sort-comp */
 import { Made } from "@exabyte-io/made.js";
-import { createGenerateClassName, Tooltip } from "@material-ui/core";
+import { createGenerateClassName, MenuItem, TextField, Tooltip } from "@material-ui/core";
 import Autorenew from "@material-ui/icons/Autorenew";
 import BubbleChart from "@material-ui/icons/BubbleChart";
 import CloudDownload from "@material-ui/icons/CloudDownload";
@@ -60,6 +60,7 @@ export class ThreeDEditor extends React.Component {
                 atomRadiiScale: settings.atomRadiiScale,
                 repetitions: settings.repetitions,
                 chemicalConnectivityFactor: settings.chemicalConnectivityFactor,
+                axisOfRepetitions: 'XYZ',
             },
             boundaryConditions,
             isConventionalCellShown,
@@ -397,6 +398,7 @@ export class ThreeDEditor extends React.Component {
 
     getParametersToolbarItems() {
         const { viewerSettings } = this.state;
+        const axisValues = ['XYZ', 'X', 'Y', 'Z']
         return [
             <Tooltip key="RADIUS" title="RADIUS" placement="top">
                 <input
@@ -422,6 +424,20 @@ export class ThreeDEditor extends React.Component {
                     step="1"
                     onChange={this.handleCellRepetitionsChange}
                 />
+            </Tooltip>,
+
+            <Tooltip key="AXIS" title="AXIS" placement="top">
+                <TextField
+                    className="axis-select"
+                    select
+                    value={viewerSettings.axisOfRepetitions}
+                    onChange={(e) => this.setState({viewerSettings: {...viewerSettings, axisOfRepetitions: e.target.value}})}
+                >
+                    {axisValues.map((item, index) =>
+                        // eslint-disable-next-line react/no-array-index-key
+                        <MenuItem key={index} value={item}>
+                    {item}
+                </MenuItem>)}</TextField>
             </Tooltip>,
 
             <Tooltip
