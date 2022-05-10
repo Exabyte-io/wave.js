@@ -26,7 +26,7 @@ export const RepetitionMixin = (superclass) =>
                 case 'Y':
                     return this.getCoordinatesByYAxis(coordinates, repetitions)
                 case 'Z':
-                    return this.getCoordinatesByZAxis(coordinates, repetitions)
+                    return this.getCoordinatesByZAxis(coordinates)
                 case 'XY':
                     return this.getCoordinatesByXYAxes(coordinates, repetitions)
                 case 'XZ':
