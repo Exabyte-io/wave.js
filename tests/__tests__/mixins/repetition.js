@@ -1,4 +1,36 @@
 import { getWaveInstance } from "../../enums";
+import { takeSnapshotAndAssertEqualityAsync } from "../../utils";
+
+describe('Screen tests for axes', () => {
+    const settings = {
+        atomRadiiScale: 0.2,
+        repetitions: 3,
+    }
+    test('X axis', () => {
+        const wave = getWaveInstance({ ...settings, axisOfRepetitions: 'X' });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "XAxis");
+    })
+    test('Y axis', () => {
+        const wave = getWaveInstance({ ...settings, axisOfRepetitions: 'Y' });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "YAxis");
+    })
+    test('Z axis', () => {
+        const wave = getWaveInstance({ ...settings, axisOfRepetitions: 'Z' });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "ZAxis");
+    })
+    test('XY axis', () => {
+        const wave = getWaveInstance({ ...settings, axisOfRepetitions: 'XY' });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "XYAxis");
+    })
+    test('XZ axis', () => {
+        const wave = getWaveInstance({ ...settings, axisOfRepetitions: 'XZ' });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "XZAxis");
+    })
+    test('YZ axis', () => {
+        const wave = getWaveInstance({ ...settings, axisOfRepetitions: 'YZ' });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "YZAxis");
+    })
+})
 
 describe('Calling the correct method', () => {
     const wave = getWaveInstance();

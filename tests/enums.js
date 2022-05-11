@@ -24,12 +24,12 @@ export const WAVE_SETTINGS = {
     repetitions: 1,
 };
 
-export function getWaveInstance() {
+export function getWaveInstance(settings) {
     const material = new Made.Material(MATERIAL_CONFIG);
     return new Wave({
         DOMElement: createElement("div", ELEMENT_PROPERTIES),
         structure: material,
         cell: material.Lattice.unitCell,
-        settings: WAVE_SETTINGS,
+        settings: settings || WAVE_SETTINGS,
     });
 }
