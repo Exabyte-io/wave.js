@@ -1,6 +1,6 @@
 /* eslint-disable react/sort-comp */
 import { Made } from "@exabyte-io/made.js";
-import { createGenerateClassName, MenuItem, TextField, Tooltip } from "@material-ui/core";
+import { createGenerateClassName, Tooltip } from "@material-ui/core";
 import Autorenew from "@material-ui/icons/Autorenew";
 import BubbleChart from "@material-ui/icons/BubbleChart";
 import CloudDownload from "@material-ui/icons/CloudDownload";
@@ -58,9 +58,10 @@ export class ThreeDEditor extends React.Component {
             // Settings of the wave viewer
             viewerSettings: {
                 atomRadiiScale: settings.atomRadiiScale,
-                repetitions: settings.repetitions,
+                XRepetitions: settings.repetitions,
+                YRepetitions: settings.repetitions,
+                ZRepetitions: settings.repetitions,
                 chemicalConnectivityFactor: settings.chemicalConnectivityFactor,
-                axisOfRepetitions: 'XYZ',
             },
             boundaryConditions,
             isConventionalCellShown,
@@ -120,8 +121,21 @@ export class ThreeDEditor extends React.Component {
         });
     };
 
+    // eslint-disable-next-line class-methods-use-this
     handleCellRepetitionsChange(e) {
-        this.handleSetSetting({ repetitions: parseFloat($(e.target).val()) });
+        const axis = e.target.id
+        switch (axis) {
+            case 'X_axis':
+                this.handleSetSetting({ XRepetitions: parseFloat($(e.target).val()) });
+                break
+            case 'Y_axis':
+                this.handleSetSetting({ YRepetitions: parseFloat($(e.target).val()) });
+                break
+            case 'Z_axis':
+                this.handleSetSetting({ ZRepetitions: parseFloat($(e.target).val()) });
+                break
+            default: break
+        }
     }
 
     handleSphereRadiusChange(e) {
@@ -398,7 +412,6 @@ export class ThreeDEditor extends React.Component {
 
     getParametersToolbarItems() {
         const { viewerSettings } = this.state;
-        const axisValues = ['XYZ', 'X', 'Y', 'Z', 'XY', 'XZ', 'YZ']
         return [
             <Tooltip key="RADIUS" title="RADIUS" placement="top">
                 <input
@@ -413,11 +426,11 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip key="REPETITIONS" title="REPETITIONS" placement="top">
+            <Tooltip key="A REPETITIONS" title="A REPETITIONS" placement="top">
                 <input
                     className="inverse stepper cell-repetitions"
-                    id="cell-repetitions"
-                    value={viewerSettings.repetitions}
+                    id="X_axis"
+                    value={viewerSettings.XRepetitions}
                     type="number"
                     max="10"
                     min="1"
@@ -426,18 +439,30 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip key="REPETITION_AXIS" title="REPETITION AXIS" placement="top">
-                <TextField
-                    className="axis-select"
-                    select
-                    value={viewerSettings.axisOfRepetitions}
-                    onChange={(e) => this.setState({viewerSettings: {...viewerSettings, axisOfRepetitions: e.target.value}})}
-                >
-                    {axisValues.map((item, index) =>
-                        // eslint-disable-next-line react/no-array-index-key
-                        <MenuItem key={index} value={item}>
-                    {item}
-                </MenuItem>)}</TextField>
+            <Tooltip key="B REPETITIONS" title="B REPETITIONS" placement="top">
+                <input
+                    className="inverse stepper cell-repetitions"
+                    id="Y_axis"
+                    value={viewerSettings.YRepetitions}
+                    type="number"
+                    max="10"
+                    min="1"
+                    step="1"
+                    onChange={this.handleCellRepetitionsChange}
+                />
+            </Tooltip>,
+
+            <Tooltip key="C REPETITIONS" title="C REPETITIONS" placement="top">
+                <input
+                    className="inverse stepper cell-repetitions"
+                    id="Z_axis"
+                    value={viewerSettings.ZRepetitions}
+                    type="number"
+                    max="10"
+                    min="1"
+                    step="1"
+                    onChange={this.handleCellRepetitionsChange}
+                />
             </Tooltip>,
 
             <Tooltip
