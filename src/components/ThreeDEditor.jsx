@@ -123,19 +123,7 @@ export class ThreeDEditor extends React.Component {
 
     // eslint-disable-next-line class-methods-use-this
     handleCellRepetitionsChange(e) {
-        const axis = e.target.id
-        switch (axis) {
-            case 'X_axis':
-                this.handleSetSetting({ XRepetitions: parseFloat($(e.target).val()) });
-                break
-            case 'Y_axis':
-                this.handleSetSetting({ YRepetitions: parseFloat($(e.target).val()) });
-                break
-            case 'Z_axis':
-                this.handleSetSetting({ ZRepetitions: parseFloat($(e.target).val()) });
-                break
-            default: break
-        }
+        this.handleSetSetting({ [e.target.id]: parseFloat($(e.target).val()) });
     }
 
     handleSphereRadiusChange(e) {
@@ -426,10 +414,10 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip key="A REPETITIONS" title="A REPETITIONS" placement="top">
+            <Tooltip key="A" title="A" placement="top">
                 <input
                     className="inverse stepper cell-repetitions"
-                    id="X_axis"
+                    id="XRepetitions"
                     value={viewerSettings.XRepetitions}
                     type="number"
                     max="10"
@@ -439,10 +427,10 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip key="B REPETITIONS" title="B REPETITIONS" placement="top">
+            <Tooltip key="B" title="B" placement="top">
                 <input
                     className="inverse stepper cell-repetitions"
-                    id="Y_axis"
+                    id="YRepetitions"
                     value={viewerSettings.YRepetitions}
                     type="number"
                     max="10"
@@ -452,10 +440,10 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip key="C REPETITIONS" title="C REPETITIONS" placement="top">
+            <Tooltip key="C" title="C" placement="top">
                 <input
                     className="inverse stepper cell-repetitions"
-                    id="Z_axis"
+                    id="ZRepetitions"
                     value={viewerSettings.ZRepetitions}
                     type="number"
                     max="10"
