@@ -22,6 +22,9 @@ export const RepetitionMixin = (superclass) =>
             const {XRepetitions, YRepetitions, ZRepetitions} = repetitions
             const maxNumberOfRepetitions = Math.max(XRepetitions, YRepetitions, ZRepetitions)
 
+            if (!XRepetitions && !YRepetitions && !ZRepetitions)
+                return coordinates
+
             let columns = coordinates.reduce((res, item, index) => {
                 if (index%maxNumberOfRepetitions === 0) {
                     res[res.length] = [item]
