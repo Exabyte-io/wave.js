@@ -6,37 +6,44 @@ export const RepetitionMixin = (superclass) =>
         /**
          * Returns an array of coordinates (lattice points) to repeat the 3D objects bases on the number of repetitions.
          */
-        get repetitionCoordinates() {
+        repetitionCoordinates(value) {
             const basis = new Made.Basis({
                 ...this.basis.toJSON(),
                 elements: ["Si"],
                 coordinates: [[0, 0, 0]],
             });
-            const value = this.settings.repetitions;
             // avoid repeating in z direction if boundaries are enabled.
             const repetitions = [value, value, this.areNonPeriodicBoundariesPresent ? 1 : value];
             return Made.tools.basis.repeat(basis, repetitions).coordinates.map((c) => c.value);
         }
 
         // eslint-disable-next-line class-methods-use-this
-        coordinatesByAxis(axis, coordinates, repetitions) {
-            switch (axis) {
-                case 'X':
-                    return this.getCoordinatesByXAxis(coordinates, repetitions)
-                case 'Y':
-                    return this.getCoordinatesByYAxis(coordinates, repetitions)
-                case 'Z':
-                    return this.getCoordinatesByZAxis(coordinates)
-                case 'XY':
-                    return this.getCoordinatesByXYAxes(coordinates, repetitions)
-                case 'XZ':
-                    return this.getCoordinatesByXZAxes(coordinates)
-                case 'YZ':
-                    return this.getCoordinatesByYZAxes(coordinates, repetitions)
-                default: return coordinates
+        coordinatesByAxis(coordinates, repetitions) {
+            const {XRepetitions, YRepetitions, ZRepetitions} = repetitions
+            if (XRepetitions > 1 && YRepetitions === 1 && ZRepetitions === 1)
+                return this.getCoordinatesByXAxis(coordinates, XRepetitions)
+            if (XRepetitions === 1 && YRepetitions > 1 && ZRepetitions === 1)
+                return this.getCoordinatesByYAxis(coordinates, YRepetitions)
+            if (XRepetitions === 1 && YRepetitions === 1 && ZRepetitions > 1)
+                return this.getCoordinatesByZAxis(coordinates, ZRepetitions)
+            // TODO changes in these methods
+            if (XRepetitions > 1 && YRepetitions > 1 && ZRepetitions === 1) {
+                return this.getCoordinatesByXYAxes(coordinates, XRepetitions, YRepetitions)
             }
+            if (XRepetitions > 1 && YRepetitions === 1 && ZRepetitions > 1) {
+                return this.getCoordinatesByXZAxes(coordinates, ZRepetitions)
+            }
+            if (XRepetitions === 1 && YRepetitions > 1 && ZRepetitions > 1) {
+                return this.getCoordinatesByXZAxes(coordinates, ZRepetitions)
+            }
+            // TODO method for XYZ
+            if (XRepetitions > 1 && YRepetitions > 1 && ZRepetitions > 1) {
+                return coordinates
+            }
+            return coordinates
         }
 
+        // side
         // eslint-disable-next-line class-methods-use-this
         getCoordinatesByYZAxes(coordinates, repetitions) {
             return coordinates.reduce((res, item, index) => {
@@ -46,15 +53,23 @@ export const RepetitionMixin = (superclass) =>
             }, [])
         }
 
+        // down
         // eslint-disable-next-line class-methods-use-this
-        getCoordinatesByXYAxes(coordinates, repetitions) {
-            return coordinates.reduce((res, item, index) => {
-                if (index % repetitions === 0)
-                res.push(item)
+        getCoordinatesByXYAxes(coordinates, X, Y) {
+            const result = coordinates.reduce((res, item, index) => {
+                if (index % Math.max(X, Y) === 0)
+                    res.push(item)
                 return res
             }, [])
+
+            if (X > Y)
+                return result.filter((item, index) => index%X < Y)
+            if (Y > X)
+                return result.slice(0, X*Y)
+            return result
         }
 
+        // front
         // eslint-disable-next-line class-methods-use-this
         getCoordinatesByXZAxes(coordinates) {
             return coordinates.filter(item => item[1] === 0)
@@ -89,10 +104,10 @@ export const RepetitionMixin = (superclass) =>
          * Repeats a given 3D object at the lattice points given by repetitionCoordinates function.
          */
         repeatObject3DAtRepetitionCoordinates(object3D) {
-            const { settings: {repetitions, axisOfRepetitions} } = this
-            const coordinates = this.repetitionCoordinates;
+            const { settings: {XRepetitions, YRepetitions, ZRepetitions} } = this
+            const coordinates = this.repetitionCoordinates(Math.max(XRepetitions, YRepetitions, ZRepetitions));
             this.structureGroup.add(object3D);
-            this.coordinatesByAxis(axisOfRepetitions, coordinates, repetitions).forEach((point) => {
+            this.coordinatesByAxis(coordinates, {XRepetitions, YRepetitions, ZRepetitions}).forEach((point) => {
                 const object3DClone = object3D.clone();
                 object3DClone.position.add(new THREE.Vector3(...point));
                 this.structureGroup.add(object3DClone);
