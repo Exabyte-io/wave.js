@@ -270,10 +270,11 @@ export class Wave extends mix(WaveBase).with(
         this.adjustOrbitControlsTarget(cellViewParams.center);
     }
 
-    rebuildScene() {
+    rebuildScene(withoutAdjustingOfCamera) {
         this.clearView();
         this.drawAtomsAsSpheres();
         this.drawUnitCell();
+        if (!withoutAdjustingOfCamera)
         this.adjustCamerasAndOrbitControlsToCell();
         this.drawBoundaries();
         if (this.isDrawBondsEnabled) this.drawBonds();
