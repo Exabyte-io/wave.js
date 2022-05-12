@@ -6,6 +6,10 @@ describe('Screen tests for axes', () => {
         atomRadiiScale: 0.2,
         repetitions: 3,
     }
+    test('XYZ axis', () => {
+        const wave = getWaveInstance(settings);
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "XYZAxis");
+    })
     test('X axis', () => {
         const wave = getWaveInstance({ ...settings, axisOfRepetitions: 'X' });
         return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "XAxis");
