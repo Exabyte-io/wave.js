@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
+import * as THREE from "@exabyte-io/three";
 import { mix } from "mixwith";
-import * as THREE from "three";
 
 import { AtomsMixin } from "./mixins/atoms";
 import { BondsMixin } from "./mixins/bonds";
