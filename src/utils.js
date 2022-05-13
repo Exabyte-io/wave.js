@@ -76,7 +76,8 @@ export const exportToDisk = function exportToDisk(
 
 /**
  * @summary Converts position array of Buffer Geometry to vertices vectors
- * @param positionArray
+ * @param geometry {THREE.BufferGeometry} the buffer geometry
+ * @param position {Float32Array} the position array
  */
 function convertPositionToVertices(geometry, position) {
     const vertices = [];
