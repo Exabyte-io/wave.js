@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "@exabyte-io/three";
 
 const TV3 = THREE.Vector3;
 

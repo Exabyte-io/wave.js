@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import * as THREE from "@exabyte-io/three";
+import { OrbitControls } from "@exabyte-io/three/examples/jsm/controls/OrbitControls";
 
 import { UtilsMixin } from "./utils";
 

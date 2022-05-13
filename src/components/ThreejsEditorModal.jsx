@@ -1,17 +1,17 @@
 import { Made } from "@exabyte-io/made.js";
+import * as THREE from "@exabyte-io/three";
+import { SetSceneCommand } from "@exabyte-io/three/editor/js/commands/SetSceneCommand";
+import { Editor } from "@exabyte-io/three/editor/js/Editor";
+import { Menubar } from "@exabyte-io/three/editor/js/Menubar";
+// TODO : resolve tern global reference in codemirror
+// import { Script } from "@exabyte-io/three/editor/js/Script";
+import { Player } from "@exabyte-io/three/editor/js/Player";
+import { Sidebar } from "@exabyte-io/three/editor/js/Sidebar";
+import { Viewport } from "@exabyte-io/three/editor/js/Viewport";
 import PropTypes from "prop-types";
 import React from "react";
 import { ModalBody } from "react-bootstrap";
 import swal from "sweetalert";
-import * as THREE from "three";
-import { SetSceneCommand } from "three/editor/js/commands/SetSceneCommand";
-import { Editor } from "three/editor/js/Editor";
-import { Menubar } from "three/editor/js/Menubar";
-// TODO : resolve tern global reference in codemirror
-// import { Script } from "three/editor/js/Script";
-import { Player } from "three/editor/js/Player";
-import { Sidebar } from "three/editor/js/Sidebar";
-import { Viewport } from "three/editor/js/Viewport";
 
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";

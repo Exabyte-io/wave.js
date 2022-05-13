@@ -1,6 +1,6 @@
 import { Made } from "@exabyte-io/made.js";
+import * as THREE from "@exabyte-io/three";
 import { sprintf } from "sprintf-js";
-import * as THREE from "three";
 
 // eslint-disable-next-line import/no-cycle
 import { Wave } from "./wave";
