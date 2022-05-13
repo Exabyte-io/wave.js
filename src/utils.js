@@ -75,19 +75,33 @@ export const exportToDisk = function exportToDisk(
 };
 
 /**
+ * @summary Converts position array of Buffer Geometry to vertices vectors
+ * @param positionArray
+ */
+function convertPositionToVertices(geometry, position) {
+    const vertices = [];
+    for (let i = 0, l = position.count; i < l; i++) {
+        const vector = new THREE.Vector3();
+        vector.fromBufferAttribute(position, i);
+        vector.applyMatrix4(geometry.matrixWorld);
+        vertices.push(vector);
+    }
+    return vertices;
+}
+
+/**
  * Extracts the lattice from the LineSegments object vertices.
  */
 function extractLatticeFromScene(scene) {
     const unitCellObject = scene.getObjectByProperty("type", "LineSegments");
-    const { vertices } = unitCellObject.geometry;
+    const vertices = convertPositionToVertices(
+        unitCellObject,
+        unitCellObject.geometry.attributes.position,
+    );
     const a = vertices[1].sub(vertices[0]).toArray();
     const b = vertices[3].sub(vertices[0]).toArray();
     const c = vertices[17].sub(vertices[0]).toArray();
-    return Made.Lattice.fromVectors({
-        a,
-        b,
-        c,
-    });
+    return Made.Lattice.fromVectors({ a, b, c });
 }
 
 /**
@@ -100,7 +114,8 @@ function extractBasisFromScene(scene, cell) {
     scene.traverse((object) => {
         if (object.type === "Mesh") {
             elements.push(object.name.split("-")[0] || "Si");
-            coordinates.push(object.getWorldPosition().toArray());
+            const vector = new THREE.Vector3();
+            coordinates.push(object.getWorldPosition(vector).toArray());
         }
     });
     return new Made.Basis({

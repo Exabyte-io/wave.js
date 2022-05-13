@@ -63,7 +63,7 @@ class WaveBase {
     initDimensions() {
         this.WIDTH = this.container.clientWidth;
         this.HEIGHT = this.container.clientHeight;
-        this.ASPECT = this.WIDTH / this.HEIGHT;
+        this.ASPECT = this.WIDTH > 0 && this.HEIGHT > 0 ? this.WIDTH / this.HEIGHT : 1;
     }
 
     // eslint-disable-next-line class-methods-use-this

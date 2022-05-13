@@ -1,31 +1,47 @@
+import { Made } from "@exabyte-io/made.js";
 import PropTypes from "prop-types";
 import React from "react";
 import { ModalBody } from "react-bootstrap";
 import swal from "sweetalert";
 import * as THREE from "three";
-import ThreeOrbitControls from "three-orbit-controls";
+import { SetSceneCommand } from "three/editor/js/commands/SetSceneCommand";
+import { Editor } from "three/editor/js/Editor";
+import { Menubar } from "three/editor/js/Menubar";
+// TODO : resolve tern global reference in codemirror
+// import { Script } from "three/editor/js/Script";
+import { Player } from "three/editor/js/Player";
+import { Sidebar } from "three/editor/js/Sidebar";
+import { Toolbar } from "three/editor/js/Toolbar";
+import { Viewport } from "three/editor/js/Viewport";
 
-import { Made } from "@exabyte-io/made.js";
-import { THREE_D_BASE_URL, THREE_D_SOURCES } from "../enums";
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
-import { LoadingIndicator } from "./LoadingIndicator";
 import { ModalDialog } from "./ModalDialog";
-import { ShowIf } from "./ShowIf";
 
 export class ThreejsEditorModal extends ModalDialog {
     constructor(props) {
         super(props);
-        window.THREE = THREE;
         this.editor = undefined;
         this.domElement = undefined;
-        this.state = { areScriptsLoaded: false };
-        this.injectScripts();
+    }
+
+    initialize(el) {
+        if (!el) return;
+        this.domElement = el;
+        this.setNumberFormat();
+        this.initializeEditor();
+        this.addEventListeners();
+        this.loadScene();
     }
 
     // eslint-disable-next-line no-unused-vars
     componentDidUpdate(prevProps, prevState, snapshot) {
         window.localStorage.removeItem("threejs-editor");
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener("dragover", this.dragOver, false);
+        window.removeEventListener("resize", this.windowResize, false);
     }
 
     /**
@@ -34,6 +50,7 @@ export class ThreejsEditorModal extends ModalDialog {
      */
     // eslint-disable-next-line class-methods-use-this
     setNumberFormat() {
+        /* eslint func-names: ["off"] */
         /* eslint no-extend-native: [0, { "exceptions": ["Object"] }] */
         Number.prototype.format = function () {
             return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
@@ -54,64 +71,46 @@ export class ThreejsEditorModal extends ModalDialog {
         camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         // initialize editor and set the scene background
-        this.editor = new window.Editor(camera);
+        this.editor = new Editor(camera);
         this.editor.scene.background = new THREE.Color(settings.backgroundColor);
 
         // pass onHide handler to editor
         this.editor.onHide = this.onHide;
 
         // initialize viewport and add it to the DOM
-        const viewport = new window.Viewport(this.editor);
+        const viewport = new Viewport(this.editor);
         this.domElement.appendChild(viewport.dom);
 
         // initialize UI elements and add them to the DOM
-        const toolbar = new window.Toolbar(this.editor);
+        const toolbar = new Toolbar(this.editor);
         this.domElement.appendChild(toolbar.dom);
-        const script = new window.Script(this.editor);
-        this.domElement.appendChild(script.dom);
-        const player = new window.Player(this.editor);
+        // const script = new Script(this.editor);
+        // this.domElement.appendChild(script.dom);
+        const player = new Player(this.editor);
         this.domElement.appendChild(player.dom);
-        const menubar = new window.Menubar(this.editor);
+        const menubar = new Menubar(this.editor);
         this.domElement.appendChild(menubar.dom);
-        const sidebar = new window.Sidebar(this.editor);
+        const sidebar = new Sidebar(this.editor);
         this.domElement.appendChild(sidebar.dom);
-        const modal = new window.UI.Modal();
-        this.domElement.appendChild(modal.dom);
+    }
 
-        // add OrbitControls to allow the camera to orbit around the scene.
-        const OrbitControls = ThreeOrbitControls(THREE);
-        const orbitControls = new OrbitControls(
-            this.editor.camera,
-            document.getElementById("viewport"),
-        );
-        orbitControls.enabled = true;
-        orbitControls.enableZoom = true;
-        orbitControls.enableKeys = false;
-        orbitControls.rotateSpeed = 2.0;
-        orbitControls.zoomSpeed = 2.0;
-        orbitControls.update();
+    // eslint-disable-next-line class-methods-use-this
+    dragOver(event) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "copy";
+    }
+
+    windowResize() {
+        this.editor.signals.windowResize.dispatch();
     }
 
     /**
      * Add dragover listeners to group the objects.
      */
     addEventListeners() {
-        const clsInstance = this;
-        document.addEventListener(
-            "dragover",
-            (event) => {
-                event.preventDefault();
-                event.dataTransfer.dropEffect = "copy";
-            },
-            false,
-        );
-
-        function onWindowResize() {
-            clsInstance.editor.signals.windowResize.dispatch();
-        }
-
-        window.addEventListener("resize", onWindowResize, false);
-        onWindowResize();
+        document.addEventListener("dragover", this.dragOver, false);
+        window.addEventListener("resize", this.windowResize, false);
+        this.windowResize();
     }
 
     /**
@@ -120,32 +119,8 @@ export class ThreejsEditorModal extends ModalDialog {
     loadScene() {
         const loader = new THREE.ObjectLoader();
         const scene = loader.parse(materialsToThreeDSceneData(this.props.materials));
-        this.editor.execute(new window.SetSceneCommand(scene));
+        this.editor.execute(new SetSceneCommand(this.editor, scene));
         this.editor.signals.objectSelected.dispatch(this.editor.camera);
-    }
-
-    /**
-     * Inject threejs editor scripts into DOM.
-     * `areScriptsLoaded` flag is used to enable/disable a loader as it takes some time to load the scripts.
-     */
-    injectScripts() {
-        const clsInstance = this;
-        THREE_D_SOURCES.forEach((src) => {
-            const script = document.createElement("script");
-            script.src = `${THREE_D_BASE_URL}/${src}`;
-            script.async = false;
-            script.defer = false;
-            if (src.includes("SetSceneCommand")) {
-                script.onload = () => {
-                    clsInstance.setState({ areScriptsLoaded: true });
-                    clsInstance.setNumberFormat();
-                    clsInstance.initializeEditor();
-                    clsInstance.addEventListeners();
-                    clsInstance.loadScene();
-                };
-            }
-            document.head.appendChild(script);
-        });
     }
 
     showAlert() {
@@ -179,14 +154,7 @@ export class ThreejsEditorModal extends ModalDialog {
     renderBody() {
         return (
             <ModalBody>
-                <div
-                    ref={(el) => {
-                        this.domElement = el;
-                    }}
-                />
-                <ShowIf condition={!this.state.areScriptsLoaded}>
-                    <LoadingIndicator />
-                </ShowIf>
+                <div ref={(el) => this.initialize(el)} />
             </ModalBody>
         );
     }

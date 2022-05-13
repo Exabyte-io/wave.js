@@ -36,7 +36,7 @@
         "no-param-reassign": ["warn", { "props": false }],
         "max-classes-per-file": "warn",
         "simple-import-sort/imports": [
-            "warn",
+            "error",
             {
                 "groups": [
                     // Side effect imports.
