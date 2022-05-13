@@ -11,7 +11,6 @@ import { Menubar } from "three/editor/js/Menubar";
 // import { Script } from "three/editor/js/Script";
 import { Player } from "three/editor/js/Player";
 import { Sidebar } from "three/editor/js/Sidebar";
-import { Toolbar } from "three/editor/js/Toolbar";
 import { Viewport } from "three/editor/js/Viewport";
 
 import settings from "../settings";
@@ -82,8 +81,6 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(viewport.dom);
 
         // initialize UI elements and add them to the DOM
-        const toolbar = new Toolbar(this.editor);
-        this.domElement.appendChild(toolbar.dom);
         // const script = new Script(this.editor);
         // this.domElement.appendChild(script.dom);
         const player = new Player(this.editor);
