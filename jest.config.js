@@ -19,8 +19,13 @@ module.exports = {
     // A list of paths to modules that run some code to configure or set up the testing environment.
     setupFiles: ["./tests/setupFiles.js"],
 
+    transformIgnorePatterns: [
+        "<rootDir>/node_modules/(?!(three)/)"
+    ],
+
     // mock css files: https://jestjs.io/docs/en/webpack#handling-static-assets
     moduleNameMapper: {
-        "\\.(css|sass|scss)$": "<rootDir>/__tests__/__mocks__/styleMock.js"
+        "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/tests/fileMock.js",
+        "\\.(css|sass|scss)$": "<rootDir>/tests/styleMock.js"
     }
 };

@@ -1,11 +1,11 @@
 import "jest-canvas-mock";
 
+import * as THREE from "three";
 import { configure } from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 import expect from "expect";
 import GL from "gl";
 import { toBeDeepCloseTo, toMatchCloseTo } from "jest-matcher-deep-close-to";
-import * as THREE from "three";
 
 import { Wave } from "../src/wave";
 import { ELEMENT_PROPERTIES } from "./enums";

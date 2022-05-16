@@ -5,7 +5,7 @@
     "scripts": {
         "prepublishOnly": "rm -rf dist; npm run transpile",
         "start": "cross-env PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
-        "transpile": "babel --out-dir dist src; sass src/stylesheets:dist/stylesheets",
+        "transpile": "babel --out-dir dist src && sass src/stylesheets:dist/stylesheets",
         "postinstall": "npm run transpile",
         "test": "npx jest",
         "lint": "eslint src tests && prettier --write src tests",
@@ -39,11 +39,12 @@
         "@babel/runtime-corejs2": "7.16.7",
         "@exabyte-io/made.js": "2022.5.5-3",
         "@exabyte-io/periodic-table.js": "2022.5.5-2",
+        "three": "npm:@exabyte-io/three@2022.5.13-0",
+        "@material-ui/core": "^4.12.3",
+        "@material-ui/icons": "^4.11.2",
         "classnames": "2.3.1",
         "enzyme-adapter-react-16": "^1.15.6",
         "jquery": "3.6.0",
-        "@material-ui/core": "^4.12.3",
-        "@material-ui/icons": "^4.11.2",
         "mixwith": "^0.1.1",
         "prop-types": "^15.8.0",
         "react-bootstrap": "0.32.4",
@@ -53,9 +54,6 @@
         "sprintf-js": "^1.1.2",
         "static-kdtree": "^1.0.2",
         "sweetalert": "^2.1.2",
-        "three": "^0.90.0",
-        "three-orbit-controls": "^82.1.0",
-        "three-transform-controls": "^1.0.4",
         "underscore": "^1.8.3",
         "underscore.string": "^3.3.4"
     },
@@ -64,6 +62,7 @@
         "react-dom": "^16.14.0"
     },
     "devDependencies": {
+        "babel-jest": "^28.1.0",
         "cross-env": "^7.0.3",
         "enzyme": "^3.11.0",
         "eslint": "7.32.0",
@@ -96,8 +95,8 @@
         "node": ">=12.0.0"
     },
     "lint-staged": {
-        "*.js": "eslint --cache --fix",
-        "*.{js,css}": "prettier --write"
+        "*.{js,jsx}": "eslint --cache --fix",
+        "*.{js,jsx,css}": "prettier --write"
     },
     "browserslist": [
         ">0.2%",

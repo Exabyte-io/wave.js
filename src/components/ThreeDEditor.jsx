@@ -1,4 +1,5 @@
 /* eslint-disable react/sort-comp */
+import { Made } from "@exabyte-io/made.js";
 import { createGenerateClassName, Tooltip } from "@material-ui/core";
 import Autorenew from "@material-ui/icons/Autorenew";
 import BubbleChart from "@material-ui/icons/BubbleChart";
@@ -13,15 +14,14 @@ import PictureInPicture from "@material-ui/icons/PictureInPicture";
 import PowerSettingsNew from "@material-ui/icons/PowerSettingsNew";
 import RemoveRedEye from "@material-ui/icons/RemoveRedEye";
 import Replay from "@material-ui/icons/Replay";
+import Spellcheck from "@material-ui/icons/Spellcheck";
 import SwitchCamera from "@material-ui/icons/SwitchCamera";
 import ThreeDRotation from "@material-ui/icons/ThreeDRotation";
-import Spellcheck from "@material-ui/icons/Spellcheck";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
 import { JssProvider } from "react-jss";
-import { Made } from "@exabyte-io/made.js";
 
 import settings from "../settings";
 import { exportToDisk } from "../utils";
@@ -66,7 +66,7 @@ export class ThreeDEditor extends React.Component {
             // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
             originalMaterial: material,
             // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
-            // material: props.material.clone(),
+            material: props.material.clone(),
         };
         this.handleCellRepetitionsChange = this.handleCellRepetitionsChange.bind(this);
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
@@ -95,8 +95,8 @@ export class ThreeDEditor extends React.Component {
         const { material } = nextProps;
         if (material) {
             this.setState({
+                material: material.clone(),
                 originalMaterial: material,
-                // material: material.clone(),
                 boundaryConditions: nextProps.boundaryConditions || {},
                 isConventionalCellShown: nextProps.isConventionalCellShown || false,
             });
@@ -474,10 +474,13 @@ export class ThreeDEditor extends React.Component {
     }
 
     renderWaveComponent() {
-        const { isConventionalCellShown, viewerSettings, viewerTriggerResize, boundaryConditions } =
-            this.state;
-        const { material } = this.props;
-        // TODO material is copied here but state.material is referenced below
+        const {
+            isConventionalCellShown,
+            viewerSettings,
+            viewerTriggerResize,
+            boundaryConditions,
+            material,
+        } = this.state;
         const materialCopy = this.getPrimitiveOrConventionalMaterial(
             material,
             isConventionalCellShown,
@@ -526,22 +529,24 @@ export class ThreeDEditor extends React.Component {
     }
 
     onThreejsEditorModalHide(material) {
-        const { originalMaterial, isThreejsEditorModalShown } = this.state;
-        const { onUpdate } = this.props;
-        if (!material || material.hash === originalMaterial.hash) {
-            this.setState({ isThreejsEditorModalShown: !isThreejsEditorModalShown });
-        } else {
+        let { isThreejsEditorModalShown } = this.state;
+        isThreejsEditorModalShown = !isThreejsEditorModalShown;
+        if (material) {
+            const { originalMaterial } = this.state;
+            const { onUpdate } = this.props;
             // preserve lattice type
             material.lattice = {
                 ...material.Lattice.toJSON(),
                 type: originalMaterial.Lattice.type,
             };
             this.setState({
-                // material: material.clone(),
                 originalMaterial: material,
-                isThreejsEditorModalShown: !isThreejsEditorModalShown,
+                material: material.clone(),
+                isThreejsEditorModalShown,
             });
             if (onUpdate) onUpdate(material);
+        } else {
+            this.setState({ isThreejsEditorModalShown });
         }
     }
 

@@ -92,13 +92,10 @@ export const CellMixin = (superclass) =>
         ) {
             const vertices = this.getCellVertices(cell, zMultiplier);
 
-            const geometry = new THREE.Geometry();
-
-            edges.forEach((edge) =>
-                geometry.vertices.push(
-                    new TV3(vertices[edge][0], vertices[edge][1], vertices[edge][2]),
-                ),
+            const points = edges.map(
+                (edge) => new TV3(vertices[edge][0], vertices[edge][1], vertices[edge][2]),
             );
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
             const lineMaterial = new THREE.LineBasicMaterial({
                 color: lineColor,
