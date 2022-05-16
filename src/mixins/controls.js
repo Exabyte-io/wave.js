@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import * as THREE from "@exabyte-io/three";
-import { getOrbitControls } from "@exabyte-io/three/examples/js/controls/OrbitControls";
+import { OrbitControls } from "@exabyte-io/three/examples/jsm/controls/OrbitControls";
 
 import { UtilsMixin } from "./utils";
 
@@ -29,7 +29,6 @@ const OrbitControlsMixin = (superclass) =>
 
         initOrbitControls(enabled = false) {
             this.initSecondAxes();
-            const { OrbitControls } = getOrbitControls(THREE);
             this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
             this.orbitControls.enabled = enabled;
             this.orbitControls.enableZoom = true;
