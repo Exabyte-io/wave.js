@@ -1,4 +1,8 @@
 import { Made } from "@exabyte-io/made.js";
+import PropTypes from "prop-types";
+import React from "react";
+import { ModalBody } from "react-bootstrap";
+import swal from "sweetalert";
 import * as THREE from "three";
 import { SetSceneCommand } from "three/editor/js/commands/SetSceneCommand";
 import { Editor } from "three/editor/js/Editor";
@@ -8,10 +12,7 @@ import { Menubar } from "three/editor/js/Menubar";
 import { Player } from "three/editor/js/Player";
 import { Sidebar } from "three/editor/js/Sidebar";
 import { Viewport } from "three/editor/js/Viewport";
-import PropTypes from "prop-types";
-import React from "react";
-import { ModalBody } from "react-bootstrap";
-import swal from "sweetalert";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
@@ -55,6 +56,33 @@ export class ThreejsEditorModal extends ModalDialog {
         };
     }
 
+    initializeCamera = () => {
+        // create a PerspectiveCamera at specific position and pass to the editor to override the default one.
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 20000);
+        camera.name = "Camera";
+        camera.position.copy(new THREE.Vector3(0, -20, 8));
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        const light = new THREE.DirectionalLight("#FFFFFF", 1.0);
+        light.name = "DirectionalLight";
+        light.target.name = "DirectionalLight Target";
+        light.position.set(0, 0, 1.0);
+        camera.add(light);
+        return camera;
+    };
+
+    initializeOrbitControls() {
+        const orbitControls = new OrbitControls(
+            this.editor.camera,
+            document.getElementById("viewport"),
+        );
+        orbitControls.enabled = true;
+        orbitControls.enableZoom = true;
+        orbitControls.enableKeys = false;
+        orbitControls.rotateSpeed = 2.0;
+        orbitControls.zoomSpeed = 2.0;
+        orbitControls.update();
+    }
+
     /**
      * Initialize threejs editor and add it to the DOM.
      */
@@ -62,14 +90,8 @@ export class ThreejsEditorModal extends ModalDialog {
         // adjust the orientation to have Z-axis up/down
         THREE.Object3D.DefaultUp.set(0, 0, 1);
 
-        // create a PerspectiveCamera at specific position and pass to the editor to override the default one.
-        const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 20000);
-        camera.name = "Camera";
-        camera.position.copy(new THREE.Vector3(0, -20, 8));
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
-
         // initialize editor and set the scene background
-        this.editor = new Editor(camera);
+        this.editor = new Editor(this.initializeCamera());
         this.editor.scene.background = new THREE.Color(settings.backgroundColor);
 
         // pass onHide handler to editor
@@ -88,6 +110,7 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(menubar.dom);
         const sidebar = new Sidebar(this.editor);
         this.domElement.appendChild(sidebar.dom);
+        this.initializeOrbitControls();
     }
 
     // eslint-disable-next-line class-methods-use-this
