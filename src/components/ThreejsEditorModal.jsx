@@ -40,7 +40,6 @@ export class ThreejsEditorModal extends ModalDialog {
 
     componentWillUnmount() {
         document.removeEventListener("dragover", this.dragOver, false);
-        window.removeEventListener("resize", this.windowResize, false);
     }
 
     /**
@@ -97,17 +96,14 @@ export class ThreejsEditorModal extends ModalDialog {
         event.dataTransfer.dropEffect = "copy";
     }
 
-    windowResize() {
-        this.editor.signals.windowResize.dispatch();
-    }
-
     /**
      * Add dragover listeners to group the objects.
      */
     addEventListeners() {
         document.addEventListener("dragover", this.dragOver, false);
-        window.addEventListener("resize", this.windowResize, false);
-        this.windowResize();
+        const onResize = () => this.editor.signals.windowResize.dispatch();
+        window.addEventListener("resize", onResize, false);
+        onResize();
     }
 
     /**
