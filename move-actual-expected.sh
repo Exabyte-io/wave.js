@@ -4,27 +4,32 @@ basedir=tests/__tests__/__snapshots__
 expected=.expected.png
 actual=.actual.png
 save=.save.png
+app=${REACT_APP_BASE_OS:-macos}
+appdir=${basedir}/${app}
 
 if [[ "$1" == "forward" ]]; then
     echo "Saving existing expected images"
-    for fl in `ls ${basedir}/*${expected}`; do
-        basename=${fl/${basedir}\//}
+    for fl in `ls ${appdir}/*${expected}`; do
+        basename=${fl/${appdir}\//}
         rootname=${basename/${expected}/}
-        cp ${basedir}/${basename} ${basedir}/${rootname}${save}
+        echo "cp ${appdir}/${basename} ${appdir}/${rootname}${save}"
+        cp ${appdir}/${basename} ${appdir}/${rootname}${save}
     done
     
     echo "Copying actual images to expected (if they exist)"
     for fl in `ls ${basedir}/*${actual}`; do
         basename=${fl/${basedir}\//}
         rootname=${basename/${actual}/}
-        cp ${basedir}/${basename} ${basedir}/${rootname}${expected}
+        echo "cp ${basedir}/${basename} ${appdir}/${rootname}${expected}"
+        cp ${basedir}/${basename} ${appdir}/${rootname}${expected}
     done
 elif [[ "$1" == "backward" ]]; then
     echo "Moving saved images back to expected"
-    for fl in `ls ${basedir}/*${save}`; do
+    for fl in `ls ${appdir}/*${save}`; do
         basename=${fl/${basedir}\//}
         rootname=${basename/${save}/}
-        mv ${basedir}/${basename} ${basedir}/${rootname}${expected}
+        echo "mv ${appdir}/${basename} ${appdir}/${rootname}${expected}"
+        mv ${appdir}/${basename} ${appdir}/${rootname}${expected}
     done
 else
     echo "

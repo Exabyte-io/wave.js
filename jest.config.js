@@ -21,6 +21,7 @@ module.exports = {
 
     // mock css files: https://jestjs.io/docs/en/webpack#handling-static-assets
     moduleNameMapper: {
-        "\\.(css|sass|scss)$": "<rootDir>/__tests__/__mocks__/styleMock.js"
+        "\\.(css|sass|scss)$": "<rootDir>/tests/styleMock.js",
+        "^three(.*)$": "<rootDir>/node_modules/@exabyte-io/three$1"
     }
 };

@@ -113,7 +113,7 @@ export async function takeSnapshotAndAssertEqualityAsync(webGLContext, imagePref
                 } else if (result && result.equal) {
                     resolve(result.equal);
                 } else {
-                    reject(`looksSame returned result: ${result}`);
+                    reject(`looksSame returned result: ${JSON.stringify(result)}`);
                 }
             });
         } catch (err) {
