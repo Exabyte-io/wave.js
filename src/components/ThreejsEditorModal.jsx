@@ -58,9 +58,6 @@ export class ThreejsEditorModal extends ModalDialog {
         camera.name = "Camera";
         camera.position.copy(new THREE.Vector3(0, -20, 8));
         camera.lookAt(new THREE.Vector3(0, 0, 0));
-        const ambientLight = new THREE.AmbientLight("#202020");
-        ambientLight.name = "AmbientLight";
-        camera.add(ambientLight);
         return camera;
     };
 
