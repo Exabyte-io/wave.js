@@ -95,8 +95,8 @@ export class ThreeDEditor extends React.Component {
         const { material } = nextProps;
         if (material) {
             this.setState({
-                material,
-                originalMaterial: material.clone(),
+                material: material.clone(),
+                originalMaterial: material,
                 boundaryConditions: nextProps.boundaryConditions || {},
                 isConventionalCellShown: nextProps.isConventionalCellShown || false,
             });
@@ -540,8 +540,8 @@ export class ThreeDEditor extends React.Component {
                 type: originalMaterial.Lattice.type,
             };
             this.setState({
-                material,
-                originalMaterial: material.clone(),
+                originalMaterial: material,
+                material: material.clone(),
                 isThreejsEditorModalShown,
             });
             if (onUpdate) onUpdate(material);
