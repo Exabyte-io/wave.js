@@ -3,8 +3,8 @@ import {
     filterBondsDataByElementsAndOrder,
     getElementsBondsData,
 } from "@exabyte-io/periodic-table.js";
-import * as THREE from "@exabyte-io/three";
 import createKDTree from "static-kdtree";
+import * as THREE from "three";
 
 /*
  * Mixin containing the logic for dealing with bonds.

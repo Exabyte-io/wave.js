@@ -1,5 +1,5 @@
 import { Made } from "@exabyte-io/made.js";
-import * as THREE from "@exabyte-io/three";
+import * as THREE from "three";
 
 export const RepetitionMixin = (superclass) =>
     class extends superclass {

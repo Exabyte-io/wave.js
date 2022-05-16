@@ -1,4 +1,4 @@
-import * as THREE from "@exabyte-io/three";
+import * as THREE from "three";
 
 import { ATOM_GROUP_NAME } from "../enums";
 // eslint-disable-next-line import/no-cycle
