@@ -9,10 +9,10 @@ import { Editor } from "three/editor/js/Editor";
 import { Menubar } from "three/editor/js/Menubar";
 // TODO : resolve tern global reference in codemirror
 // import { Script } from "three/editor/js/Script";
+import { Toolbar } from "three/editor/js/Toolbar";
 import { Player } from "three/editor/js/Player";
 import { Sidebar } from "three/editor/js/Sidebar";
 import { Viewport } from "three/editor/js/Viewport";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
@@ -39,10 +39,6 @@ export class ThreejsEditorModal extends ModalDialog {
         window.localStorage.removeItem("threejs-editor");
     }
 
-    componentWillUnmount() {
-        document.removeEventListener("dragover", this.dragOver, false);
-    }
-
     /**
      * `Number.prototype.format` is used inside three.js editor codebase to format the numbers.
      * The editor does not start without it. The ESLint line is a way to turn off the warning shown in the console.
@@ -62,25 +58,23 @@ export class ThreejsEditorModal extends ModalDialog {
         camera.name = "Camera";
         camera.position.copy(new THREE.Vector3(0, -20, 8));
         camera.lookAt(new THREE.Vector3(0, 0, 0));
-        const light = new THREE.DirectionalLight("#FFFFFF", 1.0);
-        light.name = "DirectionalLight";
-        light.target.name = "DirectionalLight Target";
-        light.position.set(0, 0, 1.0);
-        camera.add(light);
+        const ambientLight = new THREE.AmbientLight("#202020");
+        ambientLight.name = "AmbientLight";
+        camera.add(ambientLight);
         return camera;
     };
 
-    initializeOrbitControls() {
-        const orbitControls = new OrbitControls(
-            this.editor.camera,
-            document.getElementById("viewport"),
-        );
-        orbitControls.enabled = true;
-        orbitControls.enableZoom = true;
-        orbitControls.enableKeys = false;
-        orbitControls.rotateSpeed = 2.0;
-        orbitControls.zoomSpeed = 2.0;
-        orbitControls.update();
+    initializeControls = () => {
+        window.VIEW_HELPER.controls.panSpeed = 0.006;
+        window.VIEW_HELPER.controls.rotationSpeed = 0.015;
+        window.VIEW_HELPER.controls.zoomSpeed = 0.2;
+    };
+
+    initializeLights() {
+        const directionalLight = new THREE.DirectionalLight("#FFFFFF");
+        directionalLight.position.copy(new THREE.Vector3(0.2, 0.2, -1).normalize());
+        directionalLight.intensity = 1.2;
+        this.editor.scene.add(directionalLight);
     }
 
     /**
@@ -110,20 +104,27 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(menubar.dom);
         const sidebar = new Sidebar(this.editor);
         this.domElement.appendChild(sidebar.dom);
-        this.initializeOrbitControls();
-    }
+        // TODO : Re-enable rotation controls for groups of atoms
+        const toolbar = new Toolbar(this.editor);
+        this.domElement.appendChild(toolbar.dom);
 
-    // eslint-disable-next-line class-methods-use-this
-    dragOver(event) {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = "copy";
+        this.initializeControls();
+
+        this.initializeLights();
     }
 
     /**
      * Add dragover listeners to group the objects.
      */
     addEventListeners() {
-        document.addEventListener("dragover", this.dragOver, false);
+        document.addEventListener(
+            "dragover",
+            (event) => {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "copy";
+            },
+            false,
+        );
         const onResize = () => this.editor.signals.windowResize.dispatch();
         window.addEventListener("resize", onResize, false);
         onResize();
