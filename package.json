@@ -21,7 +21,7 @@
     "files": [
         "/dist",
         "/src",
-        ".babelrc"
+        "babel.config.json"
     ],
     "author": "Exabyte Inc.",
     "bugs": {
