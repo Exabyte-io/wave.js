@@ -58,7 +58,9 @@ export class ThreeDEditor extends React.Component {
             // Settings of the wave viewer
             viewerSettings: {
                 atomRadiiScale: settings.atomRadiiScale,
-                repetitions: settings.repetitions,
+                repetitionsAlongLatticeVectorA: settings.repetitions,
+                repetitionsAlongLatticeVectorB: settings.repetitions,
+                repetitionsAlongLatticeVectorC: settings.repetitions,
                 chemicalConnectivityFactor: settings.chemicalConnectivityFactor,
             },
             boundaryConditions,
@@ -119,8 +121,9 @@ export class ThreeDEditor extends React.Component {
         });
     };
 
+    // eslint-disable-next-line class-methods-use-this
     handleCellRepetitionsChange(e) {
-        this.handleSetSetting({ repetitions: parseFloat($(e.target).val()) });
+        this.handleSetSetting({ [e.target.id]: parseFloat($(e.target).val()) });
     }
 
     handleSphereRadiusChange(e) {
@@ -411,11 +414,37 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip key="REPETITIONS" title="REPETITIONS" placement="top">
+            <Tooltip key="A" title="A" placement="top">
                 <input
                     className="inverse stepper cell-repetitions"
-                    id="cell-repetitions"
-                    value={viewerSettings.repetitions}
+                    id="repetitionsAlongLatticeVectorA"
+                    value={viewerSettings.repetitionsAlongLatticeVectorA}
+                    type="number"
+                    max="10"
+                    min="1"
+                    step="1"
+                    onChange={this.handleCellRepetitionsChange}
+                />
+            </Tooltip>,
+
+            <Tooltip key="B" title="B" placement="top">
+                <input
+                    className="inverse stepper cell-repetitions"
+                    id="repetitionsAlongLatticeVectorB"
+                    value={viewerSettings.repetitionsAlongLatticeVectorB}
+                    type="number"
+                    max="10"
+                    min="1"
+                    step="1"
+                    onChange={this.handleCellRepetitionsChange}
+                />
+            </Tooltip>,
+
+            <Tooltip key="C" title="C" placement="top">
+                <input
+                    className="inverse stepper cell-repetitions"
+                    id="repetitionsAlongLatticeVectorC"
+                    value={viewerSettings.repetitionsAlongLatticeVectorC}
                     type="number"
                     max="10"
                     min="1"

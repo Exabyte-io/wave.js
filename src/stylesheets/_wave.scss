@@ -132,6 +132,13 @@ $material-ui-button-box-shadow-override: 0px 0px 1px 1px rgba(255, 255, 255, 0.2
         }
     }
 
+    .axis-select {
+        background: #424242;
+        border-radius: 5px;
+        padding: 0 5px 5px;
+        margin: 10px 5px 5px;
+    }
+
     .buttons-toolbar {
         display: table; // to make width fit content
         margin: 10px;
