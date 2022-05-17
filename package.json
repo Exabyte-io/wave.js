@@ -10,8 +10,7 @@
         "test": "npx jest",
         "lint": "eslint src tests && prettier --write src tests",
         "lint:fix": "eslint --fix --cache src tests && prettier --write src tests",
-        "prettier": "prettier --check src tests",
-        "prepare": "husky install"
+        "prettier": "prettier --check src tests"
     },
     "repository": {
         "type": "git",
@@ -21,7 +20,7 @@
     "files": [
         "/dist",
         "/src",
-        ".babelrc"
+        "babel.config.json"
     ],
     "author": "Exabyte Inc.",
     "bugs": {
