@@ -58,9 +58,9 @@ export class ThreeDEditor extends React.Component {
             // Settings of the wave viewer
             viewerSettings: {
                 atomRadiiScale: settings.atomRadiiScale,
-                XRepetitions: settings.repetitions,
-                YRepetitions: settings.repetitions,
-                ZRepetitions: settings.repetitions,
+                repetitionsAlongLatticeVectorA: settings.repetitions,
+                repetitionsAlongLatticeVectorB: settings.repetitions,
+                repetitionsAlongLatticeVectorC: settings.repetitions,
                 chemicalConnectivityFactor: settings.chemicalConnectivityFactor,
             },
             boundaryConditions,
@@ -417,8 +417,8 @@ export class ThreeDEditor extends React.Component {
             <Tooltip key="A" title="A" placement="top">
                 <input
                     className="inverse stepper cell-repetitions"
-                    id="XRepetitions"
-                    value={viewerSettings.XRepetitions}
+                    id="repetitionsAlongLatticeVectorA"
+                    value={viewerSettings.repetitionsAlongLatticeVectorA}
                     type="number"
                     max="10"
                     min="1"
@@ -430,8 +430,8 @@ export class ThreeDEditor extends React.Component {
             <Tooltip key="B" title="B" placement="top">
                 <input
                     className="inverse stepper cell-repetitions"
-                    id="YRepetitions"
-                    value={viewerSettings.YRepetitions}
+                    id="repetitionsAlongLatticeVectorB"
+                    value={viewerSettings.repetitionsAlongLatticeVectorB}
                     type="number"
                     max="10"
                     min="1"
@@ -443,8 +443,8 @@ export class ThreeDEditor extends React.Component {
             <Tooltip key="C" title="C" placement="top">
                 <input
                     className="inverse stepper cell-repetitions"
-                    id="ZRepetitions"
-                    value={viewerSettings.ZRepetitions}
+                    id="repetitionsAlongLatticeVectorC"
+                    value={viewerSettings.repetitionsAlongLatticeVectorC}
                     type="number"
                     max="10"
                     min="1"

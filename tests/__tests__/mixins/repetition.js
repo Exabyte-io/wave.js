@@ -1,40 +1,40 @@
 import { getWaveInstance } from "../../enums";
 import { takeSnapshotAndAssertEqualityAsync } from "../../utils";
 
-describe('Screen tests for axes', () => {
+describe('Screen tests for repeats', () => {
     const settings = {
         atomRadiiScale: 0.2,
-        XRepetitions: 1,
-        YRepetitions: 1,
-        ZRepetitions: 1,
+        repetitionsAlongLatticeVectorA: 1,
+        repetitionsAlongLatticeVectorB: 1,
+        repetitionsAlongLatticeVectorC: 1,
     }
 
-    test('X axis', () => {
-        const wave = getWaveInstance({ ...settings, XRepetitions: 3 });
-        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "XAxis");
+    test('Repeat along lattice vector A', () => {
+        const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorA: 3 });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "vectorA");
     })
-    test('Y axis', () => {
-        const wave = getWaveInstance({ ...settings, YRepetitions: 3 });
-        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "YAxis");
+    test('Repeat along lattice vector B', () => {
+        const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorB: 3 });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "vectorB");
     })
-    test('Z axis', () => {
-        const wave = getWaveInstance({ ...settings, ZRepetitions: 3 });
-        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "ZAxis");
+    test('Repeat along lattice vector С', () => {
+        const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorC: 3 });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "vectorC");
     })
-    test('XY axis', () => {
-        const wave = getWaveInstance({ ...settings, XRepetitions: 3, YRepetitions: 3 });
-        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "XYAxis");
+    test('Repeat along lattice vectors A and B', () => {
+        const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorA: 3, repetitionsAlongLatticeVectorB: 3 });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "vectorAB");
     })
-    test('XZ axis', () => {
-        const wave = getWaveInstance({ ...settings, XRepetitions: 3, ZRepetitions: 3 });
-        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "XZAxis");
+    test('Repeat along lattice vectors A and C', () => {
+        const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorA: 3, repetitionsAlongLatticeVectorC: 3 });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "vectorAC");
     })
-    test('YZ axis', () => {
-        const wave = getWaveInstance({ ...settings, YRepetitions: 3, ZRepetitions: 3 });
-        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "YZAxis");
+    test('Repeat along lattice vectors B and C', () => {
+        const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorB: 3, repetitionsAlongLatticeVectorC: 3 });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "vectorBC");
     })
-    test('XYZ axis', () => {
-        const wave = getWaveInstance({ ...settings, XRepetitions: 3, YRepetitions: 3, ZRepetitions: 3 });
-        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "XYZAxis");
+    test('Repeat along lattice vectors ABC', () => {
+        const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorA: 3, repetitionsAlongLatticeVectorB: 3, repetitionsAlongLatticeVectorC: 3 });
+        return takeSnapshotAndAssertEqualityAsync(wave.renderer.context, "vectorABC");
     })
 })

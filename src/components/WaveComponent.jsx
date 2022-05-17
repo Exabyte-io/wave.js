@@ -37,7 +37,7 @@ export class WaveComponent extends React.Component {
         } = this.props;
         if (triggerHandleResize) this._handleResizeTransition();
         if (this.wave) {
-            const withoutAdjustingOfCamera = !(JSON.stringify(prevProps.settings) === JSON.stringify(settings));
+            const isCameraAdjusted = !(JSON.stringify(prevProps.settings) === JSON.stringify(settings));
             // recreate bonds asynchronously if structure is changed.
             this.reloadViewer(
                 prevStructure.hash !== structure.hash ||
@@ -45,7 +45,7 @@ export class WaveComponent extends React.Component {
                         settings.chemicalConnectivityFactor ||
                     prevIsConventionalCellShown !== isConventionalCellShown ||
                     prevIsDrawBondsEnabled !== isDrawBondsEnabled,
-                withoutAdjustingOfCamera,
+                isCameraAdjusted,
             );
         }
     }
@@ -79,7 +79,7 @@ export class WaveComponent extends React.Component {
         setTimeout(() => this.wave.handleResize(), 500);
     }
 
-    reloadViewer(createBondsAsync, withoutAdjustingOfCamera) {
+    reloadViewer(createBondsAsync, isCameraAdjusted) {
         // When running in headless mode in tests the browser does not support
         // WebGL, so exception will be thrown. It may get in a way with other events => catching it.
         try {
@@ -89,7 +89,7 @@ export class WaveComponent extends React.Component {
             this.wave.boundaryConditions = boundaryConditions;
             this.wave.setCell(cell);
             if (createBondsAsync) this.wave.createBondsAsync();
-            this.wave.rebuildScene(withoutAdjustingOfCamera);
+            this.wave.rebuildScene(isCameraAdjusted);
         } catch (e) {
             console.warn("exception caught when rendering atomic viewer", e);
         }
