@@ -19,12 +19,12 @@ function getMaterials(coordinates) {
 }
 
 describe("Screen tests for ThreejsEditor", () => {
-    test("Moved atoms", () => {
+    test("Moved atoms", async () => {
         const wave = getWaveInstance(false, getMaterials([[1,1,1]]));
         return takeSnapshotAndAssertEqualityAsync(wave.renderer.getContext(), "ThreejsEditor");
     });
 
-    test("Moved atoms with repetitions", () => {
+    test("Moved atoms with repetitions", async () => {
         const wave = getWaveInstance(
             {
                 atomRadiiScale: 0.2,
