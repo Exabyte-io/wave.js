@@ -15,7 +15,7 @@
     },
     "plugins": ["prettier", "simple-import-sort", "jsdoc"],
     "rules": {
-        "prettier/prettier": "error",
+        "prettier/prettier": 0,
         "comma-dangle": ["error", "always-multiline"],
         "array-element-newline": ["error", "consistent"],
         "no-plusplus": ["error", { "allowForLoopAfterthoughts":  true }],

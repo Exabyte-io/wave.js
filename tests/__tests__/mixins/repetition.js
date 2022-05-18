@@ -1,5 +1,5 @@
 import { getWaveInstance } from "../../enums";
-import { takeSnapshot, takeSnapshotAndAssertEqualityAsync } from "../../utils";
+import { takeSnapshotAndAssertEqualityAsync } from "../../utils";
 
 describe('Screen tests for repeats', () => {
     const settings = {
