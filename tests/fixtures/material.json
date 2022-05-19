@@ -1,3 +1,39 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:3b6350bd9576ef522c2b879db2eceff36c7ce43b4d13ba5a1425713b74850f21
-size 769
+{
+  "name": "Silicon FCC",
+  "basis": {
+    "elements": [
+      {
+        "id": 0,
+        "value": "Si"
+      },
+      {
+        "id": 1,
+        "value": "Si"
+      }
+    ],
+    "coordinates": [
+      {
+        "id": 0,
+        "value": [0, 0, 0]
+      },
+      {
+        "id": 1,
+        "value": [0.25, 0.25, 0.25]
+      }
+    ],
+    "units": "crystal"
+  },
+  "lattice": {
+    "a": 3.867,
+    "b": 3.867,
+    "c": 3.867,
+    "alpha": 60,
+    "beta": 60,
+    "gamma": 59.99999,
+    "units": {
+      "length": "angstrom",
+      "angle": "degree"
+    },
+    "type": "FCC"
+  }
+}
