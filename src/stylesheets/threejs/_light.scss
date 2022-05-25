@@ -3,7 +3,9 @@
         color: #555;
         background-color: #ddd;
         border: 0px;
+        margin: 0px; /* GNOME Web */
         padding: 5px 8px;
+        font-size: 12px;
         text-transform: uppercase;
         cursor: pointer;
         outline: none;
@@ -20,7 +22,6 @@
     input,
     textarea {
         border: 1px solid;
-        //color: #444;
     }
 
     input.Number {
@@ -45,6 +46,15 @@
     }
 
     /* UI */
+    #resizer {
+        position: absolute;
+        top: 32px;
+        right: 295px;
+        width: 5px;
+        bottom: 0px;
+        /* background-color: rgba(255,0,0,0.5); */
+        cursor: col-resize;
+    }
 
     #viewport {
         position: absolute;
@@ -160,10 +170,6 @@
         overflow: auto;
     }
 
-    #sidebar * {
-        vertical-align: middle;
-    }
-
     #sidebar .Panel {
         color: #888;
         padding: 10px;
@@ -175,7 +181,9 @@
     }
 
     #sidebar .Row {
-        min-height: 20px;
+        display: flex;
+        align-items: center;
+        min-height: 24px;
         margin-bottom: 10px;
     }
 
@@ -195,38 +203,25 @@
         background-color: #eee;
     }
 
-    // TODO : compare updated main.css with _light.scss
     #toolbar {
         position: absolute;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        // left: calc(50% - 180px / 2); /* ( ( 100% - 300px ) / 2.0 ) - 140px */
-        width: auto;
-        bottom: 16px;
-        height: 32px;
+        left: 10px;
+        top: 42px;
+        width: 32px;
         background: #eee;
-        color: #333;
-        padding: 4px 8px;
+        text-align: center;
     }
 
-    #toolbar * {
-        vertical-align: middle;
+    #toolbar button, #toolbar input {
+        height: 32px;
     }
 
-    #toolbar .Panel {
-        padding: 4px;
-        color: #888;
-    }
-
-    #toolbar button {
-        margin-right: 6px;
-        line-height: 14px;
-        height: 24px;
+    #toolbar button img {
+        width: 16px;
+        opacity: 0.5;
     }
 
     .Outliner {
-        resize: vertical;
         color: #444;
         background-color: #fff;
         padding: 0;
@@ -235,6 +230,7 @@
         font-size: 12px;
         cursor: default;
         overflow: auto;
+        resize: vertical;
         outline: none !important;
     }
 
@@ -252,9 +248,37 @@
         background-color: rgba(0, 0, 0, 0.04);
     }
 
+    .TabbedPanel .Tabs {
+        background-color: #ddd;
+        border-top: 1px solid #ccc;
+    }
+
+    .TabbedPanel .Tab {
+        color: #aaa;
+        border-right: 1px solid #ccc;
+    }
+
+    .TabbedPanel .Tab.selected {
+        color: #888;
+        background-color: #eee;
+    }
+
+    .Listbox {
+        color: #444;
+        background-color: #fff;
+    }
+
+    .Panel {
+        color: #888;
+    }
+
     /* */
 
     @media all and (max-width: 600px) {
+        #resizer {
+            display: none;
+        }
+
         #menubar .menu .options {
             max-height: calc(100% - 372px);
         }
@@ -289,12 +313,6 @@
             width: 100%;
             top: calc(100% - 320px);
             bottom: 0;
-        }
-
-        #toolbar {
-            left: calc(50% - 140px);
-            width: 280px;
-            top: 52px;
         }
     }
 
