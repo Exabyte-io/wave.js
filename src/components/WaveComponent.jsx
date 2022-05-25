@@ -37,7 +37,9 @@ export class WaveComponent extends React.Component {
         } = this.props;
         if (triggerHandleResize) this._handleResizeTransition();
         if (this.wave) {
-            const isCameraAdjusted = !(JSON.stringify(prevProps.settings) === JSON.stringify(settings));
+            const isCameraAdjusted = !(
+                JSON.stringify(prevProps.settings) === JSON.stringify(settings)
+            );
             // recreate bonds asynchronously if structure is changed.
             this.reloadViewer(
                 prevStructure.hash !== structure.hash ||
