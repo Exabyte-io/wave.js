@@ -15,6 +15,18 @@ body {
         position: relative;
     }
 
+    input {
+        vertical-align: middle;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
+        border: none;
+    }
+
     textarea {
         tab-size: 4;
         white-space: pre;
@@ -27,15 +39,13 @@ body {
 
     textarea.fail {
         border-color: #f00 !important;
-        background-color: rgba(255, 0, 0, 0.05);
-    }
-
-    textarea,
-    input {
-        outline: none;
+        background-color: rgba(255,0,0,0.05);
     }
 
     /* osx */
+    textarea, input {
+        outline: none;
+    }
 
     .Panel {
         -moz-user-select: none;
@@ -47,17 +57,72 @@ body {
         user-select: none;
     }
 
-    /* CodeMirror */
+    .TabbedPanel {
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
 
+        /* No support for these yet */
+        -o-user-select: none;
+        user-select: none;
+        position: relative;
+        display: block;
+        width: 100%;
+    }
+
+    .TabbedPanel .Tabs {
+        position: relative;
+        display: block;
+        width: 100%;
+        min-width: 300px;
+    }
+
+    .TabbedPanel .Tabs .Tab {
+        padding: 10px;
+        text-transform: uppercase;
+    }
+
+    .TabbedPanel .Panels {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+        min-width: 300px;
+    }
+
+    /* Listbox */
+    .Listbox {
+        color: #444;
+        background-color: #fff;
+        padding: 0;
+        width: 100%;
+        min-height: 140px;
+        font-size: 12px;
+        cursor: default;
+        overflow: auto;
+    }
+
+    .Listbox .ListboxItem {
+        padding: 6px;
+        color: #666;
+        white-space: nowrap;
+    }
+
+    .Listbox .ListboxItem.active {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    /* CodeMirror */
     .CodeMirror {
         position: absolute !important;
         top: 37px;
         width: 100% !important;
         height: calc(100% - 37px) !important;
+
     }
 
     .CodeMirror .errorLine {
-        background: rgba(255, 0, 0, 0.25);
+        background: rgba(255,0,0,0.25);
     }
 
     .CodeMirror .esprima-error {
@@ -67,6 +132,22 @@ body {
     }
 
     /* outliner */
+    #outliner .opener {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        margin: 0px 4px;
+        vertical-align: top;
+        text-align: center;
+    }
+
+    #outliner .opener.open:after {
+        content: '−';
+    }
+
+    #outliner .opener.closed:after {
+        content: '+';
+    }
 
     #outliner .option {
         border: 1px solid transparent;
@@ -85,19 +166,32 @@ body {
     }
 
     #outliner .type {
-        position: relative;
-        top: -2px;
-        padding: 0 2px;
+        display: inline-block;
+        width: 14px;
+        height: 14px;
         color: #ddd;
+        text-align: center;
     }
 
     #outliner .type:after {
-        content: "■";
+        content: '●';
     }
 
+    /* */
+
     #outliner .Scene {
-        color: #ccccff;
+        color: #8888dd;
     }
+
+    #outliner .Camera {
+        color: #dd8888;
+    }
+
+    #outliner .Light {
+        color: #dddd88;
+    }
+
+    /* */
 
     #outliner .Object3D {
         color: #aaaaee;
@@ -121,37 +215,17 @@ body {
 
     /* */
 
-    #outliner .PointLight {
-        color: #dddd00;
-    }
-
-    /* */
-
     #outliner .Geometry {
-        color: #88ff88;
-    }
-
-    #outliner .BoxGeometry {
-        color: #bbeebb;
-    }
-
-    #outliner .TorusGeometry {
         color: #aaeeaa;
     }
 
-    /* */
-
     #outliner .Material {
-        color: #ff8888;
-    }
-
-    #outliner .MeshPhongMaterial {
-        color: #ffaa88;
+        color: #eeaaee;
     }
 
     /* */
 
     #outliner .Script:after {
-        content: "{...}"; /* ❮/❯ */
+        content: '◎'
     }
 }
