@@ -7,11 +7,11 @@ import * as THREE from "three";
 import { SetSceneCommand } from "three/editor/js/commands/SetSceneCommand";
 import { Editor } from "three/editor/js/Editor";
 import { Menubar } from "three/editor/js/Menubar";
-// TODO : resolve tern global reference in codemirror
-// import { Script } from "three/editor/js/Script";
-// import { Toolbar } from "three/editor/js/Toolbar";
 import { Player } from "three/editor/js/Player";
 import { Sidebar } from "three/editor/js/Sidebar";
+// TODO : resolve tern global reference in codemirror
+// import { Script } from "three/editor/js/Script";
+import { Toolbar } from "three/editor/js/Toolbar";
 import { Viewport } from "three/editor/js/Viewport";
 
 import settings from "../settings";
@@ -101,9 +101,8 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(menubar.dom);
         const sidebar = new Sidebar(this.editor);
         this.domElement.appendChild(sidebar.dom);
-        // TODO : Re-enable rotation controls for groups of atoms
-        // const toolbar = new Toolbar(this.editor);
-        // this.domElement.appendChild(toolbar.dom);
+        const toolbar = new Toolbar(this.editor);
+        this.domElement.appendChild(toolbar.dom);
 
         this.initializeControls();
 
