@@ -3,4 +3,5 @@ export const SELECTORS = {
     exportIconToolbar: '[data-name="Export"]',
     interactiveIconToolbar: '[data-name="Interactive"]',
     toggleAxesRoundIconButton: 'button[aria-label="toggle axes"]',
+    threeDEditorIconToolbar: '[data-name="3DEdit"]',
 };
