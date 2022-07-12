@@ -17,6 +17,10 @@ import Replay from "@material-ui/icons/Replay";
 import Spellcheck from "@material-ui/icons/Spellcheck";
 import SwitchCamera from "@material-ui/icons/SwitchCamera";
 import ThreeDRotation from "@material-ui/icons/ThreeDRotation";
+import SquareFootIcon from "@material-ui/icons/SquareFoot";
+import HeightIcon from "@material-ui/icons/Height";
+import LooksIcon from "@material-ui/icons/Looks";
+import DeleteIcon from "@material-ui/icons/Delete";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
@@ -52,6 +56,14 @@ export class ThreeDEditor extends React.Component {
             // on/off switch for the component
             isInteractive: false,
             isThreejsEditorModalShown: false,
+            // isDistanceAndAnglesShown: false,
+            measuresSettings: {
+                isDistanceShown: false,
+                isAnglesShown: false,
+                measureLabelsShown: false,
+                distance: 0,
+                angle: 0,
+            },
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -88,6 +100,13 @@ export class ThreeDEditor extends React.Component {
         this.onThreejsEditorModalHide = this.onThreejsEditorModalHide.bind(this);
         this.handleChemicalConnectivityFactorChange =
             this.handleChemicalConnectivityFactorChange.bind(this);
+        this.handleToggleDistanceShown = this.handleToggleDistanceShown.bind(this);
+        this.handleToggleAnglesShown = this.handleToggleAnglesShown.bind(this);
+        this.handleSetState = this.handleSetState.bind(this);
+        this.handleDeleteConnection = this.handleDeleteConnection.bind(this);
+        this.handleResetMeasures = this.handleResetMeasures.bind(this);
+        this.offMeasureParam = this.offMeasureParam.bind(this);
+        this.onMeasureParam = this.onMeasureParam.bind(this);
     }
 
     // TODO: update component to fully controlled or fully uncontrolled with a key?
@@ -210,6 +229,67 @@ export class ThreeDEditor extends React.Component {
 
     _getWaveProperty(name) {
         return this.WaveComponent && this.WaveComponent.wave[name];
+    }
+
+    handleSetState(newState) {
+        this.setState(newState);
+    }
+
+    handleDeleteConnection() {
+        this.WaveComponent.wave.deleteConnection();
+    }
+
+    handleToggleDistanceShown() {
+        const { measuresSettings } = this.state;
+        const { isDistanceShown, isAnglesShown } = measuresSettings;
+        if (isAnglesShown) {
+            this.offMeasureParam("isAnglesShown");
+        }
+
+        if (!isDistanceShown) {
+            this.onMeasureParam("isDistanceShown", "isAnglesShown");
+        } else {
+            this.offMeasureParam("isDistanceShown");
+        }
+    }
+
+    handleResetMeasures() {
+        this.WaveComponent.wave.resetMeasures();
+    }
+
+    offMeasureParam(param) {
+        this.WaveComponent.wave.destroyListeners();
+        this.handleResetMeasures();
+        this.setState((prevState) => {
+            const { measuresSettings } = prevState;
+            return { ...prevState, measuresSettings: { ...measuresSettings, [param]: false } };
+        });
+    }
+
+    onMeasureParam(param, offParam) {
+        this.setState((prevState) => {
+            const { measuresSettings } = prevState;
+            return { ...prevState, measuresSettings: { ...measuresSettings, [param]: true } };
+        });
+        const { measuresSettings } = this.state;
+        this.WaveComponent.wave.initListeners(this.handleSetState, {
+            ...measuresSettings,
+            [param]: true,
+            [offParam]: false,
+        });
+    }
+
+    handleToggleAnglesShown() {
+        const { measuresSettings } = this.state;
+        const { isAnglesShown, isDistanceShown } = measuresSettings;
+        if (isDistanceShown) {
+            this.offMeasureParam("isDistanceShown");
+        }
+        if (!isAnglesShown) {
+            this.onMeasureParam("isAnglesShown", "isDistanceShown");
+        } else {
+            this.offMeasureParam("isAnglesShown");
+        }
     }
 
     /**
@@ -398,6 +478,66 @@ export class ThreeDEditor extends React.Component {
         );
     }
 
+    getMeasuresToolbarItems() {
+        const { measuresSettings } = this.state;
+        const { isDistanceShown, isAnglesShown } = measuresSettings;
+
+        return [
+            <RoundIconButton
+                key="Distance"
+                tooltipPlacement="top"
+                title="Distance"
+                isToggled={isDistanceShown}
+                onClick={this.handleToggleDistanceShown}
+            >
+                <HeightIcon />
+            </RoundIconButton>,
+            <RoundIconButton
+                key="Angles"
+                tooltipPlacement="top"
+                title="Angles"
+                isToggled={isAnglesShown}
+                onClick={this.handleToggleAnglesShown}
+            >
+                <LooksIcon />
+            </RoundIconButton>,
+            <RoundIconButton
+                key="Reset Measures"
+                tooltipPlacement="top"
+                title="Reset Measures"
+                isToggleable={false}
+                onClick={this.handleResetMeasures}
+            >
+                <Replay />
+            </RoundIconButton>,
+
+            <RoundIconButton
+                key="Delete"
+                tooltipPlacement="top"
+                title="Delete connection"
+                isToggleable={false}
+                onClick={this.handleDeleteConnection}
+            >
+                <DeleteIcon />
+            </RoundIconButton>,
+        ];
+    }
+
+    renderMeasuresToolbar(className) {
+        const { isInteractive } = this.state;
+
+        return (
+            <IconToolbar
+                className={className}
+                title="Measurements"
+                iconComponent={SquareFootIcon}
+                isHidden={!isInteractive}
+            >
+                {this.getMeasuresToolbarItems()}
+            </IconToolbar>
+        );
+    }
+
     getParametersToolbarItems() {
         const { viewerSettings } = this.state;
         return [
@@ -581,6 +721,7 @@ export class ThreeDEditor extends React.Component {
 
     renderWaveOrThreejsEditorModal() {
         const { originalMaterial, isThreejsEditorModalShown } = this.state;
+
         const { editable } = this.props;
         if (isThreejsEditorModalShown) {
             return (
@@ -600,6 +741,7 @@ export class ThreeDEditor extends React.Component {
                 {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
                 {this.renderParametersToolbar(this.classNamesForTopToolbar + " third-row")}
                 {editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fourth-row")}
+                {this.renderMeasuresToolbar(this.classNamesForTopToolbar + " fifth-row")}
                 {this.renderExportToolbar(this.classNamesForBottomToolbar)}
             </div>
         );

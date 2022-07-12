@@ -1,6 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import { mix } from "mixwith";
 import * as THREE from "three";
+import { ATOM_GROUP_NAME } from "./enums";
 
 import { AtomsMixin } from "./mixins/atoms";
 import { BondsMixin } from "./mixins/bonds";
@@ -9,6 +10,7 @@ import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
 // eslint-disable-next-line import/no-cycle
 import { LabelsMixin } from "./mixins/labels";
+import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
@@ -241,6 +243,7 @@ export class Wave extends mix(WaveBase).with(
     ControlsMixin,
     BoundaryMixin,
     LabelsMixin,
+    MeasurementMixin,
 ) {
     /**
      *
@@ -271,6 +274,47 @@ export class Wave extends mix(WaveBase).with(
         this.adjustOrbitControlsTarget(cellViewParams.center);
     }
 
+    collectAllAtoms() {
+        const atoms = [];
+        this.structureGroup.children.forEach((group) => {
+            if (group.name !== ATOM_GROUP_NAME) return;
+
+            group.children.forEach((atom) => {
+                if (atom.type === "Mesh") {
+                    atoms.push(atom);
+                }
+            });
+        });
+
+        return atoms;
+    }
+
+    /**
+     * Function that called when scene is rebuilding.
+     * When scene is rebuilding and all atoms lost color this function is fills current chosen atoms by color.
+     */
+    refillChosenAtoms() {
+        const currentAtoms = this.collectAllAtoms();
+        const newChosenAtoms = [];
+
+        this.chosenAtoms.forEach((atom) => {
+            const newAtom = currentAtoms.find((currentAtom) => {
+                const firstAtomPoint = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
+                const secondAtomPoint = new THREE.Vector3().setFromMatrixPosition(
+                    currentAtom.matrixWorld,
+                );
+                if (!firstAtomPoint.distanceTo(secondAtomPoint)) {
+                    return currentAtom;
+                }
+                return null;
+            });
+            this.handleSetChosen(newAtom);
+            newAtom.userData = { ...atom.userData };
+            newChosenAtoms.push(newAtom);
+        });
+        this.chosenAtoms = newChosenAtoms;
+    }
+
     rebuildScene() {
         this.clearView();
         this.drawAtomsAsSpheres();
@@ -278,6 +322,7 @@ export class Wave extends mix(WaveBase).with(
         this.drawBoundaries();
         if (this.isDrawBondsEnabled) this.drawBonds();
         this.render();
+        this.refillChosenAtoms();
     }
 
     render() {

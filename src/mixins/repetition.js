@@ -1,5 +1,7 @@
+/* eslint-disable */
 import { Made } from "@exabyte-io/made.js";
 import * as THREE from "three";
+import { ATOM_GROUP_NAME } from "../enums";
 
 export const RepetitionMixin = (superclass) =>
     class extends superclass {
@@ -99,6 +101,47 @@ export const RepetitionMixin = (superclass) =>
                 .slice(1)
                 .forEach((point) => {
                     const object3DClone = object3D.clone();
+                    object3DClone.position.add(new THREE.Vector3(...point));
+                    this.structureGroup.add(object3DClone);
+                });
+        }
+
+        /**
+         * Repeats a given 3D atom at the lattice points given by repetitionCoordinates function.
+         * This function was added because previous one function for repeating atoms is not correct for the atoms
+         * with measurement functionality.
+         */
+        repeatAtomsAtRepetitionCoordinates(object3D) {
+            const {
+                settings: {
+                    repetitionsAlongLatticeVectorA,
+                    repetitionsAlongLatticeVectorB,
+                    repetitionsAlongLatticeVectorC,
+                },
+            } = this;
+            const coordinates = this.repetitionCoordinates(
+                Math.max(
+                    repetitionsAlongLatticeVectorA,
+                    repetitionsAlongLatticeVectorB,
+                    repetitionsAlongLatticeVectorC,
+                ),
+            );
+            this.structureGroup.add(object3D);
+            this.coordinatesByAxes(coordinates, {
+                repetitionsAlongLatticeVectorA,
+                repetitionsAlongLatticeVectorB,
+                repetitionsAlongLatticeVectorC,
+            })
+                .slice(1)
+                .forEach((point) => {
+                    const object3DClone = new THREE.Group();
+                    object3DClone.name = ATOM_GROUP_NAME;
+                    object3D.children.forEach(child => {
+                        const newChild = child.clone(true);
+                        newChild.material = child.material.clone(true);
+                        object3DClone.add(newChild);
+                    });
+
                     object3DClone.position.add(new THREE.Vector3(...point));
                     this.structureGroup.add(object3DClone);
                 });

@@ -109,9 +109,7 @@ export const AtomsMixin = (superclass) =>
             const basis = this.areNonPeriodicBoundariesPresent
                 ? this.basisWithElementsInsideNonPeriodicBoundaries
                 : this.basis;
-            this.repeatObject3DAtRepetitionCoordinates(
-                this.createAtomsGroup(basis, atomRadiiScale),
-            );
+            this.repeatAtomsAtRepetitionCoordinates(this.createAtomsGroup(basis, atomRadiiScale));
         }
 
         getAtomColorByElement(element, pallette = this.settings.elementColors) {

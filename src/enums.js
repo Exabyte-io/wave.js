@@ -22,3 +22,7 @@ export const BOUNDARY_CONDITIONS = [
 ];
 
 export const ATOM_GROUP_NAME = "Atoms";
+export const ATOM_CONNECTIONS_GROUP_NAME = "Atom_Connections";
+export const ATOM_CONNECTION_LINE_NAME = "Atom_Connection";
+export const MIN_ANGLE_POINTS_DISTANCE = 0.7;
+export const MEASURE_LABELS_GROUP_NAME = "Measure_Labels";
