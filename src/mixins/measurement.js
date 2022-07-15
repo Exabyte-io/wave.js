@@ -6,6 +6,7 @@ import {
     ATOM_CONNECTION_LINE_NAME,
     MIN_ANGLE_POINTS_DISTANCE,
     MEASURE_LABELS_GROUP_NAME,
+    ANGLE,
 } from "../enums";
 
 let clickFunction = null;
@@ -28,7 +29,7 @@ export const MeasurementMixin = (superclass) =>
             this.atomConnections = new THREE.Group();
             this.angles = new THREE.Group();
             this.measureLabels = new THREE.Group();
-            this.currentChosenConnection = null;
+            this.currentChosenLine = null;
 
             this.atomConnections.name = ATOM_CONNECTIONS_GROUP_NAME;
             this.angles.name = "Angles";
@@ -60,6 +61,7 @@ export const MeasurementMixin = (superclass) =>
          */
         initRaycaster() {
             this.raycaster = new THREE.Raycaster();
+            this.raycaster.params.Line.threshold = 0.1;
             this.pointer = new THREE.Vector2();
         }
 
@@ -81,7 +83,7 @@ export const MeasurementMixin = (superclass) =>
          * Function set color for connection line. Used for highlighting connections on mousemove event.
          * @Param intersectItem -> item on which mouse is pointing now
          */
-        setHexForConnectionLine(intersectItem) {
+        setHexForLine(intersectItem) {
             if (this.intersected !== intersectItem) {
                 if (this.intersected) {
                     this.intersected.material.color.setHex(this.intersected.currentHex);
@@ -113,7 +115,7 @@ export const MeasurementMixin = (superclass) =>
          * Function set default color for connection.
          * Used for unsetting color when mouse is no longer points connection.
          */
-        setDefaultHexForConnection() {
+        setDefaultHexForLine() {
             this.intersected.material.color.setHex(this.intersected.currentHex);
         }
 
@@ -131,8 +133,11 @@ export const MeasurementMixin = (superclass) =>
          */
         handleUnsetHex() {
             if (this.intersected && !this.intersected.userData.chosen) {
-                if (this.intersected.name === ATOM_CONNECTION_LINE_NAME) {
-                    this.setDefaultHexForConnection();
+                if (
+                    this.intersected.name === ATOM_CONNECTION_LINE_NAME ||
+                    this.intersected.name === ANGLE
+                ) {
+                    this.setDefaultHexForLine();
                 } else {
                     this.setDefaultHexForAtom();
                 }
@@ -147,13 +152,29 @@ export const MeasurementMixin = (superclass) =>
         onPointerMove(event) {
             this.checkMouseCoordinates(event);
             const atomGroup = this.getAtomGroups();
-            const searchedIntersects = [...atomGroup, ...this.atomConnections.children];
+            const searchedIntersects = [...atomGroup];
+            //  TODO: Probably will be better to set this.atomConnections.children to optional target
+            if (this.measureSettings.isDistanceShown) {
+                searchedIntersects.push(...this.atomConnections.children);
+            }
+            if (this.measureSettings.isAnglesShown) {
+                searchedIntersects.push(...this.angles.children);
+            }
+
             const intersects = this.raycaster.intersectObjects(searchedIntersects, false);
+
             for (let i = 0; i < intersects.length; i++) {
                 const intersectItem = intersects[i].object;
+                if (intersectItem.uuid !== this.intersected?.uuid) {
+                    this.handleUnsetHex();
+                    this.intersected = null;
+                }
                 if (!intersectItem.userData?.chosen) {
-                    if (intersectItem.name === ATOM_CONNECTION_LINE_NAME) {
-                        this.setHexForConnectionLine(intersectItem);
+                    if (
+                        intersectItem.name === ATOM_CONNECTION_LINE_NAME ||
+                        intersectItem.name === ANGLE
+                    ) {
+                        this.setHexForLine(intersectItem);
                         break;
                     }
                     if (intersectItem.type === "Mesh") {
@@ -162,6 +183,7 @@ export const MeasurementMixin = (superclass) =>
                     }
                 }
             }
+
             if (!intersects.length) {
                 this.handleUnsetHex();
                 this.intersected = null;
@@ -179,39 +201,90 @@ export const MeasurementMixin = (superclass) =>
         }
 
         /**
-         * Function that deletes connection between to atoms.
+         * Function that deletes an angle with label.
          */
-        deleteConnection() {
-            this.chosenAtoms.forEach((atom) => {
+        deleteAngle() {
+            const angles = [...this.angles.children];
+            angles.forEach((angle) => {
+                const isConnectedByCurrentConnection = angle.userData.atomConnections.some(
+                    (connection) => connection.uuid === this.currentChosenLine.uuid,
+                );
+                if (isConnectedByCurrentConnection) {
+                    this.measureLabels.remove(angle.userData.label);
+                    this.angles.remove(angle);
+                }
+            });
+        }
+
+        deleteConnectionsUsingAngle() {
+            const {
+                userData: {
+                    atomConnections: [connectionA, connectionB],
+                    label,
+                },
+            } = this.currentChosenLine;
+
+            this.chosenAtoms.forEach((atom, index) => {
                 const atomConnections = atom.userData.connections;
+                if (!atomConnections) return;
                 const isAtomUseThisConnection = atomConnections.some(
-                    (connection) => connection === this.currentChosenConnection.uuid,
+                    (connection) =>
+                        connection === connectionA.uuid || connection === connectionB.uuid,
                 );
                 if (isAtomUseThisConnection) {
                     atom.userData.connections = atomConnections.filter(
-                        (connection) => connection !== this.currentChosenConnection.uuid,
+                        (connection) =>
+                            connection !== connectionA.uuid && connection !== connectionB.uuid,
                     );
+                    this.chosenAtoms[index] = null;
                 }
                 if (!atom.userData.connections.length) {
                     atom.userData.chosen = false;
                     atom.material.emissive.setHex(atom.currentHex);
                 }
             });
-            this.chosenAtoms = this.chosenAtoms.filter((atom) => atom.userData.chosen);
-            if (this.measureSettings.isAnglesShown) {
-                const angles = [...this.angles.children];
-                angles.forEach((angle) => {
-                    const isConnectedByCurrentConnection = angle.userData.atomConnections.some(
-                        (connection) => connection.uuid === this.currentChosenConnection.uuid,
-                    );
-                    if (isConnectedByCurrentConnection) {
-                        this.measureLabels.remove(angle.userData.label);
-                        this.angles.remove(angle);
-                    }
-                });
+            this.chosenAtoms = this.chosenAtoms.filter((atom) => atom);
+
+            this.measureLabels.remove(label);
+            this.angles.remove(this.currentChosenLine);
+            this.atomConnections.remove(connectionA);
+            this.atomConnections.remove(connectionB);
+            this.currentChosenLine = null;
+            // this.rebuildScene();
+            this.render();
+        }
+
+        /**
+         * Function that deletes connection between to atoms.
+         */
+        deleteConnection() {
+            if (!this.currentChosenLine) return;
+            if (this.currentChosenLine.name === ANGLE) {
+                return this.deleteConnectionsUsingAngle();
             }
-            this.measureLabels.remove(this.currentChosenConnection.userData.label);
-            this.atomConnections.remove(this.currentChosenConnection);
+
+            this.chosenAtoms.forEach((atom, index) => {
+                const atomConnections = atom.userData.connections;
+                if (!atomConnections) return;
+                const isAtomUseThisConnection = atomConnections.some(
+                    (connection) => connection === this.currentChosenLine.uuid,
+                );
+                if (isAtomUseThisConnection) {
+                    atom.userData.connections = atomConnections.filter(
+                        (connection) => connection !== this.currentChosenLine.uuid,
+                    );
+                    this.chosenAtoms[index] = null;
+                }
+                if (!atom.userData.connections.length) {
+                    atom.userData.chosen = false;
+                    atom.material.emissive.setHex(atom.currentHex);
+                }
+            });
+            this.chosenAtoms = this.chosenAtoms.filter((atom) => atom);
+
+            this.measureLabels.remove(this.currentChosenLine.userData.label);
+            this.atomConnections.remove(this.currentChosenLine);
+            this.currentChosenLine = null;
             this.render();
         }
 
@@ -220,11 +293,13 @@ export const MeasurementMixin = (superclass) =>
          * @Param intersectItem -> current chosen connection
          */
         handleConnectionClick(intersectItem) {
-            if (this.currentChosenConnection?.userData.chosen) {
-                this.currentChosenConnection.userData.chosen = false;
+            if (this.currentChosenLine?.userData.chosen) {
+                this.currentChosenLine.userData.chosen = false;
+                this.currentChosenLine.material.color.setHex(this.currentChosenLine.currentHex);
             }
-            this.currentChosenConnection = intersectItem;
-            this.currentChosenConnection.userData.chosen = true;
+            this.currentChosenLine = intersectItem;
+            this.currentChosenLine.userData.chosen = true;
+            this.render();
         }
 
         /**
@@ -236,12 +311,24 @@ export const MeasurementMixin = (superclass) =>
         onClick(updateState, event) {
             this.checkMouseCoordinates(event);
             const atomGroup = this.getAtomGroups();
-            const searchedIntersects = [...atomGroup, ...this.atomConnections.children];
+            const searchedIntersects = [...atomGroup];
+            if (this.measureSettings.isDistanceShown) {
+                searchedIntersects.push(...this.atomConnections.children);
+            }
+            if (this.measureSettings.isAnglesShown) {
+                searchedIntersects.push(...this.angles.children);
+            }
             const intersects = this.raycaster.intersectObjects(searchedIntersects, false);
             for (let i = 0; i < intersects.length; i++) {
                 const intersectItem = intersects[i].object;
 
-                if (intersectItem.name === ATOM_CONNECTION_LINE_NAME) {
+                if (
+                    intersectItem.name === ATOM_CONNECTION_LINE_NAME ||
+                    intersectItem.name === ANGLE
+                ) {
+                    if (this.chosenAtoms.length % 2 && this.measureSettings.isDistanceShown) {
+                        this.unChoseAtom(this.chosenAtoms.at(-1));
+                    }
                     this.handleConnectionClick(intersectItem);
                     break;
                 }
@@ -348,8 +435,9 @@ export const MeasurementMixin = (superclass) =>
             const curvedParams = new THREE.QuadraticBezierCurve3(...anglePoints);
             const points = curvedParams.getPoints(50);
             const geometry = new THREE.BufferGeometry().setFromPoints(points);
-            const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+            const material = new THREE.LineBasicMaterial({ color: this.settings.colors.amber });
             const lineToDraw = new THREE.Line(geometry, material);
+            lineToDraw.name = ANGLE;
             lineToDraw.userData.atomConnections = atomConnections;
             this.drawAngleText(angle, anglePoints[1], lineToDraw);
             this.angles.add(lineToDraw);
@@ -390,7 +478,7 @@ export const MeasurementMixin = (superclass) =>
          * @param line - on which this text is rendered.
          */
         drawAngleText(angle, position, line) {
-            const label = this.createLabelSprite(angle, `label-for-${angle}`);
+            const label = this.createLabelSprite(`${angle}º`, `label-for-${angle}`);
             line.userData.label = label;
             label.position.set(...position);
             label.visible = true;
@@ -405,12 +493,15 @@ export const MeasurementMixin = (superclass) =>
          * @param distance - distance value that should be rendered.
          */
         drawDistanceText(distance) {
-            const label = this.createLabelSprite(distance.toFixed(8), `label-for-${distance}`);
+            const label = this.createLabelSprite(
+                `${distance.toFixed(3)}Å`,
+                `label-for-${distance}`,
+            );
             const line = this.atomConnections.children.at(-1);
             line.userData.label = label;
             label.position.set(...line.geometry.boundingSphere.center);
             label.visible = true;
-            label.scale.set(1, 1, 1);
+            label.scale.set(0.75, 0.75, 0.75);
             this.measureLabels.add(label);
             this.scene.add(this.measureLabels);
             this.render();
@@ -431,6 +522,7 @@ export const MeasurementMixin = (superclass) =>
                 atom.userData.chosen = false;
                 this.chosenAtoms.pop();
                 atom.material.emissive.setHex(atom.currentHex);
+                this.render();
             }
         }
 
@@ -486,7 +578,7 @@ export const MeasurementMixin = (superclass) =>
                 firstAtomPoint,
                 secondAtomPoint,
             ]);
-            const material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+            const material = new THREE.LineBasicMaterial({ color: this.settings.colors.amber });
             const line = new THREE.Line(geometry, material);
             this.addConnection(firstAtom, line.uuid);
             this.addConnection(secondAtom, line.uuid);
@@ -500,11 +592,19 @@ export const MeasurementMixin = (superclass) =>
         }
 
         resetMeasures() {
-            const connections = [...this.atomConnections.children];
-            connections.forEach((connection) => {
-                this.currentChosenConnection = connection;
-                this.deleteConnection();
-            });
+            if (this.measureSettings.isDistanceShown) {
+                const connections = [...this.atomConnections.children];
+                connections.forEach((connection) => {
+                    this.currentChosenLine = connection;
+                    this.deleteConnection();
+                });
+            } else {
+                const lines = [...this.angles.children];
+                lines.forEach((line) => {
+                    this.currentChosenLine = line;
+                    this.deleteConnection();
+                });
+            }
         }
 
         /**

@@ -172,6 +172,7 @@ export class ThreeDEditor extends React.Component {
 
     handleToggleConventionalCell() {
         const { isConventionalCellShown, originalMaterial } = this.state;
+        this.handleResetMeasures();
         this.setState({
             isConventionalCellShown: !isConventionalCellShown,
             originalMaterial: this.getPrimitiveOrConventionalMaterial(
@@ -204,6 +205,10 @@ export class ThreeDEditor extends React.Component {
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
     handleResetViewer() {
+        const { measuresSettings } = this.state;
+        this.setState({
+            measuresSettings: { ...measuresSettings, isDistanceShown: false, isAnglesShown: false },
+        });
         this.WaveComponent.initViewer();
         this._resetStateWaveComponent();
     }
