@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { Made } from "@exabyte-io/made.js";
 import * as THREE from "three";
 import { ATOM_GROUP_NAME } from "../enums";
@@ -136,7 +135,7 @@ export const RepetitionMixin = (superclass) =>
                 .forEach((point) => {
                     const object3DClone = new THREE.Group();
                     object3DClone.name = ATOM_GROUP_NAME;
-                    object3D.children.forEach(child => {
+                    object3D.children.forEach((child) => {
                         const newChild = child.clone(true);
                         newChild.material = child.material.clone(true);
                         object3DClone.add(newChild);

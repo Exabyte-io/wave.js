@@ -3,6 +3,7 @@ import fs from "fs";
 import looksSame from "looks-same";
 import path from "path";
 import { PNG } from "pngjs";
+import * as THREE from "three";
 
 export const WIDTH = 500;
 export const HEIGHT = 1000;
@@ -131,4 +132,47 @@ export function dispatchMouseDownMoveOrUpEvent(element, type, clientX, clientY, 
             clientY,
         }),
     );
+}
+
+export function getEventObjectBy3DPosition(position, camera) {
+    const vector = position.clone();
+
+    vector.project(camera);
+    vector.x = Math.round(((vector.x + 1) * window.innerWidth) / 2);
+    vector.y = Math.round(((-vector.y + 1) * window.innerHeight) / 2);
+    vector.z = 0;
+
+    return {
+        clientX: vector.x,
+        clientY: vector.y,
+    };
+}
+
+export function getEventObjectBy3DMatrix(matrix, camera) {
+    const vector = new THREE.Vector3().setFromMatrixPosition(matrix);
+
+    vector.project(camera);
+    vector.x = Math.round(((vector.x + 1) * window.innerWidth) / 2);
+    vector.y = Math.round(((-vector.y + 1) * window.innerHeight) / 2);
+    vector.z = 0;
+
+    return {
+        clientX: vector.x,
+        clientY: vector.y,
+    };
+}
+
+export function makeClickOnTwoAtoms(wave, atoms, stateUpdate) {
+    const [atomA, atomB] = atoms;
+    const eventA = getEventObjectBy3DPosition(atomA.position, wave.camera);
+    const eventB = getEventObjectBy3DPosition(atomB.position, wave.camera);
+    wave.onClick(stateUpdate, eventA);
+    wave.onClick(stateUpdate, eventB);
+}
+
+export function makeClickOn3Atoms(wave, atoms, stateUpdate) {
+    atoms.forEach((atom) => {
+        const event = getEventObjectBy3DMatrix(atom.matrixWorld, wave.camera);
+        wave.onClick(stateUpdate, event);
+    });
 }

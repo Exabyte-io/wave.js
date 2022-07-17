@@ -7,6 +7,7 @@ import {
     MIN_ANGLE_POINTS_DISTANCE,
     MEASURE_LABELS_GROUP_NAME,
     ANGLE,
+    COLORS,
 } from "../enums";
 
 let clickFunction = null;
@@ -90,7 +91,7 @@ export const MeasurementMixin = (superclass) =>
                 }
                 this.intersected = intersectItem;
                 this.intersected.currentHex = this.intersected.material.color.getHex();
-                this.intersected.material.color.setHex("0x00ff00");
+                this.intersected.material.color.setHex(COLORS.GREEN);
                 this.renderer.render(this.scene, this.camera);
             }
         }
@@ -106,7 +107,7 @@ export const MeasurementMixin = (superclass) =>
                 }
                 this.intersected = intersectItem;
                 this.intersected.currentHex = this.intersected.material.emissive.getHex();
-                this.intersected.material.emissive.setHex("0xff0000");
+                this.intersected.material.emissive.setHex(COLORS.RED);
                 this.renderer.render(this.scene, this.camera);
             }
         }
@@ -203,19 +204,6 @@ export const MeasurementMixin = (superclass) =>
         /**
          * Function that deletes an angle with label.
          */
-        deleteAngle() {
-            const angles = [...this.angles.children];
-            angles.forEach((angle) => {
-                const isConnectedByCurrentConnection = angle.userData.atomConnections.some(
-                    (connection) => connection.uuid === this.currentChosenLine.uuid,
-                );
-                if (isConnectedByCurrentConnection) {
-                    this.measureLabels.remove(angle.userData.label);
-                    this.angles.remove(angle);
-                }
-            });
-        }
-
         deleteConnectionsUsingAngle() {
             const {
                 userData: {
@@ -250,7 +238,6 @@ export const MeasurementMixin = (superclass) =>
             this.atomConnections.remove(connectionA);
             this.atomConnections.remove(connectionB);
             this.currentChosenLine = null;
-            // this.rebuildScene();
             this.render();
         }
 
@@ -605,6 +592,15 @@ export const MeasurementMixin = (superclass) =>
                     this.deleteConnection();
                 });
             }
+
+            if (this.chosenAtoms.length) {
+                this.chosenAtoms.forEach((atom) => {
+                    atom.userData.chosen = false;
+                    atom.material.emissive.setHex(atom.currentHex);
+                });
+                this.chosenAtoms = [];
+            }
+            this.render();
         }
 
         /**

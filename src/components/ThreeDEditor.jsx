@@ -140,7 +140,6 @@ export class ThreeDEditor extends React.Component {
         });
     };
 
-    // eslint-disable-next-line class-methods-use-this
     handleCellRepetitionsChange(e) {
         this.handleSetSetting({ [e.target.id]: parseFloat($(e.target).val()) });
     }
