@@ -314,7 +314,7 @@ export const MeasurementMixin = (superclass) =>
                     intersectItem.name === ANGLE
                 ) {
                     if (this.chosenAtoms.length % 2 && this.measureSettings.isDistanceShown) {
-                        this.unChoseAtom(this.chosenAtoms.at(-1));
+                        this.unChoseAtom(this.chosenAtoms[this.chosenAtoms.length - 1]);
                     }
                     this.handleConnectionClick(intersectItem);
                     break;
@@ -484,7 +484,8 @@ export const MeasurementMixin = (superclass) =>
                 `${distance.toFixed(3)}Å`,
                 `label-for-${distance}`,
             );
-            const line = this.atomConnections.children.at(-1);
+            const atomConnections = this.atomConnections.children;
+            const line = atomConnections[atomConnections.length - 1];
             line.userData.label = label;
             label.position.set(...line.geometry.boundingSphere.center);
             label.visible = true;
@@ -535,7 +536,7 @@ export const MeasurementMixin = (superclass) =>
          * @param intersectedAtom - atom that should be added
          */
         addIfLastNotSame(intersectedAtom) {
-            const lastAtom = this.chosenAtoms.at(-1);
+            const lastAtom = this.chosenAtoms[this.chosenAtoms.length - 1];
             if (lastAtom?.uuid === intersectedAtom.uuid && this.chosenAtoms.length % 2) {
                 return this.unChoseAtom(lastAtom);
             }
