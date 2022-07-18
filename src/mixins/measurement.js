@@ -337,14 +337,44 @@ export const MeasurementMixin = (superclass) =>
                     }
                     if (this.shouldCalculateDistance()) {
                         const lastChosenAtoms = this.chosenAtoms.slice(-2);
-                        this.drawLineBetweenAtoms(lastChosenAtoms);
-                        const distance = this.calculateDistanceBetweenAtoms(lastChosenAtoms);
-                        this.drawDistanceText(distance);
-                        updateState({ distance });
+                        const isPairAlreadyExist = this.checkAtomPairExistence(
+                            this.chosenAtoms.slice(0, -2),
+                            lastChosenAtoms,
+                        );
+                        if (!isPairAlreadyExist) {
+                            this.drawLineBetweenAtoms(lastChosenAtoms);
+                            const distance = this.calculateDistanceBetweenAtoms(lastChosenAtoms);
+                            this.drawDistanceText(distance);
+                            updateState({ distance });
+                        }
                     }
                     break;
                 }
             }
+        }
+
+        /**
+         *
+         * @param {Array} atomArray - array to be checked
+         * @param {Array} param1 - atom pair to checked
+         * @returns boolean value - true if atom pair is already exist in array.
+         */
+        checkAtomPairExistence(atomArray, [atomA, atomB]) {
+            for (let i = 0; i < atomArray.length; i += 2) {
+                const currentAtom = atomArray[i];
+                const nextAtom = atomArray[i + 1];
+
+                if (
+                    (currentAtom.uuid === atomA.uuid && atomB.uuid === nextAtom.uuid) ||
+                    (currentAtom.uuid === atomB.uuid && nextAtom.uuid === atomA.uuid)
+                ) {
+                    this.chosenAtoms.pop();
+                    this.chosenAtoms.pop();
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         shouldCalculateDistance() {
