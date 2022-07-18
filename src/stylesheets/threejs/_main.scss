@@ -234,4 +234,26 @@ body {
     #outliner .Script:after {
         content: '◎'
     }
+
+    #multiple-selection-buttons {
+        display: flex;
+    }
+
+    #multiple-selection-buttons > button.ms-button {
+        margin-left: 10px;
+    }
+
+    #multiple-selection-buttons > button.ms-button:first-child {
+        margin-left: 0;
+    }
+
+    #multiple-selection-buttons > button.ms-button.ms-button__cancel {
+        padding: 6.25px 10px;
+    }
+
+    #multiple-selection-buttons > button.ms-button.ms-button__cancel img {
+        width: 12px;
+        height: 12px;
+    }
+
 }
