@@ -134,6 +134,11 @@ export function dispatchMouseDownMoveOrUpEvent(element, type, clientX, clientY, 
     );
 }
 
+/**
+ * This function is helps to get event by atom position for clicking on atom or hovering on it.
+ * @param {Object} position - position of the atom should be instance of THREE.Vector3()
+ * @param {Object} camera - camera of the wave object
+ */
 export function getEventObjectBy3DPosition(position, camera) {
     const vector = position.clone();
 
@@ -148,6 +153,11 @@ export function getEventObjectBy3DPosition(position, camera) {
     };
 }
 
+/**
+ * This function is helps to get event by atom matrix for clicking on atom or hovering on it.
+ * @param {Object} matrix - matrix position of the atom.
+ * @param {Object} camera - camera of the wave object.
+ */
 export function getEventObjectBy3DMatrix(matrix, camera) {
     const vector = new THREE.Vector3().setFromMatrixPosition(matrix);
 
@@ -162,6 +172,12 @@ export function getEventObjectBy3DMatrix(matrix, camera) {
     };
 }
 
+/**
+ * This function is making clicks on 2 atoms. Used for testing.
+ * @param wave - wave instance object.
+ * @param atoms - 3 atoms in array.
+ * @param stateUpdate - in this context just a simple mocked jest.fn.
+ */
 export function makeClickOnTwoAtoms(wave, atoms, stateUpdate) {
     const [atomA, atomB] = atoms;
     const eventA = getEventObjectBy3DPosition(atomA.position, wave.camera);
@@ -170,6 +186,12 @@ export function makeClickOnTwoAtoms(wave, atoms, stateUpdate) {
     wave.onClick(stateUpdate, eventB);
 }
 
+/**
+ * This function is making clicks on 2 atoms. Used for testing.
+ * @param wave - wave instance object.
+ * @param atoms - atoms tuple.
+ * @param stateUpdate - in this context just a simple mocked jest.fn.
+ */
 export function makeClickOn3Atoms(wave, atoms, stateUpdate) {
     atoms.forEach((atom) => {
         const event = getEventObjectBy3DMatrix(atom.matrixWorld, wave.camera);
