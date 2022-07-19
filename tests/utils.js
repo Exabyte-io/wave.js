@@ -139,17 +139,17 @@ export function dispatchMouseDownMoveOrUpEvent(element, type, clientX, clientY, 
  * @param {Object} position - position of the atom should be instance of THREE.Vector3()
  * @param {Object} camera - camera of the wave object
  */
-export function getEventObjectBy3DPosition(position, camera) {
+export function getEventObjectBy3DPosition(position, camera, canvas) {
     const vector = position.clone();
 
     vector.project(camera);
-    vector.x = Math.round(((vector.x + 1) * window.innerWidth) / 2);
-    vector.y = Math.round(((-vector.y + 1) * window.innerHeight) / 2);
+    vector.x = Math.round(((vector.x + 1) * canvas.width) / 2);
+    vector.y = Math.round(((-vector.y + 1) * canvas.height) / 2);
     vector.z = 0;
 
     return {
-        clientX: vector.x,
-        clientY: vector.y,
+        layerX: vector.x,
+        layerY: vector.y,
     };
 }
 
@@ -158,17 +158,17 @@ export function getEventObjectBy3DPosition(position, camera) {
  * @param {Object} matrix - matrix position of the atom.
  * @param {Object} camera - camera of the wave object.
  */
-export function getEventObjectBy3DMatrix(matrix, camera) {
+export function getEventObjectBy3DMatrix(matrix, camera, canvas) {
     const vector = new THREE.Vector3().setFromMatrixPosition(matrix);
 
     vector.project(camera);
-    vector.x = Math.round(((vector.x + 1) * window.innerWidth) / 2);
-    vector.y = Math.round(((-vector.y + 1) * window.innerHeight) / 2);
+    vector.x = Math.round(((vector.x + 1) * canvas.width) / 2);
+    vector.y = Math.round(((-vector.y + 1) * canvas.height) / 2);
     vector.z = 0;
 
     return {
-        clientX: vector.x,
-        clientY: vector.y,
+        layerX: vector.x,
+        layerY: vector.y,
     };
 }
 
@@ -180,8 +180,16 @@ export function getEventObjectBy3DMatrix(matrix, camera) {
  */
 export function makeClickOnTwoAtoms(wave, atoms, stateUpdate) {
     const [atomA, atomB] = atoms;
-    const eventA = getEventObjectBy3DPosition(atomA.position, wave.camera);
-    const eventB = getEventObjectBy3DPosition(atomB.position, wave.camera);
+    const eventA = getEventObjectBy3DPosition(
+        atomA.position,
+        wave.camera,
+        wave.renderer.domElement,
+    );
+    const eventB = getEventObjectBy3DPosition(
+        atomB.position,
+        wave.camera,
+        wave.renderer.domElement,
+    );
     wave.onClick(stateUpdate, eventA);
     wave.onClick(stateUpdate, eventB);
 }
@@ -194,7 +202,11 @@ export function makeClickOnTwoAtoms(wave, atoms, stateUpdate) {
  */
 export function makeClickOn3Atoms(wave, atoms, stateUpdate) {
     atoms.forEach((atom) => {
-        const event = getEventObjectBy3DMatrix(atom.matrixWorld, wave.camera);
+        const event = getEventObjectBy3DMatrix(
+            atom.matrixWorld,
+            wave.camera,
+            wave.renderer.domElement,
+        );
         wave.onClick(stateUpdate, event);
     });
 }

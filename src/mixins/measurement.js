@@ -38,8 +38,9 @@ export const MeasurementMixin = (superclass) =>
         }
 
         destroyListeners() {
-            document.removeEventListener("click", clickFunction);
-            document.removeEventListener("mousemove", pointerMoveFunction);
+            const canvas = this.renderer.domElement;
+            canvas.removeEventListener("click", clickFunction);
+            canvas.removeEventListener("mousemove", pointerMoveFunction);
         }
 
         /**
@@ -51,9 +52,9 @@ export const MeasurementMixin = (superclass) =>
             this.measureSettings = settings;
             clickFunction = this.onClick.bind(this, updateState);
             pointerMoveFunction = this.onPointerMove.bind(this);
-
-            document.addEventListener("click", clickFunction);
-            document.addEventListener("mousemove", pointerMoveFunction);
+            const canvas = this.renderer.domElement;
+            canvas.addEventListener("click", clickFunction);
+            canvas.addEventListener("mousemove", pointerMoveFunction);
         }
 
         /**
@@ -196,8 +197,9 @@ export const MeasurementMixin = (superclass) =>
          * @Param event -> simple javascript DOM event
          */
         checkMouseCoordinates(event) {
-            this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-            this.pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            const canvas = this.renderer.domElement;
+            this.pointer.x = (event.layerX / canvas.width) * 2 - 1;
+            this.pointer.y = -(event.layerY / canvas.height) * 2 + 1;
             this.raycaster.setFromCamera(this.pointer, this.camera);
         }
 
