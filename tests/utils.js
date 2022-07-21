@@ -136,8 +136,9 @@ export function dispatchMouseDownMoveOrUpEvent(element, type, clientX, clientY, 
 
 /**
  * This function is helps to get event by atom position for clicking on atom or hovering on it.
- * @param {Object} position - position of the atom should be instance of THREE.Vector3()
- * @param {Object} camera - camera of the wave object
+ * @param {THREE.Vector3} position - position of the atom should be instance of THREE.Vector3()
+ * @param {THREE.Camera} camera - camera of the wave object
+ * @param {HTMLCanvasElement} canvas - object on which we render scene
  */
 export function getEventObjectBy3DPosition(position, camera, canvas) {
     const vector = position.clone();
@@ -155,8 +156,9 @@ export function getEventObjectBy3DPosition(position, camera, canvas) {
 
 /**
  * This function is helps to get event by atom matrix for clicking on atom or hovering on it.
- * @param {Object} matrix - matrix position of the atom.
- * @param {Object} camera - camera of the wave object.
+ * @param {THREE.Matrix4} matrix - matrix position of the atom.
+ * @param {THREE.Camera} camera - camera of the wave object.
+ * @param {HTMLCanvasElement} canvas - object on which we render scene
  */
 export function getEventObjectBy3DMatrix(matrix, camera, canvas) {
     const vector = new THREE.Vector3().setFromMatrixPosition(matrix);
@@ -174,9 +176,9 @@ export function getEventObjectBy3DMatrix(matrix, camera, canvas) {
 
 /**
  * This function is making clicks on 2 atoms. Used for testing.
- * @param wave - wave instance object.
- * @param atoms - 3 atoms in array.
- * @param stateUpdate - in this context just a simple mocked jest.fn.
+ * @param {Wave} wave - wave instance object.
+ * @param {Array<THREE.Mesh>} atoms - 2 atom mesh objects in array.
+ * @param {Function} stateUpdate - in this context just a simple mocked jest.fn.
  */
 export function makeClickOnTwoAtoms(wave, atoms, stateUpdate) {
     const [atomA, atomB] = atoms;
@@ -195,10 +197,10 @@ export function makeClickOnTwoAtoms(wave, atoms, stateUpdate) {
 }
 
 /**
- * This function is making clicks on 2 atoms. Used for testing.
- * @param wave - wave instance object.
- * @param atoms - atoms tuple.
- * @param stateUpdate - in this context just a simple mocked jest.fn.
+ * This function is making clicks on 3 atoms. Used for testing.
+ * @param {Wave} wave - wave instance object.
+ * @param {Array<THREE.Mesh>} atoms - 3 atom mesh objects in array.
+ * @param {Function} stateUpdate - in this context just a simple mocked jest.fn.
  */
 export function makeClickOn3Atoms(wave, atoms, stateUpdate) {
     atoms.forEach((atom) => {

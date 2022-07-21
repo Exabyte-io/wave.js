@@ -258,7 +258,9 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleResetMeasures() {
-        this.WaveComponent.wave.resetMeasures();
+        const { measuresSettings } = this.state;
+        const { isDistanceShown, isAnglesShown } = measuresSettings;
+        if (isDistanceShown || isAnglesShown) this.WaveComponent.wave.resetMeasures();
     }
 
     offMeasureParam(param) {
