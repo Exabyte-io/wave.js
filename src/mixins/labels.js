@@ -1,5 +1,4 @@
 import * as THREE from "three";
-
 import { ATOM_GROUP_NAME } from "../enums";
 // eslint-disable-next-line import/no-cycle
 import { setParameters } from "../utils";
@@ -11,6 +10,8 @@ import { setParameters } from "../utils";
 export const LabelsMixin = (superclass) =>
     class extends superclass {
         #texturesCache = {};
+
+        #labels = [];
 
         /**
          * Creates a new texture based on a 2D canvas with the supplied text
@@ -96,6 +97,71 @@ export const LabelsMixin = (superclass) =>
         }
 
         /**
+         * This function makes a hash map from atom names.
+         * Used it for sorting all atoms by names and then quckly get it for creating a label points
+         * @returns {Object.<string, Array.<Three.InstancedMesh>>} atomsHashMap
+         */
+        makeHashMapFromAtomNames() {
+            const atomsHashMap = {};
+            this.structureGroup.children.forEach((group) => {
+                if (group.name !== ATOM_GROUP_NAME) return;
+
+                group.children.forEach((atom) => {
+                    if (atom instanceof THREE.Mesh) {
+                        const text = atom.name.split("-")[0];
+                        if (!atomsHashMap[text]) {
+                            atomsHashMap[text] = [atom];
+                            return;
+                        }
+                        atomsHashMap[text].push(atom);
+                    }
+                });
+            });
+
+            return atomsHashMap;
+        }
+
+        /*
+         * function that creates label sprites as points.
+         * If we want to use a lot of labels and don't want to have a huge impact
+         * from rendering scene we should use Three.Points or Three.InstancedMesh.
+         * https://threejs.org/docs/#api/en/objects/Points
+         * https://threejs.org/docs/?q=instanced#api/en/objects/InstancedMesh
+         */
+        createLabelSpritesAsPoints() {
+            if (this.#labels.length) {
+                this.#labels.forEach((label) => this.structureGroup.remove(label));
+            }
+
+            const atomsHashMap = this.makeHashMapFromAtomNames();
+            Object.entries(atomsHashMap).forEach(([key, atoms]) => {
+                const texture = this.getLabelTextTexture(key);
+                const vertices = [];
+                atoms.forEach((atom) => {
+                    const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
+                    const { x, y, z } = position;
+                    vertices.push(x, y, z);
+                });
+                const geometry = new THREE.BufferGeometry();
+                geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+                const material = new THREE.PointsMaterial({
+                    size: 1.5,
+                    map: texture,
+                    depthTest: true,
+                    depthFunc: THREE.NotEqualDepth,
+                    transparent: true,
+                });
+                const particles = new THREE.Points(geometry, material);
+                particles.visible = this.areLabelsShown;
+                particles.name = `labels-for-${key}`;
+                this.#labels.push(particles);
+                this.structureGroup.add(particles);
+            });
+
+            this.render();
+        }
+
+        /**
          * Calculates a vector from the atom center to the camera clamped to the atom sphere radius.
          * @param {THREE.Group} group - the instance of THREE group containing the atom mesh;
          * @param {THREE.Mesh} atom - the instance of THREE mesh representing the atom;
@@ -124,6 +190,8 @@ export const LabelsMixin = (superclass) =>
          */
         toggleLabels() {
             this.areLabelsShown = !this.areLabelsShown;
+            this.#labels.forEach((label) => (label.visible = this.areLabelsShown));
+            this.#labels.visible = this.areLabelsShown;
 
             const atomGroups = this.scene
                 .getObjectByName(ATOM_GROUP_NAME)
