@@ -109,6 +109,11 @@ export class ThreeDEditor extends React.Component {
         this.onMeasureParam = this.onMeasureParam.bind(this);
     }
 
+    componentWillUnmount() {
+        this.handleResetMeasures();
+        this.WaveComponent.wave.destroyListeners();
+    }
+
     // TODO: update component to fully controlled or fully uncontrolled with a key?
     // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
     // eslint-disable-next-line no-unused-vars
@@ -746,8 +751,8 @@ export class ThreeDEditor extends React.Component {
                 {this.renderWaveComponent()}
                 {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
                 {this.renderParametersToolbar(this.classNamesForTopToolbar + " third-row")}
-                {editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fourth-row")}
-                {this.renderMeasuresToolbar(this.classNamesForTopToolbar + " fifth-row")}
+                {this.renderMeasuresToolbar(this.classNamesForTopToolbar + " fourth-row")}
+                {editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fifth-row")}
                 {this.renderExportToolbar(this.classNamesForBottomToolbar)}
             </div>
         );
