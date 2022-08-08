@@ -134,45 +134,81 @@ export function dispatchMouseDownMoveOrUpEvent(element, type, clientX, clientY, 
     );
 }
 
-export function getEventObjectBy3DPosition(position, camera) {
+/**
+ * This function is helps to get event by atom position for clicking on atom or hovering on it.
+ * @param {THREE.Vector3} position - position of the atom should be instance of THREE.Vector3()
+ * @param {THREE.Camera} camera - camera of the wave object
+ * @param {HTMLCanvasElement} canvas - object on which we render scene
+ */
+export function getEventObjectBy3DPosition(position, camera, canvas) {
     const vector = position.clone();
 
     vector.project(camera);
-    vector.x = Math.round(((vector.x + 1) * window.innerWidth) / 2);
-    vector.y = Math.round(((-vector.y + 1) * window.innerHeight) / 2);
+    vector.x = Math.round(((vector.x + 1) * canvas.width) / 2);
+    vector.y = Math.round(((-vector.y + 1) * canvas.height) / 2);
     vector.z = 0;
 
     return {
-        clientX: vector.x,
-        clientY: vector.y,
+        layerX: vector.x,
+        layerY: vector.y,
     };
 }
 
-export function getEventObjectBy3DMatrix(matrix, camera) {
+/**
+ * This function is helps to get event by atom matrix for clicking on atom or hovering on it.
+ * @param {THREE.Matrix4} matrix - matrix position of the atom.
+ * @param {THREE.Camera} camera - camera of the wave object.
+ * @param {HTMLCanvasElement} canvas - object on which we render scene
+ */
+export function getEventObjectBy3DMatrix(matrix, camera, canvas) {
     const vector = new THREE.Vector3().setFromMatrixPosition(matrix);
 
     vector.project(camera);
-    vector.x = Math.round(((vector.x + 1) * window.innerWidth) / 2);
-    vector.y = Math.round(((-vector.y + 1) * window.innerHeight) / 2);
+    vector.x = Math.round(((vector.x + 1) * canvas.width) / 2);
+    vector.y = Math.round(((-vector.y + 1) * canvas.height) / 2);
     vector.z = 0;
 
     return {
-        clientX: vector.x,
-        clientY: vector.y,
+        layerX: vector.x,
+        layerY: vector.y,
     };
 }
 
+/**
+ * This function is making clicks on 2 atoms. Used for testing.
+ * @param {Wave} wave - wave instance object.
+ * @param {Array<THREE.Mesh>} atoms - 2 atom mesh objects in array.
+ * @param {Function} stateUpdate - in this context just a simple mocked jest.fn.
+ */
 export function makeClickOnTwoAtoms(wave, atoms, stateUpdate) {
     const [atomA, atomB] = atoms;
-    const eventA = getEventObjectBy3DPosition(atomA.position, wave.camera);
-    const eventB = getEventObjectBy3DPosition(atomB.position, wave.camera);
+    const eventA = getEventObjectBy3DPosition(
+        atomA.position,
+        wave.camera,
+        wave.renderer.domElement,
+    );
+    const eventB = getEventObjectBy3DPosition(
+        atomB.position,
+        wave.camera,
+        wave.renderer.domElement,
+    );
     wave.onClick(stateUpdate, eventA);
     wave.onClick(stateUpdate, eventB);
 }
 
+/**
+ * This function is making clicks on 3 atoms. Used for testing.
+ * @param {Wave} wave - wave instance object.
+ * @param {Array<THREE.Mesh>} atoms - 3 atom mesh objects in array.
+ * @param {Function} stateUpdate - in this context just a simple mocked jest.fn.
+ */
 export function makeClickOn3Atoms(wave, atoms, stateUpdate) {
     atoms.forEach((atom) => {
-        const event = getEventObjectBy3DMatrix(atom.matrixWorld, wave.camera);
+        const event = getEventObjectBy3DMatrix(
+            atom.matrixWorld,
+            wave.camera,
+            wave.renderer.domElement,
+        );
         wave.onClick(stateUpdate, event);
     });
 }

@@ -5,7 +5,7 @@ import { COLORS } from "../../../src/enums";
 import * as THREE from "three";
 
 describe("distance measurements", () => {
-    let wave, atoms, camera;
+    let wave, atoms, camera, canvas;
     const stateUpdate = jest.fn();
     const measureSettings = {
         isDistanceShown: true,
@@ -20,6 +20,7 @@ describe("distance measurements", () => {
         wave.initListeners(stateUpdate, measureSettings);
         const atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
         camera = wave.camera;
+        canvas = wave.renderer.domElement;
         atoms = atomGroup.children.filter((object) => object.type === "Mesh");
     });
 
@@ -29,7 +30,7 @@ describe("distance measurements", () => {
     });
 
     test("onClick event for single atom", async () => {
-        const event = getEventObjectBy3DPosition(atoms[1].position, camera);
+        const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
         wave.onClick(stateUpdate, event);
         expect(wave.chosenAtoms.length).toEqual(1);
         expect(wave.chosenAtoms[0]).toEqual(atoms[1]);
@@ -54,6 +55,7 @@ describe("distance measurements", () => {
         const connectionClickEvent = getEventObjectBy3DPosition(
             connection.geometry.boundingSphere.center,
             camera,
+            canvas,
         );
         wave.onClick(stateUpdate, connectionClickEvent);
 
@@ -68,6 +70,7 @@ describe("distance measurements", () => {
         const connectionClickEvent = getEventObjectBy3DPosition(
             connection.geometry.boundingSphere.center,
             camera,
+            canvas,
         );
         wave.onClick(stateUpdate, connectionClickEvent);
         wave.deleteConnection();
@@ -84,6 +87,7 @@ describe("distance measurements", () => {
         const connectionClickEvent = getEventObjectBy3DPosition(
             connection.geometry.boundingSphere.center,
             camera,
+            canvas,
         );
         wave.onClick(stateUpdate, connectionClickEvent);
         wave.resetMeasures();
@@ -94,7 +98,7 @@ describe("distance measurements", () => {
     });
 
     test("onPointerMove event on atom", async () => {
-        const event = getEventObjectBy3DPosition(atoms[1].position, camera);
+        const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
         wave.onPointerMove(event);
         const color = atoms[1].material.emissive.getHex();
 
@@ -103,8 +107,8 @@ describe("distance measurements", () => {
     });
 
     test("should unset hex when pointer moves out of atom", async () => {
-        const event = getEventObjectBy3DPosition(atoms[1].position, camera);
-        const randomEvent = getEventObjectBy3DPosition(new THREE.Vector3(), camera);
+        const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
+        const randomEvent = getEventObjectBy3DPosition(new THREE.Vector3(), camera, canvas);
         wave.onPointerMove(event);
         wave.onPointerMove(randomEvent);
         const currentHex = atoms[1].currentHex;
@@ -115,7 +119,7 @@ describe("distance measurements", () => {
     });
 
     test("should unset chosen atom if clicked again", async () => {
-        const event = getEventObjectBy3DPosition(atoms[1].position, camera);
+        const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
         wave.onClick(stateUpdate, event);
         wave.onClick(stateUpdate, event);
         const color = atoms[1].material.emissive.getHex();
@@ -131,6 +135,7 @@ describe("distance measurements", () => {
         const connectionPointerMoveEvent = getEventObjectBy3DPosition(
             connection.geometry.boundingSphere.center,
             camera,
+            canvas,
         );
         wave.onPointerMove(connectionPointerMoveEvent);
         const color = wave.atomConnections.children[0].material.color.getHex();
@@ -148,7 +153,7 @@ describe("distance measurements", () => {
 });
 
 describe("angles measurements", () => {
-    let wave, atoms, camera, atomGroup;
+    let wave, atoms, camera, atomGroup, canvas;
     const stateUpdate = jest.fn();
     const measureSettings = {
         isDistanceShown: false,
@@ -170,6 +175,7 @@ describe("angles measurements", () => {
         wave.initListeners(stateUpdate, measureSettings);
         atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
         camera = wave.camera;
+        canvas = wave.renderer.domElement;
         atoms = wave.collectAllAtoms().slice(-3);
     });
 
@@ -195,6 +201,7 @@ describe("angles measurements", () => {
         const angleClickEvent = getEventObjectBy3DPosition(
             angle.geometry.boundingSphere.center,
             camera,
+            canvas,
         );
         wave.onClick(stateUpdate, angleClickEvent);
 
@@ -209,6 +216,7 @@ describe("angles measurements", () => {
         const anglePointerMoveEvent = getEventObjectBy3DPosition(
             angle.geometry.boundingSphere.center,
             camera,
+            canvas,
         );
         wave.onPointerMove(anglePointerMoveEvent);
         const color = wave.angles.children[0].material.color.getHex();
@@ -223,8 +231,13 @@ describe("angles measurements", () => {
         const anglePointerMoveEvent = getEventObjectBy3DPosition(
             angle.geometry.boundingSphere.center,
             camera,
+            canvas,
         );
-        const randomPointerMoveEvent = getEventObjectBy3DPosition(new THREE.Vector3(), camera);
+        const randomPointerMoveEvent = getEventObjectBy3DPosition(
+            new THREE.Vector3(),
+            camera,
+            canvas,
+        );
         wave.onPointerMove(anglePointerMoveEvent);
         wave.onPointerMove(randomPointerMoveEvent);
         const currentHex = wave.angles.children[0].currentHex;
