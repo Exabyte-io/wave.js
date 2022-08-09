@@ -31,6 +31,7 @@ export class ThreejsEditorModal extends ModalDialog {
         this.setNumberFormat();
         this.initializeEditor();
         this.addEventListeners();
+        this.addSignalsListeners();
         this.loadScene();
     }
 
@@ -124,6 +125,15 @@ export class ThreejsEditorModal extends ModalDialog {
         const onResize = () => this.editor.signals.windowResize.dispatch();
         window.addEventListener("resize", onResize, false);
         onResize();
+    }
+
+    /**
+     * Handle signals from the editor
+     */
+    addSignalsListeners() {
+        this.editor.signals.editorClosed.add(() => {
+            this.onHide();
+        });
     }
 
     /**
