@@ -96,29 +96,11 @@ export const LabelsMixin = (superclass) =>
             });
         }
 
-        /**
-         * This function makes a hash map from atom names.
-         * Used it for sorting all atoms by names and then quckly get it for creating a label points
-         * @returns {Object.<string, Array.<Three.InstancedMesh>>} atomsHashMap
+        /*
+         * removes labels that situated in the labels array
          */
-        makeHashMapFromAtomNames() {
-            const atomsHashMap = {};
-            this.structureGroup.children.forEach((group) => {
-                if (group.name !== ATOM_GROUP_NAME) return;
-
-                group.children.forEach((atom) => {
-                    if (atom instanceof THREE.Mesh) {
-                        const text = atom.name.split("-")[0];
-                        if (!atomsHashMap[text]) {
-                            atomsHashMap[text] = [atom];
-                            return;
-                        }
-                        atomsHashMap[text].push(atom);
-                    }
-                });
-            });
-
-            return atomsHashMap;
+        removeLabels() {
+            this.#labels.forEach((label) => this.structureGroup.remove(label));
         }
 
         /*
@@ -130,7 +112,7 @@ export const LabelsMixin = (superclass) =>
          */
         createLabelSpritesAsPoints() {
             if (this.#labels.length) {
-                this.#labels.forEach((label) => this.structureGroup.remove(label));
+                this.removeLabels();
             }
 
             const atomsHashMap = this.makeHashMapFromAtomNames();
@@ -191,7 +173,6 @@ export const LabelsMixin = (superclass) =>
         toggleLabels() {
             this.areLabelsShown = !this.areLabelsShown;
             this.#labels.forEach((label) => (label.visible = this.areLabelsShown));
-            this.#labels.visible = this.areLabelsShown;
 
             const atomGroups = this.scene
                 .getObjectByName(ATOM_GROUP_NAME)

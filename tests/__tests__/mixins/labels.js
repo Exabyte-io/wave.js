@@ -12,7 +12,7 @@ describe("Atom labels", () => {
         atoms = atomGroup.children.filter((object) => object.type === "Mesh");
     });
 
-    test("Labels are created for every atom", async () => {
+    test("Labels are created for every atom and positioned in the center of atom", async () => {
         const basisAtomsNumber = wave.structure.basis.elements.length;
         const isAllAtomsHaveLabels = atoms.every((atom) => {
             const atomName = atom.name.split("-")[0];
