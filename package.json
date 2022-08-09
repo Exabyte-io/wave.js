@@ -38,7 +38,7 @@
         "@babel/runtime-corejs2": "7.16.7",
         "@exabyte-io/made.js": "2022.5.5-3",
         "@exabyte-io/periodic-table.js": "2022.5.5-2",
-        "three": "git+https://github.com/Exabyte-io/three.js#2a48f6781b311034db53c0a3a9071e317a0446ff",
+        "three": "npm:@exabyte-io/three@2022.8.9-0",
         "@material-ui/core": "^4.12.3",
         "@material-ui/icons": "^4.11.2",
         "classnames": "2.3.1",
