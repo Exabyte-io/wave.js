@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { ATOM_GROUP_NAME } from "../enums";
 // eslint-disable-next-line import/no-cycle
 import { setParameters } from "../utils";
-
+import { DEFAULT_LABEL_MATERIALS_CONFIG } from "../config";
 /*
  * Mixin containing the logic for dealing with atom labes.
  * Dynamically draws labels over atoms.
@@ -103,6 +103,34 @@ export const LabelsMixin = (superclass) =>
             this.#labels.forEach((label) => this.structureGroup.remove(label));
         }
 
+        /**
+         * this function is creates vertices hashMap where key is atom name, value is array of vertices where this atoms is situated
+         * @returns {Object.<key, Array.<number>>}
+         */
+        createVerticesHashMap() {
+            const verticesHashMap = {};
+            this.structureGroup.children.forEach((group) => {
+                if (group.name !== ATOM_GROUP_NAME) return;
+
+                group.children.forEach((atom) => {
+                    if (atom instanceof THREE.Mesh) {
+                        const text = atom.name.split("-")[0];
+                        const position = new THREE.Vector3().setFromMatrixPosition(
+                            atom.matrixWorld,
+                        );
+                        const { x, y, z } = position;
+                        if (!verticesHashMap[text]) {
+                            verticesHashMap[text] = [x, y, z];
+                            return;
+                        }
+                        verticesHashMap[text].push(x, y, z);
+                    }
+                });
+            });
+
+            return verticesHashMap;
+        }
+
         /*
          * function that creates label sprites as points.
          * If we want to use a lot of labels and don't want to have a huge impact
@@ -115,23 +143,14 @@ export const LabelsMixin = (superclass) =>
                 this.removeLabels();
             }
 
-            const atomsHashMap = this.makeHashMapFromAtomNames();
-            Object.entries(atomsHashMap).forEach(([key, atoms]) => {
+            const verticesHashMap = this.createVerticesHashMap();
+            Object.entries(verticesHashMap).forEach(([key, vertices]) => {
                 const texture = this.getLabelTextTexture(key);
-                const vertices = [];
-                atoms.forEach((atom) => {
-                    const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-                    const { x, y, z } = position;
-                    vertices.push(x, y, z);
-                });
                 const geometry = new THREE.BufferGeometry();
                 geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
                 const material = new THREE.PointsMaterial({
-                    size: 1.5,
+                    ...DEFAULT_LABEL_MATERIALS_CONFIG,
                     map: texture,
-                    depthTest: true,
-                    depthFunc: THREE.NotEqualDepth,
-                    transparent: true,
                 });
                 const particles = new THREE.Points(geometry, material);
                 particles.visible = this.areLabelsShown;

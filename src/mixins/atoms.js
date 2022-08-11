@@ -100,31 +100,6 @@ export const AtomsMixin = (superclass) =>
             return atomsGroup;
         }
 
-        /**
-         * This function makes a hash map from atom names.
-         * Used it for sorting all atoms by names and then quckly get it for creating a label points
-         * @returns {Object.<string, Array.<THREE.InstancedMesh>>} atomsHashMap
-         */
-        makeHashMapFromAtomNames() {
-            const atomsHashMap = {};
-            this.structureGroup.children.forEach((group) => {
-                if (group.name !== ATOM_GROUP_NAME) return;
-
-                group.children.forEach((atom) => {
-                    if (atom instanceof THREE.Mesh) {
-                        const text = atom.name.split("-")[0];
-                        if (!atomsHashMap[text]) {
-                            atomsHashMap[text] = [atom];
-                            return;
-                        }
-                        atomsHashMap[text].push(atom);
-                    }
-                });
-            });
-
-            return atomsHashMap;
-        }
-
         drawAtomsAsSpheres(atomRadiiScale) {
             const basis = this.areNonPeriodicBoundariesPresent
                 ? this.basisWithElementsInsideNonPeriodicBoundaries
