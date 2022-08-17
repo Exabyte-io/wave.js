@@ -38,7 +38,7 @@
         "@babel/runtime-corejs2": "7.16.7",
         "@exabyte-io/made.js": "2022.5.5-3",
         "@exabyte-io/periodic-table.js": "2022.5.5-2",
-        "three": "npm:@exabyte-io/three@2022.8.9-0",
+        "@exabyte-io/three": "file:.yalc/@exabyte-io/three",
         "@material-ui/core": "^4.12.3",
         "@material-ui/icons": "^4.11.2",
         "classnames": "2.3.1",
@@ -53,6 +53,7 @@
         "sprintf-js": "^1.1.2",
         "static-kdtree": "^1.0.2",
         "sweetalert": "^2.1.2",
+        "three": "file:../../../three.js",
         "underscore": "^1.8.3",
         "underscore.string": "^3.3.4"
     },

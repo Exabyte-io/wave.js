@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Made } from "@exabyte-io/made.js";
 import PropTypes from "prop-types";
 import React from "react";
@@ -10,13 +11,14 @@ import { Menubar } from "three/editor/js/Menubar";
 import { Player } from "three/editor/js/Player";
 import { Sidebar } from "three/editor/js/Sidebar";
 // TODO : resolve tern global reference in codemirror
-// import { Script } from "three/editor/js/Script";
+import { Script } from "three/editor/js/Script";
 import { Toolbar } from "three/editor/js/Toolbar";
 import { Viewport } from "three/editor/js/Viewport";
 
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
 import { ModalDialog } from "./ModalDialog";
+import file from "./camera.app.json";
 
 export class ThreejsEditorModal extends ModalDialog {
     constructor(props) {
@@ -94,8 +96,6 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(viewport.dom);
 
         // initialize UI elements and add them to the DOM
-        // const script = new Script(this.editor);
-        // this.domElement.appendChild(script.dom);
         const player = new Player(this.editor);
         this.domElement.appendChild(player.dom);
         const menubar = new Menubar(this.editor);
@@ -104,7 +104,9 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(sidebar.dom);
         const toolbar = new Toolbar(this.editor);
         this.domElement.appendChild(toolbar.dom);
-
+        const script = new Script(this.editor);
+        this.domElement.appendChild(script.dom);
+        THREE.Cache.add("examples/camera.app.json", JSON.stringify(file));
         this.initializeControls();
 
         this.initializeLights();
