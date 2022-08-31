@@ -34,8 +34,8 @@ export class ThreejsEditorModal extends ModalDialog {
         this.isMultipleSelectionGroupSubmitted = this.isMultipleSelectionGroupSubmitted.bind(this);
         this.forceExitFromEditor = this.forceExitFromEditor.bind(this);
         this.exitWithCallback = this.exitWithCallback.bind(this);
-        this.collectMaterialAndHide = this.collectMaterialAndHide.bind(this);
-        this.onError = this.onError.bind(this);
+        this.extractMaterialAndHide = this.extractMaterialAndHide.bind(this);
+        this.onExtractMaterialError = this.onExtractMaterialError.bind(this);
     }
 
     initialize(el) {
@@ -233,26 +233,26 @@ export class ThreejsEditorModal extends ModalDialog {
     exitWithCallback(callback) {
         return () => {
             callback();
-            this.collectMaterialAndHide();
+            this.extractMaterialAndHide();
         };
     }
 
     /**
-     * collect materials and hides editor
+     * extracts materials and hides editor
      */
-    collectMaterialAndHide() {
+    extractMaterialAndHide() {
         try {
             const material = ThreeDSceneDataToMaterial(this.editor.scene);
             super.onHide(material);
         } catch {
-            this.onError();
+            this.onExtractMaterialError();
         }
     }
 
     /**
      * displays error confirm window if we have some errors
      */
-    onError() {
+    onExtractMaterialError() {
         this.showAlert({
             content: "Unable to extract a material from the editor!",
             title: "Error!",
@@ -272,10 +272,10 @@ export class ThreejsEditorModal extends ModalDialog {
             if (!isMultipleSelectionGroupSubmitted) {
                 this.showSubmissionMultipleSelectionModal();
             } else {
-                this.collectMaterialAndHide();
+                this.extractMaterialAndHide();
             }
         } catch {
-            this.onError();
+            this.onExtractMaterialError();
         }
     }
 
