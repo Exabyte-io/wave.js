@@ -109,9 +109,8 @@ export const LabelsMixin = (superclass) =>
         }
 
         /**
-         * 
          * Since we using a THREE.Points object for drawing label we need to know all atom names that should be drawn and in which
-         * places it should be drawn. This function creates vertices hashMap where key is atom name, value is array of vertices 
+         * places it should be drawn. This function creates vertices hashMap where key is atom name, value is array of vertices
          * where this atom is situated. Since we don't know how many atom names there could be, we should to iterate through all
          * array of atoms and obtain atom names as a keys to hashMap. If the name will already exists in the hash map we will just
          * push the coordinates of the atom on which label should be drawn
