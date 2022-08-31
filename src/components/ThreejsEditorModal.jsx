@@ -10,7 +10,6 @@ import { Editor } from "three/editor/js/Editor";
 import { Menubar } from "three/editor/js/Menubar";
 import { Player } from "three/editor/js/Player";
 import { Sidebar } from "three/editor/js/Sidebar";
-// TODO : resolve tern global reference in codemirror
 import { Script } from "three/editor/js/Script";
 import { Toolbar } from "three/editor/js/Toolbar";
 import { Viewport } from "three/editor/js/Viewport";
@@ -18,7 +17,7 @@ import { Viewport } from "three/editor/js/Viewport";
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
 import { ModalDialog } from "./ModalDialog";
-import file from "./camera.app.json";
+import rotation from "../examples/rotation.app.json";
 
 export class ThreejsEditorModal extends ModalDialog {
     constructor(props) {
@@ -106,10 +105,13 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(toolbar.dom);
         const script = new Script(this.editor);
         this.domElement.appendChild(script.dom);
-        THREE.Cache.add("examples/camera.app.json", JSON.stringify(file));
         this.initializeControls();
-
+        this.cacheSceneFiles();
         this.initializeLights();
+    }
+
+    cacheSceneFiles() {
+        THREE.Cache.add("examples/rotation.app.json", JSON.stringify(rotation));
     }
 
     /**
