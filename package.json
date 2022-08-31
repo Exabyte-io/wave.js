@@ -5,7 +5,7 @@
     "scripts": {
         "prepublishOnly": "rm -rf dist; npm run transpile",
         "start": "cross-env PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
-        "transpile": "babel --out-dir dist src && sass src/stylesheets:dist/stylesheets",
+        "transpile": "babel --out-dir dist src --copy-files && sass src/stylesheets:dist/stylesheets",
         "postinstall": "npm run transpile",
         "test": "npx jest",
         "lint": "eslint src tests && prettier --write src tests",
