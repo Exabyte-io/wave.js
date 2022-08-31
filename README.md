@@ -14,7 +14,7 @@ Exabyte.io believe in a collaborative future of materials design on the web.
 As below:
 
 - the package provides a web environment for the visualization of atomic structures and is written in ECMAScript 2015 (ES6) for use on the web
-- ESSE Data Convention is employed to organize and store information [[1]](#links) via [Made.js](https://github.com/exabyte-io/made-js)
+- ESSE Data Convention is employed to organize and store information [[1]](#links) via [Made.js](https://github.com/exabyte-io/made.js)
 - [THREE.js](https://threejs.org/) is used for 3d visualization purposes
 - High-level classes for the representation of the [viewer](src/wave.js) and modular ES6-compatible mixins for the associated functionality, ie:
     - [Atoms](src/mixins/atoms.js), 
