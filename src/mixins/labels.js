@@ -1,8 +1,7 @@
 import * as THREE from "three";
-import { ATOM_GROUP_NAME } from "../enums";
+import { ATOM_GROUP_NAME, LABELS_GROUP_NAME } from "../enums";
 // eslint-disable-next-line import/no-cycle
 import { setParameters } from "../utils";
-import { DEFAULT_LABEL_MATERIALS_CONFIG } from "../config";
 /*
  * Mixin containing the logic for dealing with atom labes.
  * Dynamically draws labels over atoms.
@@ -11,7 +10,13 @@ export const LabelsMixin = (superclass) =>
     class extends superclass {
         #texturesCache = {};
 
-        #labels = [];
+        constructor(config) {
+            super(config);
+            this.labelsGroup = new THREE.Group();
+            this.labelsGroup.name = LABELS_GROUP_NAME;
+            this.labelsGroup.visible = this.areLabelsShown;
+            this.structureGroup.add(this.labelsGroup);
+        }
 
         /**
          * Creates a new texture based on a 2D canvas with the supplied text
@@ -100,7 +105,7 @@ export const LabelsMixin = (superclass) =>
          * removes labels that situated in the labels array
          */
         removeLabels() {
-            this.#labels.forEach((label) => this.structureGroup.remove(label));
+            this.labelsGroup.children.forEach((label) => this.labelsGroup.remove(label));
         }
 
         /**
@@ -139,7 +144,7 @@ export const LabelsMixin = (superclass) =>
          * https://threejs.org/docs/?q=instanced#api/en/objects/InstancedMesh
          */
         createLabelSpritesAsPoints() {
-            if (this.#labels.length) {
+            if (this.labelsGroup.children.length) {
                 this.removeLabels();
             }
 
@@ -149,14 +154,14 @@ export const LabelsMixin = (superclass) =>
                 const geometry = new THREE.BufferGeometry();
                 geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
                 const material = new THREE.PointsMaterial({
-                    ...DEFAULT_LABEL_MATERIALS_CONFIG,
+                    ...this.settings.labelPointsConfig,
                     map: texture,
                 });
                 const particles = new THREE.Points(geometry, material);
-                particles.visible = this.areLabelsShown;
+                particles.visible = true;
                 particles.name = `labels-for-${key}`;
-                this.#labels.push(particles);
-                this.structureGroup.add(particles);
+                this.labelsGroup.add(particles);
+                this.structureGroup.add(this.labelsGroup);
             });
 
             this.render();
@@ -191,7 +196,7 @@ export const LabelsMixin = (superclass) =>
          */
         toggleLabels() {
             this.areLabelsShown = !this.areLabelsShown;
-            this.#labels.forEach((label) => (label.visible = this.areLabelsShown));
+            this.labelsGroup.visible = this.areLabelsShown;
 
             const atomGroups = this.scene
                 .getObjectByName(ATOM_GROUP_NAME)
