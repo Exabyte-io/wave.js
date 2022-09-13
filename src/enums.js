@@ -27,7 +27,7 @@ export const ATOM_CONNECTION_LINE_NAME = "Atom_Connection";
 export const MIN_ANGLE_POINTS_DISTANCE = 0.7;
 export const MEASURE_LABELS_GROUP_NAME = "Measure_Labels";
 export const ANGLE = "ANGLE";
-export const LABELS_GROUP_NAME = "Labels Group";
+export const LABELS_GROUP_NAME = "Labels_Group";
 
 export const COLORS = {
     RED: 0xff0000,

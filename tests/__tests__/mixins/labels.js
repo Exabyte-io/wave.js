@@ -22,7 +22,7 @@ describe("Atom labels", () => {
             );
             if (!labelPointsByAtomName) return false;
             const positions = labelPointsByAtomName.geometry.getAttribute("position")?.array;
-            let isHaveSomeLabel = false;
+            let hasLabel = false;
             const atomPosition = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
             for (let i = 0; i < positions.length; i += 3) {
                 const x = positions[i];
