@@ -86,6 +86,7 @@ export class ThreejsEditorModal extends ModalDialog {
         // initialize editor and set the scene background
         this.editor = new Editor(this.initializeCamera());
         this.editor.scene.background = new THREE.Color(settings.backgroundColor);
+        this.editor.examples = [{ title: "Rotation", file: "wave/rotation.app.json" }];
 
         // pass onHide handler to editor
         this.editor.onHide = this.onHide;
@@ -106,12 +107,7 @@ export class ThreejsEditorModal extends ModalDialog {
         const script = new Script(this.editor);
         this.domElement.appendChild(script.dom);
         this.initializeControls();
-        this.cacheSceneFiles();
         this.initializeLights();
-    }
-
-    cacheSceneFiles() {
-        THREE.Cache.add("examples/rotation.app.json", JSON.stringify(rotation));
     }
 
     /**
