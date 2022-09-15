@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { Made } from "@exabyte-io/made.js";
 import PropTypes from "prop-types";
 import React from "react";
@@ -17,7 +16,6 @@ import { Viewport } from "three/editor/js/Viewport";
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
 import { ModalDialog } from "./ModalDialog";
-import rotation from "../examples/rotation.app.json";
 
 export class ThreejsEditorModal extends ModalDialog {
     constructor(props) {
@@ -86,7 +84,6 @@ export class ThreejsEditorModal extends ModalDialog {
         // initialize editor and set the scene background
         this.editor = new Editor(this.initializeCamera());
         this.editor.scene.background = new THREE.Color(settings.backgroundColor);
-        this.editor.examples = [{ title: "Rotation", file: "wave/rotation.app.json" }];
 
         // pass onHide handler to editor
         this.editor.onHide = this.onHide;
