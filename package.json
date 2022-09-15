@@ -5,7 +5,7 @@
     "scripts": {
         "prepublishOnly": "rm -rf dist; npm run transpile",
         "start": "cross-env PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
-        "transpile": "babel --out-dir dist src --copy-files && sass src/stylesheets:dist/stylesheets",
+        "transpile": "babel --out-dir dist src && sass src/stylesheets:dist/stylesheets",
         "postinstall": "npm run transpile",
         "test": "npx jest",
         "lint": "eslint src tests && prettier --write src tests",
@@ -38,7 +38,7 @@
         "@babel/runtime-corejs2": "7.16.7",
         "@exabyte-io/made.js": "2022.5.5-3",
         "@exabyte-io/periodic-table.js": "2022.5.5-2",
-        "three": "git+https://github.com/Exabyte-io/three.js#db6fba71d9e25067ac067a10757c83cd5a3a9135",
+        "three": "git+https://github.com/Exabyte-io/three.js#f8d2755b8c632f85ae2346db379bce14d298c4c9",
         "@material-ui/core": "^4.12.3",
         "@material-ui/icons": "^4.11.2",
         "classnames": "2.3.1",
