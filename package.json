@@ -36,7 +36,6 @@
         "@babel/preset-env": "7.16.4",
         "@babel/preset-react": "7.16.7",
         "@babel/runtime-corejs2": "7.16.7",
-        "@exabyte-io/made.js": "2022.5.5-3",
         "@exabyte-io/periodic-table.js": "2022.5.5-2",
         "three": "npm:@exabyte-io/three@2022.8.9-0",
         "@material-ui/core": "^4.12.3",
@@ -57,10 +56,12 @@
         "underscore.string": "^3.3.4"
     },
     "peerDependencies": {
+        "@exabyte-io/made.js": "*",
         "react": "^16.14.0",
         "react-dom": "^16.14.0"
     },
     "devDependencies": {
+        "@exabyte-io/made.js": "2022.5.5-3",
         "babel-jest": "^28.1.0",
         "cross-env": "^7.0.3",
         "enzyme": "^3.11.0",
