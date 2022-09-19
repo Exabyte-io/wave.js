@@ -188,6 +188,7 @@ export class ThreejsEditorModal extends ModalDialog {
     /**
      * this function shows confirm window if user forgets to submit multiple selection and tries to exit from editor
      */
+    //TODO: probably this logic could be moved to three js library into 3DEditor, when 3DEditor will use a React library.
     showSubmissionMultipleSelectionModal() {
         this.showAlert({
             title: "Warning!",
