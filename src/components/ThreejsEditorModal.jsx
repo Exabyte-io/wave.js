@@ -2,9 +2,10 @@ import { Made } from "@exabyte-io/made.js";
 import PropTypes from "prop-types";
 import React from "react";
 import { ModalBody } from "react-bootstrap";
-import swal from "sweetalert";
 import * as THREE from "three";
 import { SetSceneCommand } from "three/editor/js/commands/SetSceneCommand";
+import { SubmitMultipleSelectionCommand } from "three/editor/js/commands/SubmitMultipleSelectionCommand";
+import { RemoveMultipleSelectionGroupCommand } from "three/editor/js/commands/RemoveMultipleSelectionGroupCommand";
 import { Editor } from "three/editor/js/Editor";
 import { Menubar } from "three/editor/js/Menubar";
 import { Player } from "three/editor/js/Player";
@@ -16,6 +17,7 @@ import { Viewport } from "three/editor/js/Viewport";
 
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
+import { AlertDialog } from "./AlertDialog";
 import { ModalDialog } from "./ModalDialog";
 
 export class ThreejsEditorModal extends ModalDialog {
@@ -23,6 +25,17 @@ export class ThreejsEditorModal extends ModalDialog {
         super(props);
         this.editor = undefined;
         this.domElement = undefined;
+
+        this.showAlert = this.showAlert.bind(this);
+        this.submitMultipleSelectionGroup = this.submitMultipleSelectionGroup.bind(this);
+        this.removeMultipleSelectionGroup = this.removeMultipleSelectionGroup.bind(this);
+        this.showSubmissionMultipleSelectionModal =
+            this.showSubmissionMultipleSelectionModal.bind(this);
+        this.isMultipleSelectionGroupSubmitted = this.isMultipleSelectionGroupSubmitted.bind(this);
+        this.forceExitFromEditor = this.forceExitFromEditor.bind(this);
+        this.exitWithCallback = this.exitWithCallback.bind(this);
+        this.extractMaterialAndHide = this.extractMaterialAndHide.bind(this);
+        this.onExtractMaterialError = this.onExtractMaterialError.bind(this);
     }
 
     initialize(el) {
@@ -146,37 +159,131 @@ export class ThreejsEditorModal extends ModalDialog {
         this.editor.signals.objectSelected.dispatch(this.editor.camera);
     }
 
-    showAlert() {
-        swal({
-            icon: "error",
-            buttons: {
-                cancel: "Cancel",
-                exit: "Exit",
-            },
-            text: "Unable to extract a material from the editor!",
-        }).then((value) => {
-            switch (value) {
-                case "exit":
-                    super.onHide();
-                    break;
-                default:
-                    break;
-            }
+    /**
+     *  shows alert with specific parameters
+     *  @typedef {{ text: string, onClick: Function }} ButtonsType
+     *  @typedef {{ title: string, content: string, buttons: ButtonsType }} ShowAlertInputType
+     *  @param {ShowAlertInputType} params
+     */
+    showAlert(params) {
+        this.alertRef.open(params);
+    }
+
+    /**
+     * submits multiple selections group
+     */
+    submitMultipleSelectionGroup() {
+        this.editor.execute(
+            new SubmitMultipleSelectionCommand(this.editor, this.editor.multipleSelection),
+        );
+    }
+
+    /**
+     * removes multiple selection group
+     */
+    removeMultipleSelectionGroup() {
+        this.editor.execute(new RemoveMultipleSelectionGroupCommand(this.editor));
+    }
+
+    /**
+     * this function shows confirm window if user forgets to submit multiple selection and tries to exit from editor
+     */
+    //TODO: probably this logic could be moved to three js library into 3DEditor, when 3DEditor will use a React library.
+    showSubmissionMultipleSelectionModal() {
+        this.showAlert({
+            title: "Warning!",
+            content:
+                "Multiple selection group is not submitted do you want submit and exit or undo latest changes?",
+            buttons: [
+                { text: "Close", onClick: this.alertRef.close },
+                {
+                    text: "Undo and Exit",
+                    onClick: this.exitWithCallback(this.removeMultipleSelectionGroup),
+                },
+                {
+                    text: "Submit and Exit",
+                    onClick: this.exitWithCallback(this.submitMultipleSelectionGroup),
+                },
+            ],
         });
     }
 
-    onHide() {
+    /**
+     * checks is multiple selection submitted
+     * @returns {Boolean} true - if multiple selection is submitted false - if not
+     */
+    isMultipleSelectionGroupSubmitted() {
+        const { scene } = this.editor;
+        const multipleSelectionGroup = scene.getObjectByProperty("type", "MultipleSelectionGroup");
+
+        return !multipleSelectionGroup;
+    }
+
+    /**
+     * force exit from the modal with initially defined materials
+     */
+    forceExitFromEditor() {
+        super.onHide(this.materials);
+    }
+
+    /**
+     * exit form editor and calls callback
+     * @param {Function} callback - function that should be called before exit from editor
+     * @returns {Function} - callback that can be applied to event listener
+     */
+    exitWithCallback(callback) {
+        return () => {
+            callback();
+            this.extractMaterialAndHide();
+        };
+    }
+
+    /**
+     * extracts materials and hides editor
+     */
+    extractMaterialAndHide() {
         try {
             const material = ThreeDSceneDataToMaterial(this.editor.scene);
             super.onHide(material);
-        } catch (e) {
-            this.showAlert(e);
+        } catch {
+            this.onExtractMaterialError();
+        }
+    }
+
+    /**
+     * displays error confirm window if we have some errors
+     */
+    onExtractMaterialError() {
+        this.showAlert({
+            content: "Unable to extract a material from the editor!",
+            title: "Error!",
+            buttons: [
+                { text: "Close", onClick: this.alertRef.close },
+                { text: "Exit", onClick: this.forceExitFromEditor },
+            ],
+        });
+    }
+
+    /**
+     * function to be called on Escape click or on exit from editor
+     */
+    onHide() {
+        try {
+            const isMultipleSelectionGroupSubmitted = this.isMultipleSelectionGroupSubmitted();
+            if (!isMultipleSelectionGroupSubmitted) {
+                this.showSubmissionMultipleSelectionModal();
+            } else {
+                this.extractMaterialAndHide();
+            }
+        } catch {
+            this.onExtractMaterialError();
         }
     }
 
     renderBody() {
         return (
             <ModalBody>
+                <AlertDialog ref={(ref) => (this.alertRef = ref)} />
                 <div ref={(el) => this.initialize(el)} />
             </ModalBody>
         );
