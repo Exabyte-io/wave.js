@@ -1,4 +1,5 @@
 import { ELEMENT_COLORS, ELEMENT_VDW_RADII } from "@exabyte-io/periodic-table.js";
+import * as THREE from "three";
 
 export default {
     // atoms
@@ -39,6 +40,12 @@ export default {
         lineWidth: 2,
         textAlign: "center",
         textBaseline: "middle",
+    },
+    labelPointsConfig: {
+        size: 1.5,
+        depthTest: true,
+        depthFunc: THREE.NotEqualDepth,
+        transparent: true,
     },
 
     boundaryConditionTypeColors: {

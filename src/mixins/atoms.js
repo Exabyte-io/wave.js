@@ -96,11 +96,6 @@ export const AtomsMixin = (superclass) =>
                 });
                 sphereMesh.name = `${element}-${atomicIndex}`;
                 atomsGroup.add(sphereMesh);
-
-                const text = sphereMesh.name.split("-")[0];
-                const label = this.createLabelSprite(text, `label-for-${sphereMesh.uuid}`);
-                label.position.set(...atomicCoordinate.value);
-                atomsGroup.add(label);
             });
             return atomsGroup;
         }
