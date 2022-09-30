@@ -201,7 +201,6 @@ export const LabelsMixin = (superclass) =>
         toggleLabels() {
             this.areLabelsShown = !this.areLabelsShown;
             this.labelsGroup.visible = this.areLabelsShown;
-            console.log(this.structureGroup);
 
             const atomGroups = this.scene
                 .getObjectByName(ATOM_GROUP_NAME)
