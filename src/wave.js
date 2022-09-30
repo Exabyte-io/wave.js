@@ -280,7 +280,7 @@ export class Wave extends mix(WaveBase).with(
             if (group.name !== ATOM_GROUP_NAME) return;
 
             group.children.forEach((atom) => {
-                if (atom.type === "Mesh") {
+                if (atom instanceof THREE.Mesh) {
                     atoms.push(atom);
                 }
             });
@@ -322,6 +322,7 @@ export class Wave extends mix(WaveBase).with(
         this.drawBoundaries();
         if (this.isDrawBondsEnabled) this.drawBonds();
         this.render();
+        this.createLabelSpritesAsPoints();
         this.refillChosenAtoms();
     }
 
