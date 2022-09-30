@@ -1,14 +1,15 @@
-import { ATOM_GROUP_NAME } from "../../../src/enums";
+import { ATOM_GROUP_NAME, LABELS_GROUP_NAME } from "../../../src/enums";
 import { getWaveInstance } from "../../enums";
 import * as THREE from "three";
 
 describe("Atom labels", () => {
-    let wave, atoms, labels;
+    let wave, atoms, labels, labelGroup;
 
     beforeEach(() => {
         wave = getWaveInstance();
         const atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
-        labels = wave.structureGroup.children.filter((child) => child instanceof THREE.Points);
+        labelGroup = wave.scene.getObjectByName(LABELS_GROUP_NAME);
+        labels = labelGroup.children;
         atoms = atomGroup.children.filter((object) => object.type === "Mesh");
     });
 
@@ -31,10 +32,10 @@ describe("Atom labels", () => {
                 const labelPosition = new THREE.Vector3(x, y, z);
                 const distance = labelPosition.distanceTo(atomPosition);
                 if (distance < 0.00001) {
-                    isHaveSomeLabel = true;
+                    hasLabel = true;
                 }
             }
-            return isHaveSomeLabel;
+            return hasLabel;
         });
 
         expect(atoms.length).toEqual(basisAtomsNumber);
@@ -43,7 +44,7 @@ describe("Atom labels", () => {
 
     test("Initial labels visibility matches the settings", async () => {
         const { areLabelsInitiallyShown } = wave.settings;
-        expect(labels.every((label) => label.visible === areLabelsInitiallyShown)).toBeTruthy();
+        expect(labelGroup.visible === areLabelsInitiallyShown).toBeTruthy();
     });
 
     test("Labels visibility can be toggled", () => {
