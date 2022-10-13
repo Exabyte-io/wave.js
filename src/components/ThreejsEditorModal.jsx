@@ -10,8 +10,7 @@ import { Editor } from "three/editor/js/Editor";
 import { Menubar } from "three/editor/js/Menubar";
 import { Player } from "three/editor/js/Player";
 import { Sidebar } from "three/editor/js/Sidebar";
-// TODO : resolve tern global reference in codemirror
-// import { Script } from "three/editor/js/Script";
+import { Script } from "three/editor/js/Script";
 import { Toolbar } from "three/editor/js/Toolbar";
 import { Viewport } from "three/editor/js/Viewport";
 
@@ -107,8 +106,8 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(viewport.dom);
 
         // initialize UI elements and add them to the DOM
-        // const script = new Script(this.editor);
-        // this.domElement.appendChild(script.dom);
+        const script = new Script(this.editor);
+        this.domElement.appendChild(script.dom);
         const player = new Player(this.editor);
         this.domElement.appendChild(player.dom);
         const menubar = new Menubar(this.editor);
