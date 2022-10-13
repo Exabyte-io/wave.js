@@ -105,7 +105,7 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(toolbar.dom);
 
         this.initializeControls();
-        
+
         this.initializeLights();
     }
 
