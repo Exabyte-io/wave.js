@@ -93,6 +93,8 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(viewport.dom);
 
         // initialize UI elements and add them to the DOM
+        const script = new Script(this.editor);
+        this.domElement.appendChild(script.dom);
         const player = new Player(this.editor);
         this.domElement.appendChild(player.dom);
         const menubar = new Menubar(this.editor);
@@ -101,9 +103,9 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(sidebar.dom);
         const toolbar = new Toolbar(this.editor);
         this.domElement.appendChild(toolbar.dom);
-        const script = new Script(this.editor);
-        this.domElement.appendChild(script.dom);
+
         this.initializeControls();
+        
         this.initializeLights();
     }
 
