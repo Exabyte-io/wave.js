@@ -1,3 +1,5 @@
+import expect from "expect";
+import jest from "jest";
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME, COLORS } from "../../../src/enums";
@@ -159,6 +161,7 @@ describe("angles measurements", () => {
     let wave,
         atoms,
         camera,
+        // eslint-disable-next-line no-unused-vars
         atomGroup,
         canvas;
     const stateUpdate = jest.fn();

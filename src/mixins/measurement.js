@@ -222,7 +222,8 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             );
             if (isAtomUseThisConnection) {
                 atom.userData.connections = atomConnections.filter(
-                    (connection) => connection !== connectionA.uuid && connection !== connectionB.uuid,
+                    (connection) => connection !== connectionA.uuid
+                        && connection !== connectionB.uuid,
                 );
                 this.chosenAtoms[index] = null;
             }
@@ -445,7 +446,8 @@ export const MeasurementMixin = (superclass) => class extends superclass {
          * @param atomConnections - array of connections that connects atoms.
          */
     drawAngleCurveAndText(atomGroup, angle, atomConnections) {
-        const atomPositions = atomGroup.map((atom) => new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld));
+        const atomPositions = atomGroup
+            .map((atom) => new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld));
         const anglePoints = this.getPointsForAngleDraw(atomPositions, angle);
         const curvedParams = new THREE.QuadraticBezierCurve3(...anglePoints);
         const points = curvedParams.getPoints(50);

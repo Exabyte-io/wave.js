@@ -1,3 +1,4 @@
+import expect from "expect";
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME, LABELS_GROUP_NAME } from "../../../src/enums";

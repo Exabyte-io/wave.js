@@ -135,7 +135,8 @@ export const BondsMixin = (superclass) => class extends superclass {
         const maxBondLength = this.getMaxBondLength(bondsData);
 
         const elementsAndCoordinatesArray1 = this.basis.elementsAndCoordinatesArray;
-        const elementsAndCoordinatesArray2 = this.getElementsAndCoordinatesArrayWithEdgeNeighbors(maxBondLength);
+        const elementsAndCoordinatesArray2 = this
+            .getElementsAndCoordinatesArrayWithEdgeNeighbors(maxBondLength);
 
         const tree = createKDTree(
             // eslint-disable-next-line no-unused-vars

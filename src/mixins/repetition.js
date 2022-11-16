@@ -55,13 +55,19 @@ export const RepetitionMixin = (superclass) => class extends superclass {
             return res;
         }, []);
 
-        if (repetitionsAlongLatticeVectorA < maxNumberOfRepetitions) columns = columns.slice(0, maxNumberOfRepetitions * repetitionsAlongLatticeVectorA);
+        if (repetitionsAlongLatticeVectorA < maxNumberOfRepetitions) {
+            columns = columns.slice(0, maxNumberOfRepetitions * repetitionsAlongLatticeVectorA);
+        }
         if (repetitionsAlongLatticeVectorB < maxNumberOfRepetitions) {
             columns = columns.filter(
                 (item, index) => index % maxNumberOfRepetitions < repetitionsAlongLatticeVectorB,
             );
         }
-        if (repetitionsAlongLatticeVectorC < maxNumberOfRepetitions) columns = columns.map((arr) => arr.filter((item, index) => index < repetitionsAlongLatticeVectorC));
+        if (repetitionsAlongLatticeVectorC < maxNumberOfRepetitions) {
+            columns = columns.map(
+                (arr) => arr.filter((item, index) => index < repetitionsAlongLatticeVectorC),
+            );
+        }
         return columns.reduce((res, item) => {
             res.push(...item);
             return res;

@@ -1,5 +1,5 @@
 import { getWaveInstance } from "../../enums";
-import { takeSnapshot, takeSnapshotAndAssertEqualityAsync } from "../../utils";
+import { takeSnapshotAndAssertEqualityAsync } from "../../utils";
 
 describe("Screen tests for repeats", () => {
     const settings = {
@@ -22,20 +22,35 @@ describe("Screen tests for repeats", () => {
         return takeSnapshotAndAssertEqualityAsync(wave.renderer.getContext(), "vectorC");
     });
     test("Repeat along lattice vectors A and B", () => {
-        const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorA: 3, repetitionsAlongLatticeVectorB: 3 });
+        const wave = getWaveInstance({
+            ...settings,
+            repetitionsAlongLatticeVectorA: 3,
+            repetitionsAlongLatticeVectorB: 3,
+        });
         return takeSnapshotAndAssertEqualityAsync(wave.renderer.getContext(), "vectorAB");
     });
     test("Repeat along lattice vectors A and C", () => {
-        const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorA: 3, repetitionsAlongLatticeVectorC: 3 });
+        const wave = getWaveInstance({
+            ...settings,
+            repetitionsAlongLatticeVectorA: 3,
+            repetitionsAlongLatticeVectorC: 3,
+        });
         return takeSnapshotAndAssertEqualityAsync(wave.renderer.getContext(), "vectorAC");
     });
     test("Repeat along lattice vectors B and C", () => {
-        const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorB: 3, repetitionsAlongLatticeVectorC: 3 });
+        const wave = getWaveInstance({
+            ...settings,
+            repetitionsAlongLatticeVectorB: 3,
+            repetitionsAlongLatticeVectorC: 3,
+        });
         return takeSnapshotAndAssertEqualityAsync(wave.renderer.getContext(), "vectorBC");
     });
     test("Repeat along lattice vectors ABC", () => {
         const wave = getWaveInstance({
-            ...settings, repetitionsAlongLatticeVectorA: 3, repetitionsAlongLatticeVectorB: 3, repetitionsAlongLatticeVectorC: 3,
+            ...settings,
+            repetitionsAlongLatticeVectorA: 3,
+            repetitionsAlongLatticeVectorB: 3,
+            repetitionsAlongLatticeVectorC: 3,
         });
         return takeSnapshotAndAssertEqualityAsync(wave.renderer.getContext(), "vectorABC");
     });
