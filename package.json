@@ -8,9 +8,8 @@
         "transpile": "babel --out-dir dist src && sass src/stylesheets:dist/stylesheets",
         "postinstall": "npm run transpile",
         "test": "npx jest",
-        "lint": "eslint src tests && prettier --write src tests",
-        "lint:fix": "eslint --fix --cache src tests && prettier --write src tests",
-        "prettier": "prettier --check src tests"
+        "lint": "eslint src tests",
+        "lint:fix": "eslint --fix --cache src tests"
     },
     "repository": {
         "type": "git",
