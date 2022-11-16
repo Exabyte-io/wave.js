@@ -1,4 +1,5 @@
 import * as THREE from "three";
+
 import { ATOM_GROUP_NAME, LABELS_GROUP_NAME } from "../enums";
 // eslint-disable-next-line import/no-cycle
 import { setParameters } from "../utils";
@@ -6,8 +7,7 @@ import { setParameters } from "../utils";
  * Mixin containing the logic for dealing with atom labes.
  * Dynamically draws labels over atoms.
  */
-export const LabelsMixin = (superclass) =>
-    class extends superclass {
+export const LabelsMixin = (superclass) => class extends superclass {
         #texturesCache = {};
 
         constructor(config) {
@@ -25,7 +25,9 @@ export const LabelsMixin = (superclass) =>
          */
         // eslint-disable-next-line class-methods-use-this
         createLabelTextTexture(text) {
-            const { fontFace, fontSize, fontWeight, ...textParams } = this.settings.labelsConfig;
+            const {
+                fontFace, fontSize, fontWeight, ...textParams
+            } = this.settings.labelsConfig;
             const canvas = document.createElement("canvas");
             const context = canvas.getContext("2d");
 
@@ -182,15 +184,15 @@ export const LabelsMixin = (superclass) =>
             const atomPosition = atom.position.clone().add(group.position);
             const vectorToCamera = this.isCameraOrthographic
                 ? new THREE.Vector3(
-                      this.camera.position.x - cellCenter[0],
-                      this.camera.position.y - cellCenter[1],
-                      this.camera.position.z - cellCenter[2],
-                  )
+                    this.camera.position.x - cellCenter[0],
+                    this.camera.position.y - cellCenter[1],
+                    this.camera.position.z - cellCenter[2],
+                )
                 : new THREE.Vector3(
-                      this.camera.position.x - atomPosition.x,
-                      this.camera.position.y - atomPosition.y,
-                      this.camera.position.z - atomPosition.z,
-                  );
+                    this.camera.position.x - atomPosition.x,
+                    this.camera.position.y - atomPosition.y,
+                    this.camera.position.z - atomPosition.z,
+                );
             const clampedVectorToCamera = vectorToCamera.clampLength(atomRadius, atomRadius);
             return clampedVectorToCamera;
         }
@@ -214,4 +216,4 @@ export const LabelsMixin = (superclass) =>
 
             this.render();
         }
-    };
+};

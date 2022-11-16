@@ -1,8 +1,8 @@
 /* eslint-disable max-classes-per-file */
 import { mix } from "mixwith";
 import * as THREE from "three";
-import { ATOM_GROUP_NAME } from "./enums";
 
+import { ATOM_GROUP_NAME } from "./enums";
 import { AtomsMixin } from "./mixins/atoms";
 import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
@@ -32,7 +32,9 @@ class WaveBase {
      * @params cell {Object} Lattice vectors forming the unit cell (to draw the unit cell).
      * @params settings {Object} Setting object to override the default values.
      */
-    constructor({ DOMElement, structure, cell, settings = {} }) {
+    constructor({
+        DOMElement, structure, cell, settings = {},
+    }) {
         this._structure = structure;
 
         this._cell = cell;
