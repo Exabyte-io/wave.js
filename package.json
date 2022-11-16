@@ -8,9 +8,8 @@
         "transpile": "babel --out-dir dist src && sass src/stylesheets:dist/stylesheets",
         "postinstall": "npm run transpile",
         "test": "npx jest",
-        "lint": "eslint src tests && prettier --write src tests",
-        "lint:fix": "eslint --fix --cache src tests && prettier --write src tests",
-        "prettier": "prettier --check src tests"
+        "lint": "eslint src tests",
+        "lint:fix": "eslint --fix --cache src tests"
     },
     "repository": {
         "type": "git",
@@ -36,8 +35,8 @@
         "@babel/preset-env": "7.16.4",
         "@babel/preset-react": "7.16.7",
         "@babel/runtime-corejs2": "7.16.7",
+        "@exabyte-io/eslint-config": "^2022.11.16-0",
         "@exabyte-io/periodic-table.js": "2022.5.5-2",
-        "three": "npm:@exabyte-io/three@2022.10.13-0",
         "@material-ui/core": "^4.12.3",
         "@material-ui/icons": "^4.11.2",
         "classnames": "2.3.1",
@@ -52,6 +51,7 @@
         "sprintf-js": "^1.1.2",
         "static-kdtree": "^1.0.2",
         "sweetalert": "^2.1.2",
+        "three": "npm:@exabyte-io/three@2022.10.13-0",
         "underscore": "^1.8.3",
         "underscore.string": "^3.3.4"
     },
@@ -67,11 +67,9 @@
         "enzyme": "^3.11.0",
         "eslint": "7.32.0",
         "eslint-config-airbnb": "19.0.2",
-        "eslint-config-prettier": "8.3.0",
         "eslint-plugin-import": "2.25.3",
         "eslint-plugin-jsdoc": "37.1.0",
         "eslint-plugin-jsx-a11y": "6.5.1",
-        "eslint-plugin-prettier": "4.0.0",
         "eslint-plugin-simple-import-sort": "7.0.0",
         "expect": "27.4.2",
         "gl": "4.9.2",
