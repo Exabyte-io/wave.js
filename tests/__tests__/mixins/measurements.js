@@ -1,5 +1,4 @@
 import expect from "expect";
-import jest from "jest";
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME, COLORS } from "../../../src/enums";
