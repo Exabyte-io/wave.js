@@ -1,4 +1,5 @@
 /* eslint-disable prefer-promise-reject-errors */
+import expect from "expect";
 import fs from "fs";
 import looksSame from "looks-same";
 import path from "path";

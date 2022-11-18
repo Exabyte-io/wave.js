@@ -1,11 +1,15 @@
-import { ATOM_GROUP_NAME } from "../../../src/enums";
-import { getEventObjectBy3DPosition, makeClickOnTwoAtoms, makeClickOn3Atoms } from "../../utils";
-import { getWaveInstance } from "../../enums";
-import { COLORS } from "../../../src/enums";
+import expect from "expect";
 import * as THREE from "three";
 
+import { ATOM_GROUP_NAME, COLORS } from "../../../src/enums";
+import { getWaveInstance } from "../../enums";
+import { getEventObjectBy3DPosition, makeClickOn3Atoms, makeClickOnTwoAtoms } from "../../utils";
+
 describe("distance measurements", () => {
-    let wave, atoms, camera, canvas;
+    let wave,
+        atoms,
+        camera,
+        canvas;
     const stateUpdate = jest.fn();
     const measureSettings = {
         isDistanceShown: true,
@@ -111,7 +115,7 @@ describe("distance measurements", () => {
         const randomEvent = getEventObjectBy3DPosition(new THREE.Vector3(), camera, canvas);
         wave.onPointerMove(event);
         wave.onPointerMove(randomEvent);
-        const currentHex = atoms[1].currentHex;
+        const { currentHex } = atoms[1];
         const color = atoms[1].material.emissive.getHex();
 
         expect(wave.chosenAtoms.length).toEqual(0);
@@ -153,7 +157,12 @@ describe("distance measurements", () => {
 });
 
 describe("angles measurements", () => {
-    let wave, atoms, camera, atomGroup, canvas;
+    let wave,
+        atoms,
+        camera,
+        // eslint-disable-next-line no-unused-vars
+        atomGroup,
+        canvas;
     const stateUpdate = jest.fn();
     const measureSettings = {
         isDistanceShown: false,
@@ -240,7 +249,7 @@ describe("angles measurements", () => {
         );
         wave.onPointerMove(anglePointerMoveEvent);
         wave.onPointerMove(randomPointerMoveEvent);
-        const currentHex = wave.angles.children[0].currentHex;
+        const { currentHex } = wave.angles.children[0];
         const color = wave.angles.children[0].material.color.getHex();
 
         expect(color).toEqual(currentHex);

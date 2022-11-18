@@ -1,9 +1,14 @@
-import { ATOM_GROUP_NAME, LABELS_GROUP_NAME } from "../../../src/enums";
-import { getWaveInstance } from "../../enums";
+import expect from "expect";
 import * as THREE from "three";
 
+import { ATOM_GROUP_NAME, LABELS_GROUP_NAME } from "../../../src/enums";
+import { getWaveInstance } from "../../enums";
+
 describe("Atom labels", () => {
-    let wave, atoms, labels, labelGroup;
+    let wave,
+        atoms,
+        labels,
+        labelGroup;
 
     beforeEach(() => {
         wave = getWaveInstance();
