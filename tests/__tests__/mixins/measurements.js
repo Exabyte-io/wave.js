@@ -6,10 +6,7 @@ import { getWaveInstance } from "../../enums";
 import { getEventObjectBy3DPosition, makeClickOn3Atoms, makeClickOnTwoAtoms } from "../../utils";
 
 describe("distance measurements", () => {
-    let wave,
-        atoms,
-        camera,
-        canvas;
+    let wave, atoms, camera, canvas;
     const stateUpdate = jest.fn();
     const measureSettings = {
         isDistanceShown: true,
