@@ -46,6 +46,18 @@ export class WaveComponent extends React.Component {
                     prevIsDrawBondsEnabled !== isDrawBondsEnabled,
             );
         }
+        if (this.isReinitViewer(prevProps)) {
+            this.initViewer();
+        }
+    }
+
+    isReinitViewer(prevProps) {
+        const { cell } = this.props;
+        const { cell: prevCell } = prevProps;
+
+        if (JSON.stringify(cell) !== JSON.stringify(prevCell)) return true;
+
+        return false;
     }
 
     _cleanViewer() {
