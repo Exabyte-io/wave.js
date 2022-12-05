@@ -31,6 +31,7 @@ export default {
     initialCameraPosition: [-50, 0, 10],
 
     areLabelsInitiallyShown: false,
+    isViewAdjustable: false,
     labelsConfig: {
         fontFace: "Arial",
         fontSize: 96,

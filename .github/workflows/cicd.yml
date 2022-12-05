@@ -37,8 +37,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_ECR }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ECR }}
 
-      - name: Validate JS package
+      - name: Validate JS package and Codebase
         uses: ./actions/js/validate
+        with:
+          node-version: 14.19.x
 
 
   publish:
