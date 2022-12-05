@@ -48,13 +48,13 @@ export class WaveComponent extends React.Component {
             );
         }
 
-        if (this.shouldViewerAndjust(prevProps) && isViewAdjustable) {
+        if (this.shouldViewerAdjust(prevProps) && isViewAdjustable) {
             this.wave.adjustCamerasAndOrbitControlsToCell();
             this.wave.render();
         }
     }
 
-    shouldViewerAndjust(prevProps) {
+    shouldViewerAdjust(prevProps) {
         const { cell } = this.props;
         const { cell: prevCell } = prevProps;
 
