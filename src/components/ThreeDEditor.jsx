@@ -474,9 +474,9 @@ export class ThreeDEditor extends React.Component {
             </RoundIconButton>,
 
             <RoundIconButton
-                key="Toggle View Adjastable"
+                key="Toggle View Adjustment"
                 tooltipPlacement="top"
-                title="Toggle View Adjastable"
+                title="Toggle View Adjustment"
                 isToggled={viewerSettings.isViewAdjustable}
                 onClick={this.handleToggleIsViewAdjustable}
             >
