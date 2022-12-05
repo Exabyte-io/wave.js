@@ -40,7 +40,7 @@ jobs:
       - name: Validate JS package and Codebase
         uses: ./actions/js/validate
         with:
-          node-version: 12.21.x
+          node-version: 14.19.x
 
 
   publish:
