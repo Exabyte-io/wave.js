@@ -9,7 +9,8 @@
         "postinstall": "npm run transpile",
         "test": "npx jest",
         "lint": "eslint src tests",
-        "lint:fix": "eslint --fix --cache src tests"
+        "lint:fix": "eslint --fix --cache src tests",
+        "prepare": "husky install"
     },
     "repository": {
         "type": "git",
