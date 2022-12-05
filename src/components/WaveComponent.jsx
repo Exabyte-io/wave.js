@@ -33,6 +33,7 @@ export class WaveComponent extends React.Component {
             structure,
             triggerHandleResize,
             isConventionalCellShown,
+            isViewAdjustable,
             isDrawBondsEnabled,
         } = this.props;
         if (triggerHandleResize) this._handleResizeTransition();
@@ -46,12 +47,14 @@ export class WaveComponent extends React.Component {
                     prevIsDrawBondsEnabled !== isDrawBondsEnabled,
             );
         }
-        if (this.isReinitViewer(prevProps)) {
-            this.initViewer();
+
+        if (this.shouldViewerAndjust(prevProps) && isViewAdjustable) {
+            this.wave.adjustCamerasAndOrbitControlsToCell();
+            this.wave.render();
         }
     }
 
-    isReinitViewer(prevProps) {
+    shouldViewerAndjust(prevProps) {
         const { cell } = this.props;
         const { cell: prevCell } = prevProps;
 
@@ -134,4 +137,5 @@ WaveComponent.propTypes = {
     boundaryConditions: PropTypes.object.isRequired,
     isConventionalCellShown: PropTypes.bool.isRequired,
     isDrawBondsEnabled: PropTypes.bool.isRequired,
+    isViewAdjustable: PropTypes.bool.isRequired,
 };

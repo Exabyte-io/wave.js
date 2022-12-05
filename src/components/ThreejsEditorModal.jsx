@@ -3,14 +3,14 @@ import PropTypes from "prop-types";
 import React from "react";
 import { ModalBody } from "react-bootstrap";
 import * as THREE from "three";
+import { RemoveMultipleSelectionGroupCommand } from "three/editor/js/commands/RemoveMultipleSelectionGroupCommand";
 import { SetSceneCommand } from "three/editor/js/commands/SetSceneCommand";
 import { SubmitMultipleSelectionCommand } from "three/editor/js/commands/SubmitMultipleSelectionCommand";
-import { RemoveMultipleSelectionGroupCommand } from "three/editor/js/commands/RemoveMultipleSelectionGroupCommand";
 import { Editor } from "three/editor/js/Editor";
 import { Menubar } from "three/editor/js/Menubar";
 import { Player } from "three/editor/js/Player";
-import { Sidebar } from "three/editor/js/Sidebar";
 import { Script } from "three/editor/js/Script";
+import { Sidebar } from "three/editor/js/Sidebar";
 import { Toolbar } from "three/editor/js/Toolbar";
 import { Viewport } from "three/editor/js/Viewport";
 
@@ -187,7 +187,7 @@ export class ThreejsEditorModal extends ModalDialog {
     /**
      * this function shows confirm window if user forgets to submit multiple selection and tries to exit from editor
      */
-    //TODO: probably this logic could be moved to three js library into 3DEditor, when 3DEditor will use a React library.
+    // TODO: probably this logic could be moved to three js library into 3DEditor, when 3DEditor will use a React library.
     showSubmissionMultipleSelectionModal() {
         this.showAlert({
             title: "Warning!",

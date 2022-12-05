@@ -4,10 +4,14 @@ import { createGenerateClassName, Tooltip } from "@material-ui/core";
 import Autorenew from "@material-ui/icons/Autorenew";
 import BubbleChart from "@material-ui/icons/BubbleChart";
 import CloudDownload from "@material-ui/icons/CloudDownload";
+import ControlCameraRounded from "@material-ui/icons/ControlCameraRounded";
+import DeleteIcon from "@material-ui/icons/Delete";
 import Edit from "@material-ui/icons/Edit";
 import FormatShapes from "@material-ui/icons/FormatShapes";
 import GpsFixed from "@material-ui/icons/GpsFixed";
+import HeightIcon from "@material-ui/icons/Height";
 import ImportExport from "@material-ui/icons/ImportExport";
+import LooksIcon from "@material-ui/icons/Looks";
 import Menu from "@material-ui/icons/Menu";
 import NotInterested from "@material-ui/icons/NotInterested";
 import PictureInPicture from "@material-ui/icons/PictureInPicture";
@@ -15,12 +19,9 @@ import PowerSettingsNew from "@material-ui/icons/PowerSettingsNew";
 import RemoveRedEye from "@material-ui/icons/RemoveRedEye";
 import Replay from "@material-ui/icons/Replay";
 import Spellcheck from "@material-ui/icons/Spellcheck";
+import SquareFootIcon from "@material-ui/icons/SquareFoot";
 import SwitchCamera from "@material-ui/icons/SwitchCamera";
 import ThreeDRotation from "@material-ui/icons/ThreeDRotation";
-import SquareFootIcon from "@material-ui/icons/SquareFoot";
-import HeightIcon from "@material-ui/icons/Height";
-import LooksIcon from "@material-ui/icons/Looks";
-import DeleteIcon from "@material-ui/icons/Delete";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
@@ -69,6 +70,7 @@ export class ThreeDEditor extends React.Component {
             viewerTriggerResize: false,
             // Settings of the wave viewer
             viewerSettings: {
+                isViewAdjustable: settings.isViewAdjustable,
                 atomRadiiScale: settings.atomRadiiScale,
                 repetitionsAlongLatticeVectorA: settings.repetitions,
                 repetitionsAlongLatticeVectorB: settings.repetitions,
@@ -91,6 +93,7 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
         this.handleToggleLabels = this.handleToggleLabels.bind(this);
         this.handleToggleConventionalCell = this.handleToggleConventionalCell.bind(this);
+        this.handleToggleIsViewAdjustable = this.handleToggleIsViewAdjustable.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);
         this.handleTakeScreenshot = this.handleTakeScreenshot.bind(this);
         this.handleToggleOrbitControls = this.handleToggleOrbitControls.bind(this);
@@ -184,6 +187,13 @@ export class ThreeDEditor extends React.Component {
                 !isConventionalCellShown,
             ),
         });
+    }
+
+    handleToggleIsViewAdjustable() {
+        const {
+            viewerSettings: { isViewAdjustable },
+        } = this.state;
+        this.handleSetSetting({ isViewAdjustable: !isViewAdjustable });
     }
 
     handleDownloadClick() {
@@ -391,7 +401,7 @@ export class ThreeDEditor extends React.Component {
      * Items for View toolbar
      */
     getViewToolbarItems() {
-        const { isConventionalCellShown } = this.state;
+        const { isConventionalCellShown, viewerSettings } = this.state;
         return [
             <RoundIconButton
                 key="Rotate/Zoom View [O]"
@@ -461,6 +471,16 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleLabels}
             >
                 <Spellcheck />
+            </RoundIconButton>,
+
+            <RoundIconButton
+                key="Toggle View Adjastable"
+                tooltipPlacement="top"
+                title="Toggle View Adjastable"
+                isToggled={viewerSettings.isViewAdjustable}
+                onClick={this.handleToggleIsViewAdjustable}
+            >
+                <ControlCameraRounded />
             </RoundIconButton>,
 
             <RoundIconButton
@@ -666,6 +686,7 @@ export class ThreeDEditor extends React.Component {
             isConventionalCellShown,
         );
         const isDrawBondsEnabled = this._getWaveProperty("isDrawBondsEnabled") || false;
+
         return (
             <WaveComponent
                 ref={(el) => {
@@ -674,6 +695,7 @@ export class ThreeDEditor extends React.Component {
                 triggerHandleResize={viewerTriggerResize}
                 isConventionalCellShown={isConventionalCellShown}
                 isDrawBondsEnabled={isDrawBondsEnabled}
+                isViewAdjustable={viewerSettings.isViewAdjustable}
                 structure={materialCopy}
                 boundaryConditions={boundaryConditions}
                 cell={materialCopy.Lattice.unitCell}
