@@ -99,7 +99,7 @@ test("preserve three.js editor changes", async () => {
     const waveInstance = getWaveInstance(WAVE_SETTINGS, wave.structure);
 
     return takeSnapshotAndAssertEqualityAsync(
-        waveInstance.renderer.context,
+        waveInstance.renderer.getContext(),
         "preserveThreeJsEditorChanges",
     );
 });
