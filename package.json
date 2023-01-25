@@ -57,8 +57,8 @@
     },
     "peerDependencies": {
         "@exabyte-io/made.js": "*",
-        "react": "^16.14.0",
-        "react-dom": "^16.14.0"
+        "react": "17.0.0",
+        "react-dom": "17.0.0"
     },
     "devDependencies": {
         "@exabyte-io/eslint-config": "^2022.11.17-0",
@@ -85,10 +85,10 @@
         "looks-same": "7.3.0",
         "pngjs": "6.0.0",
         "prettier": "2.5.1",
-        "react": "^16.14.0",
-        "react-dom": "^16.14.0",
+        "react": "^17.0.0",
+        "react-dom": "^17.0.0",
         "react-error-overlay": "^6.0.9",
-        "react-test-renderer": "^16.14.0"
+        "react-test-renderer": "^17.0.0"
     },
     "resolutions": {
         "react-error-overlay": "6.0.9"
