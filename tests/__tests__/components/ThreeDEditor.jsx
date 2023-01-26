@@ -1,13 +1,18 @@
 import { Made } from "@exabyte-io/made.js";
-import { mount } from "enzyme";
+import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
+import Enzyme from "enzyme";
 import React from "react";
 
 import { ThreeDEditor } from "../../../src/components/ThreeDEditor";
 import { ThreejsEditorModal } from "../../../src/components/ThreejsEditorModal";
+import { WaveComponent } from "../../../src/components/WaveComponent";
 import { ELEMENT_PROPERTIES, getWaveInstance, MATERIAL_CONFIG, WAVE_SETTINGS } from "../../enums";
 import { SELECTORS } from "../../selectors";
 import { createElement, takeSnapshotAndAssertEqualityAsync } from "../../utils";
-import { WaveComponent } from "../../../src/components/WaveComponent";
+
+Enzyme.configure({ adapter: new Adapter() });
+
+const { mount } = Enzyme;
 
 jest.mock("../../../src/components/ThreejsEditorModal", () => ({
     __esModule: true,
@@ -94,7 +99,7 @@ test("preserve three.js editor changes", async () => {
     const waveInstance = getWaveInstance(WAVE_SETTINGS, wave.structure);
 
     return takeSnapshotAndAssertEqualityAsync(
-        waveInstance.renderer.context,
+        waveInstance.renderer.getContext(),
         "preserveThreeJsEditorChanges",
     );
 });

@@ -1,6 +1,7 @@
 {
     "extends": ["@exabyte-io/eslint-config"],
     "globals": {
-        "jest": "readonly"
+        "jest": "readonly",
+        "expect": "readonly"
     }
 }
