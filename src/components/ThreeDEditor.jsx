@@ -444,7 +444,12 @@ export class ThreeDEditor extends React.Component {
                 isToggled={this._getWaveProperty("isDrawBondsEnabled")}
                 onClick={this.handleToggleBonds}
             >
-                <Menu />
+                <Menu
+                    anchorOrigin={{
+                        vertical: "top",
+                        horizontal: "left",
+                    }}
+                />
             </RoundIconButton>,
 
             <RoundIconButton
