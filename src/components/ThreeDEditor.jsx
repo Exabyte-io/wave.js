@@ -1,4 +1,6 @@
 /* eslint-disable react/sort-comp */
+import "../MuiClassNameSetup";
+
 import { Made } from "@exabyte-io/made.js";
 import Autorenew from "@mui/icons-material/Autorenew";
 import BubbleChart from "@mui/icons-material/BubbleChart";
@@ -21,7 +23,7 @@ import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
-import { createGenerateClassName, Tooltip } from "@mui/material";
+import { Tooltip } from "@mui/material";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
@@ -34,12 +36,6 @@ import { IconToolbar } from "./IconToolbar";
 import { RoundIconButton } from "./RoundIconButton";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
 import { WaveComponent } from "./WaveComponent";
-
-/**
- * This is to avoid class name conflicts when the component is used inside other material-ui dependent components.
- * See https://material-ui.com/customization/css-in-js/#creategenerateclassname-options-class-name-generator for more information.
- */
-const generateClassName = createGenerateClassName({ productionPrefix: "wave" });
 
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
@@ -778,11 +774,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     render() {
-        return (
-            <JssProvider generateClassName={generateClassName}>
-                {this.renderWaveOrThreejsEditorModal()}
-            </JssProvider>
-        );
+        return <JssProvider>{this.renderWaveOrThreejsEditorModal()}</JssProvider>;
     }
 }
 
