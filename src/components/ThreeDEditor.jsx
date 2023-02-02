@@ -1,27 +1,27 @@
 /* eslint-disable react/sort-comp */
 import { Made } from "@exabyte-io/made.js";
-import { createGenerateClassName, Tooltip } from "@material-ui/core";
-import Autorenew from "@material-ui/icons/Autorenew";
-import BubbleChart from "@material-ui/icons/BubbleChart";
-import CloudDownload from "@material-ui/icons/CloudDownload";
-import ControlCameraRounded from "@material-ui/icons/ControlCameraRounded";
-import DeleteIcon from "@material-ui/icons/Delete";
-import Edit from "@material-ui/icons/Edit";
-import FormatShapes from "@material-ui/icons/FormatShapes";
-import GpsFixed from "@material-ui/icons/GpsFixed";
-import HeightIcon from "@material-ui/icons/Height";
-import ImportExport from "@material-ui/icons/ImportExport";
-import LooksIcon from "@material-ui/icons/Looks";
-import Menu from "@material-ui/icons/Menu";
-import NotInterested from "@material-ui/icons/NotInterested";
-import PictureInPicture from "@material-ui/icons/PictureInPicture";
-import PowerSettingsNew from "@material-ui/icons/PowerSettingsNew";
-import RemoveRedEye from "@material-ui/icons/RemoveRedEye";
-import Replay from "@material-ui/icons/Replay";
-import Spellcheck from "@material-ui/icons/Spellcheck";
-import SquareFootIcon from "@material-ui/icons/SquareFoot";
-import SwitchCamera from "@material-ui/icons/SwitchCamera";
-import ThreeDRotation from "@material-ui/icons/ThreeDRotation";
+import Autorenew from "@mui/icons-material/Autorenew";
+import BubbleChart from "@mui/icons-material/BubbleChart";
+import CloudDownload from "@mui/icons-material/CloudDownload";
+import ControlCameraRounded from "@mui/icons-material/ControlCameraRounded";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Edit from "@mui/icons-material/Edit";
+import FormatShapes from "@mui/icons-material/FormatShapes";
+import GpsFixed from "@mui/icons-material/GpsFixed";
+import HeightIcon from "@mui/icons-material/Height";
+import ImportExport from "@mui/icons-material/ImportExport";
+import LooksIcon from "@mui/icons-material/Looks";
+import Menu from "@mui/icons-material/Menu";
+import NotInterested from "@mui/icons-material/NotInterested";
+import PictureInPicture from "@mui/icons-material/PictureInPicture";
+import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
+import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
+import Replay from "@mui/icons-material/Replay";
+import Spellcheck from "@mui/icons-material/Spellcheck";
+import SquareFootIcon from "@mui/icons-material/SquareFoot";
+import SwitchCamera from "@mui/icons-material/SwitchCamera";
+import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
+import { createGenerateClassName, Tooltip } from "@mui/material";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
@@ -171,10 +171,7 @@ export class ThreeDEditor extends React.Component {
 
     // eslint-disable-next-line class-methods-use-this
     getPrimitiveOrConventionalMaterial(material, isConventionalCellShown = false) {
-        const primitiveOrConventionalMaterial = isConventionalCellShown
-            ? material.getACopyWithConventionalCell()
-            : material.clone();
-        return primitiveOrConventionalMaterial;
+        return isConventionalCellShown ? material.getACopyWithConventionalCell() : material.clone();
     }
 
     handleToggleConventionalCell() {
