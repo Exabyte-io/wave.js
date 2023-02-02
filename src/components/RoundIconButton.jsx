@@ -30,7 +30,12 @@ export class RoundIconButton extends React.Component {
         const { id, label, title, onClick, tooltipPlacement, isToggleable } = this.props;
         const { isToggled } = this.state;
         return (
-            <Tooltip id={id} title={title.toUpperCase()} placement={tooltipPlacement}>
+            <Tooltip
+                id={id}
+                title={title.toUpperCase()}
+                placement={tooltipPlacement}
+                disableInteractive
+            >
                 <IconButton
                     aria-checked={isToggleable && isToggled}
                     aria-label={label || title.toLowerCase()}

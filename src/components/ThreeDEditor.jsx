@@ -571,7 +571,7 @@ export class ThreeDEditor extends React.Component {
     getParametersToolbarItems() {
         const { viewerSettings } = this.state;
         return [
-            <Tooltip key="RADIUS" title="RADIUS" placement="top">
+            <Tooltip key="RADIUS" title="RADIUS" placement="top" disableInteractive>
                 <input
                     className="inverse stepper sphere-radius"
                     id="sphere-radius"
@@ -584,7 +584,7 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip key="A" title="A" placement="top">
+            <Tooltip key="A" title="A" placement="top" disableInteractive>
                 <input
                     className="inverse stepper cell-repetitions"
                     id="repetitionsAlongLatticeVectorA"
@@ -597,7 +597,7 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip key="B" title="B" placement="top">
+            <Tooltip key="B" title="B" placement="top" disableInteractive>
                 <input
                     className="inverse stepper cell-repetitions"
                     id="repetitionsAlongLatticeVectorB"
@@ -610,7 +610,7 @@ export class ThreeDEditor extends React.Component {
                 />
             </Tooltip>,
 
-            <Tooltip key="C" title="C" placement="top">
+            <Tooltip key="C" title="C" placement="top" disableInteractive>
                 <input
                     className="inverse stepper cell-repetitions"
                     id="repetitionsAlongLatticeVectorC"
@@ -627,6 +627,7 @@ export class ThreeDEditor extends React.Component {
                 key="CHEMICAL_CONNECTIVITY_FACTOR"
                 title="CHEMICAL CONNECTIVITY FACTOR"
                 placement="top"
+                disableInteractive
             >
                 <input
                     className="inverse stepper cell-repetitions"
