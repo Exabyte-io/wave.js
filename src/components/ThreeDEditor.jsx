@@ -24,6 +24,7 @@ import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
 import { Tooltip } from "@mui/material";
+import { StyledEngineProvider } from "@mui/material/styles";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
@@ -774,7 +775,11 @@ export class ThreeDEditor extends React.Component {
     }
 
     render() {
-        return <JssProvider>{this.renderWaveOrThreejsEditorModal()}</JssProvider>;
+        return (
+            <StyledEngineProvider injectFirst>
+                <JssProvider>{this.renderWaveOrThreejsEditorModal()}</JssProvider>;
+            </StyledEngineProvider>
+        );
     }
 }
 
