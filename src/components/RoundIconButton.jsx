@@ -49,6 +49,7 @@ export class RoundIconButton extends React.Component {
                         "isToggleable",
                         "isToggled",
                     )}
+                    size="large"
                 />
             </Tooltip>
         );
