@@ -29,7 +29,6 @@ import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
-import { JssProvider } from "react-jss";
 
 import settings from "../settings";
 import { exportToDisk } from "../utils";
@@ -783,7 +782,7 @@ export class ThreeDEditor extends React.Component {
     render() {
         return (
             <StyledEngineProvider injectFirst>
-                <JssProvider>{this.renderWaveOrThreejsEditorModal()}</JssProvider>;
+                {this.renderWaveOrThreejsEditorModal()}
             </StyledEngineProvider>
         );
     }
