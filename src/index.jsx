@@ -1,4 +1,5 @@
 import "./stylesheets/main.scss";
+import "./MuiClassNameSetup";
 
 import { Made } from "@exabyte-io/made.js";
 import React from "react";

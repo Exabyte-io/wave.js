@@ -1,5 +1,5 @@
 /* eslint-disable react/sort-comp */
-import "../MuiClassNameSetup";
+// import "../MuiClassNameSetup";
 
 import { Made } from "@exabyte-io/made.js";
 import Autorenew from "@mui/icons-material/Autorenew";
