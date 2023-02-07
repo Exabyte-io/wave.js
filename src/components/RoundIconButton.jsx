@@ -1,5 +1,5 @@
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import React from "react";
 import _ from "underscore";
@@ -30,7 +30,12 @@ export class RoundIconButton extends React.Component {
         const { id, label, title, onClick, tooltipPlacement, isToggleable } = this.props;
         const { isToggled } = this.state;
         return (
-            <Tooltip id={id} title={title.toUpperCase()} placement={tooltipPlacement}>
+            <Tooltip
+                id={id}
+                title={title.toUpperCase()}
+                placement={tooltipPlacement}
+                disableInteractive
+            >
                 <IconButton
                     aria-checked={isToggleable && isToggled}
                     aria-label={label || title.toLowerCase()}
@@ -49,6 +54,7 @@ export class RoundIconButton extends React.Component {
                         "isToggleable",
                         "isToggled",
                     )}
+                    size="large"
                 />
             </Tooltip>
         );

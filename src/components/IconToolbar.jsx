@@ -1,4 +1,4 @@
-import Close from "@material-ui/icons/Close";
+import Close from "@mui/icons-material/Close";
 import setClass from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
@@ -17,7 +17,7 @@ export class IconToolbar extends React.Component {
     }
 
     // eslint-disable-next-line no-unused-vars
-    handleToggleActive(e) {
+    handleToggleActive() {
         const { isActive } = this.state;
         this.setState({ isActive: !isActive });
     }
