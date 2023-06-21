@@ -53,7 +53,7 @@
         "sprintf-js": "^1.1.2",
         "static-kdtree": "^1.0.2",
         "sweetalert": "^2.1.2",
-        "three": "https://github.com/Exabyte-io/three.js.git#ac55285c669e126edabd6dad66dfd4a278c6464d",
+        "three": "https://github.com/Exabyte-io/three.js.git#616f59f09beb8f5ce3e3d4bf2ca4cb7cc0f4500c",
         "underscore": "^1.8.3",
         "underscore.string": "^3.3.4"
     },
