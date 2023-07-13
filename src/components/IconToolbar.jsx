@@ -3,8 +3,8 @@ import setClass from "classnames";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { RoundIconButton } from "./RoundIconButton";
 import { ShowIf } from "./ShowIf";
+import { SquareIconButton } from "./SquareIconButton";
 
 /**
  * Icon toolbar that can be activated/deactivated
@@ -26,15 +26,18 @@ export class IconToolbar extends React.Component {
         const { className, children, isHidden, title } = this.props;
         const { isActive } = this.state;
         return (
-            <div className={setClass(className, { hidden: isHidden })} data-name={title}>
-                <RoundIconButton
+            <div
+                className={setClass(className, { hidden: isHidden })}
+                data-name={title}
+                style={{ display: "flex", flexDirection: "column" }}
+            >
+                <SquareIconButton
                     tooltipPlacement="top"
                     title={title}
                     onClick={this.handleToggleActive}
                 >
                     {isActive ? <Close /> : <this.props.iconComponent />}
-                </RoundIconButton>
-
+                </SquareIconButton>
                 {children.map((el, idx) => (
                     // eslint-disable-next-line react/no-array-index-key
                     <ShowIf condition={isActive} key={idx}>

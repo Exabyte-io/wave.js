@@ -4,6 +4,8 @@
 import { Made } from "@exabyte-io/made.js";
 import Autorenew from "@mui/icons-material/Autorenew";
 import BubbleChart from "@mui/icons-material/BubbleChart";
+import CheckIcon from "@mui/icons-material/Check";
+import Close from "@mui/icons-material/Close";
 import CloudDownload from "@mui/icons-material/CloudDownload";
 import ControlCameraRounded from "@mui/icons-material/ControlCameraRounded";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -14,7 +16,6 @@ import HeightIcon from "@mui/icons-material/Height";
 import ImportExport from "@mui/icons-material/ImportExport";
 import LooksIcon from "@mui/icons-material/Looks";
 import Menu from "@mui/icons-material/Menu";
-import NotInterested from "@mui/icons-material/NotInterested";
 import PictureInPicture from "@mui/icons-material/PictureInPicture";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
@@ -24,7 +25,8 @@ import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
 import { Tooltip } from "@mui/material";
-import { StyledEngineProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { createTheme, StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
@@ -33,8 +35,10 @@ import React from "react";
 import settings from "../settings";
 import { exportToDisk } from "../utils";
 import { IconToolbar } from "./IconToolbar";
-import { RoundIconButton } from "./RoundIconButton";
+import { ShowIf } from "./ShowIf";
+import { SquareIconButton } from "./SquareIconButton";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
+import { ToolbarMenu } from "./ToolbarMenu";
 import { WaveComponent } from "./WaveComponent";
 
 /**
@@ -52,6 +56,7 @@ export class ThreeDEditor extends React.Component {
         this.state = {
             // on/off switch for the component
             isInteractive: false,
+            activeToolbarMenu: null,
             isThreejsEditorModalShown: false,
             // isDistanceAndAnglesShown: false,
             measuresSettings: {
@@ -84,6 +89,7 @@ export class ThreeDEditor extends React.Component {
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
         this.handleDownloadClick = this.handleDownloadClick.bind(this);
         this.handleToggleInteractive = this.handleToggleInteractive.bind(this);
+        this.handleToggleToolbarMenu = this.handleToggleToolbarMenu.bind(this);
         this.handleToggleBonds = this.handleToggleBonds.bind(this);
         this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
@@ -197,6 +203,13 @@ export class ThreeDEditor extends React.Component {
     handleToggleInteractive() {
         const { isInteractive } = this.state;
         this.setState({ isInteractive: !isInteractive });
+    }
+
+    handleToggleToolbarMenu(toolbarMenuName) {
+        this.setState((prevState) => ({
+            activeToolbarMenu:
+                prevState.activeToolbarMenu === toolbarMenuName ? null : toolbarMenuName,
+        }));
     }
 
     handleToggleBonds() {
@@ -326,25 +339,26 @@ export class ThreeDEditor extends React.Component {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    get classNamesForBottomToolbar() {
-        return "buttons-toolbar buttons-toolbar-bottom pull-left";
-    }
+    // get classNamesForBottomToolbar() {
+    //     return "buttons-toolbar buttons-toolbar-bottom pull-left";
+    // }
 
     /**
      * ON/OFF switch button
      */
+    // eslint-disable-next-line react/no-unused-class-component-methods
     renderInteractiveSwitch() {
         const { isInteractive } = this.state;
         return (
             <div className={setClass(this.classNamesForTopToolbar)} data-name="Interactive">
-                <RoundIconButton
+                <SquareIconButton
                     tooltipPlacement="top"
                     title="Interactive"
                     isToggled={isInteractive}
                     onClick={this.handleToggleInteractive}
                 >
-                    {isInteractive ? <NotInterested /> : <PowerSettingsNew />}
-                </RoundIconButton>
+                    {isInteractive ? <Close /> : <PowerSettingsNew />}
+                </SquareIconButton>
             </div>
         );
     }
@@ -354,7 +368,7 @@ export class ThreeDEditor extends React.Component {
      */
     getExportToolbarItems() {
         return [
-            <RoundIconButton
+            <SquareIconButton
                 key="Screenshot"
                 tooltipPlacement="top"
                 title="Screenshot"
@@ -362,9 +376,9 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleTakeScreenshot}
             >
                 <PictureInPicture />
-            </RoundIconButton>,
+            </SquareIconButton>,
 
-            <RoundIconButton
+            <SquareIconButton
                 key="Download"
                 tooltipPlacement="top"
                 title="Download"
@@ -372,7 +386,7 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleDownloadClick}
             >
                 <CloudDownload />
-            </RoundIconButton>,
+            </SquareIconButton>,
         ];
     }
 
@@ -396,7 +410,7 @@ export class ThreeDEditor extends React.Component {
     getViewToolbarItems() {
         const { isConventionalCellShown, viewerSettings } = this.state;
         return [
-            <RoundIconButton
+            <SquareIconButton
                 key="Rotate/Zoom View [O]"
                 tooltipPlacement="top"
                 isToggled={this._getWaveProperty("areOrbitControlsEnabled")}
@@ -404,9 +418,11 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleOrbitControls}
             >
                 <ThreeDRotation />
-            </RoundIconButton>,
+                <p>Rotation & Zoom</p>
+                <CheckIcon color="success" />
+            </SquareIconButton>,
 
-            <RoundIconButton
+            <SquareIconButton
                 key="Toggle Auto Rotate"
                 tooltipPlacement="top"
                 isToggled={this._getWaveProperty("isOrbitControlsAnimationEnabled")}
@@ -414,9 +430,9 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleOrbitControlsAnimation}
             >
                 <Autorenew />
-            </RoundIconButton>,
+            </SquareIconButton>,
 
-            <RoundIconButton
+            <SquareIconButton
                 key="Toggle Axes"
                 tooltipPlacement="top"
                 isToggled={this._getWaveProperty("areAxesEnabled")}
@@ -424,9 +440,9 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleAxes}
             >
                 <GpsFixed />
-            </RoundIconButton>,
+            </SquareIconButton>,
 
-            <RoundIconButton
+            <SquareIconButton
                 key="Toggle Orthographic Camera"
                 tooltipPlacement="top"
                 title="Toggle Orthographic Camera"
@@ -434,9 +450,9 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleOrthographicCamera}
             >
                 <SwitchCamera />
-            </RoundIconButton>,
+            </SquareIconButton>,
 
-            <RoundIconButton
+            <SquareIconButton
                 key="Toggle Bonds"
                 tooltipPlacement="top"
                 title="Toggle Bonds"
@@ -449,9 +465,9 @@ export class ThreeDEditor extends React.Component {
                         horizontal: "left",
                     }}
                 />
-            </RoundIconButton>,
+            </SquareIconButton>,
 
-            <RoundIconButton
+            <SquareIconButton
                 key="Toggle Conventional Cell"
                 tooltipPlacement="top"
                 title="Toggle Conventional Cell"
@@ -459,9 +475,9 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleConventionalCell}
             >
                 <FormatShapes />
-            </RoundIconButton>,
+            </SquareIconButton>,
 
-            <RoundIconButton
+            <SquareIconButton
                 key="Toggle Labels"
                 tooltipPlacement="top"
                 title="Toggle Labels"
@@ -469,9 +485,9 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleLabels}
             >
                 <Spellcheck />
-            </RoundIconButton>,
+            </SquareIconButton>,
 
-            <RoundIconButton
+            <SquareIconButton
                 key="Toggle View Adjustment"
                 tooltipPlacement="top"
                 title="Toggle View Adjustment"
@@ -479,9 +495,9 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleIsViewAdjustable}
             >
                 <ControlCameraRounded />
-            </RoundIconButton>,
+            </SquareIconButton>,
 
-            <RoundIconButton
+            <SquareIconButton
                 key="Reset View"
                 tooltipPlacement="top"
                 title="Reset View"
@@ -489,21 +505,34 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleResetViewer}
             >
                 <Replay />
-            </RoundIconButton>,
+            </SquareIconButton>,
         ];
     }
 
-    renderViewToolbar(className = "") {
-        const { isInteractive } = this.state;
+    // eslint-disable-next-line react/no-unused-class-component-methods
+    renderViewToolbar(toolbarMenuName, activeToolbarMenu, handleToggleToolbarMenu) {
+        const isActive = toolbarMenuName === activeToolbarMenu;
         return (
-            <IconToolbar
-                className={className}
-                title="View"
-                iconComponent={RemoveRedEye}
-                isHidden={!isInteractive}
-            >
-                {this.getViewToolbarItems()}
-            </IconToolbar>
+            <div>
+                <SquareIconButton
+                    tooltipPlacement="top"
+                    title="View"
+                    isToggled={isActive}
+                    onClick={() => handleToggleToolbarMenu(toolbarMenuName)}
+                >
+                    {isActive ? <Close /> : <RemoveRedEye />}
+                </SquareIconButton>
+                <ShowIf condition={isActive}>
+                    <ToolbarMenu
+                        className=""
+                        title="View"
+                        iconComponent={RemoveRedEye}
+                        isHidden={!isActive}
+                    >
+                        {this.getViewToolbarItems()}
+                    </ToolbarMenu>
+                </ShowIf>
+            </div>
         );
     }
 
@@ -512,7 +541,7 @@ export class ThreeDEditor extends React.Component {
         const { isDistanceShown, isAnglesShown } = measuresSettings;
 
         return [
-            <RoundIconButton
+            <SquareIconButton
                 key="Distance"
                 tooltipPlacement="top"
                 title="Distance"
@@ -520,8 +549,8 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleDistanceShown}
             >
                 <HeightIcon />
-            </RoundIconButton>,
-            <RoundIconButton
+            </SquareIconButton>,
+            <SquareIconButton
                 key="Angles"
                 tooltipPlacement="top"
                 title="Angles"
@@ -529,8 +558,8 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleToggleAnglesShown}
             >
                 <LooksIcon />
-            </RoundIconButton>,
-            <RoundIconButton
+            </SquareIconButton>,
+            <SquareIconButton
                 key="Reset Measures"
                 tooltipPlacement="top"
                 title="Reset Measures"
@@ -538,9 +567,9 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleResetMeasures}
             >
                 <Replay />
-            </RoundIconButton>,
+            </SquareIconButton>,
 
-            <RoundIconButton
+            <SquareIconButton
                 key="Delete"
                 tooltipPlacement="top"
                 title="Delete connection"
@@ -548,7 +577,7 @@ export class ThreeDEditor extends React.Component {
                 onClick={this.handleDeleteConnection}
             >
                 <DeleteIcon />
-            </RoundIconButton>,
+            </SquareIconButton>,
         ];
     }
 
@@ -660,14 +689,14 @@ export class ThreeDEditor extends React.Component {
         const { isInteractive } = this.state;
         return (
             <div className={setClass(className, { hidden: !isInteractive })} data-name="3DEdit">
-                <RoundIconButton
+                <SquareIconButton
                     key="3D Editor"
                     tooltipPlacement="top"
                     title="3D Editor"
                     onClick={this.toggleThreejsEditorModal}
                 >
                     <Edit />
-                </RoundIconButton>
+                </SquareIconButton>
             </div>
         );
     }
@@ -704,6 +733,38 @@ export class ThreeDEditor extends React.Component {
         );
     }
 
+    renderToolbar() {
+        const { isInteractive, activeToolbarMenu } = this.state;
+        const { editable } = this.props;
+
+        return (
+            <div>
+                {/* {this.renderInteractiveSwitch()} */}
+                {/* <div */}
+                {/*    className={this.classNamesForTopToolbar} */}
+                {/*    style={{ display: "flex", flexDirection: "column" }} */}
+                {/* > */}
+                <IconToolbar
+                    className={this.classNamesForTopToolbar}
+                    title="Interactive"
+                    iconComponent={PowerSettingsNew}
+                    isHidden={isInteractive}
+                >
+                    {this.renderViewToolbar(
+                        "view",
+                        activeToolbarMenu,
+                        this.handleToggleToolbarMenu,
+                    )}
+                    {this.renderMeasuresToolbar()}
+                    {this.renderParametersToolbar()}
+                    {editable && this.render3DEditToggle()}
+                    {this.renderExportToolbar()}
+                </IconToolbar>
+                {/* </div> */}
+            </div>
+        );
+    }
+
     /**
      * Helper to produce RoundIconButton
      * TODO: adjust the code above to use this
@@ -711,14 +772,14 @@ export class ThreeDEditor extends React.Component {
     // eslint-disable-next-line react/no-unused-class-component-methods, class-methods-use-this
     getRoundIconButton(title, tooltipPlacement, onClick, icon) {
         return (
-            <RoundIconButton
+            <SquareIconButton
                 tooltipPlacement={tooltipPlacement}
                 title={title}
                 isToggleable={false}
                 onClick={onClick}
             >
                 {icon}
-            </RoundIconButton>
+            </SquareIconButton>
         );
     }
 
@@ -754,6 +815,7 @@ export class ThreeDEditor extends React.Component {
     renderWaveOrThreejsEditorModal() {
         const { originalMaterial, isThreejsEditorModalShown } = this.state;
 
+        // eslint-disable-next-line no-unused-vars
         const { editable } = this.props;
         if (isThreejsEditorModalShown) {
             return (
@@ -768,21 +830,30 @@ export class ThreeDEditor extends React.Component {
         return (
             <div className={this.getThreeDEditorClassNames()}>
                 {this.renderCoverDiv()}
-                {this.renderInteractiveSwitch()}
+                {/* {this.renderInteractiveSwitch()} */}
                 {this.renderWaveComponent()}
-                {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
-                {this.renderParametersToolbar(this.classNamesForTopToolbar + " third-row")}
-                {this.renderMeasuresToolbar(this.classNamesForTopToolbar + " fourth-row")}
-                {editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fifth-row")}
-                {this.renderExportToolbar(this.classNamesForBottomToolbar)}
+                {this.renderToolbar()}
+                {/* {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")} */}
+                {/* {this.renderParametersToolbar(this.classNamesForTopToolbar + " third-row")} */}
+                {/* {this.renderMeasuresToolbar(this.classNamesForTopToolbar + " fourth-row")} */}
+                {/* {editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fifth-row")} */}
+                {/* {this.renderExportToolbar(this.classNamesForBottomToolbar)} */}
             </div>
         );
     }
 
     render() {
+        const darkTheme = createTheme({
+            palette: {
+                mode: "dark",
+            },
+        });
         return (
             <StyledEngineProvider injectFirst>
-                {this.renderWaveOrThreejsEditorModal()}
+                <ThemeProvider theme={darkTheme}>
+                    <CssBaseline />
+                    {this.renderWaveOrThreejsEditorModal()}
+                </ThemeProvider>
             </StyledEngineProvider>
         );
     }

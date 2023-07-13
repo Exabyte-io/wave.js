@@ -7,7 +7,7 @@ import _ from "underscore";
 /**
  * Round icon button with toggle logic
  */
-export class RoundIconButton extends React.Component {
+export class SquareIconButton extends React.Component {
     constructor(props) {
         super(props);
         const { isToggled } = this.props;
@@ -43,6 +43,7 @@ export class RoundIconButton extends React.Component {
                         onClick(...args);
                         this.handleToggle();
                     }}
+                    sx={{ borderRadius: 0 }}
                     // eslint-disable-next-line react/jsx-props-no-spreading
                     {..._.omit(
                         this.props,
@@ -61,7 +62,7 @@ export class RoundIconButton extends React.Component {
     }
 }
 
-RoundIconButton.propTypes = {
+SquareIconButton.propTypes = {
     title: PropTypes.string.isRequired,
     id: PropTypes.string,
     label: PropTypes.string,
@@ -71,7 +72,7 @@ RoundIconButton.propTypes = {
     isToggled: PropTypes.bool,
 };
 
-RoundIconButton.defaultProps = {
+SquareIconButton.defaultProps = {
     isToggleable: true,
     isToggled: false,
     label: undefined,
