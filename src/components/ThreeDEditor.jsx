@@ -1,6 +1,8 @@
 /* eslint-disable react/sort-comp */
 // import "../MuiClassNameSetup";
 
+import Dropdown from "@exabyte-io/cove.js/dist/mui/components/dropdown/Dropdown";
+// import { DropdownItem } from "@exabyte-io/cove.js/dist/mui/components/dropdown/DropdownItem";
 import { Made } from "@exabyte-io/made.js";
 import Autorenew from "@mui/icons-material/Autorenew";
 import BubbleChart from "@mui/icons-material/BubbleChart";
@@ -25,6 +27,7 @@ import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
 import { Tooltip } from "@mui/material";
+import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import setClass from "classnames";
@@ -35,12 +38,11 @@ import React from "react";
 import settings from "../settings";
 import { exportToDisk } from "../utils";
 import { IconToolbar } from "./IconToolbar";
-import { ShowIf } from "./ShowIf";
 import { SquareIconButton } from "./SquareIconButton";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
-import { ToolbarMenu } from "./ToolbarMenu";
+// import ToolbarMenu from "./ToolbarMenu/ToolbarMenu.tsx";
+// import ToolbarMenuItem from "./ToolbarMenu/ToolbarMenuItem.tsx";
 import { WaveComponent } from "./WaveComponent";
-
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
  */
@@ -339,9 +341,9 @@ export class ThreeDEditor extends React.Component {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    // get classNamesForBottomToolbar() {
-    //     return "buttons-toolbar buttons-toolbar-bottom pull-left";
-    // }
+    get classNamesForBottomToolbar() {
+        return "buttons-toolbar buttons-toolbar-bottom pull-left";
+    }
 
     /**
      * ON/OFF switch button
@@ -407,20 +409,23 @@ export class ThreeDEditor extends React.Component {
     /**
      * Items for View toolbar
      */
+    // eslint-disable-next-line react/no-unused-class-component-methods
     getViewToolbarItems() {
         const { isConventionalCellShown, viewerSettings } = this.state;
         return [
-            <SquareIconButton
-                key="Rotate/Zoom View [O]"
-                tooltipPlacement="top"
-                isToggled={this._getWaveProperty("areOrbitControlsEnabled")}
-                title="Rotate/Zoom View [O]"
-                onClick={this.handleToggleOrbitControls}
-            >
-                <ThreeDRotation />
+            <>
+                <SquareIconButton
+                    key="Rotate/Zoom View [O]"
+                    tooltipPlacement="top"
+                    isToggled={this._getWaveProperty("areOrbitControlsEnabled")}
+                    title="Rotate/Zoom View [O]"
+                    onClick={this.handleToggleOrbitControls}
+                >
+                    <ThreeDRotation />
+                </SquareIconButton>
                 <p>Rotation & Zoom</p>
                 <CheckIcon color="success" />
-            </SquareIconButton>,
+            </>,
 
             <SquareIconButton
                 key="Toggle Auto Rotate"
@@ -510,30 +515,8 @@ export class ThreeDEditor extends React.Component {
     }
 
     // eslint-disable-next-line react/no-unused-class-component-methods
-    renderViewToolbar(toolbarMenuName, activeToolbarMenu, handleToggleToolbarMenu) {
-        const isActive = toolbarMenuName === activeToolbarMenu;
-        return (
-            <div>
-                <SquareIconButton
-                    tooltipPlacement="top"
-                    title="View"
-                    isToggled={isActive}
-                    onClick={() => handleToggleToolbarMenu(toolbarMenuName)}
-                >
-                    {isActive ? <Close /> : <RemoveRedEye />}
-                </SquareIconButton>
-                <ShowIf condition={isActive}>
-                    <ToolbarMenu
-                        className=""
-                        title="View"
-                        iconComponent={RemoveRedEye}
-                        isHidden={!isActive}
-                    >
-                        {this.getViewToolbarItems()}
-                    </ToolbarMenu>
-                </ShowIf>
-            </div>
-        );
+    renderViewToolbar() {
+        return <div>{this.renderToolbar()}</div>;
     }
 
     getMeasuresToolbarItems() {
@@ -734,33 +717,113 @@ export class ThreeDEditor extends React.Component {
     }
 
     renderToolbar() {
-        const { isInteractive, activeToolbarMenu } = this.state;
-        const { editable } = this.props;
+        // eslint-disable-next-line no-unused-vars
+        const { isInteractive } = this.state;
+        const { viewerSettings } = this.state;
+        // eslint-disable-next-line no-unused-vars
+        const actionWithDropdown = [
+            {
+                id: "show-sub-menu",
+                disabled: false,
+                content: "Show Sub Menu",
+                icon: <PowerSettingsNew />,
+                onClick: () => {
+                    console.log("show sub  menu");
+                },
+            },
+        ];
+
+        const actions = [
+            {
+                id: "rotate-zoom",
+                disabled: false,
+                content: "Rotate/Zoom View [O]",
+                icon: <ThreeDRotation />,
+                onClick: this.handleToggleOrbitControls,
+                shouldMenuStayOpen: true,
+            },
+            {
+                id: "auto-rotate",
+                disabled: false,
+                content: "Toggle Auto Rotate",
+                icon: <Autorenew />,
+                onClick: this.handleToggleOrbitControlsAnimation,
+                shouldMenuStayOpen: true,
+            },
+            {
+                id: "toggle-axes",
+                disabled: false,
+                content: "Toggle Axes",
+                icon: <GpsFixed />,
+                onClick: this.handleToggleAxes,
+            },
+            {
+                id: "toggle-camera",
+                disabled: false,
+                content: "Toggle Orthographic Camera",
+                icon: <SwitchCamera />,
+                onClick: this.handleToggleOrthographicCamera,
+            },
+            {
+                id: "toggle-bonds",
+                disabled: false,
+                content: "Toggle Bonds",
+                icon: <Menu />, // Please replace <Menu /> with your desired icon component
+                onClick: this.handleToggleBonds,
+            },
+            {
+                id: "toggle-cell",
+                disabled: false,
+                content: "Toggle Conventional Cell",
+                icon: <FormatShapes />,
+                onClick: this.handleToggleConventionalCell,
+            },
+            {
+                id: "toggle-labels",
+                disabled: false,
+                content: "Toggle Labels",
+                icon: <Spellcheck />,
+                onClick: this.handleToggleLabels,
+            },
+            {
+                id: "toggle-view-adjustment",
+                disabled: false,
+                content: "Toggle View Adjustment",
+                icon: <ControlCameraRounded />,
+                onClick: this.handleToggleIsViewAdjustable,
+                showCheckIcon: viewerSettings.isViewAdjustable,
+            },
+            // {
+            //     id: "sub-menu",
+            //     disabled: false,
+            //     content: <Dropdown actions={actionWithDropdown} />,
+            //     icon: <PowerSettingsNew />,
+            //     onClick: () => {
+            //         console.log("sub-menu");
+            //     },
+            // },
+            {
+                id: "divider",
+                isDivider: true,
+            },
+            {
+                id: "reset-view",
+                disabled: false,
+                content: "Reset View",
+                icon: <Replay />,
+                onClick: this.handleResetViewer,
+            },
+        ];
 
         return (
-            <div>
-                {/* {this.renderInteractiveSwitch()} */}
-                {/* <div */}
-                {/*    className={this.classNamesForTopToolbar} */}
-                {/*    style={{ display: "flex", flexDirection: "column" }} */}
-                {/* > */}
-                <IconToolbar
-                    className={this.classNamesForTopToolbar}
-                    title="Interactive"
-                    iconComponent={PowerSettingsNew}
-                    isHidden={isInteractive}
-                >
-                    {this.renderViewToolbar(
-                        "view",
-                        activeToolbarMenu,
-                        this.handleToggleToolbarMenu,
-                    )}
-                    {this.renderMeasuresToolbar()}
-                    {this.renderParametersToolbar()}
-                    {editable && this.render3DEditToggle()}
-                    {this.renderExportToolbar()}
-                </IconToolbar>
-                {/* </div> */}
+            <div style={{ width: "320px" }}>
+                {isInteractive && (
+                    <Dropdown actions={actions}>
+                        <RemoveRedEye />
+                        <Button>View Options</Button>
+                        {/* <Dropdown actions={actionWithDropdown} /> */}
+                    </Dropdown>
+                )}
             </div>
         );
     }
@@ -830,14 +893,14 @@ export class ThreeDEditor extends React.Component {
         return (
             <div className={this.getThreeDEditorClassNames()}>
                 {this.renderCoverDiv()}
-                {/* {this.renderInteractiveSwitch()} */}
-                {this.renderWaveComponent()}
+                {this.renderInteractiveSwitch()}
                 {this.renderToolbar()}
-                {/* {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")} */}
-                {/* {this.renderParametersToolbar(this.classNamesForTopToolbar + " third-row")} */}
-                {/* {this.renderMeasuresToolbar(this.classNamesForTopToolbar + " fourth-row")} */}
-                {/* {editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fifth-row")} */}
-                {/* {this.renderExportToolbar(this.classNamesForBottomToolbar)} */}
+                {this.renderWaveComponent()}
+                {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
+                {this.renderParametersToolbar(this.classNamesForTopToolbar + " third-row")}
+                {this.renderMeasuresToolbar(this.classNamesForTopToolbar + " fourth-row")}
+                {editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fifth-row")}
+                {this.renderExportToolbar(this.classNamesForBottomToolbar)}
             </div>
         );
     }
@@ -848,6 +911,8 @@ export class ThreeDEditor extends React.Component {
                 mode: "dark",
             },
         });
+        // eslint-disable-next-line no-unused-vars
+        const { isInteractive } = this.state;
         return (
             <StyledEngineProvider injectFirst>
                 <ThemeProvider theme={darkTheme}>

@@ -26,11 +26,7 @@ export class IconToolbar extends React.Component {
         const { className, children, isHidden, title } = this.props;
         const { isActive } = this.state;
         return (
-            <div
-                className={setClass(className, { hidden: isHidden })}
-                data-name={title}
-                style={{ display: "flex", flexDirection: "column" }}
-            >
+            <div className={setClass(className, { hidden: isHidden })} data-name={title}>
                 <SquareIconButton
                     tooltipPlacement="top"
                     title={title}
