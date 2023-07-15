@@ -1,7 +1,10 @@
 /* eslint-disable react/sort-comp */
 // import "../MuiClassNameSetup";
 
-import Dropdown from "@exabyte-io/cove.js/dist/mui/components/dropdown";
+// import Dropdown from "@exabyte-io/cove.js/dist/mui/components/dropdown/Dropdown";
+// import { DropdownItem } from "@exabyte-io/cove.js/dist/mui/components/dropdown/DropdownItem";
+// import NestedDropdown from "@exabyte-io/cove.js/dist/mui/components/nested-dropdown/NestedDropdown";
+import NestedDropdown from "@exabyte-io/cove.js/dist/mui/components/nested-dropdown/NestedDropdown";
 import { Made } from "@exabyte-io/made.js";
 import Autorenew from "@mui/icons-material/Autorenew";
 import BubbleChart from "@mui/icons-material/BubbleChart";
@@ -19,15 +22,16 @@ import LooksIcon from "@mui/icons-material/Looks";
 import Menu from "@mui/icons-material/Menu";
 import PictureInPicture from "@mui/icons-material/PictureInPicture";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
-import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
+// import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
 import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
-import { ListItemText, Stack, Tooltip } from "@mui/material";
+import { createTheme, ThemeProvider, Tooltip } from "@mui/material";
+// import { styled } from "@mui/system";;
 import CssBaseline from "@mui/material/CssBaseline";
-import { createTheme, StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
+import { StyledEngineProvider } from "@mui/material/styles";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
@@ -35,14 +39,20 @@ import React from "react";
 
 import settings from "../settings";
 import { exportToDisk } from "../utils";
-// import Dropdown from "./dropdown/Dropdown.tsx";
-// import NestedDropdown from "./dropdown/NestedDropdown.tsx";
 import { IconToolbar } from "./IconToolbar";
 import { SquareIconButton } from "./SquareIconButton";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
 // import ToolbarMenu from "./ToolbarMenu/ToolbarMenu.tsx";
+// import ToolbarMenu from "./ToolbarMenu/ToolbarMenu.tsx";
 // import ToolbarMenuItem from "./ToolbarMenu/ToolbarMenuItem.tsx";
 import { WaveComponent } from "./WaveComponent";
+
+const darkTheme = createTheme({
+    palette: {
+        mode: "dark",
+    },
+});
+
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
  */
@@ -733,13 +743,14 @@ export class ThreeDEditor extends React.Component {
             },
         ];
 
-        const actions = [
+        const viewSettingsActions = [
             {
                 id: "rotate-zoom",
                 disabled: false,
                 content: "Rotate/Zoom View [O]",
                 icon: <ThreeDRotation />,
                 onClick: this.handleToggleOrbitControls,
+                isActive: this._getWaveProperty("areOrbitControlsEnabled"),
                 shouldMenuStayOpen: true,
             },
             {
@@ -748,6 +759,7 @@ export class ThreeDEditor extends React.Component {
                 content: "Toggle Auto Rotate",
                 icon: <Autorenew />,
                 onClick: this.handleToggleOrbitControlsAnimation,
+                isActive: this._getWaveProperty("isOrbitControlsAnimationEnabled"),
                 shouldMenuStayOpen: true,
             },
             {
@@ -791,14 +803,17 @@ export class ThreeDEditor extends React.Component {
                 content: "Toggle View Adjustment",
                 icon: <ControlCameraRounded />,
                 onClick: this.handleToggleIsViewAdjustable,
-                showCheckIcon: viewerSettings.isViewAdjustable,
+                isActive: viewerSettings.isViewAdjustable,
             },
             {
-                id: "submenu",
+                id: "sub-menu-root",
                 disabled: false,
-                content: "Toggle View Adjustment",
-                icon: <Close />,
-                onClick: () => {},
+                content: "Submenu",
+                icon: <PowerSettingsNew />,
+                onClick: () => {
+                    console.log("sub-menu-root is pressed, submenu should be shown");
+                },
+                isNested: true,
                 actions: actionSubmenu,
             },
             {
@@ -814,24 +829,60 @@ export class ThreeDEditor extends React.Component {
             },
         ];
 
+        const { measuresSettings } = this.state;
+        const { isDistanceShown, isAnglesShown } = measuresSettings;
+        const measurementsActions = [
+            {
+                id: "Distance",
+                content: "Distance",
+                isActive: isDistanceShown,
+                onClick: this.handleToggleDistanceShown,
+            },
+            {
+                id: "Angles",
+                content: "Angles",
+                isActive: isAnglesShown,
+                onClick: this.handleToggleAnglesShown,
+            },
+            {
+                id: "Reset Measures",
+                content: "Reset Measures",
+                // isToggleable: false,
+                onClick: this.handleResetMeasures,
+            },
+            {
+                id: "Delete",
+                content: "Delete connection",
+                // isToggleable: false,
+                onClick: this.handleDeleteConnection,
+            },
+        ];
+
+        const toolsActions = [
+            {
+                id: "view-settings",
+                disabled: false,
+                icon: <PowerSettingsNew />,
+                isNested: true,
+                actions: viewSettingsActions,
+                content: "View Settings",
+                onClick: this.handleToggleInteractive,
+            },
+            {
+                id: "measurements",
+                disabled: false,
+                icon: <SquareFootIcon />,
+                isNested: true,
+                actions: measurementsActions,
+                onClick: this.handleToggleInteractive,
+            },
+        ];
+
         return (
-            <div style={{ position: "absolute", left: "300px" }}>
-                {isInteractive && (
-                    <Dropdown actions={actions} paperPlacement="right-start">
-                        <Stack direction="row">
-                            <RemoveRedEye />
-                            <ListItemText
-                                primaryTypographyProps={{
-                                    variant: "caption",
-                                    color: "text.primary",
-                                }}
-                                className="DropdownItemText"
-                            >
-                                View options
-                            </ListItemText>
-                        </Stack>
-                    </Dropdown>
-                )}
+            <div style={{ position: "absolute", top: "50px", left: "50px", maxWidth: "320px" }}>
+                <NestedDropdown actions={toolsActions}>
+                    <PowerSettingsNew />
+                </NestedDropdown>
             </div>
         );
     }
@@ -898,7 +949,6 @@ export class ThreeDEditor extends React.Component {
                 />
             );
         }
-
         return (
             <div className={this.getThreeDEditorClassNames()}>
                 {this.renderCoverDiv()}
@@ -915,11 +965,6 @@ export class ThreeDEditor extends React.Component {
     }
 
     render() {
-        const darkTheme = createTheme({
-            palette: {
-                mode: "dark",
-            },
-        });
         // eslint-disable-next-line no-unused-vars
         const { isInteractive } = this.state;
         return (

@@ -1,16 +1,20 @@
-import MenuList from "@mui/material/MenuList";
-import Paper from "@mui/material/Paper";
+import NestedDropdown, {
+    NestedDropdownAction,
+} from "@exabyte-io/cove.js/dist/mui/components/nested-dropdown/NestedDropdown";
+import ListItemIcon from "@mui/material/ListItemIcon";
 import React from "react";
 
 interface ToolbarMenuProps {
-    children: React.ReactNode;
+    actions: NestedDropdownAction[];
+    icon: JSX.Element;
+    title: string;
 }
 
-const ToolbarMenu = function ({ children }: ToolbarMenuProps) {
+const ToolbarMenu = function ({ actions, icon, title }: ToolbarMenuProps) {
     return (
-        <Paper sx={{ width: "320px" }} data-name="toolbar-menu">
-            <MenuList>{children}</MenuList>);
-        </Paper>
+        <NestedDropdown actions={actions} title={title}>
+            <ListItemIcon>{icon}</ListItemIcon>
+        </NestedDropdown>
     );
 };
 
