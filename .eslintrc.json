@@ -15,14 +15,10 @@
                 "eslint:recommended",
                 "plugin:@typescript-eslint/eslint-recommended",
                 "plugin:@typescript-eslint/recommended",
+                // "plugin:@typescript-eslint/recommended-requiring-type-checking",
                 "plugin:import/typescript"
             ],
             "parser": "@typescript-eslint/parser",
-            "parserOptions": {
-                "ecmaVersion": 2020,
-                "sourceType": "module",
-                "project": "./tsconfig.json"
-            },
             "rules": {
                 "@typescript-eslint/ban-ts-comment": "off",
                 "import/no-absolute-path": "off",
@@ -31,15 +27,10 @@
                 "react/jsx-filename-extension": "off",
                 "react/require-default-props": "off",
                 "no-use-before-define": "off",
-                "no-restricted-exports": "off",
                 "no-shadow": "off",
-                "@typescript-eslint/no-use-before-define": [
-                    "error"
-                ]
+                "@typescript-eslint/no-use-before-define": ["error"]
             },
-            "plugins": [
-                "@typescript-eslint"
-            ]
+            "plugins": ["@typescript-eslint"]
         }
     ]
 }

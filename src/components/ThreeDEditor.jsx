@@ -1,8 +1,7 @@
 /* eslint-disable react/sort-comp */
 // import "../MuiClassNameSetup";
 
-import Dropdown from "@exabyte-io/cove.js/dist/mui/components/dropdown/Dropdown";
-// import { DropdownItem } from "@exabyte-io/cove.js/dist/mui/components/dropdown/DropdownItem";
+import Dropdown from "@exabyte-io/cove.js/dist/mui/components/dropdown";
 import { Made } from "@exabyte-io/made.js";
 import Autorenew from "@mui/icons-material/Autorenew";
 import BubbleChart from "@mui/icons-material/BubbleChart";
@@ -26,8 +25,7 @@ import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
-import { Tooltip } from "@mui/material";
-import Button from "@mui/material/Button";
+import { ListItemText, Stack, Tooltip } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import setClass from "classnames";
@@ -37,6 +35,8 @@ import React from "react";
 
 import settings from "../settings";
 import { exportToDisk } from "../utils";
+// import Dropdown from "./dropdown/Dropdown.tsx";
+// import NestedDropdown from "./dropdown/NestedDropdown.tsx";
 import { IconToolbar } from "./IconToolbar";
 import { SquareIconButton } from "./SquareIconButton";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
@@ -721,7 +721,7 @@ export class ThreeDEditor extends React.Component {
         const { isInteractive } = this.state;
         const { viewerSettings } = this.state;
         // eslint-disable-next-line no-unused-vars
-        const actionWithDropdown = [
+        const actionSubmenu = [
             {
                 id: "show-sub-menu",
                 disabled: false,
@@ -793,15 +793,14 @@ export class ThreeDEditor extends React.Component {
                 onClick: this.handleToggleIsViewAdjustable,
                 showCheckIcon: viewerSettings.isViewAdjustable,
             },
-            // {
-            //     id: "sub-menu",
-            //     disabled: false,
-            //     content: <Dropdown actions={actionWithDropdown} />,
-            //     icon: <PowerSettingsNew />,
-            //     onClick: () => {
-            //         console.log("sub-menu");
-            //     },
-            // },
+            {
+                id: "submenu",
+                disabled: false,
+                content: "Toggle View Adjustment",
+                icon: <Close />,
+                onClick: () => {},
+                actions: actionSubmenu,
+            },
             {
                 id: "divider",
                 isDivider: true,
@@ -816,12 +815,21 @@ export class ThreeDEditor extends React.Component {
         ];
 
         return (
-            <div style={{ width: "320px" }}>
+            <div style={{ position: "absolute", left: "300px" }}>
                 {isInteractive && (
-                    <Dropdown actions={actions}>
-                        <RemoveRedEye />
-                        <Button>View Options</Button>
-                        {/* <Dropdown actions={actionWithDropdown} /> */}
+                    <Dropdown actions={actions} paperPlacement="right-start">
+                        <Stack direction="row">
+                            <RemoveRedEye />
+                            <ListItemText
+                                primaryTypographyProps={{
+                                    variant: "caption",
+                                    color: "text.primary",
+                                }}
+                                className="DropdownItemText"
+                            >
+                                View options
+                            </ListItemText>
+                        </Stack>
                     </Dropdown>
                 )}
             </div>
@@ -890,6 +898,7 @@ export class ThreeDEditor extends React.Component {
                 />
             );
         }
+
         return (
             <div className={this.getThreeDEditorClassNames()}>
                 {this.renderCoverDiv()}
