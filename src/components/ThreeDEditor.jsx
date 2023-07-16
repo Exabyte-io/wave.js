@@ -22,14 +22,13 @@ import LooksIcon from "@mui/icons-material/Looks";
 import Menu from "@mui/icons-material/Menu";
 import PictureInPicture from "@mui/icons-material/PictureInPicture";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
-// import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
+import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
 import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
-import { createTheme, ThemeProvider, Tooltip } from "@mui/material";
-// import { styled } from "@mui/system";;
+import { ButtonGroup, createTheme, ThemeProvider, Tooltip } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import { StyledEngineProvider } from "@mui/material/styles";
 import setClass from "classnames";
@@ -42,14 +41,12 @@ import { exportToDisk } from "../utils";
 import { IconToolbar } from "./IconToolbar";
 import { SquareIconButton } from "./SquareIconButton";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
-// import ToolbarMenu from "./ToolbarMenu/ToolbarMenu.tsx";
-// import ToolbarMenu from "./ToolbarMenu/ToolbarMenu.tsx";
-// import ToolbarMenuItem from "./ToolbarMenu/ToolbarMenuItem.tsx";
+// import ToolbarMenuItem from "./Toolbar/ToolbarMenuItem.tsx";
 import { WaveComponent } from "./WaveComponent";
 
 const darkTheme = createTheme({
     palette: {
-        mode: "dark",
+        mode: "light",
     },
 });
 
@@ -524,9 +521,9 @@ export class ThreeDEditor extends React.Component {
         ];
     }
 
-    // eslint-disable-next-line react/no-unused-class-component-methods
     renderViewToolbar() {
-        return <div>{this.renderToolbar()}</div>;
+        const { isInteractive } = this.state;
+        if (isInteractive) return <div>{this.renderToolbar()}</div>;
     }
 
     getMeasuresToolbarItems() {
@@ -731,90 +728,67 @@ export class ThreeDEditor extends React.Component {
         const { isInteractive } = this.state;
         const { viewerSettings } = this.state;
         // eslint-disable-next-line no-unused-vars
-        const actionSubmenu = [
-            {
-                id: "show-sub-menu",
-                disabled: false,
-                content: "Show Sub Menu",
-                icon: <PowerSettingsNew />,
-                onClick: () => {
-                    console.log("show sub  menu");
-                },
-            },
-        ];
 
         const viewSettingsActions = [
             {
                 id: "rotate-zoom",
                 disabled: false,
                 content: "Rotate/Zoom View [O]",
-                icon: <ThreeDRotation />,
+                leftIcon: <ThreeDRotation />,
+                rightIcon: <CheckIcon />,
                 onClick: this.handleToggleOrbitControls,
                 isActive: this._getWaveProperty("areOrbitControlsEnabled"),
-                shouldMenuStayOpen: true,
             },
             {
                 id: "auto-rotate",
                 disabled: false,
                 content: "Toggle Auto Rotate",
-                icon: <Autorenew />,
+                leftIcon: <Autorenew />,
                 onClick: this.handleToggleOrbitControlsAnimation,
                 isActive: this._getWaveProperty("isOrbitControlsAnimationEnabled"),
-                shouldMenuStayOpen: true,
             },
             {
                 id: "toggle-axes",
                 disabled: false,
                 content: "Toggle Axes",
-                icon: <GpsFixed />,
+                leftIcon: <GpsFixed />,
                 onClick: this.handleToggleAxes,
             },
             {
                 id: "toggle-camera",
                 disabled: false,
                 content: "Toggle Orthographic Camera",
-                icon: <SwitchCamera />,
+                leftIcon: <SwitchCamera />,
                 onClick: this.handleToggleOrthographicCamera,
             },
             {
                 id: "toggle-bonds",
                 disabled: false,
                 content: "Toggle Bonds",
-                icon: <Menu />, // Please replace <Menu /> with your desired icon component
+                leftIcon: <Menu />, // Please replace <Menu /> with your desired icon component
                 onClick: this.handleToggleBonds,
             },
             {
                 id: "toggle-cell",
                 disabled: false,
                 content: "Toggle Conventional Cell",
-                icon: <FormatShapes />,
+                leftIcon: <FormatShapes />,
                 onClick: this.handleToggleConventionalCell,
             },
             {
                 id: "toggle-labels",
                 disabled: false,
                 content: "Toggle Labels",
-                icon: <Spellcheck />,
+                leftIcon: <Spellcheck />,
                 onClick: this.handleToggleLabels,
             },
             {
                 id: "toggle-view-adjustment",
                 disabled: false,
                 content: "Toggle View Adjustment",
-                icon: <ControlCameraRounded />,
+                leftIcon: <ControlCameraRounded />,
                 onClick: this.handleToggleIsViewAdjustable,
                 isActive: viewerSettings.isViewAdjustable,
-            },
-            {
-                id: "sub-menu-root",
-                disabled: false,
-                content: "Submenu",
-                icon: <PowerSettingsNew />,
-                onClick: () => {
-                    console.log("sub-menu-root is pressed, submenu should be shown");
-                },
-                isNested: true,
-                actions: actionSubmenu,
             },
             {
                 id: "divider",
@@ -824,7 +798,7 @@ export class ThreeDEditor extends React.Component {
                 id: "reset-view",
                 disabled: false,
                 content: "Reset View",
-                icon: <Replay />,
+                leftIcon: <Replay />,
                 onClick: this.handleResetViewer,
             },
         ];
@@ -837,18 +811,14 @@ export class ThreeDEditor extends React.Component {
                 content: "Distance",
                 isActive: isDistanceShown,
                 onClick: this.handleToggleDistanceShown,
+                rightIcon: <CheckIcon />,
             },
             {
                 id: "Angles",
                 content: "Angles",
                 isActive: isAnglesShown,
                 onClick: this.handleToggleAnglesShown,
-            },
-            {
-                id: "Reset Measures",
-                content: "Reset Measures",
-                // isToggleable: false,
-                onClick: this.handleResetMeasures,
+                rightIcon: <CheckIcon />,
             },
             {
                 id: "Delete",
@@ -856,33 +826,70 @@ export class ThreeDEditor extends React.Component {
                 // isToggleable: false,
                 onClick: this.handleDeleteConnection,
             },
+            {
+                id: "Divider",
+                isDivider: true,
+            },
+            {
+                id: "Reset Measures",
+                content: "Reset Measures",
+                // isToggleable: false,
+                onClick: this.handleResetMeasures,
+            },
         ];
 
-        const toolsActions = [
+        const configs = [
             {
                 id: "view-settings",
-                disabled: false,
-                icon: <PowerSettingsNew />,
-                isNested: true,
                 actions: viewSettingsActions,
-                content: "View Settings",
-                onClick: this.handleToggleInteractive,
+                header: "View Settings",
+                leftIcon: <RemoveRedEye />,
+                title: "View Settings",
             },
             {
                 id: "measurements",
-                disabled: false,
-                icon: <SquareFootIcon />,
-                isNested: true,
                 actions: measurementsActions,
-                onClick: this.handleToggleInteractive,
+                header: "Measurements",
+                leftIcon: <SquareFootIcon />,
+                title: "Measurements",
+            },
+            {
+                id: "edit",
+                onClick: this.toggleThreejsEditorModal,
+                title: "Edit",
+                leftIcon: <Edit />,
+            },
+            {
+                id: "export",
+                leftIcon: <ImportExport />,
+                title: "Export",
+                contentObject: <CheckIcon />,
             },
         ];
-
         return (
             <div style={{ position: "absolute", top: "50px", left: "50px", maxWidth: "320px" }}>
-                <NestedDropdown actions={toolsActions}>
-                    <PowerSettingsNew />
-                </NestedDropdown>
+                {isInteractive && (
+                    <ButtonGroup orientation="vertical">
+                        {configs.map((config) => {
+                            if ("actions" in config) {
+                                return (
+                                    // eslint-disable-next-line react/jsx-props-no-spreading
+                                    <NestedDropdown {...config}>
+                                        <SquareIconButton title={config.title} onClick={() => {}}>
+                                            {config.leftIcon}
+                                        </SquareIconButton>
+                                    </NestedDropdown>
+                                );
+                            }
+                            const { title, onClick, leftIcon } = config;
+                            return (
+                                <SquareIconButton key={title} title={title} onClick={onClick}>
+                                    {leftIcon}
+                                </SquareIconButton>
+                            );
+                        })}
+                    </ButtonGroup>
+                )}
             </div>
         );
     }

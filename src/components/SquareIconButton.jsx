@@ -67,7 +67,7 @@ SquareIconButton.propTypes = {
     id: PropTypes.string,
     label: PropTypes.string,
     onClick: PropTypes.func.isRequired,
-    tooltipPlacement: PropTypes.string.isRequired,
+    tooltipPlacement: PropTypes.string,
     isToggleable: PropTypes.bool,
     isToggled: PropTypes.bool,
 };
@@ -77,4 +77,5 @@ SquareIconButton.defaultProps = {
     isToggled: false,
     label: undefined,
     id: undefined,
+    tooltipPlacement: "top",
 };
