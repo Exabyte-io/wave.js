@@ -2,14 +2,16 @@
 // import "../MuiClassNameSetup";
 
 import NestedDropdown from "@exabyte-io/cove.js/dist/mui/components/nested-dropdown/NestedDropdown";
+import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
 import { Made } from "@exabyte-io/made.js";
-import { Article, Dehaze } from "@mui/icons-material";
+import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
 import BubbleChart from "@mui/icons-material/BubbleChart";
 import CheckIcon from "@mui/icons-material/Check";
 import Close from "@mui/icons-material/Close";
 import CloudDownload from "@mui/icons-material/CloudDownload";
 import ControlCameraRounded from "@mui/icons-material/ControlCameraRounded";
+import Dehaze from "@mui/icons-material/Dehaze";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import FormatShapes from "@mui/icons-material/FormatShapes";
@@ -25,9 +27,9 @@ import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
-import { ButtonGroup, createTheme, ThemeProvider, Tooltip } from "@mui/material";
-import CssBaseline from "@mui/material/CssBaseline";
+import ButtonGroup from "@mui/material/ButtonGroup";
 import { StyledEngineProvider } from "@mui/material/styles";
+import Tooltip from "@mui/material/Tooltip";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
@@ -38,12 +40,6 @@ import { exportToDisk } from "../utils";
 import { SquareIconButton } from "./SquareIconButton";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
 import { WaveComponent } from "./WaveComponent";
-
-const darkTheme = createTheme({
-    palette: {
-        mode: "dark",
-    },
-});
 
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
@@ -661,15 +657,19 @@ export class ThreeDEditor extends React.Component {
                                         // eslint-disable-next-line react/jsx-props-no-spreading
                                         {...config}
                                     >
-                                        <SquareIconButton title={config.title} onClick={() => {}}>
+                                        <SquareIconButton
+                                            key={config.key}
+                                            title={config.title}
+                                            onClick={() => {}}
+                                        >
                                             {config.leftIcon}
                                         </SquareIconButton>
                                     </NestedDropdown>
                                 );
                             }
-                            const { title, onClick, leftIcon } = config;
+                            const { key, title, onClick, leftIcon } = config;
                             return (
-                                <SquareIconButton key={title} title={title} onClick={onClick}>
+                                <SquareIconButton key={key} title={title} onClick={onClick}>
                                     {leftIcon}
                                 </SquareIconButton>
                             );
@@ -737,10 +737,7 @@ export class ThreeDEditor extends React.Component {
         const { isInteractive } = this.state;
         return (
             <StyledEngineProvider injectFirst>
-                <ThemeProvider theme={darkTheme}>
-                    <CssBaseline />
-                    {this.renderWaveOrThreejsEditorModal()}
-                </ThemeProvider>
+                <ThemeProvider>{this.renderWaveOrThreejsEditorModal()}</ThemeProvider>
             </StyledEngineProvider>
         );
     }
