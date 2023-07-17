@@ -460,6 +460,7 @@ export class ThreeDEditor extends React.Component {
         const { measuresSettings } = this.state;
         const { isDistanceShown, isAnglesShown } = measuresSettings;
 
+        const { isConventionalCellShown } = this.state;
         const viewSettingsActions = [
             {
                 id: "rotate-zoom",
@@ -508,7 +509,7 @@ export class ThreeDEditor extends React.Component {
                 disabled: false,
                 content: "Toggle Conventional Cell",
                 leftIcon: <FormatShapes />,
-                rightIcon: this.getCheckmark(this.isConventionalCellShown),
+                rightIcon: this.getCheckmark(isConventionalCellShown),
                 onClick: this.handleToggleConventionalCell,
             },
             {
