@@ -29,7 +29,6 @@ import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import { StyledEngineProvider } from "@mui/material/styles";
-import Tooltip from "@mui/material/Tooltip";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
@@ -333,79 +332,92 @@ export class ThreeDEditor extends React.Component {
         return <div className="atom-view-cover" style={style} />;
     }
 
-    getParametersToolbarItems() {
+    // TODO: create separate component
+    renderParametersMenu() {
         const { viewerSettings } = this.state;
-        return [
-            <Tooltip key="RADIUS" title="RADIUS" placement="top" disableInteractive>
+        // eslint-disable-next-line react/no-unstable-nested-components
+        const InputWithLabel = ({ label, id, value, max, min, step, onChange, className }) => (
+            <div className="input-container">
+                <label htmlFor={id}>{label}</label>
                 <input
-                    className="inverse stepper sphere-radius"
-                    id="sphere-radius"
-                    value={viewerSettings.atomRadiiScale}
+                    className={className}
+                    id={id}
+                    value={value}
                     type="number"
-                    max="10"
-                    min="0.1"
-                    step="0.1"
-                    onChange={this.handleSphereRadiusChange}
+                    max={max}
+                    min={min}
+                    step={step}
+                    onChange={onChange}
                 />
-            </Tooltip>,
+            </div>
+        );
 
-            <Tooltip key="A" title="A" placement="top" disableInteractive>
-                <input
-                    className="inverse stepper cell-repetitions"
-                    id="repetitionsAlongLatticeVectorA"
-                    value={viewerSettings.repetitionsAlongLatticeVectorA}
-                    type="number"
-                    max="10"
-                    min="1"
-                    step="1"
-                    onChange={this.handleCellRepetitionsChange}
-                />
-            </Tooltip>,
-
-            <Tooltip key="B" title="B" placement="top" disableInteractive>
-                <input
-                    className="inverse stepper cell-repetitions"
-                    id="repetitionsAlongLatticeVectorB"
-                    value={viewerSettings.repetitionsAlongLatticeVectorB}
-                    type="number"
-                    max="10"
-                    min="1"
-                    step="1"
-                    onChange={this.handleCellRepetitionsChange}
-                />
-            </Tooltip>,
-
-            <Tooltip key="C" title="C" placement="top" disableInteractive>
-                <input
-                    className="inverse stepper cell-repetitions"
-                    id="repetitionsAlongLatticeVectorC"
-                    value={viewerSettings.repetitionsAlongLatticeVectorC}
-                    type="number"
-                    max="10"
-                    min="1"
-                    step="1"
-                    onChange={this.handleCellRepetitionsChange}
-                />
-            </Tooltip>,
-
-            <Tooltip
-                key="CHEMICAL_CONNECTIVITY_FACTOR"
-                title="CHEMICAL CONNECTIVITY FACTOR"
-                placement="top"
-                disableInteractive
-            >
-                <input
-                    className="inverse stepper cell-repetitions"
-                    id="chemical-connectivity-factor"
-                    value={viewerSettings.chemicalConnectivityFactor}
-                    type="number"
-                    max="2"
-                    min="0"
-                    step="0.01"
-                    onChange={this.handleChemicalConnectivityFactorChange}
-                />
-            </Tooltip>,
+        const inputsData = [
+            {
+                label: "RADIUS",
+                id: "sphere-radius",
+                value: viewerSettings.atomRadiiScale,
+                max: "10",
+                min: "0.1",
+                step: "0.1",
+                onChange: this.handleSphereRadiusChange,
+                className: "inverse stepper sphere-radius",
+            },
+            {
+                label: "A",
+                id: "repetitionsAlongLatticeVectorA",
+                value: viewerSettings.repetitionsAlongLatticeVectorA,
+                max: "10",
+                min: "1",
+                step: "1",
+                onChange: this.handleCellRepetitionsChange,
+                className: "inverse stepper cell-repetitions",
+            },
+            {
+                label: "B",
+                id: "repetitionsAlongLatticeVectorB",
+                value: viewerSettings.repetitionsAlongLatticeVectorB,
+                max: "10",
+                min: "1",
+                step: "1",
+                onChange: this.handleCellRepetitionsChange,
+                className: "inverse stepper cell-repetitions",
+            },
+            {
+                label: "C",
+                id: "repetitionsAlongLatticeVectorC",
+                value: viewerSettings.repetitionsAlongLatticeVectorC,
+                max: "10",
+                min: "1",
+                step: "1",
+                onChange: this.handleCellRepetitionsChange,
+                className: "inverse stepper cell-repetitions",
+            },
+            {
+                label: "CHEMICAL CONNECTIVITY FACTOR",
+                id: "chemical-connectivity-factor",
+                value: viewerSettings.chemicalConnectivityFactor,
+                max: "2",
+                min: "0",
+                step: "0.01",
+                onChange: this.handleChemicalConnectivityFactorChange,
+                className: "inverse stepper cell-repetitions",
+            },
         ];
+
+        return (
+            <div>
+                {inputsData.map((inputData, index) => (
+                    <div
+                        className={index < inputsData.length - 1 ? "top-inputs" : "bottom-input"}
+                        key={inputData.id}
+                    >
+                        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+                        <InputWithLabel {...inputData} />
+                    </div>
+                ))}
+            </div>
+        );
     }
 
     renderWaveComponent() {
@@ -619,8 +631,9 @@ export class ThreeDEditor extends React.Component {
                 id: "parameters",
                 title: "Parameters",
                 header: "Parameters",
+                shouldMenuStayOpened: true,
                 leftIcon: <BubbleChart />,
-                objectContent: this.getParametersToolbarItems,
+                contentObject: this.renderParametersMenu(),
             },
             {
                 id: "measurements",
@@ -641,6 +654,7 @@ export class ThreeDEditor extends React.Component {
                 leftIcon: <ImportExport />,
                 actions: exportActions,
             },
+            // fullscreen is not present here but is used in materials-designer
         ];
 
         return (
@@ -651,7 +665,7 @@ export class ThreeDEditor extends React.Component {
                     </SquareIconButton>
                     {isInteractive &&
                         toolbarConfig.map((config) => {
-                            if (config.actions) {
+                            if (config.actions || config.contentObject) {
                                 return (
                                     <NestedDropdown
                                         // eslint-disable-next-line react/jsx-props-no-spreading
