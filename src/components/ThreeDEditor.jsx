@@ -28,7 +28,11 @@ import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
 import ButtonGroup from "@mui/material/ButtonGroup";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
+import Stack from "@mui/material/Stack";
 import { StyledEngineProvider } from "@mui/material/styles";
+import TextField from "@mui/material/TextField";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
@@ -40,6 +44,7 @@ import { SquareIconButton } from "./SquareIconButton";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
 import { WaveComponent } from "./WaveComponent";
 
+const toolbarStyle = { position: "absolute", top: "50px", left: "50px", maxWidth: "320px" };
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
  */
@@ -332,29 +337,35 @@ export class ThreeDEditor extends React.Component {
         return <div className="atom-view-cover" style={style} />;
     }
 
-    // TODO: create separate component
-    renderParametersMenu() {
-        const { viewerSettings } = this.state;
-        // eslint-disable-next-line react/no-unstable-nested-components
-        const InputWithLabel = ({ label, id, value, max, min, step, onChange, className }) => (
-            <div className="input-container">
-                <label htmlFor={id}>{label}</label>
-                <input
+    // eslint-disable-next-line class-methods-use-this
+    renderInputWithLabel({ label, id, value, max, min, step, onChange, className, sx }) {
+        return (
+            <FormControl>
+                <FormLabel htmlFor={id}>{label}</FormLabel>
+                <TextField
+                    type="number"
                     className={className}
                     id={id}
                     value={value}
-                    type="number"
-                    max={max}
-                    min={min}
-                    step={step}
                     onChange={onChange}
+                    sx={sx}
+                    inputProps={{
+                        max,
+                        min,
+                        step,
+                    }}
                 />
-            </div>
+            </FormControl>
         );
+    }
 
-        const inputsData = [
+    // TODO: create separate component
+    renderParametersMenu() {
+        const { viewerSettings } = this.state;
+
+        const topInputs = [
             {
-                label: "RADIUS",
+                label: "Radius",
                 id: "sphere-radius",
                 value: viewerSettings.atomRadiiScale,
                 max: "10",
@@ -393,30 +404,38 @@ export class ThreeDEditor extends React.Component {
                 onChange: this.handleCellRepetitionsChange,
                 className: "inverse stepper cell-repetitions",
             },
-            {
-                label: "CHEMICAL CONNECTIVITY FACTOR",
-                id: "chemical-connectivity-factor",
-                value: viewerSettings.chemicalConnectivityFactor,
-                max: "2",
-                min: "0",
-                step: "0.01",
-                onChange: this.handleChemicalConnectivityFactorChange,
-                className: "inverse stepper cell-repetitions",
-            },
         ];
 
+        const bottomInput = {
+            label: "Chemical Connectivity Factor",
+            id: "chemical-connectivity-factor",
+            value: viewerSettings.chemicalConnectivityFactor,
+            max: "2",
+            min: "0",
+            step: "0.01",
+            onChange: this.handleChemicalConnectivityFactorChange,
+            className: "inverse stepper cell-repetitions",
+        };
+
         return (
-            <div>
-                {inputsData.map((inputData, index) => (
-                    <div
-                        className={index < inputsData.length - 1 ? "top-inputs" : "bottom-input"}
-                        key={inputData.id}
-                    >
-                        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-                        <InputWithLabel {...inputData} />
-                    </div>
-                ))}
-            </div>
+            <Stack orientation="vertical">
+                <Stack orientation="horizontal" direction="row">
+                    {topInputs.map((input) =>
+                        // eslint-disable-next-line react/jsx-props-no-spreading
+                        this.renderInputWithLabel({
+                            ...input,
+                            key: input.id,
+                            sx: { margin: "15px", size: "small" },
+                        }),
+                    )}
+                </Stack>
+                {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+                {bottomInput &&
+                    this.renderInputWithLabel({
+                        ...bottomInput,
+                        sx: { margin: "15px", size: "small", width: "20%" },
+                    })}
+            </Stack>
         );
     }
 
@@ -463,12 +482,9 @@ export class ThreeDEditor extends React.Component {
 
     renderToolbar() {
         // TODO: create a separate component for toolbar and pass this configs to it
-        const { isInteractive } = this.state;
-        const { viewerSettings } = this.state;
-        const { measuresSettings } = this.state;
+        const { isInteractive, viewerSettings, measuresSettings, isConventionalCellShown } =
+            this.state;
         const { isDistanceShown, isAnglesShown } = measuresSettings;
-
-        const { isConventionalCellShown } = this.state;
         const viewSettingsActions = [
             {
                 id: "rotate-zoom",
@@ -626,6 +642,7 @@ export class ThreeDEditor extends React.Component {
                 header: "View Settings",
                 leftIcon: <RemoveRedEye />,
                 actions: viewSettingsActions,
+                onClick: () => this.handleToggleToolbarMenu("view-settings"),
             },
             {
                 id: "parameters",
@@ -634,6 +651,7 @@ export class ThreeDEditor extends React.Component {
                 shouldMenuStayOpened: true,
                 leftIcon: <BubbleChart />,
                 contentObject: this.renderParametersMenu(),
+                onClick: () => this.handleToggleToolbarMenu("parameters"),
             },
             {
                 id: "measurements",
@@ -641,6 +659,7 @@ export class ThreeDEditor extends React.Component {
                 header: "Measurements",
                 leftIcon: <SquareFootIcon />,
                 actions: measurementsActions,
+                onClick: () => this.handleToggleToolbarMenu("measurements"),
             },
             {
                 id: "edit",
@@ -653,12 +672,13 @@ export class ThreeDEditor extends React.Component {
                 title: "Export",
                 leftIcon: <ImportExport />,
                 actions: exportActions,
+                onClick: () => this.handleToggleToolbarMenu("export"),
             },
-            // fullscreen is not present here but is used in materials-designer
+            // fullscreen option is not present here but is used in materials-designer
         ];
 
         return (
-            <div style={{ position: "absolute", top: "50px", left: "50px", maxWidth: "320px" }}>
+            <div style={toolbarStyle}>
                 <ButtonGroup orientation="vertical">
                     <SquareIconButton title="Interactive" onClick={this.handleToggleInteractive}>
                         {isInteractive ? <Close /> : <PowerSettingsNew />}
@@ -670,11 +690,13 @@ export class ThreeDEditor extends React.Component {
                                     <NestedDropdown
                                         // eslint-disable-next-line react/jsx-props-no-spreading
                                         {...config}
+                                        paperPlacement="right-start"
+                                        paperProps={{ margin: "0 0 0 15px" }}
                                     >
                                         <SquareIconButton
-                                            key={config.key}
+                                            key={config.key || config.id}
                                             title={config.title}
-                                            onClick={() => {}}
+                                            onClick={config.onClick}
                                         >
                                             {config.leftIcon}
                                         </SquareIconButton>
@@ -747,8 +769,6 @@ export class ThreeDEditor extends React.Component {
     }
 
     render() {
-        // eslint-disable-next-line no-unused-vars
-        const { isInteractive } = this.state;
         return (
             <StyledEngineProvider injectFirst>
                 <ThemeProvider>{this.renderWaveOrThreejsEditorModal()}</ThemeProvider>
