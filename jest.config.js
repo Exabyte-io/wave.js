@@ -4,7 +4,6 @@
  */
 
 module.exports = {
-
     // Tell Jest to stop running tests after first failure.
     bail: false,
 
@@ -19,13 +18,12 @@ module.exports = {
     // A list of paths to modules that run some code to configure or set up the testing environment.
     setupFiles: ["./tests/setupFiles.js"],
 
-    transformIgnorePatterns: [
-        "<rootDir>/node_modules/(?!(three)/)"
-    ],
+    transformIgnorePatterns: ["<rootDir>/node_modules/(?!(three|@exabyte-io/cove.js)/)"],
 
     // mock css files: https://jestjs.io/docs/en/webpack#handling-static-assets
     moduleNameMapper: {
-        "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/tests/fileMock.js",
-        "\\.(css|sass|scss)$": "<rootDir>/tests/styleMock.js"
-    }
+        "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$":
+            "<rootDir>/tests/fileMock.js",
+        "\\.(css|sass|scss)$": "<rootDir>/tests/styleMock.js",
+    },
 };
