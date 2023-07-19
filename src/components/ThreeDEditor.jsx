@@ -340,7 +340,7 @@ export class ThreeDEditor extends React.Component {
     // eslint-disable-next-line class-methods-use-this
     renderInputWithLabel({ label, id, value, max, min, step, onChange, className, sx }) {
         return (
-            <FormControl>
+            <FormControl key={`form-control-${id}`}>
                 <FormLabel htmlFor={id}>{label}</FormLabel>
                 <TextField
                     type="number"
@@ -363,7 +363,7 @@ export class ThreeDEditor extends React.Component {
     renderParametersMenu() {
         const { viewerSettings } = this.state;
 
-        const topInputs = [
+        const parametersFirstRow = [
             {
                 label: "Radius",
                 id: "sphere-radius",
@@ -406,7 +406,7 @@ export class ThreeDEditor extends React.Component {
             },
         ];
 
-        const bottomInput = {
+        const parametersSecondRow = {
             label: "Chemical Connectivity Factor",
             id: "chemical-connectivity-factor",
             value: viewerSettings.chemicalConnectivityFactor,
@@ -419,8 +419,8 @@ export class ThreeDEditor extends React.Component {
 
         return (
             <Stack orientation="vertical">
-                <Stack orientation="horizontal" direction="row">
-                    {topInputs.map((input) =>
+                <Stack key="paramters-first-row" orientation="horizontal" direction="row">
+                    {parametersFirstRow.map((input) =>
                         // eslint-disable-next-line react/jsx-props-no-spreading
                         this.renderInputWithLabel({
                             ...input,
@@ -430,9 +430,10 @@ export class ThreeDEditor extends React.Component {
                     )}
                 </Stack>
                 {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-                {bottomInput &&
+                {parametersSecondRow &&
                     this.renderInputWithLabel({
-                        ...bottomInput,
+                        ...parametersSecondRow,
+                        key: "paramters-second-row",
                         sx: { margin: "15px", size: "small", width: "20%" },
                     })}
             </Stack>
@@ -637,7 +638,7 @@ export class ThreeDEditor extends React.Component {
 
         const toolbarConfig = [
             {
-                id: "view-settings",
+                id: "View",
                 title: "View Settings",
                 header: "View Settings",
                 leftIcon: <RemoveRedEye />,
@@ -662,13 +663,13 @@ export class ThreeDEditor extends React.Component {
                 onClick: () => this.handleToggleToolbarMenu("measurements"),
             },
             {
-                id: "edit",
+                id: "3DEdit",
                 title: "Edit",
                 leftIcon: <Edit />,
                 onClick: this.toggleThreejsEditorModal,
             },
             {
-                id: "export",
+                id: "Export",
                 title: "Export",
                 leftIcon: <ImportExport />,
                 actions: exportActions,
@@ -678,40 +679,51 @@ export class ThreeDEditor extends React.Component {
         ];
 
         return (
-            <div style={toolbarStyle}>
-                <ButtonGroup orientation="vertical">
-                    <SquareIconButton title="Interactive" onClick={this.handleToggleInteractive}>
-                        {isInteractive ? <Close /> : <PowerSettingsNew />}
-                    </SquareIconButton>
-                    {isInteractive &&
-                        toolbarConfig.map((config) => {
-                            if (config.actions || config.contentObject) {
-                                return (
-                                    <NestedDropdown
-                                        // eslint-disable-next-line react/jsx-props-no-spreading
-                                        {...config}
-                                        paperPlacement="right-start"
-                                        paperProps={{ margin: "0 0 0 15px" }}
-                                    >
-                                        <SquareIconButton
-                                            key={config.key || config.id}
-                                            title={config.title}
-                                            onClick={config.onClick}
-                                        >
-                                            {config.leftIcon}
-                                        </SquareIconButton>
-                                    </NestedDropdown>
-                                );
-                            }
-                            const { key, title, onClick, leftIcon } = config;
+            <ButtonGroup key="toolbar-button-group" orientation="vertical" style={toolbarStyle}>
+                <SquareIconButton
+                    key="toggle-interactive"
+                    title="Interactive"
+                    data-name="Interactive"
+                    onClick={this.handleToggleInteractive}
+                >
+                    {isInteractive ? <Close /> : <PowerSettingsNew />}
+                </SquareIconButton>
+                {isInteractive &&
+                    toolbarConfig.map((config) => {
+                        if (config.actions || config.contentObject) {
                             return (
-                                <SquareIconButton key={key} title={title} onClick={onClick}>
-                                    {leftIcon}
-                                </SquareIconButton>
+                                <NestedDropdown
+                                    // eslint-disable-next-line react/jsx-props-no-spreading
+                                    {...config}
+                                    key={config.key || config.id}
+                                    data-name={config.id}
+                                    paperPlacement="right-start"
+                                    paperProps={{ margin: "0 0 0 15px" }}
+                                >
+                                    <SquareIconButton
+                                        data-name={config.id}
+                                        key={config.key || config.id}
+                                        title={config.title}
+                                        onClick={config.onClick}
+                                    >
+                                        {config.leftIcon}
+                                    </SquareIconButton>
+                                </NestedDropdown>
                             );
-                        })}
-                </ButtonGroup>
-            </div>
+                        }
+                        const { id, key, title, onClick, leftIcon } = config;
+                        return (
+                            <SquareIconButton
+                                key={key}
+                                data-name={id}
+                                title={title}
+                                onClick={onClick}
+                            >
+                                {leftIcon}
+                            </SquareIconButton>
+                        );
+                    })}
+            </ButtonGroup>
         );
     }
 
