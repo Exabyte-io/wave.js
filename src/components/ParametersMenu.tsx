@@ -1,7 +1,6 @@
-import Stack from "@mui/material/Stack";
+import { Box, Divider, Stack, TextField, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import React from "react";
-
-import InputWithLabel, { InputWithLabelProps } from "./InputWithLabel";
 
 export type ViewerSettings = {
     isViewAdjustable: boolean;
@@ -18,6 +17,7 @@ interface ParametersMenuProps {
     handleCellRepetitionsChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleChemicalConnectivityFactorChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
+
 function ParametersMenu(props: ParametersMenuProps) {
     const {
         viewerSettings,
@@ -26,75 +26,81 @@ function ParametersMenu(props: ParametersMenuProps) {
         handleChemicalConnectivityFactorChange,
     } = props;
 
-    const parametersFirstRow: InputWithLabelProps[] = [
-        {
-            label: "Radius",
-            id: "sphere-radius",
-            value: viewerSettings.atomRadiiScale,
-            max: 10,
-            min: 0.1,
-            step: 0.1,
-            onChange: handleSphereRadiusChange,
-            className: "inverse stepper sphere-radius",
+    const theme = useTheme();
+    const defaultTextFieldStyle = {
+        "& input": {
+            margin: theme.spacing(0.5),
+            height: theme.spacing(3),
+            padding: theme.spacing(1),
+            borderRadius: theme.spacing(0.5),
         },
-        {
-            label: "A",
-            id: "repetitionsAlongLatticeVectorA",
-            value: viewerSettings.repetitionsAlongLatticeVectorA,
-            max: 10,
-            min: 1,
-            step: 1,
-            onChange: handleCellRepetitionsChange,
-            className: "inverse stepper cell-repetitions",
-        },
-        {
-            label: "B",
-            id: "repetitionsAlongLatticeVectorB",
-            value: viewerSettings.repetitionsAlongLatticeVectorB,
-            max: 10,
-            min: 1,
-            step: 1,
-            onChange: handleCellRepetitionsChange,
-            className: "inverse stepper cell-repetitions",
-        },
-        {
-            label: "C",
-            id: "repetitionsAlongLatticeVectorC",
-            value: viewerSettings.repetitionsAlongLatticeVectorC,
-            max: 10,
-            min: 1,
-            step: 1,
-            onChange: handleCellRepetitionsChange,
-            className: "inverse stepper cell-repetitions",
-        },
-    ];
-
-    const parametersSecondRow: InputWithLabelProps = {
-        label: "Chemical Connectivity Factor",
-        id: "chemical-connectivity-factor",
-        value: viewerSettings.chemicalConnectivityFactor,
-        max: 2,
-        min: 0,
-        step: 0.1,
-        onChange: handleChemicalConnectivityFactorChange,
-        className: "inverse stepper cell-repetitions",
     };
 
     return (
-        <Stack>
-            <Stack key="parameters-first-row" direction="row">
-                {parametersFirstRow.map((props) => {
-                    const { id } = props;
+        <Stack spacing={theme.spacing(1)} sx={{ margin: theme.spacing(2) }}>
+            <Divider />
+            <Box>
+                <TextField
+                    label="Radius"
+                    type="number"
+                    className="inverse stepper sphere-radius"
+                    id="sphere-radius"
+                    value={viewerSettings.atomRadiiScale}
+                    onChange={handleSphereRadiusChange}
+                    sx={defaultTextFieldStyle}
+                    inputProps={{
+                        max: 10,
+                        min: 0.1,
+                        step: 0.1,
+                    }}
+                />
+            </Box>
+            <Divider />
+            <Typography variant="subtitle1">Repetition along vectors:</Typography>
+            <Stack key="repetition" direction="row" spacing={theme.spacing(2)}>
+                {["A", "B", "C"].map((label) => {
                     return (
-                        // eslint-disable-next-line react/jsx-props-no-spreading
-                        <InputWithLabel key={id} {...props} />
+                        <Box key={label}>
+                            <TextField
+                                label={label}
+                                type="number"
+                                className="inverse stepper cell-repetitions"
+                                id={`repetitionsAlongLatticeVector${label}`}
+                                value={
+                                    (viewerSettings as { [key: string]: any })[
+                                        `repetitionsAlongLatticeVector${label}`
+                                    ]
+                                }
+                                onChange={handleCellRepetitionsChange}
+                                sx={defaultTextFieldStyle}
+                                inputProps={{
+                                    max: 10,
+                                    min: 1,
+                                    step: 1,
+                                }}
+                            />
+                        </Box>
                     );
                 })}
             </Stack>
-            {parametersSecondRow && (
-                /* eslint-disable-next-line react/jsx-props-no-spreading */
-                <InputWithLabel key={parametersSecondRow.id} {...parametersSecondRow} />
-            )}
+            <Divider />
+            <Typography variant="subtitle1">Chemical connectivity factor</Typography>
+            <Box>
+                <TextField
+                    label="Factor"
+                    type="number"
+                    className="inverse stepper cell-repetitions"
+                    id="chemical-connectivity-factor"
+                    value={viewerSettings.chemicalConnectivityFactor}
+                    onChange={handleChemicalConnectivityFactorChange}
+                    sx={defaultTextFieldStyle}
+                    inputProps={{
+                        max: 2,
+                        min: 0,
+                        step: 0.1,
+                    }}
+                />
+            </Box>
         </Stack>
     );
 }
