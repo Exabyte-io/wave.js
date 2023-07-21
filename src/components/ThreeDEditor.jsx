@@ -6,7 +6,6 @@ import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
 import { Made } from "@exabyte-io/made.js";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
-import BubbleChart from "@mui/icons-material/BubbleChart";
 import CheckIcon from "@mui/icons-material/Check";
 import CloudDownload from "@mui/icons-material/CloudDownload";
 import ControlCameraRounded from "@mui/icons-material/ControlCameraRounded";
@@ -21,6 +20,7 @@ import LooksIcon from "@mui/icons-material/Looks";
 import PictureInPicture from "@mui/icons-material/PictureInPicture";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
+import Settings from "@mui/icons-material/Settings";
 import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
@@ -376,6 +376,10 @@ export class ThreeDEditor extends React.Component {
         const { isDistanceShown, isAnglesShown } = measuresSettings;
         const viewSettingsActions = [
             {
+                id: "Divider",
+                isDivider: true,
+            },
+            {
                 id: "rotate-zoom",
                 disabled: false,
                 content: "Rotate/Zoom View [O]",
@@ -456,6 +460,10 @@ export class ThreeDEditor extends React.Component {
 
         const measurementsActions = [
             {
+                id: "Divider",
+                isDivider: true,
+            },
+            {
                 id: "Distance",
                 content: "Distance",
                 rightIcon: this.getCheckmark(isDistanceShown),
@@ -508,6 +516,10 @@ export class ThreeDEditor extends React.Component {
 
         const exportActions = [
             {
+                id: "Divider",
+                isDivider: true,
+            },
+            {
                 id: "Screenshot",
                 title: "Screenshot",
                 content: "Screenshot",
@@ -538,7 +550,7 @@ export class ThreeDEditor extends React.Component {
                 title: "Parameters",
                 header: "Parameters",
                 shouldMenuStayOpened: true,
-                leftIcon: <BubbleChart />,
+                leftIcon: <Settings />,
                 contentObject: (
                     <ParametersMenu
                         viewerSettings={viewerSettings}
@@ -568,6 +580,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "Export",
                 title: "Export",
+                header: "Export",
                 leftIcon: <ImportExport />,
                 actions: exportActions,
                 onClick: () => this.handleToggleToolbarMenu("export"),
