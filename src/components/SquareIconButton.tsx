@@ -1,44 +1,48 @@
-import React, { useState, useEffect, FC } from 'react';
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import _ from "lodash";
+import IconButton, { IconButtonProps } from "@mui/material/IconButton";
+import { useTheme } from "@mui/material/styles";
+import Tooltip, { TooltipProps } from "@mui/material/Tooltip";
+import React, { useEffect, useState } from "react";
+import _ from "underscore";
 
-interface SquareIconButtonProps {
+interface SquareIconButtonProps extends IconButtonProps {
     title: string;
     id?: string;
     label?: string;
-    onClick: (...args: any[]) => void;
-    tooltipPlacement?: string;
+    onClick: (...args: React.MouseEvent[]) => void;
+    tooltipPlacement?: TooltipProps["placement"];
     isToggleable?: boolean;
     isToggled?: boolean;
 }
 
-// Should be imported from theme
-const defaultIconButtonStyle = {
-    size: "large",
-    borderRadius: "0",
-};
-
 /**
- * Round icon button with toggle logic
+ * Square icon button with toggle logic
  */
-function SquareIconButton ({
-                                                                title,
-                                                                id,
-                                                                label,
-                                                                onClick,
-                                                                tooltipPlacement = "top",
-                                                                isToggleable = true,
-                                                                isToggled = false,
-                                                            }: SquareIconButtonProps)  {
+function SquareIconButton(props: SquareIconButtonProps) {
+    const {
+        title,
+        id,
+        label,
+        onClick,
+        tooltipPlacement = "top",
+        isToggleable = true,
+        isToggled = false,
+    } = props;
     const [stateIsToggled, setStateIsToggled] = useState(isToggled);
+    const theme = useTheme();
+
+    const defaultIconButtonStyle = {
+        borderRadius: 0,
+        height: theme.spacing(6),
+        width: theme.spacing(6),
+        backgroundColor: theme.palette.background.paper,
+    };
 
     useEffect(() => {
         setStateIsToggled(isToggled);
     }, [isToggled]);
 
     const handleToggle = () => {
-        setStateIsToggled(prevState => !prevState);
+        setStateIsToggled((prevState) => !prevState);
     };
 
     return (
@@ -49,6 +53,7 @@ function SquareIconButton ({
             disableInteractive
         >
             <IconButton
+                key={id}
                 aria-checked={isToggleable && stateIsToggled}
                 aria-label={label || title.toLowerCase()}
                 onClick={(...args) => {
@@ -58,7 +63,7 @@ function SquareIconButton ({
                 sx={defaultIconButtonStyle}
                 // eslint-disable-next-line react/jsx-props-no-spreading
                 {..._.omit(
-                    this.props,
+                    props,
                     "title",
                     "tooltipPlacement",
                     "id",
@@ -67,8 +72,9 @@ function SquareIconButton ({
                     "isToggleable",
                     "isToggled",
                 )}
-                size="large"
             />
         </Tooltip>
     );
 }
+
+export default SquareIconButton;
