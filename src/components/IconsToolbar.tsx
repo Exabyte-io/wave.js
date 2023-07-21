@@ -7,18 +7,17 @@ import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import { PaperProps } from "@mui/material/Paper";
 import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import React from "react";
 
 import SquareIconButton from "./SquareIconButton";
 
-// @ts-ignore
-const paperProps: PaperProps = { margin: "0 0 0 15px" };
 interface ToolbarConfig {
     id: string;
     key?: string;
     title: string;
     header?: string;
-    onClick: (...args: any[]) => void;
+    onClick: (...args: React.MouseEvent[]) => void;
     leftIcon: React.ReactNode;
     actions?: NestedDropdownAction[];
     contentObject?: NestedDropdownProps["contentObject"];
@@ -32,12 +31,19 @@ interface IconToolbarProps {
 function IconsToolbar(props: IconToolbarProps) {
     const { isInteractive, handleToggleInteractive, toolbarConfig } = props;
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const toolbarStyle = {
         position: "absolute",
         top: "25px",
         left: "25px",
-        maxWidth: "280px",
+        boxShadow: theme.shadows[4],
     };
+
+    const paperSx: PaperProps["sx"] = {
+        margin: theme.spacing(2),
+        boxShadow: theme.shadows[4],
+    };
+
     return (
         <ButtonGroup
             key="toolbar-button-group"
@@ -70,7 +76,8 @@ function IconsToolbar(props: IconToolbarProps) {
                                 key={config.key || config.id}
                                 data-name={config.id}
                                 paperPlacement="right-start"
-                                paperProps={paperProps}
+                                paperSx={paperSx}
+                                isMobile={isMobile}
                             >
                                 <SquareIconButton
                                     data-name={config.id}
