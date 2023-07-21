@@ -1,14 +1,12 @@
 /* eslint-disable react/sort-comp */
 // import "../MuiClassNameSetup";
 
-import NestedDropdown from "@exabyte-io/cove.js/dist/mui/components/nested-dropdown/NestedDropdown";
+import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
 import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
 import { Made } from "@exabyte-io/made.js";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
-import BubbleChart from "@mui/icons-material/BubbleChart";
 import CheckIcon from "@mui/icons-material/Check";
-import Close from "@mui/icons-material/Close";
 import CloudDownload from "@mui/icons-material/CloudDownload";
 import ControlCameraRounded from "@mui/icons-material/ControlCameraRounded";
 import Dehaze from "@mui/icons-material/Dehaze";
@@ -20,19 +18,14 @@ import HeightIcon from "@mui/icons-material/Height";
 import ImportExport from "@mui/icons-material/ImportExport";
 import LooksIcon from "@mui/icons-material/Looks";
 import PictureInPicture from "@mui/icons-material/PictureInPicture";
-import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
+import Settings from "@mui/icons-material/Settings";
 import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
-import Stack from "@mui/material/Stack";
 import { StyledEngineProvider } from "@mui/material/styles";
-import TextField from "@mui/material/TextField";
 import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
@@ -40,11 +33,11 @@ import React from "react";
 
 import settings from "../settings";
 import { exportToDisk } from "../utils";
-import { SquareIconButton } from "./SquareIconButton";
+import IconsToolbar from "./IconsToolbar.tsx";
+import ParametersMenu from "./ParametersMenu.tsx";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
 import { WaveComponent } from "./WaveComponent";
 
-const toolbarStyle = { position: "absolute", top: "50px", left: "50px", maxWidth: "320px" };
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
  */
@@ -337,109 +330,6 @@ export class ThreeDEditor extends React.Component {
         return <div className="atom-view-cover" style={style} />;
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    renderInputWithLabel({ label, id, value, max, min, step, onChange, className, sx }) {
-        return (
-            <FormControl key={`form-control-${id}`}>
-                <FormLabel htmlFor={id}>{label}</FormLabel>
-                <TextField
-                    type="number"
-                    className={className}
-                    id={id}
-                    value={value}
-                    onChange={onChange}
-                    sx={sx}
-                    inputProps={{
-                        max,
-                        min,
-                        step,
-                    }}
-                />
-            </FormControl>
-        );
-    }
-
-    // TODO: create separate component
-    renderParametersMenu() {
-        const { viewerSettings } = this.state;
-
-        const parametersFirstRow = [
-            {
-                label: "Radius",
-                id: "sphere-radius",
-                value: viewerSettings.atomRadiiScale,
-                max: "10",
-                min: "0.1",
-                step: "0.1",
-                onChange: this.handleSphereRadiusChange,
-                className: "inverse stepper sphere-radius",
-            },
-            {
-                label: "A",
-                id: "repetitionsAlongLatticeVectorA",
-                value: viewerSettings.repetitionsAlongLatticeVectorA,
-                max: "10",
-                min: "1",
-                step: "1",
-                onChange: this.handleCellRepetitionsChange,
-                className: "inverse stepper cell-repetitions",
-            },
-            {
-                label: "B",
-                id: "repetitionsAlongLatticeVectorB",
-                value: viewerSettings.repetitionsAlongLatticeVectorB,
-                max: "10",
-                min: "1",
-                step: "1",
-                onChange: this.handleCellRepetitionsChange,
-                className: "inverse stepper cell-repetitions",
-            },
-            {
-                label: "C",
-                id: "repetitionsAlongLatticeVectorC",
-                value: viewerSettings.repetitionsAlongLatticeVectorC,
-                max: "10",
-                min: "1",
-                step: "1",
-                onChange: this.handleCellRepetitionsChange,
-                className: "inverse stepper cell-repetitions",
-            },
-        ];
-
-        const parametersSecondRow = {
-            label: "Chemical Connectivity Factor",
-            id: "chemical-connectivity-factor",
-            value: viewerSettings.chemicalConnectivityFactor,
-            max: "2",
-            min: "0",
-            step: "0.01",
-            onChange: this.handleChemicalConnectivityFactorChange,
-            className: "inverse stepper cell-repetitions",
-        };
-
-        return (
-            <Stack orientation="vertical">
-                <Stack key="paramters-first-row" orientation="horizontal" direction="row">
-                    {parametersFirstRow.map((input) =>
-                        // eslint-disable-next-line react/jsx-props-no-spreading
-                        this.renderInputWithLabel({
-                            ...input,
-                            key: input.id,
-                            sx: { margin: "15px", size: "small" },
-                        }),
-                    )}
-                </Stack>
-                {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-                {parametersSecondRow &&
-                    this.renderInputWithLabel({
-                        ...parametersSecondRow,
-                        key: "paramters-second-row",
-                        sx: { margin: "15px", size: "small", width: "20%" },
-                    })}
-            </Stack>
-        );
-    }
-
     renderWaveComponent() {
         const {
             isConventionalCellShown,
@@ -481,12 +371,14 @@ export class ThreeDEditor extends React.Component {
         return <CheckIcon style={{ color: "grey" }} />;
     }
 
-    renderToolbar() {
-        // TODO: create a separate component for toolbar and pass this configs to it
-        const { isInteractive, viewerSettings, measuresSettings, isConventionalCellShown } =
-            this.state;
+    getToolbarConfig() {
+        const { viewerSettings, measuresSettings, isConventionalCellShown } = this.state;
         const { isDistanceShown, isAnglesShown } = measuresSettings;
         const viewSettingsActions = [
+            {
+                id: "Divider",
+                isDivider: true,
+            },
             {
                 id: "rotate-zoom",
                 disabled: false,
@@ -568,6 +460,10 @@ export class ThreeDEditor extends React.Component {
 
         const measurementsActions = [
             {
+                id: "Divider",
+                isDivider: true,
+            },
+            {
                 id: "Distance",
                 content: "Distance",
                 rightIcon: this.getCheckmark(isDistanceShown),
@@ -620,14 +516,18 @@ export class ThreeDEditor extends React.Component {
 
         const exportActions = [
             {
-                key: "Screenshot",
+                id: "Divider",
+                isDivider: true,
+            },
+            {
+                id: "Screenshot",
                 title: "Screenshot",
                 content: "Screenshot",
                 leftIcon: <PictureInPicture />,
                 onClick: this.handleTakeScreenshot,
             },
             {
-                key: "Download",
+                id: "Download",
                 title: "Download",
                 content: "Download",
                 leftIcon: <CloudDownload />,
@@ -636,7 +536,7 @@ export class ThreeDEditor extends React.Component {
             },
         ];
 
-        const toolbarConfig = [
+        return [
             {
                 id: "View",
                 title: "View Settings",
@@ -646,12 +546,21 @@ export class ThreeDEditor extends React.Component {
                 onClick: () => this.handleToggleToolbarMenu("view-settings"),
             },
             {
-                id: "parameters",
+                id: "Parameters",
                 title: "Parameters",
                 header: "Parameters",
                 shouldMenuStayOpened: true,
-                leftIcon: <BubbleChart />,
-                contentObject: this.renderParametersMenu(),
+                leftIcon: <Settings />,
+                contentObject: (
+                    <ParametersMenu
+                        viewerSettings={viewerSettings}
+                        handleSphereRadiusChange={this.handleSphereRadiusChange}
+                        handleCellRepetitionsChange={this.handleCellRepetitionsChange}
+                        handleChemicalConnectivityFactorChange={
+                            this.handleChemicalConnectivityFactorChange
+                        }
+                    />
+                ),
                 onClick: () => this.handleToggleToolbarMenu("parameters"),
             },
             {
@@ -671,60 +580,13 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "Export",
                 title: "Export",
+                header: "Export",
                 leftIcon: <ImportExport />,
                 actions: exportActions,
                 onClick: () => this.handleToggleToolbarMenu("export"),
             },
             // fullscreen option is not present here but is used in materials-designer
         ];
-
-        return (
-            <ButtonGroup key="toolbar-button-group" orientation="vertical" style={toolbarStyle}>
-                <SquareIconButton
-                    key="toggle-interactive"
-                    title="Interactive"
-                    data-name="Interactive"
-                    onClick={this.handleToggleInteractive}
-                >
-                    {isInteractive ? <Close /> : <PowerSettingsNew />}
-                </SquareIconButton>
-                {isInteractive &&
-                    toolbarConfig.map((config) => {
-                        if (config.actions || config.contentObject) {
-                            return (
-                                <NestedDropdown
-                                    // eslint-disable-next-line react/jsx-props-no-spreading
-                                    {...config}
-                                    key={config.key || config.id}
-                                    data-name={config.id}
-                                    paperPlacement="right-start"
-                                    paperProps={{ margin: "0 0 0 15px" }}
-                                >
-                                    <SquareIconButton
-                                        data-name={config.id}
-                                        key={config.key || config.id}
-                                        title={config.title}
-                                        onClick={config.onClick}
-                                    >
-                                        {config.leftIcon}
-                                    </SquareIconButton>
-                                </NestedDropdown>
-                            );
-                        }
-                        const { id, key, title, onClick, leftIcon } = config;
-                        return (
-                            <SquareIconButton
-                                key={key}
-                                data-name={id}
-                                title={title}
-                                onClick={onClick}
-                            >
-                                {leftIcon}
-                            </SquareIconButton>
-                        );
-                    })}
-            </ButtonGroup>
-        );
     }
 
     /** Helper to construct a compound CSS classname based on interactivity state */
@@ -771,10 +633,15 @@ export class ThreeDEditor extends React.Component {
                 />
             );
         }
+        const { isInteractive } = this.state;
         return (
             <div className={this.getThreeDEditorClassNames()}>
                 {this.renderCoverDiv()}
-                {this.renderToolbar()}
+                <IconsToolbar
+                    toolbarConfig={this.getToolbarConfig()}
+                    isInteractive={isInteractive}
+                    handleToggleInteractive={this.handleToggleInteractive}
+                />
                 {this.renderWaveComponent()}
             </div>
         );
@@ -783,7 +650,9 @@ export class ThreeDEditor extends React.Component {
     render() {
         return (
             <StyledEngineProvider injectFirst>
-                <ThemeProvider>{this.renderWaveOrThreejsEditorModal()}</ThemeProvider>
+                <ThemeProvider theme={DarkMaterialUITheme}>
+                    {this.renderWaveOrThreejsEditorModal()}
+                </ThemeProvider>
             </StyledEngineProvider>
         );
     }
