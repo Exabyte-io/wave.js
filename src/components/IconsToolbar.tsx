@@ -92,7 +92,12 @@ function IconsToolbar(props: IconToolbarProps) {
                     }
                     const { id, key, title, onClick, leftIcon } = config;
                     return (
-                        <SquareIconButton key={key} data-name={id} title={title} onClick={onClick}>
+                        <SquareIconButton
+                            key={key || id}
+                            data-name={id}
+                            title={title}
+                            onClick={onClick}
+                        >
                             {leftIcon}
                         </SquareIconButton>
                     );
