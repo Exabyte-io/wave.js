@@ -192,9 +192,17 @@ export class ThreeDEditor extends React.Component {
         this.handleSetSetting({ isViewAdjustable: !isViewAdjustable });
     }
 
-    handleDownloadClick() {
+    handleDownloadClick(format = "poscar") {
         const { originalMaterial } = this.state;
-        exportToDisk(originalMaterial.getAsPOSCAR(), originalMaterial.name, "poscar");
+        let content;
+        switch (format) {
+            case "poscar":
+                content = originalMaterial.getAsPOSCAR();
+                break;
+            default:
+                content = originalMaterial.toJSON();
+        }
+        exportToDisk(content, originalMaterial.name, format);
     }
 
     handleToggleInteractive() {
@@ -366,9 +374,9 @@ export class ThreeDEditor extends React.Component {
     // eslint-disable-next-line class-methods-use-this
     getCheckmark(isActive) {
         if (isActive) {
-            return <CheckIcon style={{ color: "green" }} />;
+            return <CheckIcon style={{ color: DarkMaterialUITheme.palette.success.main }} />;
         }
-        return <CheckIcon style={{ color: "grey" }} />;
+        return <CheckIcon style={{ color: DarkMaterialUITheme.palette.grey[800] }} />;
     }
 
     getToolbarConfig() {
@@ -382,7 +390,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "rotate-zoom",
                 disabled: false,
-                content: "Rotate/Zoom View [O]",
+                content: "Rotate/Zoom",
                 leftIcon: <ThreeDRotation />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areOrbitControlsEnabled")),
                 onClick: this.handleToggleOrbitControls,
@@ -390,7 +398,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "auto-rotate",
                 disabled: false,
-                content: "Toggle Auto Rotate",
+                content: "Auto Rotate",
                 leftIcon: <Autorenew />,
                 rightIcon: this.getCheckmark(
                     this._getWaveProperty("isOrbitControlsAnimationEnabled"),
@@ -400,7 +408,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-axes",
                 disabled: false,
-                content: "Toggle Axes",
+                content: "Axes",
                 leftIcon: <GpsFixed />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areAxesEnabled")),
                 onClick: this.handleToggleAxes,
@@ -408,7 +416,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-camera",
                 disabled: false,
-                content: "Toggle Orthographic Camera",
+                content: "Orthographic Camera",
                 leftIcon: <SwitchCamera />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("isCameraOrthographic")),
                 onClick: this.handleToggleOrthographicCamera,
@@ -416,7 +424,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-bonds",
                 disabled: false,
-                content: "Toggle Bonds",
+                content: "Bonds",
                 leftIcon: <Dehaze />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("isDrawBondsEnabled")),
                 onClick: this.handleToggleBonds,
@@ -424,7 +432,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-cell",
                 disabled: false,
-                content: "Toggle Conventional Cell",
+                content: "Conventional Cell",
                 leftIcon: <FormatShapes />,
                 rightIcon: this.getCheckmark(isConventionalCellShown),
                 onClick: this.handleToggleConventionalCell,
@@ -432,7 +440,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-labels",
                 disabled: false,
-                content: "Toggle Labels",
+                content: "Labels",
                 leftIcon: <Spellcheck />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areLabelsShown")),
                 onClick: this.handleToggleLabels,
@@ -440,7 +448,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-view-adjustment",
                 disabled: false,
-                content: "Toggle View Adjustment",
+                content: "Auto-center on change",
                 leftIcon: <ControlCameraRounded />,
                 rightIcon: this.getCheckmark(viewerSettings.isViewAdjustable),
                 onClick: this.handleToggleIsViewAdjustable,
@@ -464,8 +472,8 @@ export class ThreeDEditor extends React.Component {
                 isDivider: true,
             },
             {
-                id: "Distance",
-                content: "Distance",
+                id: "Distances",
+                content: "Distances",
                 rightIcon: this.getCheckmark(isDistanceShown),
                 leftIcon: <HeightIcon />,
                 onClick: this.handleToggleDistanceShown,
@@ -501,16 +509,14 @@ export class ThreeDEditor extends React.Component {
                 title: "JSON",
                 content: "JSON",
                 leftIcon: <Article />,
-                onClick: () => {
-                    console.log("Download JSON");
-                },
+                onClick: () => this.handleDownloadClick("json"),
             },
             {
                 id: "POSCAR",
                 title: "POSCAR",
                 content: "POSCAR",
                 leftIcon: <Article />,
-                onClick: this.handleDownloadClick,
+                onClick: () => this.handleDownloadClick("poscar"),
             },
         ];
 
@@ -532,15 +538,14 @@ export class ThreeDEditor extends React.Component {
                 content: "Download",
                 leftIcon: <CloudDownload />,
                 actions: downloadActions,
-                onClick: this.handleDownloadClick,
             },
         ];
 
         return [
             {
                 id: "View",
-                title: "View Settings",
-                header: "View Settings",
+                title: "View",
+                header: "View",
                 leftIcon: <RemoveRedEye />,
                 actions: viewSettingsActions,
                 onClick: () => this.handleToggleToolbarMenu("view-settings"),

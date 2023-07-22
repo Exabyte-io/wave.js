@@ -39,9 +39,10 @@ function ParametersMenu(props: ParametersMenuProps) {
     return (
         <Stack spacing={theme.spacing(1)} sx={{ margin: theme.spacing(2) }}>
             <Divider />
+            <Typography variant="subtitle1">Atomic radius</Typography>
             <Box>
                 <TextField
-                    label="Radius"
+                    label="Value"
                     type="number"
                     className="inverse stepper sphere-radius"
                     id="sphere-radius"
@@ -87,7 +88,7 @@ function ParametersMenu(props: ParametersMenuProps) {
             <Typography variant="subtitle1">Chemical connectivity factor</Typography>
             <Box>
                 <TextField
-                    label="Factor"
+                    label="Value"
                     type="number"
                     className="inverse stepper cell-repetitions"
                     id="chemical-connectivity-factor"
