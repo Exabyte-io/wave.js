@@ -18,6 +18,12 @@ module.exports = {
     // A list of paths to modules that run some code to configure or set up the testing environment.
     setupFiles: ["./tests/setupFiles.js"],
 
+    // Adding this config to accommodate for new TS files
+    // https://jestjs.io/docs/getting-started#using-typescript
+    transform: {
+        "^.+\\.[t|j]sx?$": "babel-jest",
+    },
+
     transformIgnorePatterns: ["<rootDir>/node_modules/(?!(three|@exabyte-io/cove.js)/)"],
 
     // mock css files: https://jestjs.io/docs/en/webpack#handling-static-assets
