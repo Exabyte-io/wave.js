@@ -376,7 +376,7 @@ export class ThreeDEditor extends React.Component {
         const { isDistanceShown, isAnglesShown } = measuresSettings;
         const viewSettingsActions = [
             {
-                id: "Divider",
+                id: "divider-1",
                 isDivider: true,
             },
             {
@@ -446,7 +446,7 @@ export class ThreeDEditor extends React.Component {
                 onClick: this.handleToggleIsViewAdjustable,
             },
             {
-                id: "divider",
+                id: "divider-2",
                 isDivider: true,
             },
             {
@@ -460,7 +460,7 @@ export class ThreeDEditor extends React.Component {
 
         const measurementsActions = [
             {
-                id: "Divider",
+                id: "divider-3",
                 isDivider: true,
             },
             {
@@ -484,7 +484,7 @@ export class ThreeDEditor extends React.Component {
                 onClick: this.handleDeleteConnection,
             },
             {
-                id: "Divider",
+                id: "divider-4",
                 isDivider: true,
             },
             {
@@ -516,7 +516,7 @@ export class ThreeDEditor extends React.Component {
 
         const exportActions = [
             {
-                id: "Divider",
+                id: "divider-5",
                 isDivider: true,
             },
             {
