@@ -23,7 +23,7 @@ function SquareIconButton(props: SquareIconButtonProps) {
         id,
         label,
         onClick,
-        tooltipPlacement = "top",
+        tooltipPlacement = "right",
         isToggleable = true,
         isToggled = false,
     } = props;
