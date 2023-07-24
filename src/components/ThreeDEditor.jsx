@@ -380,10 +380,10 @@ export class ThreeDEditor extends React.Component {
         return <CheckIcon style={{ color: DarkMaterialUITheme.palette.grey[800] }} />;
     }
 
-    getToolbarConfig() {
-        const { viewerSettings, measuresSettings, isConventionalCellShown } = this.state;
-        const { isDistanceShown, isAnglesShown } = measuresSettings;
-        const viewSettingsActions = [
+    getViewSettingsActions = () => {
+        const { viewerSettings, isConventionalCellShown } = this.state;
+
+        return [
             {
                 id: "divider-1",
                 isDivider: true,
@@ -466,8 +466,12 @@ export class ThreeDEditor extends React.Component {
                 onClick: this.handleResetViewer,
             },
         ];
+    };
 
-        const measurementsActions = [
+    getMeasurementsActions = () => {
+        const { measuresSettings } = this.state;
+        const { isDistanceShown, isAnglesShown } = measuresSettings;
+        return [
             {
                 id: "divider-3",
                 isDivider: true,
@@ -503,7 +507,9 @@ export class ThreeDEditor extends React.Component {
                 onClick: this.handleResetMeasures,
             },
         ];
+    };
 
+    getExportActions = () => {
         const downloadActions = [
             {
                 id: "JSON",
@@ -520,8 +526,7 @@ export class ThreeDEditor extends React.Component {
                 onClick: () => this.handleDownloadClick("poscar"),
             },
         ];
-
-        const exportActions = [
+        return [
             {
                 id: "divider-5",
                 isDivider: true,
@@ -541,14 +546,28 @@ export class ThreeDEditor extends React.Component {
                 actions: downloadActions,
             },
         ];
+    };
 
-        return [
+    getParametersActions = () => {
+        const { viewerSettings } = this.state;
+        return (
+            <ParametersMenu
+                viewerSettings={viewerSettings}
+                handleSphereRadiusChange={this.handleSphereRadiusChange}
+                handleCellRepetitionsChange={this.handleCellRepetitionsChange}
+                handleChemicalConnectivityFactorChange={this.handleChemicalConnectivityFactorChange}
+            />
+        );
+    };
+
+    getToolbarConfig() {
+        const toolbarConfig = [
             {
                 id: "View",
                 title: "View",
                 header: "View",
                 leftIcon: <RemoveRedEye />,
-                actions: viewSettingsActions,
+                actions: this.getViewSettingsActions(),
                 onClick: () => this.handleToggleToolbarMenu("view-settings"),
             },
             {
@@ -557,16 +576,7 @@ export class ThreeDEditor extends React.Component {
                 header: "Parameters",
                 shouldMenuStayOpened: true,
                 leftIcon: <Settings />,
-                contentObject: (
-                    <ParametersMenu
-                        viewerSettings={viewerSettings}
-                        handleSphereRadiusChange={this.handleSphereRadiusChange}
-                        handleCellRepetitionsChange={this.handleCellRepetitionsChange}
-                        handleChemicalConnectivityFactorChange={
-                            this.handleChemicalConnectivityFactorChange
-                        }
-                    />
-                ),
+                contentObject: this.getParametersActions(),
                 onClick: () => this.handleToggleToolbarMenu("parameters"),
             },
             {
@@ -574,21 +584,15 @@ export class ThreeDEditor extends React.Component {
                 title: "Measurements",
                 header: "Measurements",
                 leftIcon: <SquareFootIcon />,
-                actions: measurementsActions,
+                actions: this.getMeasurementsActions(),
                 onClick: () => this.handleToggleToolbarMenu("measurements"),
-            },
-            {
-                id: "3DEdit",
-                title: "Edit",
-                leftIcon: <Edit />,
-                onClick: this.toggleThreejsEditorModal,
             },
             {
                 id: "Export",
                 title: "Export",
                 header: "Export",
                 leftIcon: <ImportExport />,
-                actions: exportActions,
+                actions: this.getExportActions(),
                 onClick: () => this.handleToggleToolbarMenu("export"),
             },
             {
@@ -598,6 +602,17 @@ export class ThreeDEditor extends React.Component {
                 onClick: () => console.log("Fullscreen toggled"),
             },
         ];
+
+        const { editable } = this.props;
+        if (editable) {
+            toolbarConfig.splice(3, 0, {
+                id: "3DEdit",
+                title: "Edit",
+                leftIcon: <Edit />,
+                onClick: this.toggleThreejsEditorModal,
+            });
+        }
+        return toolbarConfig;
     }
 
     /** Helper to construct a compound CSS classname based on interactivity state */
@@ -632,8 +647,6 @@ export class ThreeDEditor extends React.Component {
     renderWaveOrThreejsEditorModal() {
         const { originalMaterial, isThreejsEditorModalShown } = this.state;
 
-        // eslint-disable-next-line no-unused-vars
-        const { editable } = this.props;
         if (isThreejsEditorModalShown) {
             return (
                 <ThreejsEditorModal
