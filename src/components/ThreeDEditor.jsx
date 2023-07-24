@@ -13,6 +13,7 @@ import Dehaze from "@mui/icons-material/Dehaze";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import FormatShapes from "@mui/icons-material/FormatShapes";
+import Fullscreen from "@mui/icons-material/Fullscreen";
 import GpsFixed from "@mui/icons-material/GpsFixed";
 import HeightIcon from "@mui/icons-material/Height";
 import ImportExport from "@mui/icons-material/ImportExport";
@@ -33,8 +34,8 @@ import React from "react";
 
 import settings from "../settings";
 import { exportToDisk } from "../utils";
-import IconsToolbar from "./IconsToolbar.tsx";
-import ParametersMenu from "./ParametersMenu.tsx";
+import IconsToolbar from "./IconsToolbar";
+import ParametersMenu from "./ParametersMenu";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
 import { WaveComponent } from "./WaveComponent";
 
@@ -590,7 +591,12 @@ export class ThreeDEditor extends React.Component {
                 actions: exportActions,
                 onClick: () => this.handleToggleToolbarMenu("export"),
             },
-            // fullscreen option is not present here but is used in materials-designer
+            {
+                id: "Fullscreen",
+                title: "Fullscreen",
+                leftIcon: <Fullscreen />,
+                onClick: () => console.log("Fullscreen toggled"),
+            },
         ];
     }
 
