@@ -13,7 +13,6 @@ import Dehaze from "@mui/icons-material/Dehaze";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import FormatShapes from "@mui/icons-material/FormatShapes";
-import Fullscreen from "@mui/icons-material/Fullscreen";
 import GpsFixed from "@mui/icons-material/GpsFixed";
 import HeightIcon from "@mui/icons-material/Height";
 import ImportExport from "@mui/icons-material/ImportExport";
@@ -594,12 +593,6 @@ export class ThreeDEditor extends React.Component {
                 leftIcon: <ImportExport />,
                 actions: this.getExportActions(),
                 onClick: () => this.handleToggleToolbarMenu("export"),
-            },
-            {
-                id: "Fullscreen",
-                title: "Fullscreen",
-                leftIcon: <Fullscreen />,
-                onClick: () => console.log("Fullscreen toggled"),
             },
         ];
 
