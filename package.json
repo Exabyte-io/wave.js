@@ -5,7 +5,7 @@
     "scripts": {
         "prepublishOnly": "rm -rf dist; npm run transpile",
         "start": "cross-env PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
-        "transpile": "babel --out-dir dist src && sass src/stylesheets:dist/stylesheets",
+        "transpile": "babel --extensions '.ts,.tsx' --out-dir dist src && sass src/stylesheets:dist/stylesheets",
         "postinstall": "npm run transpile",
         "test": "npx jest",
         "lint": "eslint src tests",
@@ -38,7 +38,7 @@
         "@babel/runtime-corejs2": "7.16.7",
         "@emotion/react": "^11.10.5",
         "@emotion/styled": "^11.10.5",
-        "@exabyte-io/cove.js": "^2023.7.22-0",
+        "@exabyte-io/cove.js": "https://github.com/Exabyte-io/cove.js#cc48da9652840eb0f7d8854e02cb690484e6fab1",
         "@exabyte-io/periodic-table.js": "2022.5.5-2",
         "@mui/icons-material": "^5.11.0",
         "@mui/material": "^5.11.9",
