@@ -13,6 +13,7 @@ import { Script } from "three/editor/js/Script";
 import { Sidebar } from "three/editor/js/Sidebar";
 import { Toolbar } from "three/editor/js/Toolbar";
 import { Viewport } from "three/editor/js/Viewport";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
@@ -74,12 +75,6 @@ export class ThreejsEditorModal extends ModalDialog {
         return camera;
     };
 
-    initializeControls = () => {
-        window.VIEW_HELPER.controls.panSpeed = 0.006;
-        window.VIEW_HELPER.controls.rotationSpeed = 0.015;
-        window.VIEW_HELPER.controls.zoomSpeed = 0.2;
-    };
-
     initializeLights() {
         const directionalLight = new THREE.DirectionalLight("#FFFFFF");
         directionalLight.position.copy(new THREE.Vector3(0.2, 0.2, -1).normalize());
@@ -117,7 +112,14 @@ export class ThreejsEditorModal extends ModalDialog {
         const toolbar = new Toolbar(this.editor);
         this.domElement.appendChild(toolbar.dom);
 
-        this.initializeControls();
+        // initialize controls
+        this.editor.controls = new OrbitControls(this.editor.camera, viewport.dom);
+        this.editor.controls.up = new THREE.Vector3(0, 0, 1);
+
+        // set controls parameters
+        this.editor.controls.panSpeed = 0.006;
+        this.editor.controls.rotationSpeed = 0.015;
+        this.editor.controls.zoomSpeed = 0.2;
 
         this.initializeLights();
     }
