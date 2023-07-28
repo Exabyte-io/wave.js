@@ -38,7 +38,7 @@
         "@babel/runtime-corejs2": "7.16.7",
         "@emotion/react": "^11.10.5",
         "@emotion/styled": "^11.10.5",
-        "@exabyte-io/cove.js": "https://github.com/Exabyte-io/cove.js#cc48da9652840eb0f7d8854e02cb690484e6fab1",
+        "@exabyte-io/cove.js": "https://github.com/Exabyte-io/cove.js#feature/SOF-6782",
         "@exabyte-io/periodic-table.js": "2022.5.5-2",
         "@mui/icons-material": "^5.11.0",
         "@mui/material": "^5.11.9",
