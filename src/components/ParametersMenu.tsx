@@ -38,7 +38,6 @@ function ParametersMenu(props: ParametersMenuProps) {
 
     return (
         <Stack spacing={theme.spacing(1)} sx={{ margin: theme.spacing(2) }}>
-            <Divider />
             <Typography variant="subtitle1">Atomic radius</Typography>
             <Box>
                 <TextField

@@ -23,7 +23,7 @@ function SquareIconButton(props: SquareIconButtonProps) {
         id,
         label,
         onClick,
-        tooltipPlacement = "right",
+        tooltipPlacement = "top",
         isToggleable = true,
         isToggled = false,
     } = props;
@@ -32,6 +32,7 @@ function SquareIconButton(props: SquareIconButtonProps) {
 
     const defaultIconButtonStyle = {
         borderRadius: 0,
+        fontSize: theme.typography.h2.fontSize,
         height: theme.spacing(6),
         width: theme.spacing(6),
         backgroundColor: theme.palette.background.paper,
