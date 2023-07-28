@@ -531,6 +531,7 @@ export class ThreeDEditor extends React.Component {
                 content: "Download",
                 leftIcon: <CloudDownload />,
                 actions: downloadActions,
+                paperPlacement: "right-end",
             },
         ];
     };

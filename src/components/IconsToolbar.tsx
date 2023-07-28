@@ -20,11 +20,13 @@ interface ToolbarConfig {
     leftIcon: React.ReactNode;
     actions?: NestedDropdownAction[];
     contentObject?: NestedDropdownProps["contentObject"];
+    paperPlacement?: NestedDropdownProps["paperPlacement"];
 }
 interface IconToolbarProps {
     handleToggleInteractive: () => void;
     isInteractive: boolean;
     toolbarConfig: ToolbarConfig[];
+    paperPlacement?: NestedDropdownProps["paperPlacement"];
 }
 
 function IconsToolbar(props: IconToolbarProps) {
@@ -74,7 +76,7 @@ function IconsToolbar(props: IconToolbarProps) {
                                 contentObject={config.contentObject}
                                 key={config.key || config.id}
                                 data-name={config.id}
-                                paperPlacement="right-start"
+                                paperPlacement={config.paperPlacement || "right-start"}
                                 paperSx={paperSx}
                                 isMobile={isMobile}
                             >
