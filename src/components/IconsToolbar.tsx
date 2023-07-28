@@ -5,8 +5,7 @@ import NestedDropdown, {
 } from "@exabyte-io/cove.js/dist/mui/components/nested-dropdown/NestedDropdown";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
 import ButtonGroup from "@mui/material/ButtonGroup";
-import { PaperProps } from "@mui/material/Paper";
-import { useTheme } from "@mui/material/styles";
+import { SxProps, useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import React from "react";
 
@@ -39,7 +38,7 @@ function IconsToolbar(props: IconToolbarProps) {
         boxShadow: theme.shadows[4],
     };
 
-    const paperSx: PaperProps["sx"] = {
+    const paperSx: SxProps = {
         margin: theme.spacing(2),
         boxShadow: theme.shadows[4],
     };
