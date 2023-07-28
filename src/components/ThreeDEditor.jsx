@@ -384,10 +384,6 @@ export class ThreeDEditor extends React.Component {
 
         return [
             {
-                id: "divider-1",
-                isDivider: true,
-            },
-            {
                 id: "rotate-zoom",
                 disabled: false,
                 content: "Rotate/Zoom",
@@ -472,10 +468,6 @@ export class ThreeDEditor extends React.Component {
         const { isDistanceShown, isAnglesShown } = measuresSettings;
         return [
             {
-                id: "divider-3",
-                isDivider: true,
-            },
-            {
                 id: "Distances",
                 content: "Distances",
                 rightIcon: this.getCheckmark(isDistanceShown),
@@ -496,7 +488,7 @@ export class ThreeDEditor extends React.Component {
                 onClick: this.handleDeleteConnection,
             },
             {
-                id: "divider-4",
+                id: "divider-actions",
                 isDivider: true,
             },
             {
@@ -526,10 +518,6 @@ export class ThreeDEditor extends React.Component {
             },
         ];
         return [
-            {
-                id: "divider-5",
-                isDivider: true,
-            },
             {
                 id: "Screenshot",
                 title: "Screenshot",
