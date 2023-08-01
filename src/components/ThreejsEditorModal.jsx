@@ -136,6 +136,21 @@ export class ThreejsEditorModal extends ModalDialog {
             },
             false,
         );
+
+        // on right click and hold disable orbit controls to allow pan
+        document.addEventListener("mousedown", (event) => {
+            if (event.button === THREE.MOUSE.RIGHT) {
+                this.editor.controls.enabled = false;
+            }
+        });
+
+        // on right click release enable orbit controls
+        document.addEventListener("mouseup", (event) => {
+            if (event.button === THREE.MOUSE.RIGHT) {
+                this.editor.controls.enabled = true;
+            }
+        });
+
         const onResize = () => this.editor.signals.windowResize.dispatch();
         window.addEventListener("resize", onResize, false);
         onResize();
