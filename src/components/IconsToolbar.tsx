@@ -60,7 +60,7 @@ function IconsToolbar(props: IconToolbarProps) {
                 onClick={handleToggleInteractive}
             >
                 {isInteractive ? (
-                    <IconByName name="close" sx={{ color: theme.palette.warning.main }} />
+                    <IconByName name="actions.close" sx={{ color: theme.palette.warning.main }} />
                 ) : (
                     <PowerSettingsNew />
                 )}
