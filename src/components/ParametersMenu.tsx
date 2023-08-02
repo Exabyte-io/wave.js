@@ -11,6 +11,8 @@ export type ViewerSettings = {
     chemicalConnectivityFactor: number;
 };
 
+type ViewerSettingsKey = keyof ViewerSettings;
+
 interface ParametersMenuProps {
     viewerSettings: ViewerSettings;
     handleSphereRadiusChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -59,6 +61,8 @@ function ParametersMenu(props: ParametersMenuProps) {
             <Typography variant="subtitle1">Repetition along vectors:</Typography>
             <Stack key="repetition" direction="row" spacing={theme.spacing(2)}>
                 {["A", "B", "C"].map((label) => {
+                    const key = `repetitionsAlongLatticeVector${label}` as ViewerSettingsKey;
+
                     return (
                         <Box key={label}>
                             <TextField
@@ -66,12 +70,7 @@ function ParametersMenu(props: ParametersMenuProps) {
                                 type="number"
                                 className="inverse stepper cell-repetitions"
                                 id={`repetitionsAlongLatticeVector${label}`}
-                                value={
-                                    // @ts-ignore
-                                    (viewerSettings as { [key: string]: any })[
-                                        `repetitionsAlongLatticeVector${label}`
-                                    ]
-                                }
+                                value={viewerSettings[key]}
                                 onChange={handleCellRepetitionsChange}
                                 sx={defaultTextFieldStyle}
                                 inputProps={{
