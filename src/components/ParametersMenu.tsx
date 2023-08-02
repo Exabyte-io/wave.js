@@ -67,6 +67,7 @@ function ParametersMenu(props: ParametersMenuProps) {
                                 className="inverse stepper cell-repetitions"
                                 id={`repetitionsAlongLatticeVector${label}`}
                                 value={
+                                    // @ts-ignore
                                     (viewerSettings as { [key: string]: any })[
                                         `repetitionsAlongLatticeVector${label}`
                                     ]
