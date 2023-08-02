@@ -9,6 +9,7 @@ RUN yum update -y && \
         mesa-dri-drivers \
         xorg-x11-server-Xvfb \
         wget \
+        git \ # to install package from github \
         which \
         make \
         scl-utils \

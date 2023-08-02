@@ -23,6 +23,7 @@ export const BondsMixin = (superclass) =>
          * Creates bond asynchronously as bonds creation takes time for large structures.
          */
         createBondsAsync() {
+            // eslint-disable-next-line @typescript-eslint/no-this-alias
             const clsInstance = this;
             clsInstance.areBondsCreated = false;
             setTimeout(() => {

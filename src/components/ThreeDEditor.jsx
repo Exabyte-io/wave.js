@@ -1,11 +1,15 @@
 /* eslint-disable react/sort-comp */
 // import "../MuiClassNameSetup";
 
+import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
+import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
 import { Made } from "@exabyte-io/made.js";
+import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
-import BubbleChart from "@mui/icons-material/BubbleChart";
+import CheckIcon from "@mui/icons-material/Check";
 import CloudDownload from "@mui/icons-material/CloudDownload";
 import ControlCameraRounded from "@mui/icons-material/ControlCameraRounded";
+import Dehaze from "@mui/icons-material/Dehaze";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import FormatShapes from "@mui/icons-material/FormatShapes";
@@ -13,17 +17,14 @@ import GpsFixed from "@mui/icons-material/GpsFixed";
 import HeightIcon from "@mui/icons-material/Height";
 import ImportExport from "@mui/icons-material/ImportExport";
 import LooksIcon from "@mui/icons-material/Looks";
-import Menu from "@mui/icons-material/Menu";
-import NotInterested from "@mui/icons-material/NotInterested";
 import PictureInPicture from "@mui/icons-material/PictureInPicture";
-import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
+import Settings from "@mui/icons-material/Settings";
 import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
-import { Tooltip } from "@mui/material";
 import { StyledEngineProvider } from "@mui/material/styles";
 import setClass from "classnames";
 import $ from "jquery";
@@ -32,8 +33,8 @@ import React from "react";
 
 import settings from "../settings";
 import { exportToDisk } from "../utils";
-import { IconToolbar } from "./IconToolbar";
-import { RoundIconButton } from "./RoundIconButton";
+import IconsToolbar from "./IconsToolbar";
+import ParametersMenu from "./ParametersMenu";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
 import { WaveComponent } from "./WaveComponent";
 
@@ -52,6 +53,7 @@ export class ThreeDEditor extends React.Component {
         this.state = {
             // on/off switch for the component
             isInteractive: false,
+            activeToolbarMenu: null,
             isThreejsEditorModalShown: false,
             // isDistanceAndAnglesShown: false,
             measuresSettings: {
@@ -84,6 +86,7 @@ export class ThreeDEditor extends React.Component {
         this.handleSphereRadiusChange = this.handleSphereRadiusChange.bind(this);
         this.handleDownloadClick = this.handleDownloadClick.bind(this);
         this.handleToggleInteractive = this.handleToggleInteractive.bind(this);
+        this.handleToggleToolbarMenu = this.handleToggleToolbarMenu.bind(this);
         this.handleToggleBonds = this.handleToggleBonds.bind(this);
         this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
@@ -189,14 +192,29 @@ export class ThreeDEditor extends React.Component {
         this.handleSetSetting({ isViewAdjustable: !isViewAdjustable });
     }
 
-    handleDownloadClick() {
+    handleDownloadClick(format = "poscar") {
         const { originalMaterial } = this.state;
-        exportToDisk(originalMaterial.getAsPOSCAR(), originalMaterial.name, "poscar");
+        let content;
+        switch (format) {
+            case "poscar":
+                content = originalMaterial.getAsPOSCAR();
+                break;
+            default:
+                content = originalMaterial.toJSON();
+        }
+        exportToDisk(content, originalMaterial.name, format);
     }
 
     handleToggleInteractive() {
         const { isInteractive } = this.state;
         this.setState({ isInteractive: !isInteractive });
+    }
+
+    handleToggleToolbarMenu(toolbarMenuName) {
+        this.setState((prevState) => ({
+            activeToolbarMenu:
+                prevState.activeToolbarMenu === toolbarMenuName ? null : toolbarMenuName,
+        }));
     }
 
     handleToggleBonds() {
@@ -320,358 +338,6 @@ export class ThreeDEditor extends React.Component {
         return <div className="atom-view-cover" style={style} />;
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    get classNamesForTopToolbar() {
-        return "buttons-toolbar buttons-toolbar-top pull-left";
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    get classNamesForBottomToolbar() {
-        return "buttons-toolbar buttons-toolbar-bottom pull-left";
-    }
-
-    /**
-     * ON/OFF switch button
-     */
-    renderInteractiveSwitch() {
-        const { isInteractive } = this.state;
-        return (
-            <div className={setClass(this.classNamesForTopToolbar)} data-name="Interactive">
-                <RoundIconButton
-                    tooltipPlacement="top"
-                    title="Interactive"
-                    isToggled={isInteractive}
-                    onClick={this.handleToggleInteractive}
-                >
-                    {isInteractive ? <NotInterested /> : <PowerSettingsNew />}
-                </RoundIconButton>
-            </div>
-        );
-    }
-
-    /**
-     * Items for Export toolbar
-     */
-    getExportToolbarItems() {
-        return [
-            <RoundIconButton
-                key="Screenshot"
-                tooltipPlacement="top"
-                title="Screenshot"
-                isToggleable={false}
-                onClick={this.handleTakeScreenshot}
-            >
-                <PictureInPicture />
-            </RoundIconButton>,
-
-            <RoundIconButton
-                key="Download"
-                tooltipPlacement="top"
-                title="Download"
-                isToggleable={false}
-                onClick={this.handleDownloadClick}
-            >
-                <CloudDownload />
-            </RoundIconButton>,
-        ];
-    }
-
-    renderExportToolbar(className = "") {
-        const { isInteractive } = this.state;
-        return (
-            <IconToolbar
-                className={className}
-                title="Export"
-                iconComponent={ImportExport}
-                isHidden={!isInteractive}
-            >
-                {this.getExportToolbarItems()}
-            </IconToolbar>
-        );
-    }
-
-    /**
-     * Items for View toolbar
-     */
-    getViewToolbarItems() {
-        const { isConventionalCellShown, viewerSettings } = this.state;
-        return [
-            <RoundIconButton
-                key="Rotate/Zoom View [O]"
-                tooltipPlacement="top"
-                isToggled={this._getWaveProperty("areOrbitControlsEnabled")}
-                title="Rotate/Zoom View [O]"
-                onClick={this.handleToggleOrbitControls}
-            >
-                <ThreeDRotation />
-            </RoundIconButton>,
-
-            <RoundIconButton
-                key="Toggle Auto Rotate"
-                tooltipPlacement="top"
-                isToggled={this._getWaveProperty("isOrbitControlsAnimationEnabled")}
-                title="Toggle Auto Rotate"
-                onClick={this.handleToggleOrbitControlsAnimation}
-            >
-                <Autorenew />
-            </RoundIconButton>,
-
-            <RoundIconButton
-                key="Toggle Axes"
-                tooltipPlacement="top"
-                isToggled={this._getWaveProperty("areAxesEnabled")}
-                title="Toggle Axes"
-                onClick={this.handleToggleAxes}
-            >
-                <GpsFixed />
-            </RoundIconButton>,
-
-            <RoundIconButton
-                key="Toggle Orthographic Camera"
-                tooltipPlacement="top"
-                title="Toggle Orthographic Camera"
-                isToggled={this._getWaveProperty("isCameraOrthographic")}
-                onClick={this.handleToggleOrthographicCamera}
-            >
-                <SwitchCamera />
-            </RoundIconButton>,
-
-            <RoundIconButton
-                key="Toggle Bonds"
-                tooltipPlacement="top"
-                title="Toggle Bonds"
-                isToggled={this._getWaveProperty("isDrawBondsEnabled")}
-                onClick={this.handleToggleBonds}
-            >
-                <Menu
-                    anchorOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
-                    }}
-                />
-            </RoundIconButton>,
-
-            <RoundIconButton
-                key="Toggle Conventional Cell"
-                tooltipPlacement="top"
-                title="Toggle Conventional Cell"
-                isToggled={isConventionalCellShown}
-                onClick={this.handleToggleConventionalCell}
-            >
-                <FormatShapes />
-            </RoundIconButton>,
-
-            <RoundIconButton
-                key="Toggle Labels"
-                tooltipPlacement="top"
-                title="Toggle Labels"
-                isToggled={this._getWaveProperty("areLabelsShown")}
-                onClick={this.handleToggleLabels}
-            >
-                <Spellcheck />
-            </RoundIconButton>,
-
-            <RoundIconButton
-                key="Toggle View Adjustment"
-                tooltipPlacement="top"
-                title="Toggle View Adjustment"
-                isToggled={viewerSettings.isViewAdjustable}
-                onClick={this.handleToggleIsViewAdjustable}
-            >
-                <ControlCameraRounded />
-            </RoundIconButton>,
-
-            <RoundIconButton
-                key="Reset View"
-                tooltipPlacement="top"
-                title="Reset View"
-                isToggleable={false}
-                onClick={this.handleResetViewer}
-            >
-                <Replay />
-            </RoundIconButton>,
-        ];
-    }
-
-    renderViewToolbar(className = "") {
-        const { isInteractive } = this.state;
-        return (
-            <IconToolbar
-                className={className}
-                title="View"
-                iconComponent={RemoveRedEye}
-                isHidden={!isInteractive}
-            >
-                {this.getViewToolbarItems()}
-            </IconToolbar>
-        );
-    }
-
-    getMeasuresToolbarItems() {
-        const { measuresSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measuresSettings;
-
-        return [
-            <RoundIconButton
-                key="Distance"
-                tooltipPlacement="top"
-                title="Distance"
-                isToggled={isDistanceShown}
-                onClick={this.handleToggleDistanceShown}
-            >
-                <HeightIcon />
-            </RoundIconButton>,
-            <RoundIconButton
-                key="Angles"
-                tooltipPlacement="top"
-                title="Angles"
-                isToggled={isAnglesShown}
-                onClick={this.handleToggleAnglesShown}
-            >
-                <LooksIcon />
-            </RoundIconButton>,
-            <RoundIconButton
-                key="Reset Measures"
-                tooltipPlacement="top"
-                title="Reset Measures"
-                isToggleable={false}
-                onClick={this.handleResetMeasures}
-            >
-                <Replay />
-            </RoundIconButton>,
-
-            <RoundIconButton
-                key="Delete"
-                tooltipPlacement="top"
-                title="Delete connection"
-                isToggleable={false}
-                onClick={this.handleDeleteConnection}
-            >
-                <DeleteIcon />
-            </RoundIconButton>,
-        ];
-    }
-
-    renderMeasuresToolbar(className) {
-        const { isInteractive } = this.state;
-
-        return (
-            <IconToolbar
-                className={className}
-                title="Measurements"
-                iconComponent={SquareFootIcon}
-                isHidden={!isInteractive}
-            >
-                {this.getMeasuresToolbarItems()}
-            </IconToolbar>
-        );
-    }
-
-    getParametersToolbarItems() {
-        const { viewerSettings } = this.state;
-        return [
-            <Tooltip key="RADIUS" title="RADIUS" placement="top" disableInteractive>
-                <input
-                    className="inverse stepper sphere-radius"
-                    id="sphere-radius"
-                    value={viewerSettings.atomRadiiScale}
-                    type="number"
-                    max="10"
-                    min="0.1"
-                    step="0.1"
-                    onChange={this.handleSphereRadiusChange}
-                />
-            </Tooltip>,
-
-            <Tooltip key="A" title="A" placement="top" disableInteractive>
-                <input
-                    className="inverse stepper cell-repetitions"
-                    id="repetitionsAlongLatticeVectorA"
-                    value={viewerSettings.repetitionsAlongLatticeVectorA}
-                    type="number"
-                    max="10"
-                    min="1"
-                    step="1"
-                    onChange={this.handleCellRepetitionsChange}
-                />
-            </Tooltip>,
-
-            <Tooltip key="B" title="B" placement="top" disableInteractive>
-                <input
-                    className="inverse stepper cell-repetitions"
-                    id="repetitionsAlongLatticeVectorB"
-                    value={viewerSettings.repetitionsAlongLatticeVectorB}
-                    type="number"
-                    max="10"
-                    min="1"
-                    step="1"
-                    onChange={this.handleCellRepetitionsChange}
-                />
-            </Tooltip>,
-
-            <Tooltip key="C" title="C" placement="top" disableInteractive>
-                <input
-                    className="inverse stepper cell-repetitions"
-                    id="repetitionsAlongLatticeVectorC"
-                    value={viewerSettings.repetitionsAlongLatticeVectorC}
-                    type="number"
-                    max="10"
-                    min="1"
-                    step="1"
-                    onChange={this.handleCellRepetitionsChange}
-                />
-            </Tooltip>,
-
-            <Tooltip
-                key="CHEMICAL_CONNECTIVITY_FACTOR"
-                title="CHEMICAL CONNECTIVITY FACTOR"
-                placement="top"
-                disableInteractive
-            >
-                <input
-                    className="inverse stepper cell-repetitions"
-                    id="chemical-connectivity-factor"
-                    value={viewerSettings.chemicalConnectivityFactor}
-                    type="number"
-                    max="2"
-                    min="0"
-                    step="0.01"
-                    onChange={this.handleChemicalConnectivityFactorChange}
-                />
-            </Tooltip>,
-        ];
-    }
-
-    renderParametersToolbar(className = "") {
-        const { isInteractive } = this.state;
-        return (
-            <IconToolbar
-                className={className}
-                title="Parameters"
-                iconComponent={BubbleChart}
-                isHidden={!isInteractive}
-            >
-                {this.getParametersToolbarItems()}
-            </IconToolbar>
-        );
-    }
-
-    render3DEditToggle(className = "") {
-        const { isInteractive } = this.state;
-        return (
-            <div className={setClass(className, { hidden: !isInteractive })} data-name="3DEdit">
-                <RoundIconButton
-                    key="3D Editor"
-                    tooltipPlacement="top"
-                    title="3D Editor"
-                    onClick={this.toggleThreejsEditorModal}
-                >
-                    <Edit />
-                </RoundIconButton>
-            </div>
-        );
-    }
-
     renderWaveComponent() {
         const {
             isConventionalCellShown,
@@ -704,22 +370,231 @@ export class ThreeDEditor extends React.Component {
         );
     }
 
-    /**
-     * Helper to produce RoundIconButton
-     * TODO: adjust the code above to use this
-     * */
-    // eslint-disable-next-line react/no-unused-class-component-methods, class-methods-use-this
-    getRoundIconButton(title, tooltipPlacement, onClick, icon) {
+    // TODO: move in the toolbar component when it's created
+    // eslint-disable-next-line class-methods-use-this
+    getCheckmark(isActive) {
+        if (isActive) {
+            return <CheckIcon style={{ color: DarkMaterialUITheme.palette.success.main }} />;
+        }
+        return <CheckIcon style={{ color: DarkMaterialUITheme.palette.grey[800] }} />;
+    }
+
+    getViewSettingsActions = () => {
+        const { viewerSettings, isConventionalCellShown } = this.state;
+
+        return [
+            {
+                id: "rotate-zoom",
+                disabled: false,
+                content: "Rotate/Zoom",
+                leftIcon: <ThreeDRotation />,
+                rightIcon: this.getCheckmark(this._getWaveProperty("areOrbitControlsEnabled")),
+                onClick: this.handleToggleOrbitControls,
+            },
+            {
+                id: "auto-rotate",
+                disabled: false,
+                content: "Auto Rotate",
+                leftIcon: <Autorenew />,
+                rightIcon: this.getCheckmark(
+                    this._getWaveProperty("isOrbitControlsAnimationEnabled"),
+                ),
+                onClick: this.handleToggleOrbitControlsAnimation,
+            },
+            {
+                id: "toggle-axes",
+                disabled: false,
+                content: "Axes",
+                leftIcon: <GpsFixed />,
+                rightIcon: this.getCheckmark(this._getWaveProperty("areAxesEnabled")),
+                onClick: this.handleToggleAxes,
+            },
+            {
+                id: "toggle-camera",
+                disabled: false,
+                content: "Orthographic Camera",
+                leftIcon: <SwitchCamera />,
+                rightIcon: this.getCheckmark(this._getWaveProperty("isCameraOrthographic")),
+                onClick: this.handleToggleOrthographicCamera,
+            },
+            {
+                id: "toggle-bonds",
+                disabled: false,
+                content: "Bonds",
+                leftIcon: <Dehaze />,
+                rightIcon: this.getCheckmark(this._getWaveProperty("isDrawBondsEnabled")),
+                onClick: this.handleToggleBonds,
+            },
+            {
+                id: "toggle-cell",
+                disabled: false,
+                content: "Conventional Cell",
+                leftIcon: <FormatShapes />,
+                rightIcon: this.getCheckmark(isConventionalCellShown),
+                onClick: this.handleToggleConventionalCell,
+            },
+            {
+                id: "toggle-labels",
+                disabled: false,
+                content: "Labels",
+                leftIcon: <Spellcheck />,
+                rightIcon: this.getCheckmark(this._getWaveProperty("areLabelsShown")),
+                onClick: this.handleToggleLabels,
+            },
+            {
+                id: "toggle-view-adjustment",
+                disabled: false,
+                content: "Auto-center on change",
+                leftIcon: <ControlCameraRounded />,
+                rightIcon: this.getCheckmark(viewerSettings.isViewAdjustable),
+                onClick: this.handleToggleIsViewAdjustable,
+            },
+            {
+                id: "divider-2",
+                isDivider: true,
+            },
+            {
+                id: "reset-view",
+                disabled: false,
+                content: "Reset View",
+                leftIcon: <Replay />,
+                onClick: this.handleResetViewer,
+            },
+        ];
+    };
+
+    getMeasurementsActions = () => {
+        const { measuresSettings } = this.state;
+        const { isDistanceShown, isAnglesShown } = measuresSettings;
+        return [
+            {
+                id: "Distances",
+                content: "Distances",
+                rightIcon: this.getCheckmark(isDistanceShown),
+                leftIcon: <HeightIcon />,
+                onClick: this.handleToggleDistanceShown,
+            },
+            {
+                id: "Angles",
+                content: "Angles",
+                rightIcon: this.getCheckmark(isAnglesShown),
+                leftIcon: <LooksIcon />,
+                onClick: this.handleToggleAnglesShown,
+            },
+            {
+                id: "Delete",
+                content: "Delete connection",
+                leftIcon: <DeleteIcon />,
+                onClick: this.handleDeleteConnection,
+            },
+            {
+                id: "divider-actions",
+                isDivider: true,
+            },
+            {
+                id: "Reset Measures",
+                content: "Reset Measures",
+                leftIcon: <Replay />,
+                onClick: this.handleResetMeasures,
+            },
+        ];
+    };
+
+    getExportActions = () => {
+        const downloadActions = [
+            {
+                id: "JSON",
+                title: "JSON",
+                content: "JSON",
+                leftIcon: <Article />,
+                onClick: () => this.handleDownloadClick("json"),
+            },
+            {
+                id: "POSCAR",
+                title: "POSCAR",
+                content: "POSCAR",
+                leftIcon: <Article />,
+                onClick: () => this.handleDownloadClick("poscar"),
+            },
+        ];
+        return [
+            {
+                id: "Screenshot",
+                title: "Screenshot",
+                content: "Screenshot",
+                leftIcon: <PictureInPicture />,
+                onClick: this.handleTakeScreenshot,
+            },
+            {
+                id: "Download",
+                title: "Download",
+                content: "Download",
+                leftIcon: <CloudDownload />,
+                actions: downloadActions,
+                paperPlacement: "right-start",
+            },
+        ];
+    };
+
+    getParametersActions = () => {
+        const { viewerSettings } = this.state;
         return (
-            <RoundIconButton
-                tooltipPlacement={tooltipPlacement}
-                title={title}
-                isToggleable={false}
-                onClick={onClick}
-            >
-                {icon}
-            </RoundIconButton>
+            <ParametersMenu
+                viewerSettings={viewerSettings}
+                handleSphereRadiusChange={this.handleSphereRadiusChange}
+                handleCellRepetitionsChange={this.handleCellRepetitionsChange}
+                handleChemicalConnectivityFactorChange={this.handleChemicalConnectivityFactorChange}
+            />
         );
+    };
+
+    getToolbarConfig() {
+        const toolbarConfig = [
+            {
+                id: "View",
+                title: "View",
+                header: "View",
+                leftIcon: <RemoveRedEye />,
+                actions: this.getViewSettingsActions(),
+                onClick: () => this.handleToggleToolbarMenu("view-settings"),
+            },
+            {
+                id: "Parameters",
+                title: "Parameters",
+                header: "Parameters",
+                shouldMenuStayOpened: true,
+                leftIcon: <Settings />,
+                contentObject: this.getParametersActions(),
+                onClick: () => this.handleToggleToolbarMenu("parameters"),
+            },
+            {
+                id: "measurements",
+                title: "Measurements",
+                header: "Measurements",
+                leftIcon: <SquareFootIcon />,
+                actions: this.getMeasurementsActions(),
+                onClick: () => this.handleToggleToolbarMenu("measurements"),
+            },
+            {
+                id: "Export",
+                title: "Export",
+                header: "Export",
+                leftIcon: <ImportExport />,
+                actions: this.getExportActions(),
+                onClick: () => this.handleToggleToolbarMenu("export"),
+            },
+        ];
+
+        const { editable } = this.props;
+        if (editable) {
+            toolbarConfig.splice(3, 0, {
+                id: "3DEdit",
+                title: "Edit",
+                leftIcon: <Edit />,
+                onClick: this.toggleThreejsEditorModal,
+            });
+        }
+        return toolbarConfig;
     }
 
     /** Helper to construct a compound CSS classname based on interactivity state */
@@ -754,7 +629,6 @@ export class ThreeDEditor extends React.Component {
     renderWaveOrThreejsEditorModal() {
         const { originalMaterial, isThreejsEditorModalShown } = this.state;
 
-        const { editable } = this.props;
         if (isThreejsEditorModalShown) {
             return (
                 <ThreejsEditorModal
@@ -765,16 +639,16 @@ export class ThreeDEditor extends React.Component {
                 />
             );
         }
+        const { isInteractive } = this.state;
         return (
             <div className={this.getThreeDEditorClassNames()}>
                 {this.renderCoverDiv()}
-                {this.renderInteractiveSwitch()}
+                <IconsToolbar
+                    toolbarConfig={this.getToolbarConfig()}
+                    isInteractive={isInteractive}
+                    handleToggleInteractive={this.handleToggleInteractive}
+                />
                 {this.renderWaveComponent()}
-                {this.renderViewToolbar(this.classNamesForTopToolbar + " second-row")}
-                {this.renderParametersToolbar(this.classNamesForTopToolbar + " third-row")}
-                {this.renderMeasuresToolbar(this.classNamesForTopToolbar + " fourth-row")}
-                {editable && this.render3DEditToggle(this.classNamesForTopToolbar + " fifth-row")}
-                {this.renderExportToolbar(this.classNamesForBottomToolbar)}
             </div>
         );
     }
@@ -782,7 +656,9 @@ export class ThreeDEditor extends React.Component {
     render() {
         return (
             <StyledEngineProvider injectFirst>
-                {this.renderWaveOrThreejsEditorModal()}
+                <ThemeProvider theme={DarkMaterialUITheme}>
+                    {this.renderWaveOrThreejsEditorModal()}
+                </ThemeProvider>
             </StyledEngineProvider>
         );
     }

@@ -28,16 +28,16 @@ test("toggleInteractive", () => {
     });
 
     // assert view and export buttons are hidden
-    expect(wrapper.find(SELECTORS.viewIconToolbar).hasClass("hidden")).toBe(true);
-    expect(wrapper.find(SELECTORS.exportIconToolbar).hasClass("hidden")).toBe(true);
+    expect(wrapper.find(SELECTORS.viewIconToolbar).exists()).toBe(false);
+    expect(wrapper.find(SELECTORS.exportIconToolbar).exists()).toBe(false);
 
     const interactiveButton = wrapper.find(`${SELECTORS.interactiveIconToolbar} button`);
     interactiveButton.prop("onClick")();
     wrapper.update();
 
     // assert view and export buttons are visible
-    expect(wrapper.find(SELECTORS.viewIconToolbar).hasClass("hidden")).toBe(false);
-    expect(wrapper.find(SELECTORS.exportIconToolbar).hasClass("hidden")).toBe(false);
+    expect(wrapper.find(SELECTORS.viewIconToolbar).exists()).toBe(true);
+    expect(wrapper.find(SELECTORS.exportIconToolbar).exists()).toBe(true);
 });
 
 test("toggleView", () => {
@@ -51,14 +51,14 @@ test("toggleView", () => {
     wrapper.update();
 
     // assert toggle axes button is hidden
-    expect(wrapper.find(SELECTORS.toggleAxesRoundIconButton).exists()).toBe(false);
+    expect(wrapper.find(SELECTORS.toggleAxesMenuItem).exists()).toBe(false);
 
     const viewButton = wrapper.find(`${SELECTORS.viewIconToolbar} button`);
-    viewButton.prop("onClick")();
+    viewButton.simulate("click");
     wrapper.update();
 
     // assert toggle axes button is visible
-    expect(wrapper.find(SELECTORS.toggleAxesRoundIconButton).exists()).toBe(true);
+    expect(wrapper.find(SELECTORS.toggleAxesMenuItem).exists()).toBe(true);
 });
 
 test("preserve three.js editor changes", async () => {
