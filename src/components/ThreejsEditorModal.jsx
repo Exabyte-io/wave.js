@@ -43,6 +43,7 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement = el;
         this.setNumberFormat();
         this.initializeEditor();
+        this.initializeControlsInEditor();
         this.addEventListeners();
         this.addSignalsListeners();
         this.loadScene();
@@ -82,6 +83,17 @@ export class ThreejsEditorModal extends ModalDialog {
         this.editor.scene.add(directionalLight);
     }
 
+    initializeControlsInEditor() {
+        // initialize controls
+        this.editor.controls = new OrbitControls(this.editor.camera, this.viewport.dom);
+        this.editor.controls.up = new THREE.Vector3(0, 0, 1);
+
+        // set controls parameters
+        this.editor.controls.panSpeed = 0.006;
+        this.editor.controls.rotationSpeed = 0.015;
+        this.editor.controls.zoomSpeed = 0.2;
+    }
+
     /**
      * Initialize threejs editor and add it to the DOM.
      */
@@ -97,8 +109,8 @@ export class ThreejsEditorModal extends ModalDialog {
         this.editor.onHide = this.onHide;
 
         // initialize viewport and add it to the DOM
-        const viewport = new Viewport(this.editor);
-        this.domElement.appendChild(viewport.dom);
+        this.viewport = new Viewport(this.editor);
+        this.domElement.appendChild(this.viewport.dom);
 
         // initialize UI elements and add them to the DOM
         const script = new Script(this.editor);
@@ -111,15 +123,6 @@ export class ThreejsEditorModal extends ModalDialog {
         this.domElement.appendChild(sidebar.dom);
         const toolbar = new Toolbar(this.editor);
         this.domElement.appendChild(toolbar.dom);
-
-        // initialize controls
-        this.editor.controls = new OrbitControls(this.editor.camera, viewport.dom);
-        this.editor.controls.up = new THREE.Vector3(0, 0, 1);
-
-        // set controls parameters
-        this.editor.controls.panSpeed = 0.006;
-        this.editor.controls.rotationSpeed = 0.015;
-        this.editor.controls.zoomSpeed = 0.2;
 
         this.initializeLights();
     }
