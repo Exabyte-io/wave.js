@@ -79,29 +79,6 @@ export const LabelsMixin = (superclass) =>
             return sprite;
         }
 
-        /**
-         * Adjusts the label sprites' positions so that the center of every sprite
-         * is always in the point where the atom's bound sphere is intersected
-         * by the line joining the atom's center with the camera.
-         */
-        adjustLabelsToCameraPosition() {
-            if (!this.areLabelsShown) return;
-
-            const atomGroups = this.scene
-                .getObjectByName(ATOM_GROUP_NAME)
-                .parent.children.filter((object) => object.name.includes(ATOM_GROUP_NAME));
-            atomGroups.forEach((group) => {
-                const labels = group.children.filter((child) => child instanceof THREE.Sprite);
-                labels.forEach((label) => {
-                    const atomUUID = label.name.replace(/label-for-/, "");
-                    const atom = this.scene.getObjectByProperty("uuid", atomUUID);
-                    const clampedVectorToCamera = this.getClampedVectorToCamera(group, atom);
-                    const newLabelPosition = atom.position.clone().add(clampedVectorToCamera);
-                    label.position.copy(newLabelPosition);
-                });
-            });
-        }
-
         /*
          * removes labels that situated in the labels array
          */
@@ -113,7 +90,7 @@ export const LabelsMixin = (superclass) =>
          * Since we using a THREE.Points object for drawing label we need to know all atom names that should be drawn and in which
          * places it should be drawn. This function creates vertices hashMap where key is atom name, value is array of vertices
          * where this atom is situated. Since we don't know how many atom names there could be, we should to iterate through all
-         * array of atoms and obtain atom names as a keys to hashMap. If the name will already exists in the hash map we will just
+         * array of atoms and obtain atom names as a keys to hashMap. If the name already exists in the hash map we will just
          * push the coordinates of the atom on which label should be drawn
          * @returns {Object.<key, Array.<number>>}
          */
@@ -148,52 +125,28 @@ export const LabelsMixin = (superclass) =>
          * https://threejs.org/docs/#api/en/objects/Points
          * https://threejs.org/docs/?q=instanced#api/en/objects/InstancedMesh
          */
-        createLabelSpritesAsPoints() {
+        createLabelSprites() {
             if (this.labelsGroup.children.length) {
                 this.removeLabels();
             }
-
+            console.log("Creating labels");
             const verticesHashMap = this.createVerticesHashMap();
+            console.log(verticesHashMap);
             Object.entries(verticesHashMap).forEach(([key, vertices]) => {
-                const texture = this.getLabelTextTexture(key);
-                const geometry = new THREE.BufferGeometry();
-                geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-                const material = new THREE.PointsMaterial({
-                    ...this.settings.labelPointsConfig,
-                    map: texture,
-                });
-                const particles = new THREE.Points(geometry, material);
-                particles.visible = true;
-                particles.name = `labels-for-${key}`;
-                this.labelsGroup.add(particles);
-                this.structureGroup.add(this.labelsGroup);
+                console.log(key);
+                for (let i = 0; i < vertices.length; i += 3) {
+                    const label = this.createLabelSprite(key, `label-for-${key}`);
+                    label.position.set(vertices[i], vertices[i + 1], vertices[i + 2]);
+                    console.log(label);
+                    label.visible = true;
+                    label.scale.set(0.25, 0.25, 0.25);
+                    this.labelsGroup.add(label);
+                }
             });
-
+            this.structureGroup.add(this.labelsGroup);
+            console.log(this.labelsGroup);
+            console.log(this.scene);
             this.render();
-        }
-
-        /**
-         * Calculates a vector from the atom center to the camera clamped to the atom sphere radius.
-         * @param {THREE.Group} group - the instance of THREE group containing the atom mesh;
-         * @param {THREE.Mesh} atom - the instance of THREE mesh representing the atom;
-         */
-        getClampedVectorToCamera(group, atom) {
-            const { center: cellCenter } = this.getCellViewParams();
-            const atomRadius = atom.geometry.parameters.radius;
-            const atomPosition = atom.position.clone().add(group.position);
-            const vectorToCamera = this.isCameraOrthographic
-                ? new THREE.Vector3(
-                      this.camera.position.x - cellCenter[0],
-                      this.camera.position.y - cellCenter[1],
-                      this.camera.position.z - cellCenter[2],
-                  )
-                : new THREE.Vector3(
-                      this.camera.position.x - atomPosition.x,
-                      this.camera.position.y - atomPosition.y,
-                      this.camera.position.z - atomPosition.z,
-                  );
-            const clampedVectorToCamera = vectorToCamera.clampLength(atomRadius, atomRadius);
-            return clampedVectorToCamera;
         }
 
         /**
