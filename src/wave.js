@@ -328,6 +328,7 @@ export class Wave extends mix(WaveBase).with(
 
     render() {
         this.adjustLabelsToCameraPosition();
+        // console.log(this.scene);
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2) this.renderer2.render(this.scene2, this.camera2);
     }

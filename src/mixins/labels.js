@@ -61,11 +61,60 @@ export const LabelsMixin = (superclass) =>
             return texture;
         }
 
-        /*
+        /**
+         * Creates a sprite with a label text
+         * @param {String} text - the text displayed on the atom label;
+         * should be 1-2 symbols long to fit the square form of the label shown in front of a sphere
+         * @param {String} name - the name of the created sprite;
+         * naming convention: label-for-<atom mesh uuid>
+         * @return {THREE.Sprite}
+         */
+        createLabelSprite(text, name) {
+            const texture = this.getLabelTextTexture(text);
+            const spriteMaterial = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true,
+                depthFunc: THREE.LessEqualDepth,
+                depthTest: true,
+            });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.name = name;
+            sprite.scale.set(0.25, 0.25, 0.25);
+            return sprite;
+        }
+
+        /**
+         * Adjusts label positions in 3D space so that they don't overlap with their corresponding atoms
+         * and always face the camera.
+         * @method adjustLabelsToCameraPosition
+         */
+        adjustLabelsToCameraPosition() {
+            if (!this.areLabelsShown) return;
+            this.labelsGroup.children.forEach((label) => {
+                const atomPos = label.userData.atomPosition;
+                const offsetVector = this.getLabelOffsetVector(atomPos);
+
+                label.position.set(
+                    atomPos.x + offsetVector.x,
+                    atomPos.y + offsetVector.y,
+                    atomPos.z + offsetVector.z,
+                );
+
+                label.visible = this.areLabelsShown;
+                label.lookAt(this.camera.position);
+            });
+        }
+
+        /**
          * removes labels that situated in the labels array
          */
         removeLabels() {
-            this.labelsGroup.children.forEach((label) => this.labelsGroup.remove(label));
+            console.log(this.labelsGroup.children);
+            this.labelsGroup.children.forEach((label) => {
+                console.log(label);
+                this.labelsGroup.remove(label);
+            });
+            console.log(this.labelsGroup.children);
         }
 
         /**
@@ -101,28 +150,6 @@ export const LabelsMixin = (superclass) =>
         }
 
         /**
-         * Creates a sprite with a label text
-         * @param {String} text - the text displayed on the atom label;
-         * should be 1-2 symbols long to fit the square form of the label shown in front of a sphere
-         * @param {String} name - the name of the created sprite;
-         * naming convention: label-for-<atom mesh uuid>
-         * @return {THREE.Sprite}
-         */
-        createLabelSprite(text, name) {
-            const texture = this.getLabelTextTexture(text);
-            const spriteMaterial = new THREE.SpriteMaterial({
-                map: texture,
-                transparent: true,
-                depthFunc: THREE.LessEqualDepth,
-                depthTest: true,
-            });
-            const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.name = name;
-            sprite.scale.set(0.25, 0.25, 0.25);
-            return sprite;
-        }
-
-        /**
          * Generates and positions label sprites in the 3D space based on the vertices of atoms.
          * If any labels already exist, they are removed before creating new ones.
          * The method uses a hashmap of vertices to organize and label atoms.
@@ -148,7 +175,6 @@ export const LabelsMixin = (superclass) =>
                     );
                     const offsetVector = this.getLabelOffsetVector(atomPos);
                     const labelSprite = this.createLabelSprite(key, `label-for-${key}`);
-
                     labelSprite.userData.atomPosition = atomPos;
                     labelSprite.position.set(
                         vertices[i] + offsetVector.x,
@@ -161,28 +187,6 @@ export const LabelsMixin = (superclass) =>
             });
             this.structureGroup.add(this.labelsGroup);
             this.render();
-        }
-
-        /**
-         * Adjusts label positions in 3D space so that they don't overlap with their corresponding atoms
-         * and always face the camera.
-         * @method adjustLabelsToCameraPosition
-         */
-        adjustLabelsToCameraPosition() {
-            if (!this.areLabelsShown) return;
-            this.labelsGroup.children.forEach((label) => {
-                const atomPos = label.userData.atomPosition;
-                const offsetVector = this.getLabelOffsetVector(atomPos);
-
-                label.position.set(
-                    atomPos.x + offsetVector.x,
-                    atomPos.y + offsetVector.y,
-                    atomPos.z + offsetVector.z,
-                );
-
-                label.visible = this.areLabelsShown;
-                label.lookAt(this.camera.position);
-            });
         }
 
         /**
