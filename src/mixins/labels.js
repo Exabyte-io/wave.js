@@ -100,27 +100,28 @@ export const LabelsMixin = (superclass) =>
             return verticesHashMap;
         }
 
-        //
-        // /**
-        //  * Creates a sprite with a label text
-        //  * @param {String} text - the text displayed on the atom label;
-        //  * should be 1-2 symbols long to fit the square form of the label shown in front of a sphere
-        //  * @param {String} name - the name of the created sprite;
-        //  * naming convention: label-for-<atom mesh uuid>
-        //  * @return {THREE.Sprite}
-        //  */
-        // createLabelSprite(text, name) {
-        //     const texture = this.getLabelTextTexture(text);
-        //     const spriteMaterial = new THREE.SpriteMaterial({
-        //         map: texture,
-        //         depthTest: false,
-        //     });
-        //     const sprite = new THREE.Sprite(spriteMaterial);
-        //     sprite.name = name;
-        //     sprite.scale.set(0.25, 0.25, 0.25);
-        //     sprite.visible = this.areLabelsShown;
-        //     return sprite;
-        // }
+        /**
+         * Creates a sprite with a label text
+         * @param {String} text - the text displayed on the atom label;
+         * should be 1-2 symbols long to fit the square form of the label shown in front of a sphere
+         * @param {String} name - the name of the created sprite;
+         * naming convention: label-for-<atom mesh uuid>
+         * @return {THREE.Sprite}
+         */
+        createLabelSprite(text, name) {
+            const texture = this.getLabelTextTexture(text);
+            const spriteMaterial = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true,
+                depthFunc: THREE.LessEqualDepth,
+                depthTest: true,
+            });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.name = name;
+            sprite.scale.set(0.25, 0.25, 0.25);
+            sprite.visible = this.areLabelsShown;
+            return sprite;
+        }
 
         /**
          * Generates and positions label sprites in the 3D space based on the vertices of atoms.
@@ -134,40 +135,29 @@ export const LabelsMixin = (superclass) =>
          *  https://threejs.org/docs/#api/en/objects/Points
          *  https://threejs.org/docs/?q=instanced#api/en/objects/InstancedMesh
          */
-        createLabelSprites() {
+        createLabelsAsSprites() {
             if (this.labelsGroup.children.length) {
                 this.removeLabels();
             }
             const verticesHashMap = this.createVerticesHashMap();
             Object.entries(verticesHashMap).forEach(([key, vertices]) => {
                 for (let i = 0; i < vertices.length; i += 3) {
-                    const texture = this.getLabelTextTexture(key);
-                    const labelMaterial = new THREE.MeshBasicMaterial({
-                        map: texture,
-                        transparent: true,
-                        side: THREE.DoubleSide,
-                        depthFunc: THREE.LessEqualDepth,
-                        depthTest: true,
-                    });
-                    const labelGeometry = new THREE.PlaneBufferGeometry(0.25, 0.25);
-                    const labelPlane = new THREE.Mesh(labelGeometry, labelMaterial);
                     const atomPos = new THREE.Vector3(
                         vertices[i],
                         vertices[i + 1],
                         vertices[i + 2],
                     );
-
                     const offsetVector = this.getLabelOffsetVector(atomPos);
-                    labelPlane.position.set(
+                    const labelSprite = this.createLabelSprite(key, `label-for-${key}`);
+
+                    labelSprite.userData.atomPosition = atomPos;
+                    labelSprite.position.set(
                         vertices[i] + offsetVector.x,
                         vertices[i + 1] + offsetVector.y,
                         vertices[i + 2] + offsetVector.z,
                     );
-
-                    labelPlane.userData.atomPosition = atomPos;
-                    labelPlane.up = new THREE.Vector3(0, 0, 1);
-                    labelPlane.updateMatrix();
-                    this.labelsGroup.add(labelPlane);
+                    labelSprite.updateMatrix();
+                    this.labelsGroup.add(labelSprite);
                 }
             });
             this.structureGroup.add(this.labelsGroup);
