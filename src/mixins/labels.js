@@ -60,24 +60,27 @@ export const LabelsMixin = (superclass) =>
             this.#texturesCache[text] = texture;
             return texture;
         }
-
-        /**
-         * Creates a sprite with a label text
-         * @param {String} text - the text displayed on the atom label;
-         * should be 1-2 symbols long to fit the square form of the label shown in front of a sphere
-         * @param {String} name - the name of the created sprite;
-         * naming convention: label-for-<atom mesh uuid>
-         * @return {THREE.Sprite}
-         */
-        createLabelSprite(text, name) {
-            const texture = this.getLabelTextTexture(text);
-            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-            const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.name = name;
-            sprite.scale.set(0.25, 0.25, 0.25);
-            sprite.visible = this.areLabelsShown;
-            return sprite;
-        }
+        //
+        // /**
+        //  * Creates a sprite with a label text
+        //  * @param {String} text - the text displayed on the atom label;
+        //  * should be 1-2 symbols long to fit the square form of the label shown in front of a sphere
+        //  * @param {String} name - the name of the created sprite;
+        //  * naming convention: label-for-<atom mesh uuid>
+        //  * @return {THREE.Sprite}
+        //  */
+        // createLabelSprite(text, name) {
+        //     const texture = this.getLabelTextTexture(text);
+        //     const spriteMaterial = new THREE.SpriteMaterial({
+        //         map: texture,
+        //         depthTest: false,
+        //     });
+        //     const sprite = new THREE.Sprite(spriteMaterial);
+        //     sprite.name = name;
+        //     sprite.scale.set(0.25, 0.25, 0.25);
+        //     sprite.visible = this.areLabelsShown;
+        //     return sprite;
+        // }
 
         /*
          * removes labels that situated in the labels array
@@ -135,18 +138,79 @@ export const LabelsMixin = (superclass) =>
             Object.entries(verticesHashMap).forEach(([key, vertices]) => {
                 console.log(key);
                 for (let i = 0; i < vertices.length; i += 3) {
-                    const label = this.createLabelSprite(key, `label-for-${key}`);
-                    label.position.set(vertices[i], vertices[i + 1], vertices[i + 2]);
-                    console.log(label);
-                    label.visible = true;
-                    label.scale.set(0.25, 0.25, 0.25);
-                    this.labelsGroup.add(label);
+                    const texture = this.getLabelTextTexture(key);
+                    const labelMaterial = new THREE.MeshBasicMaterial({
+                        map: texture,
+                        transparent: true,
+                        side: THREE.DoubleSide,
+                        depthFunc: THREE.LessEqualDepth,
+                        depthTest: true,
+                    });
+                    const labelGeometry = new THREE.PlaneBufferGeometry(0.25, 0.25); // Adjust the size as needed
+                    const labelPlane = new THREE.Mesh(labelGeometry, labelMaterial);
+                    // offset must be a vector in the direction from atom to camera with radius of atom
+                    const atomPos = new THREE.Vector3(
+                        vertices[i],
+                        vertices[i + 1],
+                        vertices[i + 2],
+                    );
+                    const offsetVector = this.getLabelOffsetVector(atomPos);
+                    labelPlane.position.set(
+                        vertices[i] + offsetVector.x,
+                        vertices[i + 1] + offsetVector.y,
+                        vertices[i + 2] + offsetVector.z,
+                    );
+
+                    console.log(this.camera, this.camera.position);
+                    labelPlane.userData.atomPosition = atomPos;
+
+                    labelPlane.lookAt(this.camera.position);
+                    labelPlane.updateMatrix();
+                    this.labelsGroup.add(labelPlane);
                 }
             });
             this.structureGroup.add(this.labelsGroup);
             console.log(this.labelsGroup);
             console.log(this.scene);
             this.render();
+        }
+
+        adjustLabelsToCameraPosition() {
+            this.labelsGroup.children.forEach((label) => {
+                // Assuming you have a way to get the corresponding atom for each label
+                const atomPos = label.userData.atomPosition;
+
+                const offsetVector = this.getLabelOffsetVector(atomPos);
+
+                label.position.set(
+                    atomPos.x + offsetVector.x,
+                    atomPos.y + offsetVector.y,
+                    atomPos.z + offsetVector.z,
+                );
+
+                // Ensure the label always faces the camera
+                label.lookAt(this.camera.position);
+            });
+        }
+
+        /**
+         * Calculates a vector from the atom center to the camera clamped to the atom sphere radius.
+         * @param {THREE.Group} group - the instance of THREE group containing the atom mesh;
+         * @param {THREE.Mesh} atom - the instance of THREE mesh representing the atom;
+         */
+        getLabelOffsetVector(atomPosition) {
+            // Calculate vector from atom to camera
+            const vectorToCamera = new THREE.Vector3().subVectors(
+                this.camera.position,
+                atomPosition,
+            );
+
+            // Normalize the vector (makes its length = 1) and scale it by the desired offset.
+            // Here I assume a constant offset, but you can adjust as needed.
+            const offsetLength = 0.7; // or atomRadius + small_value
+            const offsetVector = vectorToCamera.normalize().multiplyScalar(offsetLength);
+            console.log(offsetVector);
+            return offsetVector;
         }
 
         /**
