@@ -45,7 +45,7 @@ export default {
     labelPointsConfig: {
         size: 1.5,
         depthTest: true,
-        depthFunc: THREE.NotEqualDepth,
+        depthFunc: THREE.LessEqualDepth,
         transparent: true,
     },
 

@@ -132,11 +132,9 @@ export const LabelsMixin = (superclass) =>
             if (this.labelsGroup.children.length) {
                 this.removeLabels();
             }
-            console.log("Creating labels");
             const verticesHashMap = this.createVerticesHashMap();
             console.log(verticesHashMap);
             Object.entries(verticesHashMap).forEach(([key, vertices]) => {
-                console.log(key);
                 for (let i = 0; i < vertices.length; i += 3) {
                     const texture = this.getLabelTextTexture(key);
                     const labelMaterial = new THREE.MeshBasicMaterial({
@@ -154,6 +152,7 @@ export const LabelsMixin = (superclass) =>
                         vertices[i + 1],
                         vertices[i + 2],
                     );
+
                     const offsetVector = this.getLabelOffsetVector(atomPos);
                     labelPlane.position.set(
                         vertices[i] + offsetVector.x,
@@ -161,17 +160,14 @@ export const LabelsMixin = (superclass) =>
                         vertices[i + 2] + offsetVector.z,
                     );
 
-                    console.log(this.camera, this.camera.position);
                     labelPlane.userData.atomPosition = atomPos;
-
+                    labelPlane.up = new THREE.Vector3(0, 0, 1);
                     labelPlane.lookAt(this.camera.position);
                     labelPlane.updateMatrix();
                     this.labelsGroup.add(labelPlane);
                 }
             });
             this.structureGroup.add(this.labelsGroup);
-            console.log(this.labelsGroup);
-            console.log(this.scene);
             this.render();
         }
 
@@ -205,9 +201,7 @@ export const LabelsMixin = (superclass) =>
                 atomPosition,
             );
 
-            // Normalize the vector (makes its length = 1) and scale it by the desired offset.
-            // Here I assume a constant offset, but you can adjust as needed.
-            const offsetLength = 0.7; // or atomRadius + small_value
+            const offsetLength = this.settings.sphereRadius;
             const offsetVector = vectorToCamera.normalize().multiplyScalar(offsetLength);
             console.log(offsetVector);
             return offsetVector;
