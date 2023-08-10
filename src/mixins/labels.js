@@ -119,7 +119,6 @@ export const LabelsMixin = (superclass) =>
             const sprite = new THREE.Sprite(spriteMaterial);
             sprite.name = name;
             sprite.scale.set(0.25, 0.25, 0.25);
-            sprite.visible = this.areLabelsShown;
             return sprite;
         }
 
@@ -170,6 +169,7 @@ export const LabelsMixin = (superclass) =>
          * @method adjustLabelsToCameraPosition
          */
         adjustLabelsToCameraPosition() {
+            if (!this.areLabelsShown) return;
             this.labelsGroup.children.forEach((label) => {
                 const atomPos = label.userData.atomPosition;
                 const offsetVector = this.getLabelOffsetVector(atomPos);
@@ -180,6 +180,7 @@ export const LabelsMixin = (superclass) =>
                     atomPos.z + offsetVector.z,
                 );
 
+                label.visible = this.areLabelsShown;
                 label.lookAt(this.camera.position);
             });
         }
