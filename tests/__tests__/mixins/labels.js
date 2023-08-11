@@ -15,9 +15,8 @@ describe("Atom labels", () => {
         atoms = atomGroup.children.filter((object) => object.type === "Mesh");
     });
 
-    test("Labels are created for every atom and positioned in the center of atom", async () => {
+    test("Labels are created for every atom and positioned in the center of atom with the offset towards camera", async () => {
         const basisAtomsNumber = wave.structure.basis.elements.length;
-        const matchResults = [];
 
         atoms.forEach((atom) => {
             const atomName = atom.name.split("-")[0];
@@ -27,7 +26,6 @@ describe("Atom labels", () => {
             const expectedLabelPosition = atomPosition.clone().add(offsetVector);
 
             const labelSprite = labelGroup.children.find((label) => {
-                console.log(label.userData.atomName, label.position);
                 return (
                     label.userData.atomName === atomName &&
                     label.userData.atomPosition.distanceTo(atomPosition) < 0.00001 &&
@@ -35,15 +33,9 @@ describe("Atom labels", () => {
                 );
             });
 
-            if (labelSprite) {
-                matchResults.push(true);
-            } else {
-                matchResults.push(false);
-            }
+            expect(labelSprite).toBeTruthy();
         });
 
-        const allAtomsHaveLabels = matchResults.every((result) => result);
-        expect(allAtomsHaveLabels).toBeTruthy();
         expect(atoms.length).toEqual(basisAtomsNumber);
     });
 
