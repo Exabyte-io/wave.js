@@ -130,6 +130,34 @@ export const LabelsMixin = (superclass) =>
             return verticesHashMap;
         }
 
+        /*
+         * function that creates label sprites as points.
+         * If we want to use a lot of labels and don't want to have a huge impact
+         * from rendering scene we should use Three.Points or Three.InstancedMesh.
+         * https://threejs.org/docs/#api/en/objects/Points
+         * https://threejs.org/docs/?q=instanced#api/en/objects/InstancedMesh
+         */
+        createLabelsAsPoints() {
+            this.labelsGroup.clear();
+            const verticesHashMap = this.createVerticesHashMap();
+            Object.entries(verticesHashMap).forEach(([key, vertices]) => {
+                const texture = this.getLabelTextTexture(key);
+                const geometry = new THREE.BufferGeometry();
+                geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+                const material = new THREE.PointsMaterial({
+                    ...this.settings.labelPointsConfig,
+                    map: texture,
+                });
+                const particles = new THREE.Points(geometry, material);
+                particles.visible = true;
+                particles.name = `labels-for-${key}`;
+                this.labelsGroup.add(particles);
+                this.structureGroup.add(this.labelsGroup);
+            });
+
+            this.render();
+        }
+
         /**
          * Creates and positions label sprites based on atom vertices.
          * Clears any existing labels, then uses a hash map of vertices to determine label placement.
