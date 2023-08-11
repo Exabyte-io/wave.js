@@ -146,7 +146,9 @@ export const LabelsMixin = (superclass) =>
                 for (let i = 0; i < vertices.length; i += 3) {
                     const atomPosition = new THREE.Vector3().fromArray(vertices, i);
                     const labelSprite = this.createLabelSprite(key, `label-for-${key}`);
+                    const offsetVector = this.getLabelOffsetVector(atomPosition, key);
                     labelSprite.userData = { atomPosition, atomName: key };
+                    labelSprite.position.addVectors(atomPosition, offsetVector);
                     this.labelsGroup.add(labelSprite);
                 }
             });

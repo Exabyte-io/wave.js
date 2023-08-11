@@ -17,31 +17,34 @@ describe("Atom labels", () => {
 
     test("Labels are created for every atom and positioned in the center of atom", async () => {
         const basisAtomsNumber = wave.structure.basis.elements.length;
-        const isAllAtomsHaveLabels = atoms.every((atom) => {
+        const matchResults = [];
+
+        atoms.forEach((atom) => {
             const atomName = atom.name.split("-")[0];
-            const labelName = `labels-for-${atomName}`;
-            const labelPointsByAtomName = labels.find(
-                (labelPoints) => labelPoints.name === labelName,
-            );
-            if (!labelPointsByAtomName) return false;
-            const positions = labelPointsByAtomName.geometry.getAttribute("position")?.array;
-            let hasLabel = false;
             const atomPosition = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-            for (let i = 0; i < positions.length; i += 3) {
-                const x = positions[i];
-                const y = positions[i + 1];
-                const z = positions[i + 2];
-                const labelPosition = new THREE.Vector3(x, y, z);
-                const distance = labelPosition.distanceTo(atomPosition);
-                if (distance < 0.00001) {
-                    hasLabel = true;
-                }
+
+            const offsetVector = wave.getLabelOffsetVector(atomPosition, atomName);
+            const expectedLabelPosition = atomPosition.clone().add(offsetVector);
+
+            const labelSprite = labelGroup.children.find((label) => {
+                console.log(label.userData.atomName, label.position);
+                return (
+                    label.userData.atomName === atomName &&
+                    label.userData.atomPosition.distanceTo(atomPosition) < 0.00001 &&
+                    label.position.distanceTo(expectedLabelPosition) < 0.00001
+                );
+            });
+
+            if (labelSprite) {
+                matchResults.push(true);
+            } else {
+                matchResults.push(false);
             }
-            return hasLabel;
         });
 
+        const allAtomsHaveLabels = matchResults.every((result) => result);
+        expect(allAtomsHaveLabels).toBeTruthy();
         expect(atoms.length).toEqual(basisAtomsNumber);
-        expect(isAllAtomsHaveLabels).toBeTruthy();
     });
 
     test("Initial labels visibility matches the settings", async () => {
