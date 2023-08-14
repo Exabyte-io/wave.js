@@ -45,10 +45,14 @@ export default {
     labelPointsConfig: {
         size: 1.5,
         depthTest: true,
-        depthFunc: THREE.LessEqualDepth,
+        depthFunc: THREE.NotEqualDepth,
         transparent: true,
     },
-
+    labelSpriteConfig: {
+        transparent: true,
+        depthFunc: THREE.LessEqualDepth,
+        depthTest: true,
+    },
     boundaryConditionTypeColors: {
         bc1: [0xffff00, 0xffff00],
         bc2: [0x0000ff, 0x0000ff],

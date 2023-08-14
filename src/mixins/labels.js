@@ -73,9 +73,7 @@ export const LabelsMixin = (superclass) =>
             const texture = this.getLabelTextTexture(text);
             const spriteMaterial = new THREE.SpriteMaterial({
                 map: texture,
-                transparent: true,
-                depthFunc: THREE.LessEqualDepth,
-                depthTest: true,
+                ...this.settings.labelSpriteConfig,
             });
             const sprite = new THREE.Sprite(spriteMaterial);
             sprite.name = name;
@@ -130,6 +128,15 @@ export const LabelsMixin = (superclass) =>
             return verticesHashMap;
         }
 
+        createLabels() {
+            if (this.fastLabelRender) {
+                this.createLabelsAsPoints();
+            } else {
+                this.createLabelsAsSprites();
+            }
+            this.render();
+        }
+
         /*
          * function that creates label sprites as points.
          * If we want to use a lot of labels and don't want to have a huge impact
@@ -154,8 +161,6 @@ export const LabelsMixin = (superclass) =>
                 this.labelsGroup.add(particles);
                 this.structureGroup.add(this.labelsGroup);
             });
-
-            this.render();
         }
 
         /**
@@ -181,7 +186,6 @@ export const LabelsMixin = (superclass) =>
                 }
             });
             this.structureGroup.add(this.labelsGroup);
-            this.render();
         }
 
         /**

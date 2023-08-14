@@ -323,8 +323,7 @@ export class Wave extends mix(WaveBase).with(
         this.drawBoundaries();
         if (this.isDrawBondsEnabled) this.drawBonds();
         this.render();
-        if (this.fastLabelsRender) this.createLabelsAsPoints();
-        else this.createLabelsAsSprites();
+        this.createLabels();
         this.refillChosenAtoms();
     }
 
