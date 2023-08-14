@@ -17,6 +17,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
+import { Wave } from "../wave";
 import { AlertDialog } from "./AlertDialog";
 import { ModalDialog } from "./ModalDialog";
 
@@ -36,6 +37,7 @@ export class ThreejsEditorModal extends ModalDialog {
         this.exitWithCallback = this.exitWithCallback.bind(this);
         this.extractMaterialAndHide = this.extractMaterialAndHide.bind(this);
         this.onExtractMaterialError = this.onExtractMaterialError.bind(this);
+        this.adjustCameraAndOrbitControlsToCell();
     }
 
     initialize(el) {
@@ -74,6 +76,13 @@ export class ThreejsEditorModal extends ModalDialog {
         camera.lookAt(new THREE.Vector3(0, 0, 0));
         return camera;
     };
+
+    // eslint-disable-next-line class-methods-use-this
+    adjustCamerasAndOrbitControlsToCell() {
+        const cellViewParams = Wave.getCellViewParams();
+        Wave.adjustCamerasTargetAndFrustum(cellViewParams);
+        Wave.adjustOrbitControlsTarget(cellViewParams.center);
+    }
 
     initializeLights() {
         const directionalLight = new THREE.DirectionalLight("#FFFFFF");
@@ -159,7 +168,13 @@ export class ThreejsEditorModal extends ModalDialog {
                 raycaster.setFromCamera(mouse, this.editor.camera);
 
                 const intersects = raycaster.intersectObjects(this.editor.scene.children, true);
-
+                console.log(intersects);
+                try {
+                    console.log(intersects[0].point);
+                } catch (e) {
+                    console.log("no intersect");
+                }
+                console.log(mouse.x, mouse.y);
                 this.editor.controls.enabled = intersects.length === 0;
             }
         });
