@@ -256,7 +256,6 @@ export class Wave extends mix(WaveBase).with(
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
-        this.fastLabelsRender = false;
     }
 
     takeScreenshot() {
@@ -328,7 +327,7 @@ export class Wave extends mix(WaveBase).with(
     }
 
     render() {
-        this.adjustLabelsToCameraPosition();
+        if (this.settings.labelsConfig.areSpritesUsed) this.adjustLabelsToCameraPosition();
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2) this.renderer2.render(this.scene2, this.camera2);
     }

@@ -33,6 +33,7 @@ export default {
     areLabelsInitiallyShown: false,
     isViewAdjustable: true,
     labelsConfig: {
+        areSpritesUsed: true,
         fontFace: "Arial",
         fontSize: 96,
         fontWeight: "Bold",

@@ -128,17 +128,21 @@ export const LabelsMixin = (superclass) =>
             return verticesHashMap;
         }
 
+        /**
+         * Creates labels as sprites or points
+         * depending on the settings.labelsConfig.areSpritesUsed value
+         */
         createLabels() {
-            if (this.fastLabelRender) {
-                this.createLabelsAsPoints();
-            } else {
+            if (this.settings.labelsConfig.areSpritesUsed) {
                 this.createLabelsAsSprites();
+            } else {
+                this.createLabelsAsPoints();
             }
             this.render();
         }
 
-        /*
-         * function that creates label sprites as points.
+        /**
+         * Creates label sprites as points.
          * If we want to use a lot of labels and don't want to have a huge impact
          * from rendering scene we should use Three.Points or Three.InstancedMesh.
          * https://threejs.org/docs/#api/en/objects/Points
