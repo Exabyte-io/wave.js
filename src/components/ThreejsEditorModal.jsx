@@ -15,9 +15,9 @@ import { Toolbar } from "three/editor/js/Toolbar";
 import { Viewport } from "three/editor/js/Viewport";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+import { LABELS_GROUP_NAME } from "../enums";
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
-import { Wave } from "../wave";
 import { AlertDialog } from "./AlertDialog";
 import { ModalDialog } from "./ModalDialog";
 
@@ -37,7 +37,6 @@ export class ThreejsEditorModal extends ModalDialog {
         this.exitWithCallback = this.exitWithCallback.bind(this);
         this.extractMaterialAndHide = this.extractMaterialAndHide.bind(this);
         this.onExtractMaterialError = this.onExtractMaterialError.bind(this);
-        this.adjustCameraAndOrbitControlsToCell();
     }
 
     initialize(el) {
@@ -48,6 +47,7 @@ export class ThreejsEditorModal extends ModalDialog {
         this.addEventListeners();
         this.addSignalsListeners();
         this.loadScene();
+        this.initializeRaycaster();
     }
 
     // eslint-disable-next-line no-unused-vars
@@ -73,16 +73,8 @@ export class ThreejsEditorModal extends ModalDialog {
         const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 20000);
         camera.name = "Camera";
         camera.position.copy(new THREE.Vector3(0, -20, 8));
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
         return camera;
     };
-
-    // eslint-disable-next-line class-methods-use-this
-    adjustCamerasAndOrbitControlsToCell() {
-        const cellViewParams = Wave.getCellViewParams();
-        Wave.adjustCamerasTargetAndFrustum(cellViewParams);
-        Wave.adjustOrbitControlsTarget(cellViewParams.center);
-    }
 
     initializeLights() {
         const directionalLight = new THREE.DirectionalLight("#FFFFFF");
@@ -95,11 +87,25 @@ export class ThreejsEditorModal extends ModalDialog {
         // initialize controls
         this.editor.controls = new OrbitControls(this.editor.camera, this.viewport.dom);
         this.editor.controls.up = new THREE.Vector3(0, 0, 1);
-
+        this.editor.controls.target.set(0, 0, 0);
         // set controls parameters
-        this.editor.controls.panSpeed = 0.006;
-        this.editor.controls.rotationSpeed = 0.015;
+        this.editor.controls.panSpeed = 0.1;
+        this.editor.controls.rotateSpeed = 2.0;
         this.editor.controls.zoomSpeed = 0.2;
+
+        window.VIEW_HELPER.controls = this.editor.controls;
+    }
+
+    initializeRaycaster() {
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+        const cell = this.editor.scene.getObjectByName("Cell");
+        const labels = this.editor.scene.getObjectByName(LABELS_GROUP_NAME).children;
+        // Make the cell and labels transparent for raycaster so they do not block atoms
+        cell.raycast = () => {};
+        labels.forEach((label) => {
+            label.raycast = () => {};
+        });
     }
 
     /**
@@ -150,6 +156,7 @@ export class ThreejsEditorModal extends ModalDialog {
         );
 
         document.addEventListener("mousedown", (event) => {
+            event.preventDefault();
             // on right click and hold disable orbit controls to allow pan
             if (event.button === THREE.MOUSE.RIGHT) {
                 this.editor.controls.enabled = false;
@@ -158,31 +165,36 @@ export class ThreejsEditorModal extends ModalDialog {
 
             // on a left click detect if the click was on the object and disable orbit controls in that case
             if (event.button === THREE.MOUSE.LEFT) {
-                const mouse = new THREE.Vector2();
                 // calculate mouse position in normalized device coordinates
-                // https://stackoverflow.com/questions/13055214/mouse-canvas-x-y-to-three-js-world-x-y-z
-                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                // https://threejs.org/docs/#api/en/core/Raycaster
 
-                const raycaster = new THREE.Raycaster();
-                raycaster.setFromCamera(mouse, this.editor.camera);
+                this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-                const intersects = raycaster.intersectObjects(this.editor.scene.children, true);
-                console.log(intersects);
-                try {
-                    console.log(intersects[0].point);
-                } catch (e) {
-                    console.log("no intersect");
-                }
-                console.log(mouse.x, mouse.y);
+                this.raycaster.setFromCamera(this.mouse, this.editor.camera);
+
+                const objects = this.editor.scene.children;
+                const intersects = this.raycaster.intersectObjects(objects, true);
+                console.log("Raycaster intersects:", intersects, intersects[0]?.point);
                 this.editor.controls.enabled = intersects.length === 0;
             }
         });
 
-        // Unselect the "Cell" object to access atoms inside it
+        // Disable rotation and set orbit controls target to the selected object if it's a Mesh (Atom)
         this.editor.signals.objectSelected.add((selectedObject) => {
-            if (selectedObject && selectedObject.name === "Cell") {
-                this.editor.signals.objectSelected.dispatch(null);
+            if (selectedObject && selectedObject.type === "Mesh") {
+                this.atomSelected = true;
+                this.editor.controls.target.copy(selectedObject.position);
+                this.editor.controls.enabled = false;
+            } else {
+                this.atomSelected = false;
+                this.editor.controls.enabled = true;
+            }
+        });
+        // on signal of object changing position disable orbit controls
+        this.editor.signals.objectChanged.add((selectedObject) => {
+            if (selectedObject && selectedObject.type === "Mesh") {
+                this.editor.controls.enabled = false;
             }
         });
 
@@ -191,6 +203,22 @@ export class ThreejsEditorModal extends ModalDialog {
             if (event.button === THREE.MOUSE.RIGHT) {
                 this.editor.controls.enabled = true;
             }
+        });
+
+        // on mouse move console log raycaster intersects
+        document.addEventListener("mousemove", (event) => {
+            // const view = this.editor.viewport.dom;
+            this.mouse.x = (event.clientX / this.viewport.dom.children[3].width) * 2 - 1;
+            this.mouse.y = -(event.clientY / this.viewport.dom.children[3].height) * 2 + 1;
+            this.raycaster.setFromCamera(this.mouse, this.editor.camera);
+            const objects = this.editor.scene.children;
+            // const atoms = this.editor.scene.getObjectByName(ATOM_GROUP_NAME).children;
+            const intersects = this.raycaster.intersectObjects(objects, true);
+            // console log the names of the objects that are intersected
+            intersects.forEach((intersect) => {
+                console.log(intersect.object.name);
+            });
+            console.log("OC-Controls:", this.editor.controls.enabled);
         });
 
         const onResize = () => this.editor.signals.windowResize.dispatch();
