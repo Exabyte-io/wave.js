@@ -175,7 +175,6 @@ export class ThreejsEditorModal extends ModalDialog {
 
                 const objects = this.editor.scene.children;
                 const intersects = this.raycaster.intersectObjects(objects, true);
-                console.log("Raycaster intersects:", intersects, intersects[0]?.point);
                 this.editor.controls.enabled = intersects.length === 0;
             }
         });
@@ -183,11 +182,9 @@ export class ThreejsEditorModal extends ModalDialog {
         // Disable rotation and set orbit controls target to the selected object if it's a Mesh (Atom)
         this.editor.signals.objectSelected.add((selectedObject) => {
             if (selectedObject && selectedObject.type === "Mesh") {
-                this.atomSelected = true;
                 this.editor.controls.target.copy(selectedObject.position);
                 this.editor.controls.enabled = false;
             } else {
-                this.atomSelected = false;
                 this.editor.controls.enabled = true;
             }
         });
@@ -198,27 +195,11 @@ export class ThreejsEditorModal extends ModalDialog {
             }
         });
 
-        // on right click release enable orbit controls
+        // on right click release enable orbit controls after pan
         document.addEventListener("mouseup", (event) => {
             if (event.button === THREE.MOUSE.RIGHT) {
                 this.editor.controls.enabled = true;
             }
-        });
-
-        // on mouse move console log raycaster intersects
-        document.addEventListener("mousemove", (event) => {
-            // const view = this.editor.viewport.dom;
-            this.mouse.x = (event.clientX / this.viewport.dom.children[3].width) * 2 - 1;
-            this.mouse.y = -(event.clientY / this.viewport.dom.children[3].height) * 2 + 1;
-            this.raycaster.setFromCamera(this.mouse, this.editor.camera);
-            const objects = this.editor.scene.children;
-            // const atoms = this.editor.scene.getObjectByName(ATOM_GROUP_NAME).children;
-            const intersects = this.raycaster.intersectObjects(objects, true);
-            // console log the names of the objects that are intersected
-            intersects.forEach((intersect) => {
-                console.log(intersect.object.name);
-            });
-            console.log("OC-Controls:", this.editor.controls.enabled);
         });
 
         const onResize = () => this.editor.signals.windowResize.dispatch();
