@@ -172,14 +172,26 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleKeyPress = (e) => {
-        // If key pressed inside CodeMirror (Basis Viewer), do nothing
-        if (e.target.closest(".cm-editor")) {
+        // Check if the event originated from an input, textarea, select, or CodeMirror
+        if (
+            e.target.closest(".cm-editor") ||
+            ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.nodeName)
+        ) {
             return;
         }
+
+        // In threejs editor modal, only listen to "e" key not to interfere with its own hotkeys
+        const { isThreejsEditorModalShown } = this.state;
+        if (isThreejsEditorModalShown) {
+            if (e.key.toLowerCase() === "e") {
+                this.toggleThreejsEditorModal();
+            }
+            return;
+        }
+
         const handler = this.keyConfig[e.key.toLowerCase()];
         if (handler) {
             handler.call(this);
-            console.log(e.key.toUpperCase());
         }
     };
 
