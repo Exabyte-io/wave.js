@@ -73,6 +73,7 @@ export class ThreejsEditorModal extends ModalDialog {
         const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 20000);
         camera.name = "Camera";
         camera.position.copy(new THREE.Vector3(0, -20, 8));
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
         return camera;
     };
 
@@ -162,7 +163,6 @@ export class ThreejsEditorModal extends ModalDialog {
         );
 
         document.addEventListener("mousedown", (event) => {
-            event.preventDefault();
             // on right click and hold disable orbit controls to allow pan
             if (event.button === THREE.MOUSE.RIGHT) {
                 this.editor.controls.enabled = false;
