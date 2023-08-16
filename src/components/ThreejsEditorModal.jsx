@@ -146,6 +146,12 @@ export class ThreejsEditorModal extends ModalDialog {
      * Add dragover listeners to group the objects.
      */
     addEventListeners() {
+        // TODO: this is a trick to disable orbit controls when multiple selection is active.
+        const isMultipleSelectionActive = () => {
+            const toggleButton = document.querySelector(".ms-button__toggle");
+            return toggleButton && toggleButton.classList.contains("selected");
+        };
+
         document.addEventListener(
             "dragover",
             (event) => {
@@ -175,7 +181,8 @@ export class ThreejsEditorModal extends ModalDialog {
 
                 const objects = this.editor.scene.children;
                 const intersects = this.raycaster.intersectObjects(objects, true);
-                this.editor.controls.enabled = intersects.length === 0;
+                this.editor.controls.enabled =
+                    intersects.length === 0 && !isMultipleSelectionActive();
             }
         });
 
