@@ -105,7 +105,6 @@ class WaveBase {
         camera.name = type;
         camera.position.copy(new TV3(...this.settings.initialCameraPosition));
         camera.up = new TV3(0, 0, 1);
-        camera.lookAt(new TV3(0, 0, 0));
         this.scene.add(camera);
         return camera;
     }
