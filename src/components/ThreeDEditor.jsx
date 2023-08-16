@@ -168,10 +168,14 @@ export class ThreeDEditor extends React.Component {
     };
 
     addHotKeyListener() {
-        window.addEventListener("keypress", this.handleKeyPress, true);
+        document.addEventListener("keypress", this.handleKeyPress, true);
     }
 
     handleKeyPress = (e) => {
+        // If key pressed inside CodeMirror (Basis Viewer), do nothing
+        if (e.target.closest(".cm-editor")) {
+            return;
+        }
         const handler = this.keyConfig[e.key.toLowerCase()];
         if (handler) {
             handler.call(this);
@@ -180,7 +184,7 @@ export class ThreeDEditor extends React.Component {
     };
 
     removeHotKeyListener() {
-        window.removeEventListener("keypress", this.handleKeyPress);
+        document.removeEventListener("keypress", this.handleKeyPress);
     }
 
     handleCellRepetitionsChange(e) {
