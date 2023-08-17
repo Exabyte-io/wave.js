@@ -147,7 +147,9 @@ export class ThreejsEditorModal extends ModalDialog {
      * Add dragover listeners to group the objects.
      */
     addEventListeners() {
-        // TODO: this is a trick to disable orbit controls when multiple selection is active.
+        // This is a hack to disable Orbit Controls when Multiple Selection button is toggled.
+        // It detects if the word "selected" is in the classname of the button element.
+        // This conforms to previous behavior of controls during the operation.
         const isMultipleSelectionActive = () => {
             const toggleButton = document.querySelector(".ms-button__toggle");
             return toggleButton && toggleButton.classList.contains("selected");
