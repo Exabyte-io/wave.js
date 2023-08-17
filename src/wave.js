@@ -327,7 +327,6 @@ export class Wave extends mix(WaveBase).with(
     }
 
     render() {
-        if (this.settings.labelsConfig.areSpritesUsed) this.adjustLabelsToCameraPosition();
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2) this.renderer2.render(this.scene2, this.camera2);
     }

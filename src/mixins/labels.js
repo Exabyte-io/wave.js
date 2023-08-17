@@ -138,6 +138,7 @@ export const LabelsMixin = (superclass) =>
             } else {
                 this.createLabelsAsPoints();
             }
+            if (this.settings.labelsConfig.areSpritesUsed) this.adjustLabelsToCameraPosition();
             this.render();
         }
 
