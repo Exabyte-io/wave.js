@@ -93,8 +93,6 @@ export class ThreejsEditorModal extends ModalDialog {
         this.editor.controls.panSpeed = 0.1;
         this.editor.controls.rotateSpeed = 2.0;
         this.editor.controls.zoomSpeed = 0.2;
-
-        window.VIEW_HELPER.controls = this.editor.controls;
     }
 
     initializeRaycaster() {
