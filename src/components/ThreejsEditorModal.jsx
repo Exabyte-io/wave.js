@@ -169,42 +169,37 @@ export class ThreejsEditorModal extends ModalDialog {
                 return;
             }
 
-            // on a left click detect if the click was on the object and disable orbit controls in that case
+            // on a left click detect if the click was on the object of type Mesh and disable orbit controls in that case
+            // Conveniently, the only objects of type Mesh are Atoms and Transform Controls
             if (event.button === THREE.MOUSE.LEFT) {
-                // calculate mouse position in normalized device coordinates
+                // calculate mouse position in normalized viewport coordinates
                 // https://threejs.org/docs/#api/en/core/Raycaster
-
-                this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-                this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
+                const view = this.viewport.dom.getBoundingClientRect();
+                this.mouse.x = ((event.clientX - view.left) / view.width) * 2 - 1;
+                this.mouse.y = -((event.clientY - view.top) / view.height) * 2 + 1;
                 this.raycaster.setFromCamera(this.mouse, this.editor.camera);
 
                 const objects = this.editor.scene.children;
-                const intersects = this.raycaster.intersectObjects(objects, true);
-                this.editor.controls.enabled =
-                    intersects.length === 0 && !isMultipleSelectionActive();
+                const helpers = this.editor.sceneHelpers.children;
+
+                const intersects = this.raycaster.intersectObjects([...objects, ...helpers], true);
+
+                // Check if any of the intersected objects is of type Mesh (only Atoms and Transform Controls are of that type)
+                const hasMeshIntersect = intersects.some(
+                    (intersect) => intersect.object.type === "Mesh",
+                );
+
+                this.editor.controls.enabled = !hasMeshIntersect && !isMultipleSelectionActive();
             }
         });
 
-        // Disable rotation and set orbit controls target to the selected object if it's a Mesh (Atom)
-        this.editor.signals.objectSelected.add((selectedObject) => {
-            if (selectedObject && selectedObject.type === "Mesh") {
-                this.editor.controls.target.copy(selectedObject.position);
-                this.editor.controls.enabled = false;
-            } else {
+        document.addEventListener("mouseup", (event) => {
+            // on right click release enable orbit controls after pan
+            if (event.button === THREE.MOUSE.RIGHT) {
                 this.editor.controls.enabled = true;
             }
-        });
-        // on signal of object changing position disable orbit controls
-        this.editor.signals.objectChanged.add((selectedObject) => {
-            if (selectedObject && selectedObject.type === "Mesh") {
-                this.editor.controls.enabled = false;
-            }
-        });
-
-        // on right click release enable orbit controls after pan
-        document.addEventListener("mouseup", (event) => {
-            if (event.button === THREE.MOUSE.RIGHT) {
+            // on left click release enable orbit controls (return them to the default state)
+            if (event.button === THREE.MOUSE.LEFT) {
                 this.editor.controls.enabled = true;
             }
         });
