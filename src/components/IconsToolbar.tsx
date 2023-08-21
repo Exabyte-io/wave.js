@@ -38,6 +38,7 @@ function IconsToolbar(props: IconToolbarProps) {
         top: "25px",
         left: "25px",
         boxShadow: theme.shadows[4],
+        zIndex: 100,
     };
 
     const paperSx: SxProps = {

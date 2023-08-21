@@ -629,7 +629,7 @@ export class ThreeDEditor extends React.Component {
                         show={isThreejsEditorModalShown}
                         onHide={this.onThreejsEditorModalHide}
                         materials={[originalMaterial]}
-                        modalId="threejs-editor"
+                        id="threejs-editor"
                     />
                 )}
             </div>

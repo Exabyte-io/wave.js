@@ -36,11 +36,11 @@ export function ThreejsEditor({ materials }: ThreejsEditorProps): JSX.Element {
     }, []);
 
     return (
-        <Box sx={{ width: "100%", height: "100%" }}>
-            <Canvas>
+        <Box sx={{ width: "100vw", height: "100vh" }}>
+            <Canvas style={{ background: "black" }}>
                 <ambientLight />
                 <pointLight position={[10, 10, 10]} />
-                <camera />
+                <camera position={[-20, 0, 10]} lookAt={} />
                 <ThreejsScene materials={materials} />
             </Canvas>
         </Box>
