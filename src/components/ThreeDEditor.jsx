@@ -35,7 +35,7 @@ import settings from "../settings";
 import { exportToDisk } from "../utils";
 import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";
-import { ThreejsEditorModal } from "./ThreejsEditorModal";
+import { ThreejsEditor } from "./ThreejsEditor";
 import { WaveComponent } from "./WaveComponent";
 
 /**
@@ -322,20 +322,6 @@ export class ThreeDEditor extends React.Component {
         } else {
             this.offMeasureParam("isAnglesShown");
         }
-    }
-
-    /**
-     * Returns a cover div to cover the area and prevent user interaction with component
-     */
-    renderCoverDiv() {
-        const style = {
-            position: "absolute",
-            height: "100%",
-            width: "100%",
-        };
-        const { isInteractive } = this.state;
-        if (isInteractive) style.display = "none";
-        return <div className="atom-view-cover" style={style} />;
     }
 
     renderWaveComponent() {
@@ -629,26 +615,23 @@ export class ThreeDEditor extends React.Component {
     renderWaveOrThreejsEditorModal() {
         const { originalMaterial, isThreejsEditorModalShown } = this.state;
 
-        if (isThreejsEditorModalShown) {
-            return (
-                <ThreejsEditorModal
-                    show={isThreejsEditorModalShown}
-                    onHide={this.onThreejsEditorModalHide}
-                    materials={[originalMaterial]}
-                    modalId="threejs-editor"
-                />
-            );
-        }
         const { isInteractive } = this.state;
         return (
             <div className={this.getThreeDEditorClassNames()}>
-                {this.renderCoverDiv()}
                 <IconsToolbar
                     toolbarConfig={this.getToolbarConfig()}
                     isInteractive={isInteractive}
                     handleToggleInteractive={this.handleToggleInteractive}
                 />
-                {this.renderWaveComponent()}
+                {!isThreejsEditorModalShown && this.renderWaveComponent()}
+                {isThreejsEditorModalShown && (
+                    <ThreejsEditor
+                        show={isThreejsEditorModalShown}
+                        onHide={this.onThreejsEditorModalHide}
+                        materials={[originalMaterial]}
+                        modalId="threejs-editor"
+                    />
+                )}
             </div>
         );
     }

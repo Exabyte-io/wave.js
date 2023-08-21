@@ -4,7 +4,7 @@ import Enzyme from "enzyme";
 import React from "react";
 
 import { ThreeDEditor } from "../../../src/components/ThreeDEditor";
-import { ThreejsEditorModal } from "../../../src/components/ThreejsEditorModal";
+import { ThreejsEditor } from "../../../src/components/ThreejsEditor";
 import { WaveComponent } from "../../../src/components/WaveComponent";
 import { ELEMENT_PROPERTIES, getWaveInstance, MATERIAL_CONFIG, WAVE_SETTINGS } from "../../enums";
 import { SELECTORS } from "../../selectors";
@@ -90,7 +90,7 @@ test("preserve three.js editor changes", async () => {
             })),
         },
     });
-    const threeJsEditorModal = wrapper.find(ThreejsEditorModal);
+    const threeJsEditorModal = wrapper.find(ThreejsEditor);
     threeJsEditorModal.prop("onHide")(modifiedMaterial);
     wrapper.update();
 
