@@ -2,7 +2,7 @@
 import { Made } from "@exabyte-io/made.js";
 import { Box } from "@mui/material";
 import { Canvas, useThree } from "@react-three/fiber";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 import { materialsToThreeDSceneData } from "../utils";
@@ -10,6 +10,7 @@ import { materialsToThreeDSceneData } from "../utils";
 interface ThreejsSceneProps {
     materials: Made.Material[];
 }
+
 function ThreejsScene({ materials }: ThreejsSceneProps): JSX.Element | null {
     const { scene } = useThree();
 
@@ -21,13 +22,22 @@ function ThreejsScene({ materials }: ThreejsSceneProps): JSX.Element | null {
         scene.add(...loadedScene.children);
     }, [materials, scene]);
 
-    return null; // This component is just for side effects, it doesn't render anything
+    return null; // This component doesn't render anything visually itself
 }
 
 interface ThreejsEditorProps {
     materials: Made.Material[];
 }
+
 export function ThreejsEditor({ materials }: ThreejsEditorProps): JSX.Element {
+    const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+
+    useEffect(() => {
+        if (cameraRef.current) {
+            cameraRef.current.lookAt(new THREE.Vector3(0, 0, 0));
+        }
+    }, []);
+
     useEffect(() => {
         return () => {
             // Cleanup actions (equivalent to componentWillUnmount)
@@ -40,7 +50,11 @@ export function ThreejsEditor({ materials }: ThreejsEditorProps): JSX.Element {
             <Canvas style={{ background: "black" }}>
                 <ambientLight />
                 <pointLight position={[10, 10, 10]} />
-                <camera position={[-20, 0, 10]} lookAt={} />
+                <perspectiveCamera
+                    ref={cameraRef}
+                    position={new THREE.Vector3(-20, 0, 10)}
+                    up={new THREE.Vector3(0, 0, 1)}
+                />
                 <ThreejsScene materials={materials} />
             </Canvas>
         </Box>
