@@ -154,17 +154,18 @@ export class ThreeDEditor extends React.Component {
         });
     };
 
+    // map of hotkeys to their handlers
     keyConfig = {
-        o: this.handleToggleOrbitControls, // O toggle orbit controls
-        i: this.handleToggleInteractive, // I toggle interactive
-        b: this.handleToggleBonds, // B toggle bonds
-        c: this.handleToggleConventionalCell, // C toggle conventional cell
-        l: this.handleToggleLabels, // L toggle labels
-        r: this.handleResetViewer, // R reset viewer
-        e: this.toggleThreejsEditorModal, // E toggle threejs editor modal
-        d: this.handleToggleDistanceShown, // D toggle distance measurement
-        a: this.handleToggleAnglesShown, // A toggle angles measurement
-        x: this.handleDeleteConnection, // X delete connection
+        [settings.hotKeysConfig.toggleOrbitControls]: this.handleToggleOrbitControls,
+        [settings.hotKeysConfig.toggleInteractive]: this.handleToggleInteractive,
+        [settings.hotKeysConfig.toggleBonds]: this.handleToggleBonds,
+        [settings.hotKeysConfig.toggleConventionalCell]: this.handleToggleConventionalCell,
+        [settings.hotKeysConfig.toggleLabels]: this.handleToggleLabels,
+        [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
+        [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
+        [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleDistanceShown,
+        [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleAnglesShown,
+        [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
     };
 
     addHotKeyListener() {
