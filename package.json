@@ -55,7 +55,7 @@
         "sprintf-js": "^1.1.2",
         "static-kdtree": "^1.0.2",
         "sweetalert": "^2.1.2",
-        "three": "https://github.com/Exabyte-io/three.js#ad7deb387f1fe6f2894f56a5affc54a8619509a9",
+        "three": "https://github.com/Exabyte-io/three.js#d4a6a3f9044e18af4514a85e1dc715980c5f960b",
         "underscore": "^1.8.3",
         "underscore.string": "^3.3.4",
         "@mui/lab": "^5.0.0-alpha.120",
