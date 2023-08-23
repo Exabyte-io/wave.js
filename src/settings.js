@@ -59,4 +59,17 @@ export default {
         bc2: [0x0000ff, 0x0000ff],
         bc3: [0xffff00, 0x0000ff],
     },
+
+    hotKeysConfig: {
+        toggleOrbitControls: "o",
+        toggleInteractive: "i",
+        toggleBonds: "b",
+        toggleConventionalCell: "c",
+        toggleLabels: "l",
+        resetViewer: "r",
+        toggleThreejsEditorModal: "e",
+        toggleDistanceShown: "d",
+        toggleAnglesShown: "a",
+        deleteConnection: "x",
+    },
 };

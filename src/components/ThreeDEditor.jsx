@@ -109,11 +109,18 @@ export class ThreeDEditor extends React.Component {
         this.handleResetMeasures = this.handleResetMeasures.bind(this);
         this.offMeasureParam = this.offMeasureParam.bind(this);
         this.onMeasureParam = this.onMeasureParam.bind(this);
+        this.addHotKeyListener = this.addHotKeyListener.bind(this);
+        this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
+    }
+
+    componentDidMount() {
+        this.addHotKeyListener();
     }
 
     componentWillUnmount() {
         this.handleResetMeasures();
         this.WaveComponent.wave.destroyListeners();
+        this.removeHotKeyListener();
     }
 
     // TODO: update component to fully controlled or fully uncontrolled with a key?
@@ -146,6 +153,52 @@ export class ThreeDEditor extends React.Component {
             },
         });
     };
+
+    // map of hotkeys to their handlers
+    keyConfig = {
+        [settings.hotKeysConfig.toggleOrbitControls]: this.handleToggleOrbitControls,
+        [settings.hotKeysConfig.toggleInteractive]: this.handleToggleInteractive,
+        [settings.hotKeysConfig.toggleBonds]: this.handleToggleBonds,
+        [settings.hotKeysConfig.toggleConventionalCell]: this.handleToggleConventionalCell,
+        [settings.hotKeysConfig.toggleLabels]: this.handleToggleLabels,
+        [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
+        [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
+        [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleDistanceShown,
+        [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleAnglesShown,
+        [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
+    };
+
+    addHotKeyListener() {
+        document.addEventListener("keypress", this.handleKeyPress, true);
+    }
+
+    handleKeyPress = (e) => {
+        // Check if the event originated from an input, textarea, select, or CodeMirror
+        if (
+            e.target.closest(".cm-editor") ||
+            ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.nodeName)
+        ) {
+            return;
+        }
+
+        // In threejs editor modal, only listen to "e" key not to interfere with its own hotkeys
+        const { isThreejsEditorModalShown } = this.state;
+        if (isThreejsEditorModalShown) {
+            if (e.key.toLowerCase() === "e") {
+                this.toggleThreejsEditorModal();
+            }
+            return;
+        }
+
+        const handler = this.keyConfig[e.key.toLowerCase()];
+        if (handler) {
+            handler.call(this);
+        }
+    };
+
+    removeHotKeyListener() {
+        document.removeEventListener("keypress", this.handleKeyPress);
+    }
 
     handleCellRepetitionsChange(e) {
         this.handleSetSetting({ [e.target.id]: parseFloat($(e.target).val()) });
@@ -351,7 +404,6 @@ export class ThreeDEditor extends React.Component {
             isConventionalCellShown,
         );
         const isDrawBondsEnabled = this._getWaveProperty("isDrawBondsEnabled") || false;
-
         return (
             <WaveComponent
                 ref={(el) => {
@@ -386,7 +438,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "rotate-zoom",
                 disabled: false,
-                content: "Rotate/Zoom",
+                content: "Rotate/Zoom [O]",
                 leftIcon: <ThreeDRotation />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areOrbitControlsEnabled")),
                 onClick: this.handleToggleOrbitControls,
@@ -420,7 +472,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-bonds",
                 disabled: false,
-                content: "Bonds",
+                content: "Bonds [B]",
                 leftIcon: <Dehaze />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("isDrawBondsEnabled")),
                 onClick: this.handleToggleBonds,
@@ -428,7 +480,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-cell",
                 disabled: false,
-                content: "Conventional Cell",
+                content: "Conventional Cell [C]",
                 leftIcon: <FormatShapes />,
                 rightIcon: this.getCheckmark(isConventionalCellShown),
                 onClick: this.handleToggleConventionalCell,
@@ -436,7 +488,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-labels",
                 disabled: false,
-                content: "Labels",
+                content: "Labels [L]",
                 leftIcon: <Spellcheck />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areLabelsShown")),
                 onClick: this.handleToggleLabels,
@@ -456,7 +508,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "reset-view",
                 disabled: false,
-                content: "Reset View",
+                content: "Reset View [R]",
                 leftIcon: <Replay />,
                 onClick: this.handleResetViewer,
             },
@@ -469,21 +521,21 @@ export class ThreeDEditor extends React.Component {
         return [
             {
                 id: "Distances",
-                content: "Distances",
+                content: "Distances [D]",
                 rightIcon: this.getCheckmark(isDistanceShown),
                 leftIcon: <HeightIcon />,
                 onClick: this.handleToggleDistanceShown,
             },
             {
                 id: "Angles",
-                content: "Angles",
+                content: "Angles [A]",
                 rightIcon: this.getCheckmark(isAnglesShown),
                 leftIcon: <LooksIcon />,
                 onClick: this.handleToggleAnglesShown,
             },
             {
                 id: "Delete",
-                content: "Delete connection",
+                content: "Delete connection [X]",
                 leftIcon: <DeleteIcon />,
                 onClick: this.handleDeleteConnection,
             },
@@ -589,11 +641,12 @@ export class ThreeDEditor extends React.Component {
         if (editable) {
             toolbarConfig.splice(3, 0, {
                 id: "3DEdit",
-                title: "Edit",
+                title: "Edit [E]",
                 leftIcon: <Edit />,
                 onClick: this.toggleThreejsEditorModal,
             });
         }
+
         return toolbarConfig;
     }
 
@@ -640,6 +693,7 @@ export class ThreeDEditor extends React.Component {
             );
         }
         const { isInteractive } = this.state;
+
         return (
             <div className={this.getThreeDEditorClassNames()}>
                 {this.renderCoverDiv()}
