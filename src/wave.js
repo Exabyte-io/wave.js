@@ -322,12 +322,12 @@ export class Wave extends mix(WaveBase).with(
         this.drawBoundaries();
         if (this.isDrawBondsEnabled) this.drawBonds();
         this.render();
-        this.createLabelSpritesAsPoints();
+        this.createLabels();
         this.refillChosenAtoms();
     }
 
     render() {
-        this.adjustLabelsToCameraPosition(this.scene, this.camera);
+        this.adjustLabelsToCameraPosition();
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2) this.renderer2.render(this.scene2, this.camera2);
     }

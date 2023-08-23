@@ -33,6 +33,7 @@ export default {
     areLabelsInitiallyShown: false,
     isViewAdjustable: true,
     labelsConfig: {
+        areSpritesUsed: true,
         fontFace: "Arial",
         fontSize: 96,
         fontWeight: "Bold",
@@ -48,7 +49,11 @@ export default {
         depthFunc: THREE.NotEqualDepth,
         transparent: true,
     },
-
+    labelSpriteConfig: {
+        transparent: true,
+        depthFunc: THREE.LessEqualDepth,
+        depthTest: true,
+    },
     boundaryConditionTypeColors: {
         bc1: [0xffff00, 0xffff00],
         bc2: [0x0000ff, 0x0000ff],
