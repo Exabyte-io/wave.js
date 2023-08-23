@@ -87,7 +87,7 @@ export const LabelsMixin = (superclass) =>
          * @method adjustLabelsToCameraPosition
          */
         adjustLabelsToCameraPosition() {
-            if (!this.areLabelsShown) return;
+            if (!this.areLabelsShown || !this.settings.labelsConfig.areSpritesUsed) return;
             this.labelsGroup.children.forEach((label) => {
                 const { atomPosition, atomName: element } = label.userData;
                 const offsetVector = this.getLabelOffsetVector(atomPosition, element);
