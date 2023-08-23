@@ -13,7 +13,9 @@ import { Script } from "three/editor/js/Script";
 import { Sidebar } from "three/editor/js/Sidebar";
 import { Toolbar } from "three/editor/js/Toolbar";
 import { Viewport } from "three/editor/js/Viewport";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+import { LABELS_GROUP_NAME } from "../enums";
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
 import { AlertDialog } from "./AlertDialog";
@@ -45,6 +47,7 @@ export class ThreejsEditorModal extends ModalDialog {
         this.addEventListeners();
         this.addSignalsListeners();
         this.loadScene();
+        this.initializeRaycaster();
     }
 
     // eslint-disable-next-line no-unused-vars
@@ -74,17 +77,34 @@ export class ThreejsEditorModal extends ModalDialog {
         return camera;
     };
 
-    initializeControls = () => {
-        window.VIEW_HELPER.controls.panSpeed = 0.006;
-        window.VIEW_HELPER.controls.rotationSpeed = 0.015;
-        window.VIEW_HELPER.controls.zoomSpeed = 0.2;
-    };
-
     initializeLights() {
         const directionalLight = new THREE.DirectionalLight("#FFFFFF");
         directionalLight.position.copy(new THREE.Vector3(0.2, 0.2, -1).normalize());
         directionalLight.intensity = 1.2;
         this.editor.scene.add(directionalLight);
+    }
+
+    initializeControlsInEditor() {
+        // initialize controls
+        this.editor.controls = new OrbitControls(this.editor.camera, this.viewport.dom);
+        this.editor.controls.up = new THREE.Vector3(0, 0, 1);
+        this.editor.controls.target.set(0, 0, 0);
+        // set controls parameters
+        this.editor.controls.panSpeed = 0.1;
+        this.editor.controls.rotateSpeed = 2.0;
+        this.editor.controls.zoomSpeed = 0.2;
+    }
+
+    initializeRaycaster() {
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+        const cell = this.editor.scene.getObjectByName("Cell");
+        const labels = this.editor.scene.getObjectByName(LABELS_GROUP_NAME).children;
+        // Make the cell and labels transparent for raycaster so they do not block atoms
+        cell.raycast = () => {};
+        labels.forEach((label) => {
+            label.raycast = () => {};
+        });
     }
 
     /**
@@ -102,8 +122,8 @@ export class ThreejsEditorModal extends ModalDialog {
         this.editor.onHide = this.onHide;
 
         // initialize viewport and add it to the DOM
-        const viewport = new Viewport(this.editor);
-        this.domElement.appendChild(viewport.dom);
+        this.viewport = new Viewport(this.editor);
+        this.domElement.appendChild(this.viewport.dom);
 
         // initialize UI elements and add them to the DOM
         const script = new Script(this.editor);
@@ -117,8 +137,7 @@ export class ThreejsEditorModal extends ModalDialog {
         const toolbar = new Toolbar(this.editor);
         this.domElement.appendChild(toolbar.dom);
 
-        this.initializeControls();
-
+        this.initializeControlsInEditor();
         this.initializeLights();
     }
 
@@ -126,6 +145,14 @@ export class ThreejsEditorModal extends ModalDialog {
      * Add dragover listeners to group the objects.
      */
     addEventListeners() {
+        // This is a hack to disable Orbit Controls when Multiple Selection button is toggled.
+        // It detects if the word "selected" is in the classname of the button element.
+        // This conforms to previous behavior of controls during the operation.
+        const isMultipleSelectionActive = () => {
+            const toggleButton = document.querySelector(".ms-button__toggle");
+            return toggleButton && toggleButton.classList.contains("selected");
+        };
+
         document.addEventListener(
             "dragover",
             (event) => {
@@ -134,6 +161,49 @@ export class ThreejsEditorModal extends ModalDialog {
             },
             false,
         );
+
+        document.addEventListener("mousedown", (event) => {
+            // on right click and hold disable orbit controls to allow pan
+            if (event.button === THREE.MOUSE.RIGHT) {
+                this.editor.controls.enabled = false;
+                return;
+            }
+
+            // on a left click detect if the click was on the object of type Mesh and disable orbit controls in that case
+            // Conveniently, the only objects of type Mesh are Atoms and Transform Controls
+            if (event.button === THREE.MOUSE.LEFT) {
+                // calculate mouse position in normalized viewport coordinates
+                // https://threejs.org/docs/#api/en/core/Raycaster
+                const view = this.viewport.dom.getBoundingClientRect();
+                this.mouse.x = ((event.clientX - view.left) / view.width) * 2 - 1;
+                this.mouse.y = -((event.clientY - view.top) / view.height) * 2 + 1;
+                this.raycaster.setFromCamera(this.mouse, this.editor.camera);
+
+                const objects = this.editor.scene.children;
+                const helpers = this.editor.sceneHelpers.children;
+
+                const intersects = this.raycaster.intersectObjects([...objects, ...helpers], true);
+
+                // Check if any of the intersected objects is of type Mesh (only Atoms and Transform Controls are of that type)
+                const hasMeshIntersect = intersects.some(
+                    (intersect) => intersect.object.type === "Mesh",
+                );
+
+                this.editor.controls.enabled = !hasMeshIntersect && !isMultipleSelectionActive();
+            }
+        });
+
+        document.addEventListener("mouseup", (event) => {
+            // on right click release enable orbit controls after pan
+            if (event.button === THREE.MOUSE.RIGHT) {
+                this.editor.controls.enabled = true;
+            }
+            // on left click release enable orbit controls (return them to the default state)
+            if (event.button === THREE.MOUSE.LEFT) {
+                this.editor.controls.enabled = true;
+            }
+        });
+
         const onResize = () => this.editor.signals.windowResize.dispatch();
         window.addEventListener("resize", onResize, false);
         onResize();
