@@ -1,3 +1,4 @@
+import jest from "@jest/globals";
 import expect from "expect";
 import * as THREE from "three";
 
