@@ -215,6 +215,7 @@ export class ThreeDEditor extends React.Component {
 
     handleToggleLabels() {
         this.WaveComponent.wave.toggleLabels();
+        this._resetStateWaveComponent();
     }
 
     handleChemicalConnectivityFactorChange(e) {
