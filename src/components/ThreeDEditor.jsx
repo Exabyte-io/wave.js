@@ -215,6 +215,7 @@ export class ThreeDEditor extends React.Component {
 
     handleToggleLabels() {
         this.WaveComponent.wave.toggleLabels();
+        this._resetStateWaveComponent();
     }
 
     handleChemicalConnectivityFactorChange(e) {
@@ -442,6 +443,7 @@ export class ThreeDEditor extends React.Component {
                 leftIcon: <ThreeDRotation />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areOrbitControlsEnabled")),
                 onClick: this.handleToggleOrbitControls,
+                shouldMenuStayOpened: true,
             },
             {
                 id: "auto-rotate",
@@ -452,6 +454,7 @@ export class ThreeDEditor extends React.Component {
                     this._getWaveProperty("isOrbitControlsAnimationEnabled"),
                 ),
                 onClick: this.handleToggleOrbitControlsAnimation,
+                shouldMenuStayOpened: true,
             },
             {
                 id: "toggle-axes",
@@ -460,6 +463,7 @@ export class ThreeDEditor extends React.Component {
                 leftIcon: <GpsFixed />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areAxesEnabled")),
                 onClick: this.handleToggleAxes,
+                shouldMenuStayOpened: true,
             },
             {
                 id: "toggle-camera",
@@ -468,6 +472,7 @@ export class ThreeDEditor extends React.Component {
                 leftIcon: <SwitchCamera />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("isCameraOrthographic")),
                 onClick: this.handleToggleOrthographicCamera,
+                shouldMenuStayOpened: true,
             },
             {
                 id: "toggle-bonds",
@@ -476,6 +481,7 @@ export class ThreeDEditor extends React.Component {
                 leftIcon: <Dehaze />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("isDrawBondsEnabled")),
                 onClick: this.handleToggleBonds,
+                shouldMenuStayOpened: true,
             },
             {
                 id: "toggle-cell",
@@ -484,6 +490,7 @@ export class ThreeDEditor extends React.Component {
                 leftIcon: <FormatShapes />,
                 rightIcon: this.getCheckmark(isConventionalCellShown),
                 onClick: this.handleToggleConventionalCell,
+                shouldMenuStayOpened: true,
             },
             {
                 id: "toggle-labels",
@@ -492,6 +499,7 @@ export class ThreeDEditor extends React.Component {
                 leftIcon: <Spellcheck />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areLabelsShown")),
                 onClick: this.handleToggleLabels,
+                shouldMenuStayOpened: true,
             },
             {
                 id: "toggle-view-adjustment",
@@ -500,6 +508,7 @@ export class ThreeDEditor extends React.Component {
                 leftIcon: <ControlCameraRounded />,
                 rightIcon: this.getCheckmark(viewerSettings.isViewAdjustable),
                 onClick: this.handleToggleIsViewAdjustable,
+                shouldMenuStayOpened: true,
             },
             {
                 id: "divider-2",
@@ -511,6 +520,7 @@ export class ThreeDEditor extends React.Component {
                 content: "Reset View [R]",
                 leftIcon: <Replay />,
                 onClick: this.handleResetViewer,
+                shouldMenuStayOpened: true,
             },
         ];
     };
@@ -525,6 +535,7 @@ export class ThreeDEditor extends React.Component {
                 rightIcon: this.getCheckmark(isDistanceShown),
                 leftIcon: <HeightIcon />,
                 onClick: this.handleToggleDistanceShown,
+                shouldMenuStayOpened: true,
             },
             {
                 id: "Angles",
@@ -532,12 +543,14 @@ export class ThreeDEditor extends React.Component {
                 rightIcon: this.getCheckmark(isAnglesShown),
                 leftIcon: <LooksIcon />,
                 onClick: this.handleToggleAnglesShown,
+                shouldMenuStayOpened: true,
             },
             {
                 id: "Delete",
                 content: "Delete connection [X]",
                 leftIcon: <DeleteIcon />,
                 onClick: this.handleDeleteConnection,
+                shouldMenuStayOpened: true,
             },
             {
                 id: "divider-actions",
@@ -548,6 +561,7 @@ export class ThreeDEditor extends React.Component {
                 content: "Reset Measures",
                 leftIcon: <Replay />,
                 onClick: this.handleResetMeasures,
+                shouldMenuStayOpened: true,
             },
         ];
     };
@@ -614,7 +628,6 @@ export class ThreeDEditor extends React.Component {
                 id: "Parameters",
                 title: "Parameters",
                 header: "Parameters",
-                shouldMenuStayOpened: true,
                 leftIcon: <Settings />,
                 contentObject: this.getParametersActions(),
                 onClick: () => this.handleToggleToolbarMenu("parameters"),
