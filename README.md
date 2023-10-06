@@ -128,3 +128,18 @@ This package depends on [Made.js](https://github.com/Exabyte-io/made.js), as wel
 1. [Enzyme, A JavaScript Testing Utility For React, Github Repo](https://github.com/airbnb/enzyme)
 1. [Jest Testing Framework, Official Website](https://jestjs.io/index.html)
 1. [Git LFS, Official Website](https://git-lfs.github.com/)
+
+## Cove.js local development
+
+In case you need to link Cove.js into the app for local development you need
+
+1. Add local path of Cove.js to package.json
+```bash
+    "@exabyte-io/code.js": "file:../../cove.js"
+```
+2. Run the app
+```bash
+    npm start
+```
+
+If you need to re-link it again, remove node_modules in cove.js and the app, run npm install, then run npm start again. 
