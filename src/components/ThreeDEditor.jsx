@@ -254,7 +254,7 @@ export class ThreeDEditor extends React.Component {
                 content = originalMaterial.getAsPOSCAR();
                 break;
             default:
-                content = originalMaterial.toJSON();
+                content = JSON.stringify(originalMaterial.toJSON());
         }
         exportToDisk(content, originalMaterial.name, format);
     }
