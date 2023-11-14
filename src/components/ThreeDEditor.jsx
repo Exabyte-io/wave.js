@@ -700,7 +700,7 @@ export class ThreeDEditor extends React.Component {
         const { isInteractive } = this.state;
 
         return (
-            <div>
+            <div style={{ position: "relative" }}>
                 {this.renderCoverDiv()}
                 <IconsToolbar
                     toolbarConfig={this.getToolbarConfig()}
