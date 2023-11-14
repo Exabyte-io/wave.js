@@ -26,7 +26,6 @@ import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
 import { StyledEngineProvider } from "@mui/material/styles";
-import setClass from "classnames";
 import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
@@ -663,13 +662,6 @@ export class ThreeDEditor extends React.Component {
         return toolbarConfig;
     }
 
-    /** Helper to construct a compound CSS classname based on interactivity state */
-    getThreeDEditorClassNames() {
-        const { isInteractive } = this.state;
-        const isInteractiveCls = isInteractive ? "" : "non-interactive";
-        return setClass("materials-designer-3d-editor", isInteractiveCls);
-    }
-
     onThreejsEditorModalHide(material) {
         let { isThreejsEditorModalShown } = this.state;
         isThreejsEditorModalShown = !isThreejsEditorModalShown;
@@ -708,7 +700,7 @@ export class ThreeDEditor extends React.Component {
         const { isInteractive } = this.state;
 
         return (
-            <div className={this.getThreeDEditorClassNames()}>
+            <div>
                 {this.renderCoverDiv()}
                 <IconsToolbar
                     toolbarConfig={this.getToolbarConfig()}
