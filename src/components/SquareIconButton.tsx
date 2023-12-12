@@ -1,5 +1,4 @@
 import IconButton, { IconButtonProps } from "@mui/material/IconButton";
-import { useTheme } from "@mui/material/styles";
 import Tooltip, { TooltipProps } from "@mui/material/Tooltip";
 import React, { useEffect, useState } from "react";
 import _ from "underscore";
@@ -28,14 +27,9 @@ function SquareIconButton(props: SquareIconButtonProps) {
         isToggled = false,
     } = props;
     const [stateIsToggled, setStateIsToggled] = useState(isToggled);
-    const theme = useTheme();
 
     const defaultIconButtonStyle = {
         borderRadius: 0,
-        fontSize: theme.typography.h2.fontSize,
-        height: theme.spacing(6),
-        width: theme.spacing(6),
-        backgroundColor: theme.palette.background.paper,
     };
 
     useEffect(() => {
@@ -47,13 +41,11 @@ function SquareIconButton(props: SquareIconButtonProps) {
     };
 
     return (
-        <Tooltip
-            id={id}
-            title={title.toUpperCase()}
-            placement={tooltipPlacement}
-            disableInteractive
-        >
+        <Tooltip id={id} title={title} placement={tooltipPlacement} disableInteractive>
             <IconButton
+                disableFocusRipple
+                disableTouchRipple
+                size="large"
                 key={id}
                 aria-checked={isToggleable && stateIsToggled}
                 aria-label={label || title.toLowerCase()}

@@ -1,7 +1,5 @@
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
-import { useTheme } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import React from "react";
@@ -32,28 +30,19 @@ function ParametersMenu(props: ParametersMenuProps) {
         handleChemicalConnectivityFactorChange,
     } = props;
 
-    const theme = useTheme();
-    const defaultTextFieldStyle = {
-        "& input": {
-            margin: theme.spacing(0.5),
-            height: theme.spacing(3),
-            padding: theme.spacing(1),
-            borderRadius: theme.spacing(0.5),
-        },
-    };
-
     return (
-        <Stack spacing={theme.spacing(1)} sx={{ margin: theme.spacing(2) }}>
-            <Typography variant="subtitle1">Atomic radius</Typography>
+        <Stack spacing={1.5} margin={2}>
+            <Typography variant="body1">Atomic radius</Typography>
             <Box>
                 <TextField
+                    fullWidth
                     label="Value"
                     type="number"
+                    size="small"
                     className="inverse stepper sphere-radius"
                     id="sphere-radius"
                     value={viewerSettings.atomRadiiScale}
                     onChange={handleSphereRadiusChange}
-                    sx={defaultTextFieldStyle}
                     inputProps={{
                         max: 10,
                         min: 0.1,
@@ -61,9 +50,8 @@ function ParametersMenu(props: ParametersMenuProps) {
                     }}
                 />
             </Box>
-            <Divider />
-            <Typography variant="subtitle1">Repetition along vectors:</Typography>
-            <Stack key="repetition" direction="row" spacing={theme.spacing(2)}>
+            <Typography variant="body1">Repetition along vectors:</Typography>
+            <Stack key="repetition" direction="row" spacing={1}>
                 {["A", "B", "C"].map((label) => {
                     const key = `repetitionsAlongLatticeVector${label}` as ViewerSettingsKey;
 
@@ -71,12 +59,12 @@ function ParametersMenu(props: ParametersMenuProps) {
                         <Box key={label}>
                             <TextField
                                 label={label}
+                                size="small"
                                 type="number"
                                 className="inverse stepper cell-repetitions"
                                 id={`repetitionsAlongLatticeVector${label}`}
                                 value={viewerSettings[key]}
                                 onChange={handleCellRepetitionsChange}
-                                sx={defaultTextFieldStyle}
                                 inputProps={{
                                     max: 10,
                                     min: 1,
@@ -87,17 +75,17 @@ function ParametersMenu(props: ParametersMenuProps) {
                     );
                 })}
             </Stack>
-            <Divider />
-            <Typography variant="subtitle1">Chemical connectivity factor</Typography>
+            <Typography variant="body1">Chemical connectivity factor</Typography>
             <Box>
                 <TextField
+                    fullWidth
+                    size="small"
                     label="Value"
                     type="number"
                     className="inverse stepper cell-repetitions"
                     id="chemical-connectivity-factor"
                     value={viewerSettings.chemicalConnectivityFactor}
                     onChange={handleChemicalConnectivityFactorChange}
-                    sx={defaultTextFieldStyle}
                     inputProps={{
                         max: 2,
                         min: 0,
