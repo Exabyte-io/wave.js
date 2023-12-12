@@ -25,7 +25,7 @@ import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
-import { StyledEngineProvider } from "@mui/material/styles";
+import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
 import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
@@ -651,7 +651,7 @@ export class ThreeDEditor extends React.Component {
 
         const { editable } = this.props;
         if (editable) {
-            toolbarConfig.splice(3, 0, {
+            toolbarConfig.splice(4, 0, {
                 id: "3DEdit",
                 title: "Edit [E]",
                 leftIcon: <Edit />,
@@ -714,11 +714,11 @@ export class ThreeDEditor extends React.Component {
 
     render() {
         return (
-            <StyledEngineProvider injectFirst>
-                <ThemeProvider theme={DarkMaterialUITheme}>
+            <ThemeProvider theme={DarkMaterialUITheme}>
+                <ScopedCssBaseline enableColorScheme>
                     {this.renderWaveOrThreejsEditorModal()}
-                </ThemeProvider>
-            </StyledEngineProvider>
+                </ScopedCssBaseline>
+            </ThemeProvider>
         );
     }
 }
