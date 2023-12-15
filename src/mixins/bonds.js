@@ -181,6 +181,7 @@ export const BondsMixin = (superclass) =>
          * We need this to block the UI until the bonds are drawn.
          */
         drawBonds() {
+            this.createBondsAsync();
             if (!this.areBondsCreated) {
                 this.bondsGroup = this.createBondsGroup();
                 this.areBondsCreated = true;
