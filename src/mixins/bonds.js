@@ -13,6 +13,7 @@ export const BondsMixin = (superclass) =>
     class extends superclass {
         constructor(config) {
             super(config);
+            this.bondsGroup = new THREE.Group();
             this.createBondsAsync();
             this.isDrawBondsEnabled = false;
             this.drawBonds = this.drawBonds.bind(this);
@@ -27,6 +28,7 @@ export const BondsMixin = (superclass) =>
             const clsInstance = this;
             clsInstance.areBondsCreated = false;
             setTimeout(() => {
+                clsInstance.bondsGroup.clear();
                 clsInstance.bondsGroup = clsInstance.createBondsGroup();
                 clsInstance.areBondsCreated = true;
             }, 10);
