@@ -173,20 +173,20 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleKeyPress = (e) => {
-        // Check if the event originated from an input, textarea, select, or CodeMirror
+        const { isInteractive, isThreejsEditorModalShown } = this.state;
+
+        // Check if interactive mode is off, or if the event originated from an input-like element
         if (
+            !isInteractive ||
             e.target.closest(".cm-editor") ||
             ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.nodeName)
         ) {
             return;
         }
 
-        // In threejs editor modal, only listen to "e" key not to interfere with its own hotkeys
-        const { isThreejsEditorModalShown } = this.state;
-        if (isThreejsEditorModalShown) {
-            if (e.key.toLowerCase() === "e") {
-                this.toggleThreejsEditorModal();
-            }
+        // In threejs editor modal, only listen to "e" key
+        if (isThreejsEditorModalShown && e.key.toLowerCase() === "e") {
+            this.toggleThreejsEditorModal();
             return;
         }
 
