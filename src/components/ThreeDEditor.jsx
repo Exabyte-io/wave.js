@@ -178,14 +178,9 @@ export class ThreeDEditor extends React.Component {
         if (
             !isInteractive ||
             e.target.closest(".cm-editor") ||
-            ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.nodeName)
+            ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.nodeName) ||
+            isThreejsEditorModalShown
         ) {
-            return;
-        }
-
-        // In threejs editor modal, only listen to "e" key
-        if (isThreejsEditorModalShown && e.key.toLowerCase() === "e") {
-            this.toggleThreejsEditorModal();
             return;
         }
 
