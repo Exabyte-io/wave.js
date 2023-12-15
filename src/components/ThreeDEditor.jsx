@@ -25,8 +25,7 @@ import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
-import { StyledEngineProvider } from "@mui/material/styles";
-import setClass from "classnames";
+import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
 import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
@@ -652,7 +651,7 @@ export class ThreeDEditor extends React.Component {
 
         const { editable } = this.props;
         if (editable) {
-            toolbarConfig.splice(3, 0, {
+            toolbarConfig.splice(4, 0, {
                 id: "3DEdit",
                 title: "Edit [E]",
                 leftIcon: <Edit />,
@@ -661,13 +660,6 @@ export class ThreeDEditor extends React.Component {
         }
 
         return toolbarConfig;
-    }
-
-    /** Helper to construct a compound CSS classname based on interactivity state */
-    getThreeDEditorClassNames() {
-        const { isInteractive } = this.state;
-        const isInteractiveCls = isInteractive ? "" : "non-interactive";
-        return setClass("materials-designer-3d-editor", isInteractiveCls);
     }
 
     onThreejsEditorModalHide(material) {
@@ -708,7 +700,7 @@ export class ThreeDEditor extends React.Component {
         const { isInteractive } = this.state;
 
         return (
-            <div className={this.getThreeDEditorClassNames()}>
+            <div style={{ position: "relative" }}>
                 {this.renderCoverDiv()}
                 <IconsToolbar
                     toolbarConfig={this.getToolbarConfig()}
@@ -722,11 +714,11 @@ export class ThreeDEditor extends React.Component {
 
     render() {
         return (
-            <StyledEngineProvider injectFirst>
-                <ThemeProvider theme={DarkMaterialUITheme}>
+            <ThemeProvider theme={DarkMaterialUITheme}>
+                <ScopedCssBaseline enableColorScheme>
                     {this.renderWaveOrThreejsEditorModal()}
-                </ThemeProvider>
-            </StyledEngineProvider>
+                </ScopedCssBaseline>
+            </ThemeProvider>
         );
     }
 }

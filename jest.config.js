@@ -24,7 +24,7 @@ module.exports = {
         "^.+\\.[t|j]sx?$": "babel-jest",
     },
 
-    transformIgnorePatterns: ["<rootDir>/node_modules/(?!(three|@exabyte-io/cove.js)/)"],
+    transformIgnorePatterns: ["<rootDir>/node_modules/(?!(three|color-diff|@exabyte-io/cove.js)/)"],
 
     // mock css files: https://jestjs.io/docs/en/webpack#handling-static-assets
     moduleNameMapper: {
