@@ -1,7 +1,6 @@
-import setClass from "classnames";
+import Modal from "@mui/material/Modal";
 import PropTypes from "prop-types";
 import React from "react";
-import { Modal } from "react-bootstrap";
 
 export class ModalDialog extends React.Component {
     constructor(props) {
@@ -13,12 +12,6 @@ export class ModalDialog extends React.Component {
     onHide(e) {
         const { onHide } = this.props;
         onHide(e);
-        this.removeStylingFromBody();
-    }
-
-    removeStylingFromBody() {
-        const { backdropColor } = this.props;
-        document.body.classList.remove("modal-backdrop-color-" + backdropColor);
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -27,19 +20,9 @@ export class ModalDialog extends React.Component {
     }
 
     render() {
-        const { className, isFullWidth, show, backdropColor, modalId } = this.props;
-        const setClassName = setClass(className, isFullWidth ? "full-page-overlay" : "");
-        if (show) {
-            document.body.classList.add("modal-backdrop-color-" + backdropColor);
-        }
+        const { show, modalId } = this.props;
         return (
-            <Modal
-                id={modalId}
-                animation={false}
-                show={show}
-                onHide={this.onHide}
-                className={setClassName}
-            >
+            <Modal id={modalId} open={show} onHide={this.onHide}>
                 {this.renderBody()}
             </Modal>
         );
@@ -50,12 +33,4 @@ ModalDialog.propTypes = {
     modalId: PropTypes.string.isRequired,
     show: PropTypes.bool.isRequired,
     onHide: PropTypes.func.isRequired,
-    className: PropTypes.string.isRequired,
-    isFullWidth: PropTypes.bool,
-    backdropColor: PropTypes.string,
-};
-
-ModalDialog.defaultProps = {
-    isFullWidth: true,
-    backdropColor: "white",
 };
