@@ -7,7 +7,7 @@ import {
     ATOM_CONNECTIONS_GROUP_NAME,
     ATOM_GROUP_NAME,
     COLORS,
-    MEASURE_LABELS_GROUP_NAME,
+    MEASUREMENT_LABELS_GROUP_NAME,
     MIN_ANGLE_POINTS_DISTANCE,
 } from "../enums";
 
@@ -15,11 +15,11 @@ let clickFunction = null;
 let pointerMoveFunction = null;
 
 /*
- * Mixin containing the logic for dealing with measures.
+ * Mixin containing the logic for dealing with measurements.
  * Draws connections between atoms, calculate angles and distances, draws angles and labels.
  * Checks clicks and mouse movements.
  */
-export const MeasurementMixin = (superclass) =>
+export const measurementMixin = (superclass) =>
     class extends superclass {
         constructor(config) {
             super(config);
@@ -30,12 +30,12 @@ export const MeasurementMixin = (superclass) =>
 
             this.atomConnections = new THREE.Group();
             this.angles = new THREE.Group();
-            this.measureLabels = new THREE.Group();
+            this.measurementLabels = new THREE.Group();
             this.currentChosenLine = null;
 
             this.atomConnections.name = ATOM_CONNECTIONS_GROUP_NAME;
             this.angles.name = "Angles";
-            this.measureLabels.name = MEASURE_LABELS_GROUP_NAME;
+            this.measurementLabels.name = MEASUREMENT_LABELS_GROUP_NAME;
         }
 
         destroyListeners() {
@@ -50,7 +50,7 @@ export const MeasurementMixin = (superclass) =>
          * @param settings - measurements settings object, this object helps to define state in this class.
          */
         initListeners(updateState, settings) {
-            this.measureSettings = settings;
+            this.measurementSettings = settings;
             clickFunction = this.onClick.bind(this, updateState);
             pointerMoveFunction = this.onPointerMove.bind(this);
             const canvas = this.renderer.domElement;
@@ -157,10 +157,10 @@ export const MeasurementMixin = (superclass) =>
             const atomGroup = this.getAtomGroups();
             const searchedIntersects = [...atomGroup];
             //  TODO: Probably will be better to set this.atomConnections.children to optional target
-            if (this.measureSettings.isDistanceShown) {
+            if (this.measurementSettings.isDistanceShown) {
                 searchedIntersects.push(...this.atomConnections.children);
             }
-            if (this.measureSettings.isAnglesShown) {
+            if (this.measurementSettings.isAnglesShown) {
                 searchedIntersects.push(...this.angles.children);
             }
 
@@ -236,7 +236,7 @@ export const MeasurementMixin = (superclass) =>
             });
             this.chosenAtoms = this.chosenAtoms.filter((atom) => atom);
 
-            this.measureLabels.remove(label);
+            this.measurementLabels.remove(label);
             this.angles.remove(this.currentChosenLine);
             this.atomConnections.remove(connectionA);
             this.atomConnections.remove(connectionB);
@@ -272,7 +272,7 @@ export const MeasurementMixin = (superclass) =>
             });
             this.chosenAtoms = this.chosenAtoms.filter((atom) => atom);
 
-            this.measureLabels.remove(this.currentChosenLine.userData.label);
+            this.measurementLabels.remove(this.currentChosenLine.userData.label);
             this.atomConnections.remove(this.currentChosenLine);
             this.currentChosenLine = null;
             this.render();
@@ -302,10 +302,10 @@ export const MeasurementMixin = (superclass) =>
             this.checkMouseCoordinates(event);
             const atomGroup = this.getAtomGroups();
             const searchedIntersects = [...atomGroup];
-            if (this.measureSettings.isDistanceShown) {
+            if (this.measurementSettings.isDistanceShown) {
                 searchedIntersects.push(...this.atomConnections.children);
             }
-            if (this.measureSettings.isAnglesShown) {
+            if (this.measurementSettings.isAnglesShown) {
                 searchedIntersects.push(...this.angles.children);
             }
             const intersects = this.raycaster.intersectObjects(searchedIntersects, false);
@@ -316,7 +316,7 @@ export const MeasurementMixin = (superclass) =>
                     intersectItem.name === ATOM_CONNECTION_LINE_NAME ||
                     intersectItem.name === ANGLE
                 ) {
-                    if (this.chosenAtoms.length % 2 && this.measureSettings.isDistanceShown) {
+                    if (this.chosenAtoms.length % 2 && this.measurementSettings.isDistanceShown) {
                         this.unChoseAtom(this.chosenAtoms[this.chosenAtoms.length - 1]);
                     }
                     this.handleConnectionClick(intersectItem);
@@ -325,8 +325,10 @@ export const MeasurementMixin = (superclass) =>
 
                 if (intersectItem.type === "Mesh") {
                     const isAlreadyChosen = intersectItem.userData.chosen;
-                    if (this.measureSettings.isDistanceShown) this.addIfLastNotSame(intersectItem);
-                    if (this.measureSettings.isAnglesShown) this.addIfTwoLastNotSame(intersectItem);
+                    if (this.measurementSettings.isDistanceShown)
+                        this.addIfLastNotSame(intersectItem);
+                    if (this.measurementSettings.isAnglesShown)
+                        this.addIfTwoLastNotSame(intersectItem);
                     if (!isAlreadyChosen) {
                         this.handleSetChosen(intersectItem);
                     }
@@ -384,7 +386,7 @@ export const MeasurementMixin = (superclass) =>
             return (
                 this.chosenAtoms.length &&
                 !(this.chosenAtoms.length % 2) &&
-                this.measureSettings.isDistanceShown
+                this.measurementSettings.isDistanceShown
             );
         }
 
@@ -392,7 +394,7 @@ export const MeasurementMixin = (superclass) =>
             return (
                 this.chosenAtoms.length &&
                 !(this.chosenAtoms.length % 3) &&
-                this.measureSettings.isAnglesShown
+                this.measurementSettings.isAnglesShown
             );
         }
 
@@ -503,8 +505,8 @@ export const MeasurementMixin = (superclass) =>
             label.position.set(...position);
             label.visible = true;
             label.scale.set(0.75, 0.75, 0.75);
-            this.measureLabels.add(label);
-            this.scene.add(this.measureLabels);
+            this.measurementLabels.add(label);
+            this.scene.add(this.measurementLabels);
             this.render();
         }
 
@@ -523,8 +525,8 @@ export const MeasurementMixin = (superclass) =>
             label.position.set(...line.geometry.boundingSphere.center);
             label.visible = true;
             label.scale.set(0.75, 0.75, 0.75);
-            this.measureLabels.add(label);
-            this.scene.add(this.measureLabels);
+            this.measurementLabels.add(label);
+            this.scene.add(this.measurementLabels);
             this.render();
         }
 
@@ -612,8 +614,8 @@ export const MeasurementMixin = (superclass) =>
             return line;
         }
 
-        resetMeasures() {
-            if (this.measureSettings && this.measureSettings.isDistanceShown) {
+        resetmeasurements() {
+            if (this.measurementSettings && this.measurementSettings.isDistanceShown) {
                 const connections = [...this.atomConnections.children];
                 connections.forEach((connection) => {
                     this.currentChosenLine = connection;
