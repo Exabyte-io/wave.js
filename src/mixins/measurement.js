@@ -36,6 +36,8 @@ export const MeasurementMixin = (superclass) =>
             this.atomConnections.name = ATOM_CONNECTIONS_GROUP_NAME;
             this.angles.name = "Angles";
             this.measureLabels.name = MEASURE_LABELS_GROUP_NAME;
+
+            this.resetMeasures();
         }
 
         destroyListeners() {
@@ -613,7 +615,7 @@ export const MeasurementMixin = (superclass) =>
         }
 
         resetMeasures() {
-            if (this.measureSettings.isDistanceShown) {
+            if (this.measureSettings && this.measureSettings.isDistanceShown) {
                 const connections = [...this.atomConnections.children];
                 connections.forEach((connection) => {
                     this.currentChosenLine = connection;
