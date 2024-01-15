@@ -19,7 +19,7 @@ let pointerMoveFunction = null;
  * Draws connections between atoms, calculate angles and distances, draws angles and labels.
  * Checks clicks and mouse movements.
  */
-export const measurementMixin = (superclass) =>
+export const MeasurementMixin = (superclass) =>
     class extends superclass {
         constructor(config) {
             super(config);
@@ -614,7 +614,7 @@ export const measurementMixin = (superclass) =>
             return line;
         }
 
-        resetmeasurements() {
+        resetMeasurements() {
             if (this.measurementSettings && this.measurementSettings.isDistanceShown) {
                 const connections = [...this.atomConnections.children];
                 connections.forEach((connection) => {
