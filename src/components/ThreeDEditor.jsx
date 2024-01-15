@@ -134,6 +134,7 @@ export class ThreeDEditor extends React.Component {
                 boundaryConditions: nextProps.boundaryConditions || {},
                 isConventionalCellShown: nextProps.isConventionalCellShown || false,
             });
+            this.handleResetMeasures();
         }
     }
 

@@ -36,8 +36,6 @@ export const MeasurementMixin = (superclass) =>
             this.atomConnections.name = ATOM_CONNECTIONS_GROUP_NAME;
             this.angles.name = "Angles";
             this.measureLabels.name = MEASURE_LABELS_GROUP_NAME;
-
-            this.resetMeasures();
         }
 
         destroyListeners() {
