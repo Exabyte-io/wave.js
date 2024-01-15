@@ -347,6 +347,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     onMeasureParam(param, offParam) {
+        this.WaveComponent.wave.resetMeasures();
         this.setState((prevState) => {
             const { measuresSettings } = prevState;
             return { ...prevState, measuresSettings: { ...measuresSettings, [param]: true } };
