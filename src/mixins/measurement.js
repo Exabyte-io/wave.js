@@ -12,7 +12,6 @@ import {
 } from "../enums";
 
 let clickFunction = null;
-let pointerMoveFunction = null;
 
 /*
  * Mixin containing the logic for dealing with measurements.
@@ -41,7 +40,6 @@ export const MeasurementMixin = (superclass) =>
         destroyListeners() {
             const canvas = this.renderer.domElement;
             canvas.removeEventListener("click", clickFunction);
-            canvas.removeEventListener("mousemove", pointerMoveFunction);
         }
 
         /**
@@ -52,10 +50,8 @@ export const MeasurementMixin = (superclass) =>
         initListeners(updateState, settings) {
             this.measurementSettings = settings;
             clickFunction = this.onClick.bind(this, updateState);
-            pointerMoveFunction = this.onPointerMove.bind(this);
             const canvas = this.renderer.domElement;
             canvas.addEventListener("click", clickFunction);
-            canvas.addEventListener("mousemove", pointerMoveFunction);
         }
 
         /**
@@ -145,51 +141,6 @@ export const MeasurementMixin = (superclass) =>
                     this.setDefaultHexForAtom();
                 }
                 this.render();
-            }
-        }
-
-        /**
-         * Function checks pointer movements
-         * @Param event -> simple javascript DOM event
-         */
-        onPointerMove(event) {
-            this.checkMouseCoordinates(event);
-            const atomGroup = this.getAtomGroups();
-            const searchedIntersects = [...atomGroup];
-            //  TODO: Probably will be better to set this.atomConnections.children to optional target
-            if (this.measurementSettings.isDistanceShown) {
-                searchedIntersects.push(...this.atomConnections.children);
-            }
-            if (this.measurementSettings.isAnglesShown) {
-                searchedIntersects.push(...this.angles.children);
-            }
-
-            const intersects = this.raycaster.intersectObjects(searchedIntersects, false);
-
-            for (let i = 0; i < intersects.length; i++) {
-                const intersectItem = intersects[i].object;
-                if (intersectItem.uuid !== this.intersected?.uuid) {
-                    this.handleUnsetHex();
-                    this.intersected = null;
-                }
-                if (!intersectItem.userData?.selected) {
-                    if (
-                        intersectItem.name === ATOM_CONNECTION_LINE_NAME ||
-                        intersectItem.name === ANGLE
-                    ) {
-                        this.setHexForLine(intersectItem);
-                        break;
-                    }
-                    if (intersectItem.type === "Mesh") {
-                        this.setHexForAtom(intersectItem);
-                        break;
-                    }
-                }
-            }
-
-            if (!intersects.length) {
-                this.handleUnsetHex();
-                this.intersected = null;
             }
         }
 
