@@ -91,7 +91,7 @@ describe("distance measurementments", () => {
             canvas,
         );
         wave.onClick(stateUpdate, connectionClickEvent);
-        wave.resetMeasures();
+        wave.resetMeasurements();
 
         expect(wave.chosenAtoms.length).toEqual(0);
         expect(wave.currentChosenLine).toEqual(null);
@@ -187,7 +187,7 @@ describe("angles measurementments", () => {
 
     afterEach(() => {
         wave.destroyListeners();
-        wave.resetMeasures();
+        wave.resetMeasurements();
     });
 
     test("onClick event for 3 atoms", async () => {
