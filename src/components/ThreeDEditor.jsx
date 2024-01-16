@@ -105,7 +105,7 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleAnglesShown = this.handleToggleAnglesShown.bind(this);
         this.handleSetState = this.handleSetState.bind(this);
         this.handleDeleteConnection = this.handleDeleteConnection.bind(this);
-        this.handleResetMeasures = this.handleResetMeasures.bind(this);
+        this.handleResetMeasurements = this.handleResetMeasurements.bind(this);
         this.offMeasureParam = this.offMeasureParam.bind(this);
         this.onMeasureParam = this.onMeasureParam.bind(this);
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
@@ -117,7 +117,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     componentWillUnmount() {
-        this.handleResetMeasures();
+        this.handleResetMeasurements();
         this.WaveComponent.wave.destroyListeners();
         this.removeHotKeyListener();
     }
@@ -134,6 +134,7 @@ export class ThreeDEditor extends React.Component {
                 boundaryConditions: nextProps.boundaryConditions || {},
                 isConventionalCellShown: nextProps.isConventionalCellShown || false,
             });
+            this.handleResetMeasurements();
         }
     }
 
@@ -223,7 +224,7 @@ export class ThreeDEditor extends React.Component {
 
     handleToggleConventionalCell() {
         const { isConventionalCellShown, originalMaterial } = this.state;
-        this.handleResetMeasures();
+        this.handleResetMeasurements();
         this.setState({
             isConventionalCellShown: !isConventionalCellShown,
             originalMaterial: this.getPrimitiveOrConventionalMaterial(
@@ -331,7 +332,7 @@ export class ThreeDEditor extends React.Component {
         }
     }
 
-    handleResetMeasures() {
+    handleResetMeasurements() {
         const { measuresSettings } = this.state;
         const { isDistanceShown, isAnglesShown } = measuresSettings;
         if (isDistanceShown || isAnglesShown) this.WaveComponent.wave.resetMeasurements();
@@ -339,7 +340,7 @@ export class ThreeDEditor extends React.Component {
 
     offMeasureParam(param) {
         this.WaveComponent.wave.destroyListeners();
-        this.handleResetMeasures();
+        this.handleResetMeasurements();
         this.setState((prevState) => {
             const { measuresSettings } = prevState;
             return { ...prevState, measuresSettings: { ...measuresSettings, [param]: false } };
@@ -554,7 +555,7 @@ export class ThreeDEditor extends React.Component {
                 id: "Reset Measures",
                 content: "Reset Measures",
                 leftIcon: <Replay />,
-                onClick: this.handleResetMeasures,
+                onClick: this.handleResetMeasurements,
                 shouldMenuStayOpened: true,
             },
         ];
