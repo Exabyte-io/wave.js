@@ -153,18 +153,7 @@ export const MeasurementMixin = (superclass) =>
          * @Param event -> simple javascript DOM event
          */
         onPointerMove(event) {
-            this.checkMouseCoordinates(event);
-            const atomGroup = this.getAtomGroups();
-            const searchedIntersects = [...atomGroup];
-            //  TODO: Probably will be better to set this.atomConnections.children to optional target
-            if (this.measurementSettings.isDistanceShown) {
-                searchedIntersects.push(...this.atomConnections.children);
-            }
-            if (this.measurementSettings.isAnglesShown) {
-                searchedIntersects.push(...this.angles.children);
-            }
-
-            const intersects = this.raycaster.intersectObjects(searchedIntersects, false);
+            const intersects = this.getIntersectedObjects(event);
 
             for (let i = 0; i < intersects.length; i++) {
                 const intersectItem = intersects[i].object;
@@ -299,16 +288,8 @@ export const MeasurementMixin = (superclass) =>
          * @Param event -> js DOM event
          */
         onClick(updateState, event) {
-            this.checkMouseCoordinates(event);
-            const atomGroup = this.getAtomGroups();
-            const searchedIntersects = [...atomGroup];
-            if (this.measurementSettings.isDistanceShown) {
-                searchedIntersects.push(...this.atomConnections.children);
-            }
-            if (this.measurementSettings.isAnglesShown) {
-                searchedIntersects.push(...this.angles.children);
-            }
-            const intersects = this.raycaster.intersectObjects(searchedIntersects, false);
+            const intersects = this.getIntersectedObjects(event);
+
             for (let i = 0; i < intersects.length; i++) {
                 const intersectItem = intersects[i].object;
 
@@ -356,6 +337,24 @@ export const MeasurementMixin = (superclass) =>
                     break;
                 }
             }
+        }
+
+        /**
+         * Returns array of intersected objects.
+         * @param event
+         * @returns {[]}
+         */
+        getIntersectedObjects(event) {
+            this.checkMouseCoordinates(event);
+            const atomGroup = this.getAtomGroups();
+            const searchedIntersects = [...atomGroup];
+            if (this.measurementSettings.isDistanceShown) {
+                searchedIntersects.push(...this.atomConnections.children);
+            }
+            if (this.measurementSettings.isAnglesShown) {
+                searchedIntersects.push(...this.angles.children);
+            }
+            return this.raycaster.intersectObjects(searchedIntersects, false);
         }
 
         /**
