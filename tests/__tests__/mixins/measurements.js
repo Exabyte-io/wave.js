@@ -5,20 +5,20 @@ import { ATOM_GROUP_NAME, COLORS } from "../../../src/enums";
 import { getWaveInstance } from "../../enums";
 import { getEventObjectBy3DPosition, makeClickOn3Atoms, makeClickOnTwoAtoms } from "../../utils";
 
-describe("distance measurements", () => {
+describe("distance measurementments", () => {
     let wave, atoms, camera, canvas;
     const stateUpdate = jest.fn();
-    const measureSettings = {
+    const measurementSettings = {
         isDistanceShown: true,
         isAnglesShown: false,
-        measureLabelsShown: false,
+        measurementLabelsShown: false,
         distance: 0,
         angle: 0,
     };
 
     beforeEach(() => {
         wave = getWaveInstance();
-        wave.initListeners(stateUpdate, measureSettings);
+        wave.initListeners(stateUpdate, measurementSettings);
         const atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
         camera = wave.camera;
         canvas = wave.renderer.domElement;
@@ -27,7 +27,7 @@ describe("distance measurements", () => {
 
     afterEach(() => {
         wave.destroyListeners();
-        wave.resetMeasures();
+        wave.resetMeasurements();
     });
 
     test("onClick event for single atom", async () => {
@@ -40,13 +40,13 @@ describe("distance measurements", () => {
     test("onClick event for 2 atoms", async () => {
         const [atomA, atomB] = atoms;
         makeClickOnTwoAtoms(wave, atoms, stateUpdate);
-        const { chosenAtoms, atomConnections, measureLabels } = wave;
+        const { chosenAtoms, atomConnections, measurementLabels } = wave;
 
         expect(chosenAtoms.length).toEqual(2);
         expect(chosenAtoms[0]).toEqual(atomA);
         expect(chosenAtoms[1]).toEqual(atomB);
         expect(atomConnections.children.length).toEqual(1);
-        expect(measureLabels.children.length).toEqual(1);
+        expect(measurementLabels.children.length).toEqual(1);
     });
 
     test("onClick on connection line between atoms", async () => {
@@ -81,7 +81,7 @@ describe("distance measurements", () => {
         expect(atomConnections.children.length).toEqual(0);
     });
 
-    test("full reset of measures", async () => {
+    test("full reset of measurements", async () => {
         makeClickOnTwoAtoms(wave, atoms, stateUpdate);
         const { atomConnections } = wave;
         const connection = atomConnections.children[0];
@@ -153,7 +153,7 @@ describe("distance measurements", () => {
     });
 });
 
-describe("angles measurements", () => {
+describe("angles measurementments", () => {
     let wave,
         atoms,
         camera,
@@ -161,10 +161,10 @@ describe("angles measurements", () => {
         atomGroup,
         canvas;
     const stateUpdate = jest.fn();
-    const measureSettings = {
+    const measurementSettings = {
         isDistanceShown: false,
         isAnglesShown: true,
-        measureLabelsShown: false,
+        measurementLabelsShown: false,
         distance: 0,
         angle: 0,
     };
@@ -178,7 +178,7 @@ describe("angles measurements", () => {
 
     beforeEach(() => {
         wave = getWaveInstance({ ...repetitionSettings });
-        wave.initListeners(stateUpdate, measureSettings);
+        wave.initListeners(stateUpdate, measurementSettings);
         atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
         camera = wave.camera;
         canvas = wave.renderer.domElement;
