@@ -5,7 +5,7 @@ import { ATOM_GROUP_NAME, COLORS } from "../../../src/enums";
 import { getWaveInstance } from "../../enums";
 import { getEventObjectBy3DPosition, makeClickOn3Atoms, makeClickOnTwoAtoms } from "../../utils";
 
-describe("distance measurementments", () => {
+describe("distance measurements", () => {
     let wave, atoms, camera, canvas;
     const stateUpdate = jest.fn();
     const measurementSettings = {
@@ -153,7 +153,7 @@ describe("distance measurementments", () => {
     });
 });
 
-describe("angles measurementments", () => {
+describe("angles measurements", () => {
     let wave,
         atoms,
         camera,
