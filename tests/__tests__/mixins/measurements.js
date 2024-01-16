@@ -33,18 +33,18 @@ describe("distance measurementments", () => {
     test("onClick event for single atom", async () => {
         const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
         wave.onClick(stateUpdate, event);
-        expect(wave.chosenAtoms.length).toEqual(1);
-        expect(wave.chosenAtoms[0]).toEqual(atoms[1]);
+        expect(wave.selectedAtoms.length).toEqual(1);
+        expect(wave.selectedAtoms[0]).toEqual(atoms[1]);
     });
 
     test("onClick event for 2 atoms", async () => {
         const [atomA, atomB] = atoms;
         makeClickOnTwoAtoms(wave, atoms, stateUpdate);
-        const { chosenAtoms, atomConnections, measurementLabels } = wave;
+        const { selectedAtoms, atomConnections, measurementLabels } = wave;
 
-        expect(chosenAtoms.length).toEqual(2);
-        expect(chosenAtoms[0]).toEqual(atomA);
-        expect(chosenAtoms[1]).toEqual(atomB);
+        expect(selectedAtoms.length).toEqual(2);
+        expect(selectedAtoms[0]).toEqual(atomA);
+        expect(selectedAtoms[1]).toEqual(atomB);
         expect(atomConnections.children.length).toEqual(1);
         expect(measurementLabels.children.length).toEqual(1);
     });
@@ -60,8 +60,8 @@ describe("distance measurementments", () => {
         );
         wave.onClick(stateUpdate, connectionClickEvent);
 
-        expect(connection.userData.chosen).toBeTruthy();
-        expect(wave.currentChosenLine).toEqual(connection);
+        expect(connection.userData.selected).toBeTruthy();
+        expect(wave.currentSelectedLine).toEqual(connection);
     });
 
     test("delete connection between 2 atoms", async () => {
@@ -76,8 +76,8 @@ describe("distance measurementments", () => {
         wave.onClick(stateUpdate, connectionClickEvent);
         wave.deleteConnection();
 
-        expect(wave.chosenAtoms.length).toEqual(0);
-        expect(wave.currentChosenLine).toEqual(null);
+        expect(wave.selectedAtoms.length).toEqual(0);
+        expect(wave.currentSelectedLine).toEqual(null);
         expect(atomConnections.children.length).toEqual(0);
     });
 
@@ -93,8 +93,8 @@ describe("distance measurementments", () => {
         wave.onClick(stateUpdate, connectionClickEvent);
         wave.resetMeasurements();
 
-        expect(wave.chosenAtoms.length).toEqual(0);
-        expect(wave.currentChosenLine).toEqual(null);
+        expect(wave.selectedAtoms.length).toEqual(0);
+        expect(wave.currentSelectedLine).toEqual(null);
         expect(atomConnections.children.length).toEqual(0);
     });
 
@@ -103,7 +103,7 @@ describe("distance measurementments", () => {
         wave.onPointerMove(event);
         const color = atoms[1].material.emissive.getHex();
 
-        expect(wave.chosenAtoms.length).toEqual(0);
+        expect(wave.selectedAtoms.length).toEqual(0);
         expect(color).toEqual(COLORS.RED);
     });
 
@@ -115,17 +115,17 @@ describe("distance measurementments", () => {
         const { currentHex } = atoms[1];
         const color = atoms[1].material.emissive.getHex();
 
-        expect(wave.chosenAtoms.length).toEqual(0);
+        expect(wave.selectedAtoms.length).toEqual(0);
         expect(color).toEqual(currentHex);
     });
 
-    test("should unset chosen atom if clicked again", async () => {
+    test("should unset selected atom if clicked again", async () => {
         const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
         wave.onClick(stateUpdate, event);
         wave.onClick(stateUpdate, event);
         const color = atoms[1].material.emissive.getHex();
 
-        expect(wave.chosenAtoms.length).toEqual(0);
+        expect(wave.selectedAtoms.length).toEqual(0);
         expect(color).toEqual(0);
     });
 
@@ -192,10 +192,10 @@ describe("angles measurementments", () => {
 
     test("onClick event for 3 atoms", async () => {
         makeClickOn3Atoms(wave, atoms, stateUpdate);
-        const { chosenAtoms, atomConnections, angles } = wave;
+        const { selectedAtoms, atomConnections, angles } = wave;
 
-        expect(chosenAtoms.length).toEqual(3);
-        expect(chosenAtoms).toEqual(atoms);
+        expect(selectedAtoms.length).toEqual(3);
+        expect(selectedAtoms).toEqual(atoms);
         expect(atomConnections.children.length).toEqual(2);
         expect(angles.children.length).toEqual(1);
     });
@@ -211,8 +211,8 @@ describe("angles measurementments", () => {
         );
         wave.onClick(stateUpdate, angleClickEvent);
 
-        expect(angle.userData.chosen).toBeTruthy();
-        expect(wave.currentChosenLine).toEqual(angle);
+        expect(angle.userData.selected).toBeTruthy();
+        expect(wave.currentSelectedLine).toEqual(angle);
     });
 
     test("onPointerMove event on angle line", async () => {
