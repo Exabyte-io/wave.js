@@ -134,7 +134,6 @@ export class ThreeDEditor extends React.Component {
                 boundaryConditions: nextProps.boundaryConditions || {},
                 isConventionalCellShown: nextProps.isConventionalCellShown || false,
             });
-            this.handleResetMeasures();
         }
     }
 
@@ -335,7 +334,7 @@ export class ThreeDEditor extends React.Component {
     handleResetMeasures() {
         const { measuresSettings } = this.state;
         const { isDistanceShown, isAnglesShown } = measuresSettings;
-        if (isDistanceShown || isAnglesShown) this.WaveComponent.wave.resetMeasures();
+        if (isDistanceShown || isAnglesShown) this.WaveComponent.wave.resetMeasurements();
     }
 
     offMeasureParam(param) {
@@ -348,7 +347,6 @@ export class ThreeDEditor extends React.Component {
     }
 
     onMeasureParam(param, offParam) {
-        this.WaveComponent.wave.resetMeasures();
         this.setState((prevState) => {
             const { measuresSettings } = prevState;
             return { ...prevState, measuresSettings: { ...measuresSettings, [param]: true } };
