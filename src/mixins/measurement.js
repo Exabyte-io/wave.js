@@ -7,7 +7,7 @@ import {
     ATOM_CONNECTIONS_GROUP_NAME,
     ATOM_GROUP_NAME,
     COLORS,
-    MEASURE_LABELS_GROUP_NAME,
+    MEASUREMENT_LABELS_GROUP_NAME,
     MIN_ANGLE_POINTS_DISTANCE,
 } from "../enums";
 
@@ -15,7 +15,7 @@ let clickFunction = null;
 let pointerMoveFunction = null;
 
 /*
- * Mixin containing the logic for dealing with measures.
+ * Mixin containing the logic for dealing with measurements.
  * Draws connections between atoms, calculate angles and distances, draws angles and labels.
  * Checks clicks and mouse movements.
  */
@@ -25,17 +25,17 @@ export const MeasurementMixin = (superclass) =>
             super(config);
 
             this.initRaycaster();
-            this.chosenAtoms = [];
+            this.selectedAtoms = [];
             this.intersected = null;
 
             this.atomConnections = new THREE.Group();
             this.angles = new THREE.Group();
-            this.measureLabels = new THREE.Group();
-            this.currentChosenLine = null;
+            this.measurementLabels = new THREE.Group();
+            this.currentSelectedLine = null;
 
             this.atomConnections.name = ATOM_CONNECTIONS_GROUP_NAME;
             this.angles.name = "Angles";
-            this.measureLabels.name = MEASURE_LABELS_GROUP_NAME;
+            this.measurementLabels.name = MEASUREMENT_LABELS_GROUP_NAME;
         }
 
         destroyListeners() {
@@ -50,7 +50,7 @@ export const MeasurementMixin = (superclass) =>
          * @param settings - measurements settings object, this object helps to define state in this class.
          */
         initListeners(updateState, settings) {
-            this.measureSettings = settings;
+            this.measurementSettings = settings;
             clickFunction = this.onClick.bind(this, updateState);
             pointerMoveFunction = this.onPointerMove.bind(this);
             const canvas = this.renderer.domElement;
@@ -135,7 +135,7 @@ export const MeasurementMixin = (superclass) =>
          * Used for unsetting color when mouse is no longer points on atom or connection.
          */
         handleUnsetHex() {
-            if (this.intersected && !this.intersected.userData.chosen) {
+            if (this.intersected && !this.intersected.userData.selected) {
                 if (
                     this.intersected.name === ATOM_CONNECTION_LINE_NAME ||
                     this.intersected.name === ANGLE
@@ -153,18 +153,7 @@ export const MeasurementMixin = (superclass) =>
          * @Param event -> simple javascript DOM event
          */
         onPointerMove(event) {
-            this.checkMouseCoordinates(event);
-            const atomGroup = this.getAtomGroups();
-            const searchedIntersects = [...atomGroup];
-            //  TODO: Probably will be better to set this.atomConnections.children to optional target
-            if (this.measureSettings.isDistanceShown) {
-                searchedIntersects.push(...this.atomConnections.children);
-            }
-            if (this.measureSettings.isAnglesShown) {
-                searchedIntersects.push(...this.angles.children);
-            }
-
-            const intersects = this.raycaster.intersectObjects(searchedIntersects, false);
+            const intersects = this.getIntersectedObjects(event);
 
             for (let i = 0; i < intersects.length; i++) {
                 const intersectItem = intersects[i].object;
@@ -172,7 +161,7 @@ export const MeasurementMixin = (superclass) =>
                     this.handleUnsetHex();
                     this.intersected = null;
                 }
-                if (!intersectItem.userData?.chosen) {
+                if (!intersectItem.userData?.selected) {
                     if (
                         intersectItem.name === ATOM_CONNECTION_LINE_NAME ||
                         intersectItem.name === ANGLE
@@ -213,9 +202,9 @@ export const MeasurementMixin = (superclass) =>
                     atomConnections: [connectionA, connectionB],
                     label,
                 },
-            } = this.currentChosenLine;
+            } = this.currentSelectedLine;
 
-            this.chosenAtoms.forEach((atom, index) => {
+            this.selectedAtoms.forEach((atom, index) => {
                 const atomConnections = atom.userData.connections;
                 if (!atomConnections) return;
                 const isAtomUseThisConnection = atomConnections.some(
@@ -227,20 +216,20 @@ export const MeasurementMixin = (superclass) =>
                         (connection) =>
                             connection !== connectionA.uuid && connection !== connectionB.uuid,
                     );
-                    this.chosenAtoms[index] = null;
+                    this.selectedAtoms[index] = null;
                 }
                 if (!atom.userData.connections.length) {
-                    atom.userData.chosen = false;
+                    atom.userData.selected = false;
                     atom.material.emissive.setHex(atom.currentHex);
                 }
             });
-            this.chosenAtoms = this.chosenAtoms.filter((atom) => atom);
+            this.selectedAtoms = this.selectedAtoms.filter((atom) => atom);
 
-            this.measureLabels.remove(label);
-            this.angles.remove(this.currentChosenLine);
+            this.measurementLabels.remove(label);
+            this.angles.remove(this.currentSelectedLine);
             this.atomConnections.remove(connectionA);
             this.atomConnections.remove(connectionB);
-            this.currentChosenLine = null;
+            this.currentSelectedLine = null;
             this.render();
         }
 
@@ -248,47 +237,47 @@ export const MeasurementMixin = (superclass) =>
          * Function that deletes connection between to atoms.
          */
         deleteConnection() {
-            if (!this.currentChosenLine) return;
-            if (this.currentChosenLine.name === ANGLE) {
+            if (!this.currentSelectedLine) return;
+            if (this.currentSelectedLine.name === ANGLE) {
                 return this.deleteConnectionsUsingAngle();
             }
 
-            this.chosenAtoms.forEach((atom, index) => {
+            this.selectedAtoms.forEach((atom, index) => {
                 const atomConnections = atom.userData.connections;
                 if (!atomConnections) return;
                 const isAtomUseThisConnection = atomConnections.some(
-                    (connection) => connection === this.currentChosenLine.uuid,
+                    (connection) => connection === this.currentSelectedLine.uuid,
                 );
                 if (isAtomUseThisConnection) {
                     atom.userData.connections = atomConnections.filter(
-                        (connection) => connection !== this.currentChosenLine.uuid,
+                        (connection) => connection !== this.currentSelectedLine.uuid,
                     );
-                    this.chosenAtoms[index] = null;
+                    this.selectedAtoms[index] = null;
                 }
                 if (!atom.userData.connections.length) {
-                    atom.userData.chosen = false;
+                    atom.userData.selected = false;
                     atom.material.emissive.setHex(atom.currentHex);
                 }
             });
-            this.chosenAtoms = this.chosenAtoms.filter((atom) => atom);
+            this.selectedAtoms = this.selectedAtoms.filter((atom) => atom);
 
-            this.measureLabels.remove(this.currentChosenLine.userData.label);
-            this.atomConnections.remove(this.currentChosenLine);
-            this.currentChosenLine = null;
+            this.measurementLabels.remove(this.currentSelectedLine.userData.label);
+            this.atomConnections.remove(this.currentSelectedLine);
+            this.currentSelectedLine = null;
             this.render();
         }
 
         /**
          * Function that handles clicks on some connection between to atoms.
-         * @Param intersectItem -> current chosen connection
+         * @Param intersectItem -> current selected connection
          */
         handleConnectionClick(intersectItem) {
-            if (this.currentChosenLine?.userData.chosen) {
-                this.currentChosenLine.userData.chosen = false;
-                this.currentChosenLine.material.color.setHex(this.currentChosenLine.currentHex);
+            if (this.currentSelectedLine?.userData.selected) {
+                this.currentSelectedLine.userData.selected = false;
+                this.currentSelectedLine.material.color.setHex(this.currentSelectedLine.currentHex);
             }
-            this.currentChosenLine = intersectItem;
-            this.currentChosenLine.userData.chosen = true;
+            this.currentSelectedLine = intersectItem;
+            this.currentSelectedLine.userData.selected = true;
             this.render();
         }
 
@@ -299,16 +288,8 @@ export const MeasurementMixin = (superclass) =>
          * @Param event -> js DOM event
          */
         onClick(updateState, event) {
-            this.checkMouseCoordinates(event);
-            const atomGroup = this.getAtomGroups();
-            const searchedIntersects = [...atomGroup];
-            if (this.measureSettings.isDistanceShown) {
-                searchedIntersects.push(...this.atomConnections.children);
-            }
-            if (this.measureSettings.isAnglesShown) {
-                searchedIntersects.push(...this.angles.children);
-            }
-            const intersects = this.raycaster.intersectObjects(searchedIntersects, false);
+            const intersects = this.getIntersectedObjects(event);
+
             for (let i = 0; i < intersects.length; i++) {
                 const intersectItem = intersects[i].object;
 
@@ -316,37 +297,39 @@ export const MeasurementMixin = (superclass) =>
                     intersectItem.name === ATOM_CONNECTION_LINE_NAME ||
                     intersectItem.name === ANGLE
                 ) {
-                    if (this.chosenAtoms.length % 2 && this.measureSettings.isDistanceShown) {
-                        this.unChoseAtom(this.chosenAtoms[this.chosenAtoms.length - 1]);
+                    if (this.selectedAtoms.length % 2 && this.measurementSettings.isDistanceShown) {
+                        this.deSelectAtom(this.selectedAtoms[this.selectedAtoms.length - 1]);
                     }
                     this.handleConnectionClick(intersectItem);
                     break;
                 }
 
                 if (intersectItem.type === "Mesh") {
-                    const isAlreadyChosen = intersectItem.userData.chosen;
-                    if (this.measureSettings.isDistanceShown) this.addIfLastNotSame(intersectItem);
-                    if (this.measureSettings.isAnglesShown) this.addIfTwoLastNotSame(intersectItem);
-                    if (!isAlreadyChosen) {
-                        this.handleSetChosen(intersectItem);
+                    const isAlreadySelected = intersectItem.userData.selected;
+                    if (this.measurementSettings.isDistanceShown)
+                        this.addIfLastNotSame(intersectItem);
+                    if (this.measurementSettings.isAnglesShown)
+                        this.addIfTwoLastNotSame(intersectItem);
+                    if (!isAlreadySelected) {
+                        this.handleSetSelected(intersectItem);
                     }
                     if (this.shouldCalculateAngles()) {
-                        const lastThreeChosenAtoms = this.chosenAtoms.slice(-3);
-                        const lineA = this.drawLineBetweenAtoms(lastThreeChosenAtoms.slice(0, 2));
-                        const lineB = this.drawLineBetweenAtoms(lastThreeChosenAtoms.slice(-2));
-                        const angle = this.calculateAngleBetweenAtoms(lastThreeChosenAtoms);
-                        this.drawAngleCurveAndText(lastThreeChosenAtoms, angle, [lineA, lineB]);
+                        const lastThreeselectedAtoms = this.selectedAtoms.slice(-3);
+                        const lineA = this.drawLineBetweenAtoms(lastThreeselectedAtoms.slice(0, 2));
+                        const lineB = this.drawLineBetweenAtoms(lastThreeselectedAtoms.slice(-2));
+                        const angle = this.calculateAngleBetweenAtoms(lastThreeselectedAtoms);
+                        this.drawAngleCurveAndText(lastThreeselectedAtoms, angle, [lineA, lineB]);
                         updateState({ angle });
                     }
                     if (this.shouldCalculateDistance()) {
-                        const lastChosenAtoms = this.chosenAtoms.slice(-2);
+                        const lastselectedAtoms = this.selectedAtoms.slice(-2);
                         const isPairAlreadyExist = this.checkAtomPairExistence(
-                            this.chosenAtoms.slice(0, -2),
-                            lastChosenAtoms,
+                            this.selectedAtoms.slice(0, -2),
+                            lastselectedAtoms,
                         );
                         if (!isPairAlreadyExist) {
-                            this.drawLineBetweenAtoms(lastChosenAtoms);
-                            const distance = this.calculateDistanceBetweenAtoms(lastChosenAtoms);
+                            this.drawLineBetweenAtoms(lastselectedAtoms);
+                            const distance = this.calculateDistanceBetweenAtoms(lastselectedAtoms);
                             this.drawDistanceText(distance);
                             updateState({ distance });
                         }
@@ -354,6 +337,24 @@ export const MeasurementMixin = (superclass) =>
                     break;
                 }
             }
+        }
+
+        /**
+         * Returns array of intersected objects.
+         * @param event
+         * @returns {[]}
+         */
+        getIntersectedObjects(event) {
+            this.checkMouseCoordinates(event);
+            const atomGroup = this.getAtomGroups();
+            const searchedIntersects = [...atomGroup];
+            if (this.measurementSettings.isDistanceShown) {
+                searchedIntersects.push(...this.atomConnections.children);
+            }
+            if (this.measurementSettings.isAnglesShown) {
+                searchedIntersects.push(...this.angles.children);
+            }
+            return this.raycaster.intersectObjects(searchedIntersects, false);
         }
 
         /**
@@ -371,8 +372,8 @@ export const MeasurementMixin = (superclass) =>
                     (currentAtom.uuid === atomA.uuid && atomB.uuid === nextAtom.uuid) ||
                     (currentAtom.uuid === atomB.uuid && nextAtom.uuid === atomA.uuid)
                 ) {
-                    this.chosenAtoms.pop();
-                    this.chosenAtoms.pop();
+                    this.selectedAtoms.pop();
+                    this.selectedAtoms.pop();
                     return true;
                 }
             }
@@ -382,17 +383,17 @@ export const MeasurementMixin = (superclass) =>
 
         shouldCalculateDistance() {
             return (
-                this.chosenAtoms.length &&
-                !(this.chosenAtoms.length % 2) &&
-                this.measureSettings.isDistanceShown
+                this.selectedAtoms.length &&
+                !(this.selectedAtoms.length % 2) &&
+                this.measurementSettings.isDistanceShown
             );
         }
 
         shouldCalculateAngles() {
             return (
-                this.chosenAtoms.length &&
-                !(this.chosenAtoms.length % 3) &&
-                this.measureSettings.isAnglesShown
+                this.selectedAtoms.length &&
+                !(this.selectedAtoms.length % 3) &&
+                this.measurementSettings.isAnglesShown
             );
         }
 
@@ -503,8 +504,8 @@ export const MeasurementMixin = (superclass) =>
             label.position.set(...position);
             label.visible = true;
             label.scale.set(0.75, 0.75, 0.75);
-            this.measureLabels.add(label);
-            this.scene.add(this.measureLabels);
+            this.measurementLabels.add(label);
+            this.scene.add(this.measurementLabels);
             this.render();
         }
 
@@ -523,57 +524,57 @@ export const MeasurementMixin = (superclass) =>
             label.position.set(...line.geometry.boundingSphere.center);
             label.visible = true;
             label.scale.set(0.75, 0.75, 0.75);
-            this.measureLabels.add(label);
-            this.scene.add(this.measureLabels);
+            this.measurementLabels.add(label);
+            this.scene.add(this.measurementLabels);
             this.render();
         }
 
-        handleSetChosen(intersectItem) {
-            intersectItem.userData.chosen = true;
+        handleSetSelected(intersectItem) {
+            intersectItem.userData.selected = true;
             intersectItem.material.emissive.setHex("0xff0000");
             this.render();
         }
 
         /**
-         * Function that unset chosen for atom if it's clicked second time.
-         * @param atom - atom that should be unchosen
+         * Function that deselects atom if it's clicked second time.
+         * @param atom - atom that should be deselected.
          */
-        unChoseAtom(atom) {
+        deSelectAtom(atom) {
             if (!atom.userData.connections?.length) {
-                atom.userData.chosen = false;
-                this.chosenAtoms.pop();
+                atom.userData.selected = false;
+                this.selectedAtoms.pop();
                 atom.material.emissive.setHex(atom.currentHex);
                 this.render();
             }
         }
 
         /**
-         * Function that adds atoms to chosen array if this atom is not same as last added atoms
+         * Function that adds atoms to selected array if this atom is not same as last added atoms
          * @param intersectedAtom - atom that should be added
          */
         addIfTwoLastNotSame(intersectedAtom) {
-            if (this.chosenAtoms.length % 2 || this.chosenAtoms.length === 1) {
+            if (this.selectedAtoms.length % 2 || this.selectedAtoms.length === 1) {
                 return this.addIfLastNotSame(intersectedAtom);
             }
 
-            const lastAtoms = this.chosenAtoms.slice(-2);
+            const lastAtoms = this.selectedAtoms.slice(-2);
             const haveSameAtom = lastAtoms.some((atom) => atom.uuid === intersectedAtom.uuid);
             if (haveSameAtom) {
                 return;
             }
-            this.chosenAtoms.push(intersectedAtom);
+            this.selectedAtoms.push(intersectedAtom);
         }
 
         /**
-         * Function that adds atoms to chosen array if this atom is same as last chosen atom
+         * Function that adds atoms to selected array if this atom is same as last selected atom
          * @param intersectedAtom - atom that should be added
          */
         addIfLastNotSame(intersectedAtom) {
-            const lastAtom = this.chosenAtoms[this.chosenAtoms.length - 1];
-            if (lastAtom?.uuid === intersectedAtom.uuid && this.chosenAtoms.length % 2) {
-                return this.unChoseAtom(lastAtom);
+            const lastAtom = this.selectedAtoms[this.selectedAtoms.length - 1];
+            if (lastAtom?.uuid === intersectedAtom.uuid && this.selectedAtoms.length % 2) {
+                return this.deSelectAtom(lastAtom);
             }
-            this.chosenAtoms.push(intersectedAtom);
+            this.selectedAtoms.push(intersectedAtom);
         }
 
         /**
@@ -589,8 +590,8 @@ export const MeasurementMixin = (superclass) =>
             atom.userData.connections = [uuid];
         }
 
-        drawLineBetweenAtoms(lastChosenAtoms) {
-            const [firstAtom, secondAtom] = lastChosenAtoms;
+        drawLineBetweenAtoms(lastselectedAtoms) {
+            const [firstAtom, secondAtom] = lastselectedAtoms;
             const [firstAtomPoint, secondAtomPoint] = this.getPointsFromMatrixWorld(
                 firstAtom.matrixWorld,
                 secondAtom.matrixWorld,
@@ -612,27 +613,27 @@ export const MeasurementMixin = (superclass) =>
             return line;
         }
 
-        resetMeasures() {
-            if (this.measureSettings.isDistanceShown) {
+        resetMeasurements() {
+            if (this.measurementSettings && this.measurementSettings.isDistanceShown) {
                 const connections = [...this.atomConnections.children];
                 connections.forEach((connection) => {
-                    this.currentChosenLine = connection;
+                    this.currentSelectedLine = connection;
                     this.deleteConnection();
                 });
             } else {
                 const lines = [...this.angles.children];
                 lines.forEach((line) => {
-                    this.currentChosenLine = line;
+                    this.currentSelectedLine = line;
                     this.deleteConnection();
                 });
             }
 
-            if (this.chosenAtoms.length) {
-                this.chosenAtoms.forEach((atom) => {
-                    atom.userData.chosen = false;
+            if (this.selectedAtoms.length) {
+                this.selectedAtoms.forEach((atom) => {
+                    atom.userData.selected = false;
                     atom.material.emissive.setHex(atom.currentHex);
                 });
-                this.chosenAtoms = [];
+                this.selectedAtoms = [];
             }
             this.render();
         }

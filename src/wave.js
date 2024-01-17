@@ -290,13 +290,13 @@ export class Wave extends mix(WaveBase).with(
 
     /**
      * Function that called when scene is rebuilding.
-     * When scene is rebuilding and all atoms lost color this function is fills current chosen atoms by color.
+     * When scene is rebuilding and all atoms lost color this function is fills current selected atoms by color.
      */
-    refillChosenAtoms() {
+    refillSelectedAtoms() {
         const currentAtoms = this.collectAllAtoms();
-        const newChosenAtoms = [];
+        const newSelectedAtoms = [];
 
-        this.chosenAtoms.forEach((atom) => {
+        this.selectedAtoms.forEach((atom) => {
             const newAtom = currentAtoms.find((currentAtom) => {
                 const firstAtomPoint = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
                 const secondAtomPoint = new THREE.Vector3().setFromMatrixPosition(
@@ -307,11 +307,11 @@ export class Wave extends mix(WaveBase).with(
                 }
                 return null;
             });
-            this.handleSetChosen(newAtom);
+            this.handleSetSelected(newAtom);
             newAtom.userData = { ...atom.userData };
-            newChosenAtoms.push(newAtom);
+            newSelectedAtoms.push(newAtom);
         });
-        this.chosenAtoms = newChosenAtoms;
+        this.selectedAtoms = newSelectedAtoms;
     }
 
     rebuildScene() {
@@ -322,7 +322,7 @@ export class Wave extends mix(WaveBase).with(
         if (this.isDrawBondsEnabled) this.drawBonds();
         this.render();
         this.createLabels();
-        this.refillChosenAtoms();
+        this.refillSelectedAtoms();
     }
 
     render() {

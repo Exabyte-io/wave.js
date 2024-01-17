@@ -55,10 +55,10 @@ export class ThreeDEditor extends React.Component {
             activeToolbarMenu: null,
             isThreejsEditorModalShown: false,
             // isDistanceAndAnglesShown: false,
-            measuresSettings: {
+            measurementsSettings: {
                 isDistanceShown: false,
                 isAnglesShown: false,
-                measureLabelsShown: false,
+                measurementLabelsShown: false,
                 distance: 0,
                 angle: 0,
             },
@@ -105,9 +105,9 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleAnglesShown = this.handleToggleAnglesShown.bind(this);
         this.handleSetState = this.handleSetState.bind(this);
         this.handleDeleteConnection = this.handleDeleteConnection.bind(this);
-        this.handleResetMeasures = this.handleResetMeasures.bind(this);
-        this.offMeasureParam = this.offMeasureParam.bind(this);
-        this.onMeasureParam = this.onMeasureParam.bind(this);
+        this.handleResetMeasurements = this.handleResetMeasurements.bind(this);
+        this.offMeasurementParam = this.offMeasurementParam.bind(this);
+        this.onMeasurementParam = this.onMeasurementParam.bind(this);
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
     }
@@ -117,7 +117,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     componentWillUnmount() {
-        this.handleResetMeasures();
+        this.handleResetMeasurements();
         this.WaveComponent.wave.destroyListeners();
         this.removeHotKeyListener();
     }
@@ -134,6 +134,7 @@ export class ThreeDEditor extends React.Component {
                 boundaryConditions: nextProps.boundaryConditions || {},
                 isConventionalCellShown: nextProps.isConventionalCellShown || false,
             });
+            this.handleResetMeasurements();
         }
     }
 
@@ -223,7 +224,7 @@ export class ThreeDEditor extends React.Component {
 
     handleToggleConventionalCell() {
         const { isConventionalCellShown, originalMaterial } = this.state;
-        this.handleResetMeasures();
+        this.handleResetMeasurements();
         this.setState({
             isConventionalCellShown: !isConventionalCellShown,
             originalMaterial: this.getPrimitiveOrConventionalMaterial(
@@ -278,9 +279,13 @@ export class ThreeDEditor extends React.Component {
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
     handleResetViewer() {
-        const { measuresSettings } = this.state;
+        const { measurementsSettings } = this.state;
         this.setState({
-            measuresSettings: { ...measuresSettings, isDistanceShown: false, isAnglesShown: false },
+            measurementsSettings: {
+                ...measurementsSettings,
+                isDistanceShown: false,
+                isAnglesShown: false,
+            },
         });
         this.WaveComponent.initViewer();
         this._resetStateWaveComponent();
@@ -318,57 +323,63 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleToggleDistanceShown() {
-        const { measuresSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measuresSettings;
+        const { measurementsSettings } = this.state;
+        const { isDistanceShown, isAnglesShown } = measurementsSettings;
         if (isAnglesShown) {
-            this.offMeasureParam("isAnglesShown");
+            this.offMeasurementParam("isAnglesShown");
         }
 
         if (!isDistanceShown) {
-            this.onMeasureParam("isDistanceShown", "isAnglesShown");
+            this.onMeasurementParam("isDistanceShown", "isAnglesShown");
         } else {
-            this.offMeasureParam("isDistanceShown");
+            this.offMeasurementParam("isDistanceShown");
         }
     }
 
-    handleResetMeasures() {
-        const { measuresSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measuresSettings;
-        if (isDistanceShown || isAnglesShown) this.WaveComponent.wave.resetMeasures();
+    handleResetMeasurements() {
+        const { measurementsSettings } = this.state;
+        const { isDistanceShown, isAnglesShown } = measurementsSettings;
+        if (isDistanceShown || isAnglesShown) this.WaveComponent.wave.resetMeasurements();
     }
 
-    offMeasureParam(param) {
+    offMeasurementParam(param) {
         this.WaveComponent.wave.destroyListeners();
-        this.handleResetMeasures();
+        this.handleResetMeasurements();
         this.setState((prevState) => {
-            const { measuresSettings } = prevState;
-            return { ...prevState, measuresSettings: { ...measuresSettings, [param]: false } };
+            const { measurementsSettings } = prevState;
+            return {
+                ...prevState,
+                measurementsSettings: { ...measurementsSettings, [param]: false },
+            };
         });
     }
 
-    onMeasureParam(param, offParam) {
+    onMeasurementParam(param, offParam) {
         this.setState((prevState) => {
-            const { measuresSettings } = prevState;
-            return { ...prevState, measuresSettings: { ...measuresSettings, [param]: true } };
+            const { measurementsSettings } = prevState;
+            return {
+                ...prevState,
+                measurementsSettings: { ...measurementsSettings, [param]: true },
+            };
         });
-        const { measuresSettings } = this.state;
+        const { measurementsSettings } = this.state;
         this.WaveComponent.wave.initListeners(this.handleSetState, {
-            ...measuresSettings,
+            ...measurementsSettings,
             [param]: true,
             [offParam]: false,
         });
     }
 
     handleToggleAnglesShown() {
-        const { measuresSettings } = this.state;
-        const { isAnglesShown, isDistanceShown } = measuresSettings;
+        const { measurementsSettings } = this.state;
+        const { isAnglesShown, isDistanceShown } = measurementsSettings;
         if (isDistanceShown) {
-            this.offMeasureParam("isDistanceShown");
+            this.offMeasurementParam("isDistanceShown");
         }
         if (!isAnglesShown) {
-            this.onMeasureParam("isAnglesShown", "isDistanceShown");
+            this.onMeasurementParam("isAnglesShown", "isDistanceShown");
         } else {
-            this.offMeasureParam("isAnglesShown");
+            this.offMeasurementParam("isAnglesShown");
         }
     }
 
@@ -520,8 +531,8 @@ export class ThreeDEditor extends React.Component {
     };
 
     getMeasurementsActions = () => {
-        const { measuresSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measuresSettings;
+        const { measurementsSettings } = this.state;
+        const { isDistanceShown, isAnglesShown } = measurementsSettings;
         return [
             {
                 id: "Distances",
@@ -551,10 +562,10 @@ export class ThreeDEditor extends React.Component {
                 isDivider: true,
             },
             {
-                id: "Reset Measures",
-                content: "Reset Measures",
+                id: "Reset measurements",
+                content: "Reset measurements",
                 leftIcon: <Replay />,
-                onClick: this.handleResetMeasures,
+                onClick: this.handleResetMeasurements,
                 shouldMenuStayOpened: true,
             },
         ];
