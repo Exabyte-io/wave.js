@@ -55,6 +55,7 @@
         "sass": "1.45.2",
         "sprintf-js": "^1.1.2",
         "static-kdtree": "^1.0.2",
+        "sweetalert": "^2.1.2",
         "three": "npm:@exabyte-io/three@2023.8.23-0",
         "underscore": "^1.8.3",
         "underscore.string": "^3.3.4",
