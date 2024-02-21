@@ -27,7 +27,7 @@ runs:
     - name: Build base image
       uses: ./actions/docker/build
       with:
-        image-name: centos-7.9-base-materials-designer
+        image-name: ghcr.io/exabyte-io/centos-7.9-base-materials-designer
         dockerfile: ./dockerfiles/centos/Dockerfile
 
     - name: Push updated application container
