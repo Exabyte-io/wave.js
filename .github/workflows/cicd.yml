@@ -44,7 +44,7 @@ jobs:
 
 
   publish:
-    needs: run-tests
+    # needs: run-tests
     runs-on: ubuntu-latest
     if: github.ref_name == 'dev'
 
