@@ -63,15 +63,16 @@
     "peerDependencies": {
         "@exabyte-io/made.js": "*",
         "@exabyte-io/cove.js": "*",
+        "@exabyte-io/code.js": "*",
         "react": "17.0.0",
         "react-dom": "17.0.0"
     },
     "devDependencies": {
         "@babel/preset-typescript": "^7.22.5",
         "@exabyte-io/eslint-config": "^2023.8.29-1",
-        "@exabyte-io/made.js": "2022.5.5-3",
-        "@exabyte-io/code.js": "2023.11.22-0",
-        "@exabyte-io/cove.js": "2023.12.12-0",
+        "@exabyte-io/made.js": "^2024.2.21-0",
+        "@exabyte-io/code.js": "^2024.2.20-0",
+        "@exabyte-io/cove.js": "2024.2.21-1",
         "@types/react": "^18.2.8",
         "@types/react-dom": "^18.2.4",
         "@types/underscore": "^1.11.9",
