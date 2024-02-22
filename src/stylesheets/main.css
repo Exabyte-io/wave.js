@@ -1,0 +1,513 @@
+@charset "UTF-8";
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    margin: 0;
+    overflow: hidden;
+}
+
+.selectBox {
+    border: 1px solid #55aaff;
+    background-color: rgba(75, 160, 255, 0.3);
+    position: fixed;
+}
+
+#threejs-editor {
+    /* osx */
+    /* Listbox */
+    /* CodeMirror */
+    /* outliner */
+    /* */
+    /* */
+    /* */
+    /* */
+}
+#threejs-editor hr {
+    border: 0;
+    border-top: 1px solid #ccc;
+}
+#threejs-editor button {
+    position: relative;
+}
+#threejs-editor input {
+    vertical-align: middle;
+}
+#threejs-editor input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+#threejs-editor input[type="color"]::-webkit-color-swatch {
+    border: none;
+}
+#threejs-editor textarea {
+    tab-size: 4;
+    white-space: pre;
+    word-wrap: normal;
+}
+#threejs-editor textarea.success {
+    border-color: #8b8 !important;
+}
+#threejs-editor textarea.fail {
+    border-color: #f00 !important;
+    background-color: rgba(255, 0, 0, 0.05);
+}
+#threejs-editor textarea,
+#threejs-editor input {
+    outline: none;
+}
+#threejs-editor .Panel {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    /* No support for these yet */
+    -o-user-select: none;
+    user-select: none;
+}
+#threejs-editor .TabbedPanel {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    /* No support for these yet */
+    -o-user-select: none;
+    user-select: none;
+    position: relative;
+    display: block;
+    width: 100%;
+}
+#threejs-editor .TabbedPanel .Tabs {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-width: 300px;
+}
+#threejs-editor .TabbedPanel .Tabs .Tab {
+    padding: 10px;
+    text-transform: uppercase;
+}
+#threejs-editor .TabbedPanel .Panels {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 300px;
+}
+#threejs-editor .Listbox {
+    color: #444;
+    background-color: #fff;
+    padding: 0;
+    width: 100%;
+    min-height: 140px;
+    font-size: 12px;
+    cursor: default;
+    overflow: auto;
+}
+#threejs-editor .Listbox .ListboxItem {
+    padding: 6px;
+    color: #666;
+    white-space: nowrap;
+}
+#threejs-editor .Listbox .ListboxItem.active {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+#threejs-editor .CodeMirror {
+    position: absolute !important;
+    top: 37px;
+    width: 100% !important;
+    height: calc(100% - 37px) !important;
+}
+#threejs-editor .CodeMirror .errorLine {
+    background: rgba(255, 0, 0, 0.25);
+}
+#threejs-editor .CodeMirror .esprima-error {
+    color: #f00;
+    text-align: right;
+    padding: 0 20px;
+}
+#threejs-editor #outliner .opener {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 0px 4px;
+    vertical-align: top;
+    text-align: center;
+}
+#threejs-editor #outliner .opener.open:after {
+    content: "−";
+}
+#threejs-editor #outliner .opener.closed:after {
+    content: "+";
+}
+#threejs-editor #outliner .option {
+    border: 1px solid transparent;
+}
+#threejs-editor #outliner .option.drag {
+    border: 1px dashed #999;
+}
+#threejs-editor #outliner .option.dragTop {
+    border-top: 1px dashed #999;
+}
+#threejs-editor #outliner .option.dragBottom {
+    border-bottom: 1px dashed #999;
+}
+#threejs-editor #outliner .type {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    color: #ddd;
+    text-align: center;
+}
+#threejs-editor #outliner .type:after {
+    content: "●";
+}
+#threejs-editor #outliner .Scene {
+    color: #8888dd;
+}
+#threejs-editor #outliner .Camera {
+    color: #dd8888;
+}
+#threejs-editor #outliner .Light {
+    color: #dddd88;
+}
+#threejs-editor #outliner .Object3D {
+    color: #aaaaee;
+}
+#threejs-editor #outliner .Mesh {
+    color: #8888ee;
+}
+#threejs-editor #outliner .Line {
+    color: #88ee88;
+}
+#threejs-editor #outliner .LineSegments {
+    color: #88ee88;
+}
+#threejs-editor #outliner .Points {
+    color: #ee8888;
+}
+#threejs-editor #outliner .Geometry {
+    color: #aaeeaa;
+}
+#threejs-editor #outliner .Material {
+    color: #eeaaee;
+}
+#threejs-editor #outliner .Script:after {
+    content: "◎";
+}
+#threejs-editor #multiple-selection-buttons {
+    display: flex;
+}
+#threejs-editor #multiple-selection-buttons > button.ms-button {
+    margin-left: 10px;
+}
+#threejs-editor #multiple-selection-buttons > button.ms-button:first-child {
+    margin-left: 0;
+}
+#threejs-editor #multiple-selection-buttons > button.ms-button.ms-button__cancel {
+    padding: 6.25px 10px;
+}
+#threejs-editor #multiple-selection-buttons > button.ms-button.ms-button__cancel img {
+    width: 12px;
+    height: 12px;
+}
+
+#threejs-editor {
+    /* UI */
+    /* */
+}
+#threejs-editor button {
+    color: #555;
+    background-color: #ddd;
+    border: 0px;
+    margin: 0px;
+    /* GNOME Web */
+    padding: 5px 8px;
+    font-size: 12px;
+    text-transform: uppercase;
+    cursor: pointer;
+    outline: none;
+}
+#threejs-editor button:hover {
+    background-color: #fff;
+}
+#threejs-editor button.selected {
+    background-color: #fff;
+}
+#threejs-editor input,
+#threejs-editor textarea {
+    border: 1px solid;
+}
+#threejs-editor input.Number {
+    color: #08f !important;
+    font-size: 12px;
+    border: 0px;
+    padding: 2px;
+    cursor: col-resize;
+}
+#threejs-editor select {
+    color: #666;
+    background-color: #ddd;
+    border: 0px;
+    text-transform: uppercase;
+    cursor: pointer;
+    outline: none;
+}
+#threejs-editor select:hover {
+    background-color: #fff;
+}
+#threejs-editor #resizer {
+    position: absolute;
+    top: 32px;
+    right: 295px;
+    width: 5px;
+    bottom: 0px;
+    /* background-color: rgba(255,0,0,0.5); */
+    cursor: col-resize;
+}
+#threejs-editor #viewport {
+    position: absolute;
+    top: 32px;
+    left: 0;
+    right: 300px;
+    bottom: 0;
+}
+#threejs-editor #viewport #info {
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+}
+#threejs-editor #script {
+    position: absolute;
+    top: 32px;
+    left: 0;
+    right: 300px;
+    bottom: 0;
+    opacity: 0.9;
+}
+#threejs-editor #player {
+    position: absolute;
+    top: 32px;
+    left: 0;
+    right: 300px;
+    bottom: 0;
+}
+#threejs-editor #menubar {
+    position: absolute;
+    z-index: 5;
+    width: 100%;
+    height: 32px;
+    background: #eee;
+    padding: 0;
+    margin: 0;
+    right: 0;
+    top: 0;
+}
+#threejs-editor #menubar .menu {
+    float: left;
+    cursor: pointer;
+    padding-right: 8px;
+}
+#threejs-editor #menubar .menu.right {
+    float: right;
+    cursor: auto;
+    padding-right: 0;
+    text-align: right;
+}
+#threejs-editor #menubar .menu .title {
+    display: inline-block;
+    color: #888;
+    margin: 0;
+    padding: 8px;
+    line-height: 16px;
+}
+#threejs-editor #menubar .menu .options {
+    position: fixed;
+    display: none;
+    padding: 5px 0;
+    background: #eee;
+    width: 150px;
+    max-height: calc(100% - 80px);
+    overflow: auto;
+}
+#threejs-editor #menubar .menu:hover .options {
+    display: block;
+}
+#threejs-editor #menubar .menu .options hr {
+    border-color: #ddd;
+}
+#threejs-editor #menubar .menu .options .option {
+    color: #666;
+    background-color: transparent;
+    padding: 5px 10px;
+    margin: 0 !important;
+}
+#threejs-editor #menubar .menu .options .option:hover {
+    color: #fff;
+    background-color: #08f;
+}
+#threejs-editor #menubar .menu .options .option:active {
+    color: #666;
+    background: transparent;
+}
+#threejs-editor #menubar .menu .options .inactive {
+    color: #bbb;
+    background-color: transparent;
+    padding: 5px 10px;
+    margin: 0 !important;
+}
+#threejs-editor #sidebar {
+    position: absolute;
+    right: 0;
+    top: 32px;
+    bottom: 0;
+    width: 300px;
+    background: #eee;
+    overflow: auto;
+}
+#threejs-editor #sidebar .Panel {
+    color: #888;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+}
+#threejs-editor #sidebar .Panel.collapsed {
+    margin-bottom: 0;
+}
+#threejs-editor #sidebar .Row {
+    display: flex;
+    align-items: center;
+    min-height: 24px;
+    margin-bottom: 10px;
+}
+#threejs-editor #tabs {
+    background-color: #ddd;
+    border-top: 1px solid #ccc;
+}
+#threejs-editor #tabs span {
+    color: #aaa;
+    border-right: 1px solid #ccc;
+    padding: 10px;
+}
+#threejs-editor #tabs span.selected {
+    color: #888;
+    background-color: #eee;
+}
+#threejs-editor #toolbar {
+    position: absolute;
+    left: 10px;
+    top: 42px;
+    width: 32px;
+    background: #eee;
+    text-align: center;
+}
+#threejs-editor #toolbar button,
+#threejs-editor #toolbar input {
+    height: 32px;
+}
+#threejs-editor #toolbar button img {
+    width: 16px;
+    opacity: 0.5;
+}
+#threejs-editor .Outliner {
+    color: #444;
+    background-color: #fff;
+    padding: 0;
+    width: 100%;
+    height: 250px;
+    font-size: 12px;
+    cursor: default;
+    overflow: auto;
+    resize: vertical;
+    outline: none !important;
+}
+#threejs-editor .Outliner .option {
+    padding: 4px;
+    color: #666;
+    white-space: nowrap;
+}
+#threejs-editor .Outliner .option:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+#threejs-editor .Outliner .option.active {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+#threejs-editor .TabbedPanel .Tabs {
+    background-color: #ddd;
+    border-top: 1px solid #ccc;
+}
+#threejs-editor .TabbedPanel .Tab {
+    color: #aaa;
+    border-right: 1px solid #ccc;
+}
+#threejs-editor .TabbedPanel .Tab.selected {
+    color: #888;
+    background-color: #eee;
+}
+#threejs-editor .Listbox {
+    color: #444;
+    background-color: #fff;
+}
+#threejs-editor .Panel {
+    color: #888;
+}
+@media all and (max-width: 600px) {
+    #threejs-editor #resizer {
+        display: none;
+    }
+    #threejs-editor #menubar .menu .options {
+        max-height: calc(100% - 372px);
+    }
+    #threejs-editor #menubar .menu.right {
+        display: none;
+    }
+    #threejs-editor #viewport {
+        left: 0;
+        right: 0;
+        top: 32px;
+        height: calc(100% - 352px);
+    }
+    #threejs-editor #script {
+        left: 0;
+        right: 0;
+        top: 32px;
+        height: calc(100% - 352px);
+    }
+    #threejs-editor #player {
+        left: 0;
+        right: 0;
+        top: 32px;
+        height: calc(100% - 352px);
+    }
+    #threejs-editor #sidebar {
+        left: 0;
+        width: 100%;
+        top: calc(100% - 320px);
+        bottom: 0;
+    }
+}
+#threejs-editor .ContextMenu {
+    z-index: 5;
+    position: fixed;
+    background: #ddd;
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+}
+#threejs-editor .ContextMenu .option:hover {
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+#threejs-editor .ContextMenu .option {
+    text-decoration: underline;
+}
+
+.three-renderer {
+    height: 100vh;
+}
+
+.three-renderer canvas:first-child {
+    position: absolute;
+    right: 10px;
+}
+.three-renderer .three-renderer-selection {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.4);
+    visibility: hidden;
+}
+
+/*# sourceMappingURL=main.css.map */
