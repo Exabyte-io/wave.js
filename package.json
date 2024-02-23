@@ -5,7 +5,7 @@
     "scripts": {
         "prepublishOnly": "rm -rf dist; npm run transpile",
         "start": "cross-env PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
-        "transpile": "babel --extensions '.js,.jsx,.ts,.tsx' --out-dir dist src",
+        "transpile": "babel --extensions '.js,.jsx,.ts,.tsx' --out-dir dist src && cp -r src/stylesheets dist/stylesheets",
         "prestart": "npm-link-shared ./node_modules/@exabyte-io/cove.js/node_modules . react",
         "postinstall": "npm run transpile",
         "test": "npx jest",
