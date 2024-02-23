@@ -1,4 +1,4 @@
-import "./stylesheets/main.scss";
+import "./stylesheets/main.css";
 import "./MuiClassNameSetup";
 
 import { Made } from "@exabyte-io/made.js";
