@@ -46,7 +46,7 @@ function ParametersMenu(props: ParametersMenuProps) {
                     inputProps={{
                         max: 10,
                         min: 0.1,
-                        step: 0.01,
+                        step: 0.1,
                     }}
                 />
             </Box>
@@ -89,7 +89,7 @@ function ParametersMenu(props: ParametersMenuProps) {
                     inputProps={{
                         max: 2,
                         min: 0,
-                        step: 0.1,
+                        step: 0.01,
                     }}
                 />
             </Box>
