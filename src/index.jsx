@@ -1,7 +1,7 @@
 import "./stylesheets/main.scss";
 import "./MuiClassNameSetup";
 
-import { Made } from "@exabyte-io/made.js";
+import { Made } from "@mat3ra/made";
 import React from "react";
 import ReactDOM from "react-dom";
 

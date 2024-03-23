@@ -3,7 +3,7 @@
 
 import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
 import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
-import { Made } from "@exabyte-io/made.js";
+import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
 import CheckIcon from "@mui/icons-material/Check";
