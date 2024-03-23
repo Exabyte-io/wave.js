@@ -1,6 +1,7 @@
-import { Made } from "@exabyte-io/made.js";
+import { Made } from "@mat3ra/made";
 import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
 import Enzyme from "enzyme";
+import expect from "expect";
 import React from "react";
 
 import { ThreeDEditor } from "../../../src/components/ThreeDEditor";

@@ -1,4 +1,4 @@
-import { Made } from "@exabyte-io/made.js";
+import { Made } from "@mat3ra/made";
 import PropTypes from "prop-types";
 import React from "react";
 import { ModalBody } from "react-bootstrap";
