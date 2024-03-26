@@ -61,9 +61,9 @@
         "moment": "^2.29.4"
     },
     "peerDependencies": {
+        "@mat3ra/code": "*",
         "@mat3ra/made": "*",
         "@exabyte-io/cove.js": "*",
-        "@exabyte-io/code.js": "*",
         "@exabyte-io/esse.js": "*",
         "react": "17.0.0",
         "react-dom": "17.0.0"
@@ -72,10 +72,10 @@
         "@babel/preset-typescript": "^7.22.5",
         "@exabyte-io/eslint-config": "^2023.8.29-1",
         "@mat3ra/tsconfig": "^2024.3.21-5",
-        "@mat3ra/made": "^2024.3.23-1",
-        "@exabyte-io/code.js": "^2024.2.20-0",
+        "@mat3ra/code": "^2024.3.25-3",
+        "@mat3ra/esse": "^2024.3.25-6",
+        "@mat3ra/made": "^2024.3.26-0",
         "@exabyte-io/cove.js": "2024.2.21-1",
-        "@mat3ra/esse": "^2024.2.19-0",
         "@types/react": "^18.2.8",
         "@types/react-dom": "^18.2.4",
         "@types/underscore": "^1.11.9",
