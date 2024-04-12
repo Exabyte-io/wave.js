@@ -1,4 +1,4 @@
-import { Made } from "@exabyte-io/made.js";
+import { Made } from "@mat3ra/made";
 import * as THREE from "three";
 
 import { BOUNDARY_CONDITIONS } from "../enums";

@@ -3,7 +3,7 @@
 
 import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
 import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
-import { Made } from "@exabyte-io/made.js";
+import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
 import CheckIcon from "@mui/icons-material/Check";
@@ -174,6 +174,7 @@ export class ThreeDEditor extends React.Component {
 
     handleKeyPress = (e) => {
         const { isInteractive, isThreejsEditorModalShown } = this.state;
+        const { editable } = this.props;
 
         // Check if interactive mode is off, or if the event originated from an input-like element
         if (
@@ -185,7 +186,13 @@ export class ThreeDEditor extends React.Component {
             return;
         }
 
-        const handler = this.keyConfig[e.key.toLowerCase()];
+        // Removing the toggleThreejsEditorModal key from the keyConfig if the editor is not editable
+        const keyConfigAdjusted = { ...this.keyConfig };
+        if (!editable) {
+            delete keyConfigAdjusted[settings.hotKeysConfig.toggleThreejsEditorModal];
+        }
+
+        const handler = keyConfigAdjusted[e.key.toLowerCase()];
         if (handler) {
             handler.call(this);
         }
