@@ -1,4 +1,6 @@
 /* eslint-disable max-classes-per-file */
+import "./stylesheets/main.css";
+
 import { mix } from "mixwith";
 import * as THREE from "three";
 
