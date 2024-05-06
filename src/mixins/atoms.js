@@ -88,6 +88,7 @@ export const AtomsMixin = (superclass) =>
         createAtomsGroup(basis, atomRadiiScale) {
             const atomsGroup = new THREE.Group();
             atomsGroup.name = ATOM_GROUP_NAME;
+            const { elementsWithLabelsArray } = basis;
             basis.coordinates.forEach((atomicCoordinate, atomicIndex) => {
                 const element = basis.getElementByIndex(atomicIndex);
                 const sphereMesh = this.getSphereMeshObject({
@@ -95,6 +96,7 @@ export const AtomsMixin = (superclass) =>
                     coordinate: atomicCoordinate.value,
                 });
                 sphereMesh.name = `${element}-${atomicIndex}`;
+                sphereMesh.nameWithLabel = `${elementsWithLabelsArray[atomicIndex]}`;
                 atomsGroup.add(sphereMesh);
             });
             return atomsGroup;

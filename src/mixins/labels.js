@@ -111,7 +111,7 @@ export const LabelsMixin = (superclass) =>
 
                 group.children.forEach((atom) => {
                     if (atom instanceof THREE.Mesh) {
-                        const text = atom.name.split("-")[0];
+                        const text = atom.nameWithLabel;
                         const position = new THREE.Vector3().setFromMatrixPosition(
                             atom.matrixWorld,
                         );
