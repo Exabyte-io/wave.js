@@ -1,8 +1,8 @@
-import { Made } from "@mat3ra/made";
 import {
     filterBondsDataByElementsAndOrder,
     getElementsBondsData,
 } from "@exabyte-io/periodic-table.js";
+import { Made } from "@mat3ra/made";
 import createKDTree from "static-kdtree";
 import * as THREE from "three";
 
