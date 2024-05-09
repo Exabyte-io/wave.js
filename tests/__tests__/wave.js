@@ -1,4 +1,4 @@
-import { getWaveInstance, getFeOWaveInstance } from "../enums";
+import { getFeOWaveInstance, getWaveInstance } from "../enums";
 import { takeSnapshotAndAssertEqualityAsync } from "../utils";
 
 test("wave", async () => {
@@ -28,5 +28,8 @@ test("colorsOfAtomsWithLabels", async () => {
     wave.renderer.domElement.dispatchEvent(new WheelEvent("wheel", { deltaY: 1 }));
     wave.renderer.domElement.dispatchEvent(new WheelEvent("wheel", { deltaY: 1 }));
     wave.renderer.domElement.dispatchEvent(new WheelEvent("wheel", { deltaY: 1 }));
-    return takeSnapshotAndAssertEqualityAsync(wave.renderer.getContext(), "colorsOfAtomsWithLabels");
+    return takeSnapshotAndAssertEqualityAsync(
+        wave.renderer.getContext(),
+        "colorsOfAtomsWithLabels",
+    );
 });
