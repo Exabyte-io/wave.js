@@ -88,12 +88,30 @@ export const AtomsMixin = (superclass) =>
         createAtomsGroup(basis, atomRadiiScale) {
             const atomsGroup = new THREE.Group();
             atomsGroup.name = ATOM_GROUP_NAME;
-            const { elementsWithLabelsArray } = basis;
+            const { atomicLabelsArray, elementsWithLabelsArray } = basis;
             basis.coordinates.forEach((atomicCoordinate, atomicIndex) => {
                 const element = basis.getElementByIndex(atomicIndex);
+                // set colors slightly different according to the labels
+                const color = this.getAtomColorByElement(element).toLowerCase();
+                const label = parseInt(atomicLabelsArray[atomicIndex], 10) || 0;
+
+                let newColor;
+                if (label === 0) {
+                    newColor = color;
+                } else if (label % 2 === 0) {
+                    newColor =
+                        "#" +
+                        new THREE.Color(color).lerp(new THREE.Color("red"), 0.2).getHexString();
+                } else {
+                    newColor =
+                        "#" +
+                        new THREE.Color(color).lerp(new THREE.Color("green"), 0.2).getHexString();
+                }
+
                 const sphereMesh = this.getSphereMeshObject({
                     ...this._getDefaultSettingsForElement(element, atomRadiiScale),
                     coordinate: atomicCoordinate.value,
+                    color: newColor,
                 });
                 sphereMesh.name = `${element}-${atomicIndex}`;
                 sphereMesh.nameWithLabel = `${elementsWithLabelsArray[atomicIndex]}`;
