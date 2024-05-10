@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   wave:
     image: wave-${BASE_OS}:${IMAGE_TAG}
