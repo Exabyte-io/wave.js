@@ -95,15 +95,16 @@ export const AtomsMixin = (superclass) =>
                 const color = this.getAtomColorByElement(element).toLowerCase();
                 const label = parseInt(atomicLabelsArray[atomicIndex], 10) || 0;
 
-                let newColor;
+                let labelColor;
                 if (label === 0) {
-                    newColor = color;
+                    labelColor = color;
                 } else if (label % 2 === 0) {
-                    newColor =
+                    // https://threejs.org/docs/#api/en/math/Color.lerp
+                    labelColor =
                         "#" +
                         new THREE.Color(color).lerp(new THREE.Color("red"), 0.2).getHexString();
                 } else {
-                    newColor =
+                    labelColor =
                         "#" +
                         new THREE.Color(color).lerp(new THREE.Color("green"), 0.2).getHexString();
                 }
@@ -111,7 +112,7 @@ export const AtomsMixin = (superclass) =>
                 const sphereMesh = this.getSphereMeshObject({
                     ...this._getDefaultSettingsForElement(element, atomRadiiScale),
                     coordinate: atomicCoordinate.value,
-                    color: newColor,
+                    color: labelColor,
                 });
                 sphereMesh.name = `${element}-${atomicIndex}`;
                 sphereMesh.nameWithLabel = `${elementsWithLabelsArray[atomicIndex]}`;
