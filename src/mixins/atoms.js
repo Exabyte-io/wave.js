@@ -112,8 +112,8 @@ export const AtomsMixin = (superclass) =>
                         hue = 0.9 - ((label - 1) * 0.1) / 2; // [0.9, 0.5]
                     }
                     hue = Math.max(0, Math.min(1, hue)); // make sure bounds
-                    sphereMesh.material.emissiveIntensity = 0.4;
-                    sphereMesh.material.emissive.setHSL(hue, 0.25, 0.5);
+                    sphereMesh.material.emissiveIntensity = 0.2;
+                    sphereMesh.material.emissive.setHSL(hue, 0.4, 0.5);
                 }
                 atomsGroup.add(sphereMesh);
             });
