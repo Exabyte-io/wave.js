@@ -91,31 +91,29 @@ export const AtomsMixin = (superclass) =>
             const { atomicLabelsArray, elementsWithLabelsArray } = basis;
             basis.coordinates.forEach((atomicCoordinate, atomicIndex) => {
                 const element = basis.getElementByIndex(atomicIndex);
-                // set colors slightly different according to the labels
-                const color = this.getAtomColorByElement(element).toLowerCase();
-                const label = parseInt(atomicLabelsArray[atomicIndex], 10) || 0;
-
-                let labelColor;
-                if (label === 0) {
-                    labelColor = color;
-                } else if (label % 2 === 0) {
-                    // https://threejs.org/docs/#api/en/math/Color.lerp
-                    labelColor =
-                        "#" +
-                        new THREE.Color(color).lerp(new THREE.Color("red"), 0.2).getHexString();
-                } else {
-                    labelColor =
-                        "#" +
-                        new THREE.Color(color).lerp(new THREE.Color("green"), 0.2).getHexString();
-                }
-
                 const sphereMesh = this.getSphereMeshObject({
                     ...this._getDefaultSettingsForElement(element, atomRadiiScale),
                     coordinate: atomicCoordinate.value,
-                    color: labelColor,
                 });
                 sphereMesh.name = `${element}-${atomicIndex}`;
                 sphereMesh.nameWithLabel = `${elementsWithLabelsArray[atomicIndex]}`;
+
+                // set glow according to the labels, currently only single digit
+                // numeric labels are allowed, in practice we expect only two
+                // different labels: 1 and 2 for up and down spin representations
+                const label = parseInt(atomicLabelsArray[atomicIndex], 10) || 0;
+                let hue;
+                if (label !== 0) {
+                    if (label % 2 === 0) {
+                        // even labels
+                        hue = (label * 0.1) / 2; // [0.1, 0.4]
+                    } else {
+                        // odd labels
+                        hue = 0.9 - ((label - 1) * 0.1) / 2; // [0.9, 0.5]
+                    }
+                    hue = Math.max(0, Math.min(1, hue)); // make sure bounds
+                    sphereMesh.material.emissive.setHSL(hue, 0.25, 0.5);
+                }
                 atomsGroup.add(sphereMesh);
             });
             return atomsGroup;
