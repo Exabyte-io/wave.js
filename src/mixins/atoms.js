@@ -113,7 +113,7 @@ export const AtomsMixin = (superclass) =>
                     } else {
                         // odd labels
                         hue = atomHSL.h - ((label + 1) * 0.1) / 2;
-                        saturation = atomHSL.s - ((label + 1) * 0.1) / 2;
+                        saturation = atomHSL.s + ((label + 1) * 0.1) / 2;
                     }
 
                     // hue is cyclic
@@ -126,7 +126,6 @@ export const AtomsMixin = (superclass) =>
                     }
 
                     saturation = Math.max(0, Math.min(1, saturation));
-                    new THREE.Color(atomColor).setHSL(atomHSL);
                     sphereMesh.material.emissiveIntensity = 0.25;
                     sphereMesh.material.emissive.setHSL(hue, saturation, atomHSL.l);
                 }
