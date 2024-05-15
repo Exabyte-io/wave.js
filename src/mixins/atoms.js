@@ -96,7 +96,10 @@ export const AtomsMixin = (superclass) =>
                     coordinate: atomicCoordinate.value,
                 });
                 sphereMesh.name = `${element}-${atomicIndex}`;
-                sphereMesh.nameWithLabel = `${elementsWithLabelsArray[atomicIndex]}`;
+                sphereMesh.userData = {
+                    ...sphereMesh.userData,
+                    symbolWithLabel: elementsWithLabelsArray[atomicIndex],
+                };
                 // set glow according to the labels, currently only single digit
                 // numeric labels are allowed, in practice we expect only two
                 // different labels: 1 and 2 for up and down spin representations
