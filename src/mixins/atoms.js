@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME } from "../enums";
+import { ApplyGlow } from "./utils";
 
 /*
  * Mixin containing the logic for dealing with atoms.
@@ -96,42 +97,19 @@ export const AtomsMixin = (superclass) =>
                     coordinate: atomicCoordinate.value,
                 });
                 sphereMesh.name = `${element}-${atomicIndex}`;
+                // store any additional data in userData
+                // https://threejs.org/docs/#api/en/core/Object3D.userData
                 sphereMesh.userData = {
                     ...sphereMesh.userData,
                     symbolWithLabel: elementsWithLabelsArray[atomicIndex],
                 };
-                // set glow according to the labels, currently only single digit
-                // numeric labels are allowed, in practice we expect only two
-                // different labels: 1 and 2 for up and down spin representations
                 const atomColor = this.getAtomColorByElement(element).toLowerCase();
-                const atomHSL = {};
-                new THREE.Color(atomColor).getHSL(atomHSL);
                 const label = parseInt(atomicLabelsArray[atomicIndex], 10) || 0;
-                let hue, saturation;
-                if (label !== 0) {
-                    if (label % 2 === 0) {
-                        // even labels
-                        hue = atomHSL.h + (label * 0.1) / 2;
-                        saturation = atomHSL.s + (label * 0.1) / 2;
-                    } else {
-                        // odd labels
-                        hue = atomHSL.h - ((label + 1) * 0.1) / 2;
-                        saturation = atomHSL.s + ((label + 1) * 0.1) / 2;
-                    }
-
-                    // hue is cyclic
-                    while (hue > 1) {
-                        hue -= 1;
-                    }
-
-                    while (hue < 0) {
-                        hue += 1;
-                    }
-
-                    saturation = Math.max(0, Math.min(1, saturation));
-                    sphereMesh.material.emissiveIntensity = 0.25;
-                    sphereMesh.material.emissive.setHSL(hue, saturation, atomHSL.l);
-                }
+                // set glow according to the label value as offset, currently
+                // only single digit numeric labels are allowed, in practice we
+                // expect only two different labels: 1 and 2 for up and down
+                // spin representations
+                ApplyGlow(sphereMesh, atomColor, label);
                 atomsGroup.add(sphereMesh);
             });
             return atomsGroup;
