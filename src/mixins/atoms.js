@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME } from "../enums";
+import { ApplyGlow } from "./utils";
 
 /*
  * Mixin containing the logic for dealing with atoms.
@@ -88,6 +89,7 @@ export const AtomsMixin = (superclass) =>
         createAtomsGroup(basis, atomRadiiScale) {
             const atomsGroup = new THREE.Group();
             atomsGroup.name = ATOM_GROUP_NAME;
+            const { atomicLabelsArray, elementsWithLabelsArray } = basis;
             basis.coordinates.forEach((atomicCoordinate, atomicIndex) => {
                 const element = basis.getElementByIndex(atomicIndex);
                 const sphereMesh = this.getSphereMeshObject({
@@ -95,6 +97,19 @@ export const AtomsMixin = (superclass) =>
                     coordinate: atomicCoordinate.value,
                 });
                 sphereMesh.name = `${element}-${atomicIndex}`;
+                // store any additional data in userData
+                // https://threejs.org/docs/#api/en/core/Object3D.userData
+                sphereMesh.userData = {
+                    ...sphereMesh.userData,
+                    symbolWithLabel: elementsWithLabelsArray[atomicIndex],
+                };
+                const atomColor = this.getAtomColorByElement(element).toLowerCase();
+                const label = parseInt(atomicLabelsArray[atomicIndex], 10) || 0;
+                // set glow according to the label value as offset, currently
+                // only single digit numeric labels are allowed, in practice we
+                // expect only two different labels: 1 and 2 for up and down
+                // spin representations
+                ApplyGlow(sphereMesh, atomColor, label);
                 atomsGroup.add(sphereMesh);
             });
             return atomsGroup;

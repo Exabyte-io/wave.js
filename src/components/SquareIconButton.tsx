@@ -1,6 +1,6 @@
 import IconButton, { IconButtonProps } from "@mui/material/IconButton";
 import Tooltip, { TooltipProps } from "@mui/material/Tooltip";
-import React, { useState } from "react";
+import React from "react";
 import _ from "underscore";
 
 interface SquareIconButtonProps extends IconButtonProps {

@@ -17,7 +17,7 @@ describe("Screen tests for repeats", () => {
         const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorB: 3 });
         return takeSnapshotAndAssertEqualityAsync(wave.renderer.getContext(), "vectorB");
     });
-    test("Repeat along lattice vector С", () => {
+    test("Repeat along lattice vector C", () => {
         const wave = getWaveInstance({ ...settings, repetitionsAlongLatticeVectorC: 3 });
         return takeSnapshotAndAssertEqualityAsync(wave.renderer.getContext(), "vectorC");
     });

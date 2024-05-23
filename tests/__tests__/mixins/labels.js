@@ -19,7 +19,7 @@ describe("Atom labels", () => {
         const basisAtomsNumber = wave.structure.basis.elements.length;
 
         atoms.forEach((atom) => {
-            const atomName = atom.name.split("-")[0];
+            const atomName = atom.userData.symbolWithLabel;
             const atomPosition = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
 
             const offsetVector = wave.getLabelOffsetVector(atomPosition, atomName);
@@ -32,7 +32,6 @@ describe("Atom labels", () => {
                     label.position.distanceTo(expectedLabelPosition) < 0.00001
                 );
             });
-
             expect(labelSprite).toBeTruthy();
         });
 
@@ -49,7 +48,7 @@ describe("Atom labels", () => {
 
         const basisAtomsNumber = wave.structure.basis.elements.length;
         const doAllAtomsHaveLabels = atoms.every((atom) => {
-            const atomName = atom.name.split("-")[0];
+            const atomName = atom.userData.symbolWithLabel;
             const labelName = `labels-for-${atomName}`;
             const labelPointsByAtomName = labels.find(
                 (labelPoints) => labelPoints.name === labelName,

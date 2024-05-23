@@ -1,4 +1,8 @@
 FROM ubuntu:latest
+# TODO: with latest (24.04) version of ubuntu there are following errors
+# MESA: error: ZINK: vkCreateInstance failed (VK_ERROR_INCOMPATIBLE_DRIVER)
+# glx: failed to create drisw screen
+# NOTE: however the snapshots on 24.04 are identical to the ones from 22.04
 
 # Install base dependencies
 RUN apt-get update && apt-get install -y -q --no-install-recommends \

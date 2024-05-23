@@ -19,12 +19,25 @@ export const ELEMENT_PROPERTIES = {
 const materialJsonFilePath = path.resolve(__dirname, "fixtures/material.json");
 export const MATERIAL_CONFIG = JSON.parse(fs.readFileSync(materialJsonFilePath));
 
+// config for material with atomic labels
+const FeOJsonFilePath = path.resolve(__dirname, "fixtures/FeO.json");
+export const FeO_CONFIG = JSON.parse(fs.readFileSync(FeOJsonFilePath));
+
 export const WAVE_SETTINGS = {
     atomRadiiScale: 0.2,
     repetitions: 1,
 };
 
 export function getWaveInstance(settings, material = new Made.Material(MATERIAL_CONFIG)) {
+    return new Wave({
+        DOMElement: createElement("div", ELEMENT_PROPERTIES),
+        structure: material,
+        cell: material.Lattice.unitCell,
+        settings: settings || WAVE_SETTINGS,
+    });
+}
+
+export function getFeOWaveInstance(settings, material = new Made.Material(FeO_CONFIG)) {
     return new Wave({
         DOMElement: createElement("div", ELEMENT_PROPERTIES),
         structure: material,
