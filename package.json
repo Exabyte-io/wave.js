@@ -65,8 +65,8 @@
         "@mat3ra/made": "*",
         "@exabyte-io/cove.js": "*",
         "@exabyte-io/esse.js": "*",
-        "react": "17.0.0",
-        "react-dom": "17.0.0"
+        "react": "^17.0.0",
+        "react-dom": "^17.0.0"
     },
     "devDependencies": {
         "@babel/preset-typescript": "^7.22.5",
