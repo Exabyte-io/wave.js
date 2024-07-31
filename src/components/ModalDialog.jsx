@@ -1,7 +1,6 @@
-import setClass from "classnames";
+import Dialog from "@exabyte-io/cove.js/dist/mui/components/dialog/Dialog";
 import PropTypes from "prop-types";
 import React from "react";
-import { Modal } from "react-bootstrap";
 
 export class ModalDialog extends React.Component {
     constructor(props) {
@@ -27,21 +26,30 @@ export class ModalDialog extends React.Component {
     }
 
     render() {
-        const { className, isFullWidth, show, backdropColor, modalId } = this.props;
-        const setClassName = setClass(className, isFullWidth ? "full-page-overlay" : "");
-        if (show) {
-            document.body.classList.add("modal-backdrop-color-" + backdropColor);
-        }
+        const { className, isFullWidth, show, modalId } = this.props;
         return (
-            <Modal
+            <Dialog
                 id={modalId}
                 animation={false}
-                show={show}
-                onHide={this.onHide}
-                className={setClassName}
-            >
-                {this.renderBody()}
-            </Modal>
+                sx={{ height: "100%", width: "100%" }}
+                open={show}
+                fullWidth={isFullWidth}
+                maxWidth={false}
+                onClose={this.onHide}
+                className={className}
+                renderHeaderCustom={() => null}
+                renderFooterCustom={() => null}
+                PaperProps={{
+                    sx: {
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        width: "100%",
+                        height: "100%",
+                        m: 0,
+                    },
+                }}
+                renderBodyCustom={this.renderBody}
+            />
         );
     }
 }
