@@ -74,7 +74,7 @@
         "@mat3ra/code": "^2024.3.25-3",
         "@mat3ra/esse": "2024.4.19-1",
         "@mat3ra/made": "2024.5.3-0",
-        "@exabyte-io/cove.js": "git+https://github.com/Exabyte-io/cove.js.git#9053b10da33f4b95eb2eb4ee1a157450abb0b8fe",
+        "@exabyte-io/cove.js": "2024.7.31-0",
         "@types/react": "^18.2.8",
         "@types/react-dom": "^18.2.4",
         "@types/underscore": "^1.11.9",
