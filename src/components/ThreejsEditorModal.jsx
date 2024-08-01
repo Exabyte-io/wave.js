@@ -1,7 +1,6 @@
 import { Made } from "@mat3ra/made";
 import PropTypes from "prop-types";
 import React from "react";
-import { ModalBody } from "react-bootstrap";
 import * as THREE from "three";
 import { RemoveMultipleSelectionGroupCommand } from "three/editor/js/commands/RemoveMultipleSelectionGroupCommand";
 import { SetSceneCommand } from "three/editor/js/commands/SetSceneCommand";
@@ -351,10 +350,10 @@ export class ThreejsEditorModal extends ModalDialog {
 
     renderBody() {
         return (
-            <ModalBody>
+            <>
                 <AlertDialog ref={(ref) => (this.alertRef = ref)} />
                 <div ref={(el) => this.initialize(el)} />
-            </ModalBody>
+            </>
         );
     }
 }

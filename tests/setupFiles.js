@@ -1,7 +1,7 @@
 import "jest-canvas-mock";
 
+import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
 import { configure } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
 import expect from "expect";
 import GL from "gl";
 import { toBeDeepCloseTo, toMatchCloseTo } from "jest-matcher-deep-close-to";
