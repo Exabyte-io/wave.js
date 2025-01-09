@@ -110,6 +110,7 @@ export class ThreeDEditor extends React.Component {
         this.onMeasurementParam = this.onMeasurementParam.bind(this);
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
+        this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
     }
 
     componentDidMount() {
@@ -597,6 +598,13 @@ export class ThreeDEditor extends React.Component {
         ];
         return [
             {
+                id: "StartGif",
+                title: "Record GIF",
+                content: "Record GIF",
+                leftIcon: <PictureInPicture />,
+                onClick: this.handleStartGifRecording, // New handler for recording GIF
+            },
+            {
                 id: "Screenshot",
                 title: "Screenshot",
                 content: "Screenshot",
@@ -674,6 +682,10 @@ export class ThreeDEditor extends React.Component {
 
         return toolbarConfig;
     }
+
+    handleStartGifRecording = () => {
+        this.WaveComponent.startGifRecording(); // Call method on WaveComponent
+    };
 
     onThreejsEditorModalHide(material) {
         let { isThreejsEditorModalShown } = this.state;

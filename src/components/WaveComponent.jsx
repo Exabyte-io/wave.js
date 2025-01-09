@@ -1,3 +1,4 @@
+import gifshot from "gifshot";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -90,6 +91,79 @@ export class WaveComponent extends React.Component {
         // renderer component on fullscreen event. Here we explicitly do that and wait for the event to finish, assuming
         // that 500 milliseconds is enough.
         setTimeout(() => this.wave.handleResize(), 500);
+    }
+
+    // eslint-disable-next-line react/no-unused-class-component-methods
+    startGifRecording() {
+        const REVOLUTIONS_PER_MINUTE = 60;
+        const canvas = this.wave.renderer.domElement;
+        const frames = [];
+        let frameCount = 0;
+        const totalFrames = REVOLUTIONS_PER_MINUTE;
+        const { width } = canvas;
+        const { height } = canvas;
+
+        this.wave.orbitControls.autoRotate = true;
+        const originalAutoRotateSpeed = this.wave.orbitControls.autoRotateSpeed;
+        this.wave.orbitControls.autoRotateSpeed = REVOLUTIONS_PER_MINUTE;
+
+        const captureFrame = () => {
+            this.wave.render();
+            frames.push(canvas.toDataURL("image/png"));
+            console.log(`Captured frame ${frameCount + 1}/${totalFrames}`);
+        };
+
+        const createGif = () => {
+            console.log("Creating GIF from frames...");
+            this.wave.orbitControls.autoRotateSpeed = originalAutoRotateSpeed;
+            this.wave.orbitControls.autoRotate = false;
+            const frameDuration = 0.05;
+            gifshot.createGIF(
+                {
+                    images: frames,
+                    gifWidth: width,
+                    gifHeight: height,
+                    numFrames: totalFrames,
+                    frameDuration,
+                    sampleInterval: REVOLUTIONS_PER_MINUTE / frameDuration,
+                    progressCallback: (progress) => {
+                        console.log(`GIF Progress: ${Math.round(progress * 100)}%`);
+                    },
+                },
+                (result) => {
+                    if (!result.error) {
+                        const { image } = result;
+                        console.log("GIF created successfully!");
+
+                        // Download the GIF
+                        const a = document.createElement("a");
+                        a.href = image;
+                        a.download = "wave-visualization.gif";
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    } else {
+                        console.error("Error creating GIF:", result.error);
+                    }
+
+                    frames.length = 0;
+                },
+            );
+        };
+
+        const animate = () => {
+            if (frameCount < totalFrames) {
+                this.wave.orbitControls.update();
+                captureFrame();
+                frameCount += 1;
+                requestAnimationFrame(animate);
+            } else {
+                createGif();
+            }
+        };
+
+        console.log("Starting GIF recording...");
+        animate();
     }
 
     reloadViewer(createBondsAsync) {
