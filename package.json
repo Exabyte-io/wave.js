@@ -45,6 +45,7 @@
         "@mui/material": "^5.11.9",
         "@mui/styles": "^5.11.7",
         "classnames": "^2.3.1",
+        "gifshot": "^0.4.5",
         "jquery": "3.6.0",
         "mixwith": "^0.1.1",
         "prop-types": "^15.8.0",
