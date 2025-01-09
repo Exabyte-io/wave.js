@@ -95,17 +95,19 @@ export class WaveComponent extends React.Component {
 
     // eslint-disable-next-line react/no-unused-class-component-methods
     startGifRecording() {
-        const REVOLUTIONS_PER_MINUTE = 60;
+        const ROTATION_SPEED = 60; // RPM
+        const frameDuration = 0.05; // seconds
+        const sampleInterval = ROTATION_SPEED * frameDuration; // seconds
         const canvas = this.wave.renderer.domElement;
         const frames = [];
         let frameCount = 0;
-        const totalFrames = REVOLUTIONS_PER_MINUTE;
+        const totalFrames = ROTATION_SPEED;
         const { width } = canvas;
         const { height } = canvas;
 
         this.wave.orbitControls.autoRotate = true;
         const originalAutoRotateSpeed = this.wave.orbitControls.autoRotateSpeed;
-        this.wave.orbitControls.autoRotateSpeed = REVOLUTIONS_PER_MINUTE;
+        this.wave.orbitControls.autoRotateSpeed = ROTATION_SPEED;
 
         const captureFrame = () => {
             this.wave.render();
@@ -117,7 +119,7 @@ export class WaveComponent extends React.Component {
             console.log("Creating GIF from frames...");
             this.wave.orbitControls.autoRotateSpeed = originalAutoRotateSpeed;
             this.wave.orbitControls.autoRotate = false;
-            const frameDuration = 0.05;
+
             gifshot.createGIF(
                 {
                     images: frames,
@@ -125,7 +127,7 @@ export class WaveComponent extends React.Component {
                     gifHeight: height,
                     numFrames: totalFrames,
                     frameDuration,
-                    sampleInterval: REVOLUTIONS_PER_MINUTE / frameDuration,
+                    sampleInterval,
                     progressCallback: (progress) => {
                         console.log(`GIF Progress: ${Math.round(progress * 100)}%`);
                     },
