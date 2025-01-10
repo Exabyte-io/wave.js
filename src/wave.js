@@ -14,6 +14,7 @@ import { ControlsMixin } from "./mixins/controls";
 import { LabelsMixin } from "./mixins/labels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
+import { createRotatingGif } from "./mixins/utils";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
 import { saveImageDataToFile } from "./utils";
@@ -336,4 +337,23 @@ export class Wave extends mix(WaveBase).with(
     doFunc(func) {
         func(this);
     } // for scripting
+
+    async takeGifScreenshot(options = {}) {
+        try {
+            const gifDataUrl = await createRotatingGif(this, options);
+
+            // Download the GIF
+            const a = document.createElement("a");
+            a.href = gifDataUrl;
+            a.download = "wave-visualization.gif";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            return gifDataUrl;
+        } catch (error) {
+            console.error("Error creating GIF:", error);
+            throw error;
+        }
+    }
 }

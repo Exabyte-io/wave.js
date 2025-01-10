@@ -684,7 +684,10 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleStartGifRecording = () => {
-        this.WaveComponent.startGifRecording(); // Call method on WaveComponent
+        this.WaveComponent.wave.takeGifScreenshot({
+            rotationSpeed: 60,
+            frameDuration: 0.05,
+        });
     };
 
     onThreejsEditorModalHide(material) {
