@@ -342,10 +342,13 @@ export class Wave extends mix(WaveBase).with(
         try {
             const gifDataUrl = await createRotatingGif(this, options);
 
+            const fileName =
+                this._structure.name || this._structure.formula || "wave-visualization";
+
             // Download the GIF
             const a = document.createElement("a");
             a.href = gifDataUrl;
-            a.download = "wave-visualization.gif";
+            a.download = `${fileName}.gif`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
