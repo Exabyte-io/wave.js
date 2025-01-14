@@ -4,7 +4,7 @@
     "description": "Web-based Atomic Viewer and Editor in JavaScript.",
     "scripts": {
         "prepublishOnly": "rm -rf dist; npm run transpile",
-        "build": "react-scripts --openssl-legacy-provider build",
+        "build": "SKIP_PREFLIGHT_CHECK=true react-scripts --openssl-legacy-provider build",
         "start": "cross-env PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts start",
         "start-20": "cross-env PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts --openssl-legacy-provider start",
         "transpile": "babel --extensions '.js,.jsx,.ts,.tsx' --out-dir dist src && cp -r src/stylesheets dist/stylesheets",
