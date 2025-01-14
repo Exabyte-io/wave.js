@@ -90,7 +90,6 @@ export function createRotatingGif(wave, options = {}) {
         const captureFrame = () => {
             wave.render();
             frames.push(canvas.toDataURL("image/png"));
-            console.log(`Captured frame ${frameCount + 1}/${totalFrames}`);
         };
 
         const createGif = () => {
@@ -107,9 +106,6 @@ export function createRotatingGif(wave, options = {}) {
                     numFrames: totalFrames,
                     frameDuration,
                     sampleInterval,
-                    progressCallback: (progress) => {
-                        console.log(`GIF Progress: ${Math.round(progress * 100)}%`);
-                    },
                 },
                 (result) => {
                     frames.length = 0; // Clear frames array
@@ -132,8 +128,6 @@ export function createRotatingGif(wave, options = {}) {
                 createGif();
             }
         };
-
-        console.log("Starting GIF recording...");
         animate();
     });
 }
