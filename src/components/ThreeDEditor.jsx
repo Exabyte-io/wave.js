@@ -599,10 +599,10 @@ export class ThreeDEditor extends React.Component {
         return [
             {
                 id: "StartGif",
-                title: "Record GIF",
-                content: "Record GIF",
+                title: "Auto Rotate GIF",
+                content: "Auto Rotate GIF",
                 leftIcon: <PictureInPicture />,
-                onClick: this.handleStartGifRecording, // New handler for recording GIF
+                onClick: this.handleStartGifRecording,
             },
             {
                 id: "Screenshot",
