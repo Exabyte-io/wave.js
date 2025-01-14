@@ -30,7 +30,7 @@
         "url": "https://github.com/Exabyte-io/wave/issues"
     },
     "license": "Apache-2.0",
-    "homepage": "https://github.com/Exabyte-io/wave",
+    "homepage": ".",
     "dependencies": {
         "@babel/cli": "7.16.0",
         "@babel/core": "7.16.0",
