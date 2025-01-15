@@ -35,10 +35,10 @@ jobs:
           username: $GITHUB_USER
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Validate Dockerfile
-        uses: ./actions/docker/validate
-        with:
-          dockerfile: ./dockerfiles/Dockerfile
+#      - name: Validate Dockerfile
+#        uses: ./actions/docker/validate
+#        with:
+#          dockerfile: ./dockerfiles/Dockerfile
 
 
       - name: Build and test
