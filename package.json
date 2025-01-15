@@ -3,12 +3,10 @@
     "version": "0.0.0",
     "description": "Web-based Atomic Viewer and Editor in JavaScript.",
     "scripts": {
-        "prepublishOnly": "rm -rf dist; npm run transpile",
         "build": "SKIP_PREFLIGHT_CHECK=true react-scripts --openssl-legacy-provider build",
         "start": "cross-env PORT=3002 SKIP_PREFLIGHT_CHECK=true react-scripts --openssl-legacy-provider start",
         "transpile": "babel --extensions '.js,.jsx,.ts,.tsx' --out-dir dist src && cp -r src/stylesheets dist/stylesheets",
         "prestart": "npm-link-shared ./node_modules/@exabyte-io/cove.js/node_modules . react",
-        "postinstall": "npm run transpile",
         "test": "npx jest",
         "lint": "eslint src tests",
         "lint:fix": "eslint --fix --cache src tests",
@@ -115,7 +113,7 @@
         "react-error-overlay": "6.0.9"
     },
     "engines": {
-        "node": ">=12.0.0"
+        "node": ">=20.0.0"
     },
     "lint-staged": {
         "*.{js,jsx}": "eslint --cache --fix",
