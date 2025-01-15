@@ -14,7 +14,7 @@ runs:
       with:
         image-name: wave
         dockerfile: ./Dockerfile
-        context: .
+        cli-args: --build-arg BASE_IMAGE=node
 
 #     - name: Push updated base container
 #       shell: bash -l {0}
