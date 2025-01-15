@@ -14,6 +14,7 @@ runs:
       with:
         image-name: wave
         dockerfile: ./dockerfiles/Dockerfile
+        context: .
 
 #     - name: Push updated base container
 #       shell: bash -l {0}
