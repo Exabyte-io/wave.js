@@ -1,70 +1,70 @@
 declare namespace _default {
-    export const atomRadiiScale: number;
-    export const repetitions: number;
-    export const chemicalConnectivityFactor: number;
-    export const defaultElement: string;
-    export const sphereRadius: number;
-    export const sphereQuality: number;
+    export let atomRadiiScale: number;
+    export let repetitions: number;
+    export let chemicalConnectivityFactor: number;
+    export let defaultElement: string;
+    export let sphereRadius: number;
+    export let sphereQuality: number;
     export { ELEMENT_COLORS as elementColors };
     export { ELEMENT_VDW_RADII as vdwRadii };
-    export const lineWidth: number;
+    export let lineWidth: number;
     export namespace lineMaterial {
-        const dashSize: number;
-        const gapSize: number;
-        const scale: number;
-        const linewidth: number;
+        let dashSize: number;
+        let gapSize: number;
+        let scale: number;
+        let linewidth: number;
     }
     export namespace colors {
-        const amber: number;
-        const gray: number;
+        let amber: number;
+        let gray: number;
     }
-    export const backgroundColor: string;
-    export const defaultColor: string;
-    export const initialCameraPosition: number[];
-    export const areLabelsInitiallyShown: boolean;
-    export const isViewAdjustable: boolean;
+    export let backgroundColor: string;
+    export let defaultColor: string;
+    export let initialCameraPosition: number[];
+    export let areLabelsInitiallyShown: boolean;
+    export let isViewAdjustable: boolean;
     export namespace labelsConfig {
-        export const areSpritesUsed: boolean;
-        export const fontFace: string;
-        export const fontSize: number;
-        export const fontWeight: string;
-        export const fillStyle: string;
-        export const strokeStyle: string;
-        const lineWidth_1: number;
+        export let areSpritesUsed: boolean;
+        export let fontFace: string;
+        export let fontSize: number;
+        export let fontWeight: string;
+        export let fillStyle: string;
+        export let strokeStyle: string;
+        let lineWidth_1: number;
         export { lineWidth_1 as lineWidth };
-        export const textAlign: string;
-        export const textBaseline: string;
+        export let textAlign: string;
+        export let textBaseline: string;
     }
     export namespace labelPointsConfig {
-        const size: number;
-        const depthTest: boolean;
-        const depthFunc: any;
-        const transparent: boolean;
+        let size: number;
+        let depthTest: boolean;
+        let depthFunc: any;
+        let transparent: boolean;
     }
     export namespace labelSpriteConfig {
-        const transparent_1: boolean;
+        let transparent_1: boolean;
         export { transparent_1 as transparent };
-        const depthFunc_1: any;
+        let depthFunc_1: any;
         export { depthFunc_1 as depthFunc };
-        const depthTest_1: boolean;
+        let depthTest_1: boolean;
         export { depthTest_1 as depthTest };
     }
     export namespace boundaryConditionTypeColors {
-        const bc1: number[];
-        const bc2: number[];
-        const bc3: number[];
+        let bc1: number[];
+        let bc2: number[];
+        let bc3: number[];
     }
     export namespace hotKeysConfig {
-        const toggleOrbitControls: string;
-        const toggleInteractive: string;
-        const toggleBonds: string;
-        const toggleConventionalCell: string;
-        const toggleLabels: string;
-        const resetViewer: string;
-        const toggleThreejsEditorModal: string;
-        const toggleDistanceShown: string;
-        const toggleAnglesShown: string;
-        const deleteConnection: string;
+        let toggleOrbitControls: string;
+        let toggleInteractive: string;
+        let toggleBonds: string;
+        let toggleConventionalCell: string;
+        let toggleLabels: string;
+        let resetViewer: string;
+        let toggleThreejsEditorModal: string;
+        let toggleDistanceShown: string;
+        let toggleAnglesShown: string;
+        let deleteConnection: string;
     }
 }
 export default _default;

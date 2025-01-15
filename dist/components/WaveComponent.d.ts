@@ -16,14 +16,14 @@ export class WaveComponent extends React.Component<any, any, any> {
 }
 export namespace WaveComponent {
     namespace propTypes {
-        const triggerHandleResize: PropTypes.Validator<boolean>;
-        const settings: PropTypes.Validator<object>;
-        const structure: PropTypes.Validator<object>;
-        const cell: PropTypes.Validator<object>;
-        const boundaryConditions: PropTypes.Validator<object>;
-        const isConventionalCellShown: PropTypes.Validator<boolean>;
-        const isDrawBondsEnabled: PropTypes.Validator<boolean>;
-        const isViewAdjustable: PropTypes.Validator<boolean>;
+        let triggerHandleResize: PropTypes.Validator<boolean>;
+        let settings: PropTypes.Validator<object>;
+        let structure: PropTypes.Validator<object>;
+        let cell: PropTypes.Validator<object>;
+        let boundaryConditions: PropTypes.Validator<object>;
+        let isConventionalCellShown: PropTypes.Validator<boolean>;
+        let isDrawBondsEnabled: PropTypes.Validator<boolean>;
+        let isViewAdjustable: PropTypes.Validator<boolean>;
     }
 }
 import React from "react";

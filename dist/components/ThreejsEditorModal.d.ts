@@ -89,7 +89,7 @@ export class ThreejsEditorModal extends ModalDialog {
 }
 export namespace ThreejsEditorModal {
     namespace propTypes {
-        const materials: PropTypes.Validator<any[]>;
+        let materials: PropTypes.Validator<any[]>;
     }
 }
 import { ModalDialog } from "./ModalDialog";
