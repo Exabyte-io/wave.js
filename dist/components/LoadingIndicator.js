@@ -1,17 +1,6 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.LoadingIndicator = void 0;
-var _CircularProgress = _interopRequireDefault(require("@mui/material/CircularProgress"));
-var _react = _interopRequireDefault(require("react"));
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
-const LoadingIndicator = exports.LoadingIndicator = function LoadingIndicator() {
-  return /*#__PURE__*/_react.default.createElement("div", {
-    className: "spinner-wrap"
-  }, /*#__PURE__*/_react.default.createElement(_CircularProgress.default, {
-    className: "spinner",
-    color: "secondary"
-  }));
+import { jsx as _jsx } from "react/jsx-runtime";
+import CircularProgress from "@mui/material/CircularProgress";
+import React from "react";
+export const LoadingIndicator = function LoadingIndicator() {
+    return (_jsx("div", { className: "spinner-wrap", children: _jsx(CircularProgress, { className: "spinner", color: "secondary" }) }));
 };

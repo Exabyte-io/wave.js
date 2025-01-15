@@ -55,7 +55,7 @@ export function ThreeDSceneDataToMaterial(scene: any): {
     getDerivedProperties(): import("@mat3ra/esse/dist/js/types").DerivedPropertiesSchema;
     readonly formula: string;
     readonly unitCellFormula: string;
-    setBasis(textOrObject: string | import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
+    setBasis(textOrObject: string | import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig, format?: string, unitz?: string): void;
     setBasisConstraints(constraints: import("@mat3ra/made/dist/js/constraints/constraints").Constraint[]): void;
     readonly basis: import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig;
     readonly Basis: import("@mat3ra/made/dist/js/basis/constrained_basis").ConstrainedBasis;
@@ -63,14 +63,14 @@ export function ThreeDSceneDataToMaterial(scene: any): {
     lattice: import("@mat3ra/made/dist/js/lattice/lattice_vectors").BravaisConfigProps | undefined;
     readonly Lattice: Made.Lattice;
     getInchiStringForHash(): string;
-    calculateHash(salt?: string | undefined, isScaled?: boolean | undefined, bypassNonPeriodicCheck?: boolean | undefined): string;
+    calculateHash(salt?: string, isScaled?: boolean, bypassNonPeriodicCheck?: boolean): string;
     hash: string;
     readonly scaledHash: string;
     toCrystal(): void;
     toCartesian(): void;
-    getBasisAsXyz(fractional?: boolean | undefined): string;
+    getBasisAsXyz(fractional?: boolean): string;
     getAsQEFormat(): string;
-    getAsPOSCAR(ignoreOriginal?: boolean | undefined, omitConstraints?: boolean | undefined): string;
+    getAsPOSCAR(ignoreOriginal?: boolean, omitConstraints?: boolean): string;
     getACopyWithConventionalCell(): any;
     getConsistencyChecks(): import("@mat3ra/esse/dist/js/types").ConsistencyCheck[];
     getBasisConsistencyChecks(): import("@mat3ra/esse/dist/js/types").ConsistencyCheck[];
@@ -117,8 +117,8 @@ export function ThreeDSceneDataToMaterial(scene: any): {
     consistencyChecks: object[];
     addConsistencyChecks(array: object[]): void;
     _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-    prop<T_7 = undefined>(name: string, defaultValue: T_7): T_7;
-    prop<T_1_4 = undefined>(name: string): T_1_4 | undefined;
+    prop<T = undefined>(name: string, defaultValue: T): T;
+    prop<T_1 = undefined>(name: string): T_1 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
     setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;
@@ -140,8 +140,8 @@ export function ThreeDSceneDataToMaterial(scene: any): {
     metadata: object;
     updateMetadata(object: object): void;
     _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-    prop<T_2_1 = undefined>(name: string, defaultValue: T_2_1): T_2_1;
-    prop<T_1_1_1 = undefined>(name: string): T_1_1_1 | undefined;
+    prop<T_2 = undefined>(name: string, defaultValue: T_2): T_2;
+    prop<T_1_1 = undefined>(name: string): T_1_1 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
     setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;
@@ -163,8 +163,8 @@ export function ThreeDSceneDataToMaterial(scene: any): {
     name: string;
     setName(name: string): void;
     _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-    prop<T_3_1 = undefined>(name: string, defaultValue: T_3_1): T_3_1;
-    prop<T_1_2_1 = undefined>(name: string): T_1_2_1 | undefined;
+    prop<T_3 = undefined>(name: string, defaultValue: T_3): T_3;
+    prop<T_1_2 = undefined>(name: string): T_1_2 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
     setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;
@@ -185,8 +185,8 @@ export function ThreeDSceneDataToMaterial(scene: any): {
 } & {
     readonly isDefault: boolean;
     _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-    prop<T_4_1 = undefined>(name: string, defaultValue: T_4_1): T_4_1;
-    prop<T_1_3_1 = undefined>(name: string): T_1_3_1 | undefined;
+    prop<T_4 = undefined>(name: string, defaultValue: T_4): T_4;
+    prop<T_1_3 = undefined>(name: string): T_1_3 | undefined;
     setProp(name: string, value: unknown): void;
     unsetProp(name: string): void;
     setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;

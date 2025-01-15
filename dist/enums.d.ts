@@ -11,6 +11,6 @@ export const MEASUREMENT_LABELS_GROUP_NAME: "Measure_Labels";
 export const ANGLE: "ANGLE";
 export const LABELS_GROUP_NAME: "Labels_Group";
 export namespace COLORS {
-    const RED: number;
-    const GREEN: number;
+    let RED: number;
+    let GREEN: number;
 }

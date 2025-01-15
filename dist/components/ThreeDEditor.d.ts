@@ -230,7 +230,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
 }
 export namespace ThreeDEditor {
     namespace propTypes {
-        const material: PropTypes.Validator<NonNullable<{
+        let material: PropTypes.Validator<NonNullable<{
             _json: import("@mat3ra/made/dist/js/material").MaterialSchemaJSON;
             toJSON(): import("@mat3ra/made/dist/js/types").MaterialJSON;
             src: import("@mat3ra/esse/dist/js/types").FileSourceSchema;
@@ -270,7 +270,7 @@ export namespace ThreeDEditor {
             getDerivedProperties(): import("@mat3ra/esse/dist/js/types").DerivedPropertiesSchema;
             readonly formula: string;
             readonly unitCellFormula: string;
-            setBasis(textOrObject: string | import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
+            setBasis(textOrObject: string | import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig, format?: string, unitz?: string): void;
             setBasisConstraints(constraints: import("@mat3ra/made/dist/js/constraints/constraints").Constraint[]): void;
             readonly basis: import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig;
             readonly Basis: import("@mat3ra/made/dist/js/basis/constrained_basis").ConstrainedBasis;
@@ -278,14 +278,14 @@ export namespace ThreeDEditor {
             lattice: import("@mat3ra/made/dist/js/lattice/lattice_vectors").BravaisConfigProps | undefined;
             readonly Lattice: Made.Lattice;
             getInchiStringForHash(): string;
-            calculateHash(salt?: string | undefined, isScaled?: boolean | undefined, bypassNonPeriodicCheck?: boolean | undefined): string;
+            calculateHash(salt?: string, isScaled?: boolean, bypassNonPeriodicCheck?: boolean): string;
             hash: string;
             readonly scaledHash: string;
             toCrystal(): void;
             toCartesian(): void;
-            getBasisAsXyz(fractional?: boolean | undefined): string;
+            getBasisAsXyz(fractional?: boolean): string;
             getAsQEFormat(): string;
-            getAsPOSCAR(ignoreOriginal?: boolean | undefined, omitConstraints?: boolean | undefined): string;
+            getAsPOSCAR(ignoreOriginal?: boolean, omitConstraints?: boolean): string;
             getACopyWithConventionalCell(): any;
             getConsistencyChecks(): import("@mat3ra/esse/dist/js/types").ConsistencyCheck[];
             getBasisConsistencyChecks(): import("@mat3ra/esse/dist/js/types").ConsistencyCheck[];
@@ -332,8 +332,8 @@ export namespace ThreeDEditor {
             consistencyChecks: object[];
             addConsistencyChecks(array: object[]): void;
             _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            prop<T_7 = undefined>(name: string, defaultValue: T_7): T_7;
-            prop<T_1_4 = undefined>(name: string): T_1_4 | undefined;
+            prop<T = undefined>(name: string, defaultValue: T): T;
+            prop<T_1 = undefined>(name: string): T_1 | undefined;
             setProp(name: string, value: unknown): void;
             unsetProp(name: string): void;
             setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;
@@ -355,8 +355,8 @@ export namespace ThreeDEditor {
             metadata: object;
             updateMetadata(object: object): void;
             _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            prop<T_2_1 = undefined>(name: string, defaultValue: T_2_1): T_2_1;
-            prop<T_1_1_1 = undefined>(name: string): T_1_1_1 | undefined;
+            prop<T_2 = undefined>(name: string, defaultValue: T_2): T_2;
+            prop<T_1_1 = undefined>(name: string): T_1_1 | undefined;
             setProp(name: string, value: unknown): void;
             unsetProp(name: string): void;
             setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;
@@ -378,8 +378,8 @@ export namespace ThreeDEditor {
             name: string;
             setName(name: string): void;
             _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            prop<T_3_1 = undefined>(name: string, defaultValue: T_3_1): T_3_1;
-            prop<T_1_2_1 = undefined>(name: string): T_1_2_1 | undefined;
+            prop<T_3 = undefined>(name: string, defaultValue: T_3): T_3;
+            prop<T_1_2 = undefined>(name: string): T_1_2 | undefined;
             setProp(name: string, value: unknown): void;
             unsetProp(name: string): void;
             setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;
@@ -400,8 +400,8 @@ export namespace ThreeDEditor {
         } & {
             readonly isDefault: boolean;
             _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            prop<T_4_1 = undefined>(name: string, defaultValue: T_4_1): T_4_1;
-            prop<T_1_3_1 = undefined>(name: string): T_1_3_1 | undefined;
+            prop<T_4 = undefined>(name: string, defaultValue: T_4): T_4;
+            prop<T_1_3 = undefined>(name: string): T_1_3 | undefined;
             setProp(name: string, value: unknown): void;
             unsetProp(name: string): void;
             setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;
@@ -420,19 +420,19 @@ export namespace ThreeDEditor {
             getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
             getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
         } & import("@mat3ra/code/dist/js/entity").InMemoryEntity>>;
-        const editable: PropTypes.Requireable<boolean>;
-        const isConventionalCellShown: PropTypes.Requireable<boolean>;
-        const boundaryConditions: PropTypes.Requireable<object>;
-        const onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
+        let editable: PropTypes.Requireable<boolean>;
+        let isConventionalCellShown: PropTypes.Requireable<boolean>;
+        let boundaryConditions: PropTypes.Requireable<object>;
+        let onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
     }
     namespace defaultProps {
-        const boundaryConditions_1: {};
+        let boundaryConditions_1: {};
         export { boundaryConditions_1 as boundaryConditions };
-        const isConventionalCellShown_1: boolean;
+        let isConventionalCellShown_1: boolean;
         export { isConventionalCellShown_1 as isConventionalCellShown };
-        const onUpdate_1: undefined;
+        let onUpdate_1: undefined;
         export { onUpdate_1 as onUpdate };
-        const editable_1: boolean;
+        let editable_1: boolean;
         export { editable_1 as editable };
     }
 }
