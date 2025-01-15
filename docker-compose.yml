@@ -3,7 +3,7 @@ services:
     image: wave:${IMAGE_TAG}
     build:
       context: .
-      dockerfile: ./dockerfiles/Dockerfile
+      dockerfile: ./Dockerfile
     ports:
       - 3002:3002
 

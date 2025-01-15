@@ -13,7 +13,7 @@ runs:
       uses: ./actions/docker/build
       with:
         image-name: wave
-        dockerfile: ./dockerfiles/Dockerfile
+        dockerfile: ./Dockerfile
         context: .
 
 #     - name: Push updated base container

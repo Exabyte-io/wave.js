@@ -38,7 +38,7 @@ jobs:
 #      - name: Validate Dockerfile
 #        uses: ./actions/docker/validate
 #        with:
-#          dockerfile: ./dockerfiles/Dockerfile
+#          dockerfile: ./Dockerfile
 
 
       - name: Build and test
