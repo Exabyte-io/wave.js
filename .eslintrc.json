@@ -1,5 +1,6 @@
 {
-    "extends": ["@exabyte-io/eslint-config"],    "extends": ["@exabyte-io/eslint-config"],
+    "extends": ["@exabyte-io/eslint-config"],
+    "ignorePatterns": ["dist/"],
     "settings": {
         "import/resolver": {
             "node": {
@@ -9,5 +10,9 @@
     },
     "globals": {
         "jest": "readonly"
+    },
+    "rules": {
+        // To avoid "Missing return type on function"
+        "@typescript-eslint/explicit-module-boundary-types": "off"
     }
 }

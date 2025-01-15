@@ -9,28 +9,24 @@ runs:
       with:
         key: docker-${{ runner.os }}-${{ hashFiles('package.json') }}
 
-    # - name: Build base image
-    #   uses: ./actions/docker/build
-    #   with:
-    #     image-name: ghcr.io/exabyte-io/centos-7.9-base-materials-designer
-    #     dockerfile: ./dockerfiles/centos/Dockerfile
-    # - name: Push updated base container
-    #   shell: bash -l {0}
-    #   run: |
-    #     docker push ghcr.io/exabyte-io/centos-7.9-base-materials-designer:latest
-
-    - name: Pull updated base container
-      shell: bash -l {0}
-      run: |
-        docker pull ghcr.io/exabyte-io/centos-7.9-base-materials-designer:latest
-
-    - name: Build app container
+    - name: Build image
       uses: ./actions/docker/build
       with:
-        image-name: wave-test
-        dockerfile: ./dockerfiles/app/Dockerfile
-        cli-args: --build-arg BASE_IMAGE=ghcr.io/exabyte-io/centos-7.9-base-materials-designer
+        image-name: wave
+        dockerfile: ./Dockerfile
+        # On 2025-01-14, the action fails without cli-args
+        cli-args: --build-arg BASE_IMAGE=node
+
+#     - name: Push updated base container
+#       shell: bash -l {0}
+#       run: |
+#         docker push ghcr.io/exabyte-io/centos-7.9-base-materials-designer:latest
+
+#    - name: Pull updated base container
+#      shell: bash -l {0}
+#      run: |
+#        docker pull ghcr.io/exabyte-io/centos-7.9-base-materials-designer:latest
 
     - name: Run tests
       shell: bash -l {0}
-      run: docker run --env REACT_APP_BASE_OS=centos wave-test:latest test
+      run: docker run wave:latest test

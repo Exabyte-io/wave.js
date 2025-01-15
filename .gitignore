@@ -1,7 +1,7 @@
-dist/
 build/
 node_modules/
 .eslintcache
 .nyc_output/
 tests/coverage/
 .idea
+.DS_Store
