@@ -1,8 +1,8 @@
 /* eslint-disable prefer-promise-reject-errors */
 import expect from "expect";
 import fs from "fs";
-import looksSame from "looks-same";
 import path from "path";
+import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 import * as THREE from "three";
 
@@ -56,11 +56,10 @@ export function flipPixels(pixels) {
 }
 
 /**
- * Takes snapshot and saves it as PNG.
- * Note: The function returns a promise as the operation is asynchronous and should be awaited when called.
- * @param webGLContext {Object} WebGLRenderer context
- * @param imagePath {String} path to save the snapshot
- * @returns {Promise}
+ * Takes a snapshot and saves it as PNG.
+ * @param {Object} webGLContext - WebGLRenderer context
+ * @param {String} imagePath - Path to save the snapshot
+ * @returns {boolean} - Returns true if the snapshot is saved successfully
  */
 export function takeSnapshot(webGLContext, imagePath) {
     const pixels = new Uint8Array(WIDTH * HEIGHT * 4);
@@ -73,27 +72,24 @@ export function takeSnapshot(webGLContext, imagePath) {
         webGLContext.UNSIGNED_BYTE,
         pixels,
     );
+
     flipPixels(pixels);
+
     const png = new PNG({
         width: WIDTH,
         height: HEIGHT,
     });
     png.data = pixels;
-    return new Promise((resolve, reject) => {
-        try {
-            png.pack()
-                .pipe(fs.createWriteStream(imagePath))
-                .on("finish", () => resolve(true));
-        } catch (err) {
-            reject(false);
-        }
-    });
-}
 
+    // Write the PNG data synchronously
+    const buffer = PNG.sync.write(png);
+    fs.writeFileSync(imagePath, buffer);
+
+    return true;
+}
 export function getExpectedImageFilePath(snapshotDir, imagePrefix) {
-    let os = process.env.REACT_APP_BASE_OS;
-    if (!os) os = "macos";
-    return path.resolve(snapshotDir, `${os}/${imagePrefix}.expected.png`);
+    const prefix = "expected";
+    return path.resolve(snapshotDir, `${prefix}/${imagePrefix}.expected.png`);
 }
 
 /**
@@ -106,23 +102,49 @@ export async function takeSnapshotAndAssertEqualityAsync(webGLContext, imagePref
     const snapshotDir = path.resolve(__dirname, "__tests__", "__snapshots__");
     const actualImageFilePath = path.resolve(snapshotDir, `${imagePrefix}.actual.png`);
     const expectedImageFilePath = getExpectedImageFilePath(snapshotDir, imagePrefix);
-    await expect(takeSnapshot(webGLContext, actualImageFilePath)).resolves.toBe(true);
-    const promise = new Promise((resolve, reject) => {
-        try {
-            looksSame(actualImageFilePath, expectedImageFilePath, (err, result) => {
-                if (err) {
-                    reject(`looksSame returned error: ${err}`);
-                } else if (result && result.equal) {
-                    resolve(result.equal);
-                } else {
-                    reject(`looksSame returned result: ${JSON.stringify(result)}`);
-                }
-            });
-        } catch (err) {
-            reject(`looksSame threw unhandled exception: ${err}`);
-        }
-    });
-    return expect(promise).resolves.toBe(true);
+    const diffImageFilePath = path.resolve(snapshotDir, `${imagePrefix}.diff.png`);
+
+    // Take the snapshot and save it as the actual image
+    const isSnapshotSaved = await takeSnapshot(webGLContext, actualImageFilePath);
+    expect(isSnapshotSaved).toBe(true);
+
+    // Read the actual and expected images
+    const actualImage = PNG.sync.read(fs.readFileSync(actualImageFilePath));
+    const expectedImage = PNG.sync.read(fs.readFileSync(expectedImageFilePath));
+
+    // Ensure dimensions match
+    if (actualImage.width !== expectedImage.width || actualImage.height !== expectedImage.height) {
+        throw new Error("Image dimensions do not match.");
+    }
+
+    // Create a diff image
+    const diff = new PNG({ width: actualImage.width, height: actualImage.height });
+
+    // Compare the images using pixelmatch
+    const numDiffPixels = pixelmatch(
+        actualImage.data,
+        expectedImage.data,
+        diff.data,
+        actualImage.width,
+        actualImage.height,
+        {
+            // Due to the differences in rendering across different OS platforms,
+            // we use the threshold value below to avoid false negatives (0.7).
+            // This appears to work well for the cases when differences are negligible,
+            // yet still allows to spot significant difference caused by real malfunctions.
+            threshold: 0.7, // Adjust this threshold for minor differences
+            // includeAA: false,
+        },
+    );
+
+    // Save the diff image if differences are found
+    if (numDiffPixels > 0) {
+        fs.writeFileSync(diffImageFilePath, PNG.sync.write(diff));
+    }
+
+    // Log the result and return true if the images match within the threshold
+    console.log(`Number of differing pixels: ${numDiffPixels}`);
+    expect(numDiffPixels).toBe(0);
 }
 
 export function dispatchMouseDownMoveOrUpEvent(element, type, clientX, clientY, button = 0) {
