@@ -4,7 +4,7 @@ basedir=tests/__tests__/__snapshots__
 expected=.expected.png
 actual=.actual.png
 save=.save.png
-app=${REACT_APP_BASE_OS:-macos}
+app=${REACT_APP_BASE_OS:-""}
 appdir=${basedir}/${app}
 
 if [[ "$1" == "forward" ]]; then
@@ -15,7 +15,7 @@ if [[ "$1" == "forward" ]]; then
         echo "cp ${appdir}/${basename} ${appdir}/${rootname}${save}"
         cp ${appdir}/${basename} ${appdir}/${rootname}${save}
     done
-    
+
     echo "Copying actual images to expected (if they exist)"
     for fl in `ls ${basedir}/*${actual}`; do
         basename=${fl/${basedir}\//}
