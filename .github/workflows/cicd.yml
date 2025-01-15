@@ -10,7 +10,7 @@ concurrency:
 jobs:
 
   run-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout this repository
@@ -35,6 +35,7 @@ jobs:
           username: $GITHUB_USER
           password: ${{ secrets.GITHUB_TOKEN }}
 
+# Re-enable this step when the action is passing
 #      - name: Validate Dockerfile
 #        uses: ./actions/docker/validate
 #        with:
@@ -54,7 +55,7 @@ jobs:
 
 
   publish:
-    # needs: run-tests
+    needs: run-tests
     runs-on: ubuntu-latest
     if: github.ref_name == 'dev'
 
