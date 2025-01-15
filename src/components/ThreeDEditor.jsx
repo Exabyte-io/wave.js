@@ -115,12 +115,14 @@ export class ThreeDEditor extends React.Component {
 
     componentDidMount() {
         this.addHotKeyListener();
+        window.addEventListener("message", this.handleMaterialMessage);
     }
 
     componentWillUnmount() {
         this.handleResetMeasurements();
         this.WaveComponent.wave.destroyListeners();
         this.removeHotKeyListener();
+        window.removeEventListener("message", this.handleMaterialMessage);
     }
 
     // TODO: update component to fully controlled or fully uncontrolled with a key?
@@ -749,6 +751,28 @@ export class ThreeDEditor extends React.Component {
             </ThemeProvider>
         );
     }
+
+    handleMaterialMessage = (event) => {
+        if (event.data && event.data.material) {
+            try {
+                const newMaterial = new Made.Material(event.data.material);
+                this.setState(
+                    {
+                        originalMaterial: newMaterial,
+                        material: newMaterial.clone(),
+                    },
+                    () => {
+                        // Force Wave component to update after state change
+                        if (this.WaveComponent) {
+                            this.WaveComponent.reloadViewer(true);
+                        }
+                    },
+                );
+            } catch (error) {
+                alert("Error creating material: " + error.message);
+            }
+        }
+    };
 }
 
 ThreeDEditor.propTypes = {
