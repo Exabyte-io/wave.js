@@ -102,7 +102,7 @@ jobs:
       - name: Build
         shell: bash -l {0}
         run: |
-          npm run build
+          npm install --legacy-peer-deps && npm run build
 
       - name: Deploy Build
         uses: peaceiris/actions-gh-pages@v3
