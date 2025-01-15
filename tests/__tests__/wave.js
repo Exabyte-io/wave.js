@@ -15,7 +15,11 @@ test("atomRadiiScale", async () => {
 
 test("atomRepetitions", async () => {
     const wave = getWaveInstance();
-    wave.updateSettings({ repetitions: 2 });
+    wave.updateSettings({
+        repetitionsAlongLatticeVectorA: 2,
+        repetitionsAlongLatticeVectorB: 2,
+        repetitionsAlongLatticeVectorC: 2,
+    });
     wave.rebuildScene();
     return takeSnapshotAndAssertEqualityAsync(wave.renderer.getContext(), "atomRepetitions");
 });

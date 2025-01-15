@@ -82,23 +82,18 @@ This is admittedly a bit fragile, and future work may improve the test coverage 
 is no longer necessary. React component tests use Enzyme [[4]](#links) that makes DOM manipulation
 and traversal easier.
 
-Since snapshots may be slightly different depending on operating systems, they are versioned by
-the operating system on which they were generated. We currently support `macos`, `ubuntu`, and
-`centos`. This can be picked up in a test run by setting `REACT_APP_BASE_OS=(current OS)` and are
-tested both on `ubuntu` (on branches) and `centos` (on dev) in CI. A `docker-compose.yml` is provided
-for convenience which defaults to using `ubuntu` (see `.env`) so that there are 3 options for running
-tests:
+Note that snapshots may be slightly different depending on operating systems leading to comparison with a tolerance. 
+A `docker-compose.yml` is provided for convenience. To run the tests, execute the following commands:
 
 ```bash
-# In an ubuntu container
+
 docker-compose build
 docker-compose run test
 
-# OR in a centos container
-BASE_OS=centos docker-compose build
-BASE_OS=centos docker-compose run test
+or directly, on a host:
 
-# OR if you're on a mac
+```bash
+
 npm install
 npm test
 ```
