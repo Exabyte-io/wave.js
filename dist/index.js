@@ -14,3 +14,10 @@ window.threeDEditor = _reactDom.default.render(/*#__PURE__*/_react.default.creat
   editable: true,
   material: material
 }), domElement);
+window.renderThreeDEditor = (materialConfig, newDomElement) => {
+  const currentMaterial = new _made.Made.Material(materialConfig);
+  _reactDom.default.render(/*#__PURE__*/_react.default.createElement(_ThreeDEditor.ThreeDEditor, {
+    editable: true,
+    material: currentMaterial
+  }), newDomElement);
+};
