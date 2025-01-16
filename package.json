@@ -107,8 +107,7 @@
         "vite": "^6.0.7",
         "vite-plugin-commonjs": "^0.10.4",
         "vite-plugin-svgr": "^4.3.0",
-        "vite-tsconfig-paths": "^5.1.4",
-        "vitest": "^2.1.8"
+        "vite-tsconfig-paths": "^5.1.4"
     },
     "resolutions": {
         "react-error-overlay": "6.0.9"
