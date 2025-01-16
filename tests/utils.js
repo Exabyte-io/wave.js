@@ -142,8 +142,6 @@ export async function takeSnapshotAndAssertEqualityAsync(webGLContext, imagePref
         fs.writeFileSync(diffImageFilePath, PNG.sync.write(diff));
     }
 
-    // Log the result and return true if the images match within the threshold
-    console.log(`Number of differing pixels: ${numDiffPixels}`);
     expect(numDiffPixels).toBe(0);
 }
 
