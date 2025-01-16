@@ -84,6 +84,7 @@
         "eslint-plugin-jsx-a11y": "6.5.1",
         "eslint-plugin-mui-path-imports": "0.0.15",
         "eslint-plugin-prettier": "^4.2.1",
+        "eslint-plugin-react": "^7.37.4",
         "eslint-plugin-simple-import-sort": "7.0.0",
         "expect": "27.4.2",
         "gl": "^8.1.6",
