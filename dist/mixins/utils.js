@@ -4,9 +4,12 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.UtilsMixin = exports.ApplyGlow = void 0;
+exports.createRotatingGif = createRotatingGif;
+var _gifshot = _interopRequireDefault(require("gifshot"));
 var THREE = _interopRequireWildcard(require("three"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 const UtilsMixin = superclass => class extends superclass {
   // toggles a boolean variable and optionally sets all variables in the antagonists array to the opposite value
   toggleBoolean(name, antagonistNames = []) {
@@ -69,3 +72,64 @@ const ApplyGlow = (meshObjet, baseColor, offset = 0) => {
   }
 };
 exports.ApplyGlow = ApplyGlow;
+function createRotatingGif(wave, options = {}) {
+  const ROTATION_SPEED = options.rotationSpeed || 60; // RPM
+  const frameDuration = options.frameDuration || 0.05; // seconds
+  const sampleInterval = ROTATION_SPEED * frameDuration;
+  const canvas = wave.renderer.domElement;
+  const frames = [];
+  let frameCount = 0;
+  const totalFrames = ROTATION_SPEED;
+  const {
+    width
+  } = canvas;
+  const {
+    height
+  } = canvas;
+
+  // Store original auto-rotate settings
+  const wasAutoRotating = wave.orbitControls.autoRotate;
+  const originalSpeed = wave.orbitControls.autoRotateSpeed;
+
+  // Enable rotation
+  wave.orbitControls.autoRotate = true;
+  wave.orbitControls.autoRotateSpeed = ROTATION_SPEED;
+  return new Promise((resolve, reject) => {
+    const captureFrame = () => {
+      wave.render();
+      frames.push(canvas.toDataURL("image/png"));
+    };
+    const createGif = () => {
+      console.log("Creating GIF from frames...");
+      // Restore original rotation settings
+      wave.orbitControls.autoRotateSpeed = originalSpeed;
+      wave.orbitControls.autoRotate = wasAutoRotating;
+      _gifshot.default.createGIF({
+        images: frames,
+        gifWidth: width,
+        gifHeight: height,
+        numFrames: totalFrames,
+        frameDuration,
+        sampleInterval
+      }, result => {
+        frames.length = 0; // Clear frames array
+        if (!result.error) {
+          resolve(result.image);
+        } else {
+          reject(new Error(result.error));
+        }
+      });
+    };
+    const animate = () => {
+      if (frameCount < totalFrames) {
+        wave.orbitControls.update();
+        captureFrame();
+        frameCount += 1;
+        requestAnimationFrame(animate);
+      } else {
+        createGif();
+      }
+    };
+    animate();
+  });
+}

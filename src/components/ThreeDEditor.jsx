@@ -111,18 +111,20 @@ export class ThreeDEditor extends React.Component {
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
+        this.handleMessage = this.handleMessage.bind(this);
+        this.doWaveFunc = this.doWaveFunc.bind(this);
     }
 
     componentDidMount() {
         this.addHotKeyListener();
-        window.addEventListener("message", this.handleMaterialMessage);
+        window.addEventListener("message", this.handleMessage);
     }
 
     componentWillUnmount() {
         this.handleResetMeasurements();
         this.WaveComponent.wave.destroyListeners();
         this.removeHotKeyListener();
-        window.removeEventListener("message", this.handleMaterialMessage);
+        window.removeEventListener("message", this.handleMessage);
     }
 
     // TODO: update component to fully controlled or fully uncontrolled with a key?
@@ -685,11 +687,16 @@ export class ThreeDEditor extends React.Component {
         return toolbarConfig;
     }
 
-    handleStartGifRecording = () => {
-        this.WaveComponent.wave.takeGifScreenshot({
-            rotationSpeed: 60,
-            frameDuration: 0.05,
-        });
+    handleStartGifRecording = (downloadPath, rotationSpeed = 60, frameDuration = 0.05) => {
+        this.WaveComponent.wave
+            .takeGifScreenshot({
+                rotationSpeed,
+                frameDuration,
+                downloadPath,
+            })
+            .then((result) => {
+                console.log("Recorded gif", result);
+            });
     };
 
     onThreejsEditorModalHide(material) {
@@ -752,7 +759,7 @@ export class ThreeDEditor extends React.Component {
         );
     }
 
-    handleMaterialMessage = (event) => {
+    handleMessage = (event) => {
         if (event.data && event.data.material) {
             try {
                 const newMaterial = new Made.Material(event.data.material);
@@ -764,22 +771,28 @@ export class ThreeDEditor extends React.Component {
                     () => {
                         // Force Wave component to update after state change
                         if (this.WaveComponent) {
-                            this.WaveComponent.reloadViewer(true);
+                            this.WaveComponent.wave.rebuildScene();
                         }
                     },
                 );
             } catch (error) {
                 alert("Error creating material: " + error.message);
             }
+        } else if (event.data && event.data.action && this[event.data.action]) {
+            const { action, parameters } = event.data;
+            this[action](...parameters);
         }
     };
+
+    doWaveFunc(func, ...args) {
+        this.WaveComponent.wave[func](...args);
+    }
 }
 
 ThreeDEditor.propTypes = {
     material: PropTypes.instanceOf(Made.Material).isRequired,
     editable: PropTypes.bool,
-    isConventionalCellShown: PropTypes.bool,
-    // eslint-disable-next-line react/forbid-prop-types
+    isConventionalCellShown: PropTypes.bool, // eslint-disable-next-line react/forbid-prop-types
     boundaryConditions: PropTypes.object,
     onUpdate: PropTypes.func,
 };

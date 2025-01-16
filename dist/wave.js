@@ -16,8 +16,9 @@ var _controls = require("./mixins/controls");
 var _labels = require("./mixins/labels");
 var _measurement = require("./mixins/measurement");
 var _repetition = require("./mixins/repetition");
+var _utils = require("./mixins/utils");
 var _settings = _interopRequireDefault(require("./settings"));
-var _utils = require("./utils");
+var _utils2 = require("./utils");
 function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
@@ -243,7 +244,7 @@ class Wave extends (0, _mixwith.mix)(WaveBase).with(_atoms.AtomsMixin, _bonds.Bo
     this.doFunc = this.doFunc.bind(this);
   }
   takeScreenshot() {
-    (0, _utils.saveImageDataToFile)(this.renderer.domElement.toDataURL("image/png"));
+    (0, _utils2.saveImageDataToFile)(this.renderer.domElement.toDataURL("image/png"));
   }
   clearView() {
     while (this.structureGroup.children.length) {
@@ -310,5 +311,27 @@ class Wave extends (0, _mixwith.mix)(WaveBase).with(_atoms.AtomsMixin, _bonds.Bo
   doFunc(func) {
     func(this);
   } // for scripting
+
+  async takeGifScreenshot(options = {}) {
+    try {
+      const gifDataUrl = await (0, _utils.createRotatingGif)(this, options);
+
+      // Use custom filename from options or fall back to default
+      const fileName = options.downloadPath ? options.downloadPath.split("/").pop() // Extract filename from path
+      : (this._structure.name || this._structure.formula || "wave-visualization") + ".gif";
+
+      // Download the GIF
+      const a = document.createElement("a");
+      a.href = gifDataUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return gifDataUrl;
+    } catch (error) {
+      console.error("Error creating GIF:", error);
+      throw error;
+    }
+  }
 }
 exports.Wave = Wave;

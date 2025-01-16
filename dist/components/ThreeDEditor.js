@@ -237,6 +237,12 @@ class ThreeDEditor extends _react.default.Component {
         onClick: () => this.handleDownloadClick("poscar")
       }];
       return [{
+        id: "StartGif",
+        title: "Auto Rotate GIF",
+        content: "Auto Rotate GIF",
+        leftIcon: /*#__PURE__*/_react.default.createElement(_PictureInPicture.default, null),
+        onClick: this.handleStartGifRecording
+      }, {
         id: "Screenshot",
         title: "Screenshot",
         content: "Screenshot",
@@ -261,6 +267,39 @@ class ThreeDEditor extends _react.default.Component {
         handleCellRepetitionsChange: this.handleCellRepetitionsChange,
         handleChemicalConnectivityFactorChange: this.handleChemicalConnectivityFactorChange
       });
+    });
+    _defineProperty(this, "handleStartGifRecording", (downloadPath, rotationSpeed = 60, frameDuration = 0.05) => {
+      this.WaveComponent.wave.takeGifScreenshot({
+        rotationSpeed,
+        frameDuration,
+        downloadPath
+      }).then(result => {
+        console.log("Recorded gif", result);
+      });
+    });
+    _defineProperty(this, "handleMessage", event => {
+      if (event.data && event.data.material) {
+        try {
+          const newMaterial = new _made.Made.Material(event.data.material);
+          this.setState({
+            originalMaterial: newMaterial,
+            material: newMaterial.clone()
+          }, () => {
+            // Force Wave component to update after state change
+            if (this.WaveComponent) {
+              this.WaveComponent.wave.rebuildScene();
+            }
+          });
+        } catch (error) {
+          alert("Error creating material: " + error.message);
+        }
+      } else if (event.data && event.data.action && this[event.data.action]) {
+        const {
+          action,
+          parameters
+        } = event.data;
+        this[action](...parameters);
+      }
     });
     const {
       boundaryConditions,
@@ -327,14 +366,19 @@ class ThreeDEditor extends _react.default.Component {
     this.onMeasurementParam = this.onMeasurementParam.bind(this);
     this.addHotKeyListener = this.addHotKeyListener.bind(this);
     this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
+    this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
+    this.handleMessage = this.handleMessage.bind(this);
+    this.doWaveFunc = this.doWaveFunc.bind(this);
   }
   componentDidMount() {
     this.addHotKeyListener();
+    window.addEventListener("message", this.handleMessage);
   }
   componentWillUnmount() {
     this.handleResetMeasurements();
     this.WaveComponent.wave.destroyListeners();
     this.removeHotKeyListener();
+    window.removeEventListener("message", this.handleMessage);
   }
 
   // TODO: update component to fully controlled or fully uncontrolled with a key?
@@ -745,6 +789,9 @@ class ThreeDEditor extends _react.default.Component {
     }, /*#__PURE__*/_react.default.createElement(_ScopedCssBaseline.default, {
       enableColorScheme: true
     }, this.renderWaveOrThreejsEditorModal()));
+  }
+  doWaveFunc(func, ...args) {
+    this.WaveComponent.wave[func](...args);
   }
 }
 exports.ThreeDEditor = ThreeDEditor;
