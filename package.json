@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "description": "Web-based Atomic Viewer and Editor in JavaScript.",
     "scripts": {
-        "build": "npm run transpile && vite build --config vite.config.ts",
+        "build": "npm run transpile && vite build",
         "start": "vite",
         "transpile": "tsc && npm run copy-css",
         "copy-css": "mkdir -p dist/stylesheets && cp src/stylesheets/* dist/stylesheets/",
