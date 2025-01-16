@@ -791,14 +791,27 @@ class ThreeDEditor extends _react.default.Component {
       enableColorScheme: true
     }, this.renderWaveOrThreejsEditorModal()));
   }
-  handleSetCameraToFitCell() {
-    alert("Setting camera to fit cell"); // eslint-disable-line no-alert
-    this.WaveComponent.wave.adjustCamerasAndOrbitControlsToCell();
+  doWaveFunc(funcStr) {
+    if (!this.WaveComponent || !this.WaveComponent.wave) {
+      console.error("Wave component not initialized");
+      return;
+    }
+    const {
+      wave
+    } = this.WaveComponent;
+    try {
+      // eslint-disable-next-line no-new-func
+      const func = new Function("wave", `return wave.${funcStr}`);
+      func(wave);
+      wave.render();
+    } catch (error) {
+      alert("Error executing wave function: " + error.message);
+      console.error("Error executing wave function:", error);
+    }
   }
-  doWaveFunc(func_str) {
-    alert("Executing function: " + func_str); // eslint-disable-line no-alert
-    const func = eval(func_str); // eslint-disable-line no-eval
-    this.WaveComponent.wave.doFunc(func);
+  handleSetCameraToFitCell() {
+    this.WaveComponent.wave.adjustCamerasAndOrbitControlsToCell();
+    this.WaveComponent.wave.rebuildScene();
   }
 }
 exports.ThreeDEditor = ThreeDEditor;
