@@ -68,6 +68,7 @@ class WaveBase {
     this.setupLights();
     this.handleResize = this.handleResize.bind(this);
     this.setBackground = this.setBackground.bind(this);
+    this.doFunc = this.doFunc.bind(this);
   }
   updateSettings(settings) {
     this.settings = {

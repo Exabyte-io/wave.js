@@ -113,6 +113,7 @@ export class ThreeDEditor extends React.Component {
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
         this.handleMessage = this.handleMessage.bind(this);
         this.doWaveFunc = this.doWaveFunc.bind(this);
+        this.handleSetCameraToFitCell = this.handleSetCameraToFitCell.bind(this);
     }
 
     componentDidMount() {
@@ -784,8 +785,15 @@ export class ThreeDEditor extends React.Component {
         }
     };
 
-    doWaveFunc(func, ...args) {
-        this.WaveComponent.wave[func](...args);
+    handleSetCameraToFitCell() {
+        alert("Setting camera to fit cell"); // eslint-disable-line no-alert
+        this.WaveComponent.wave.adjustCamerasAndOrbitControlsToCell();
+    }
+
+    doWaveFunc(func_str) {
+        alert("Executing function: " + func_str); // eslint-disable-line no-alert
+        const func = eval(func_str); // eslint-disable-line no-eval
+        this.WaveComponent.wave.doFunc(func);
     }
 }
 
