@@ -72,7 +72,18 @@ const ApplyGlow = (meshObjet, baseColor, offset = 0) => {
   }
 };
 exports.ApplyGlow = ApplyGlow;
-function createRotatingGif(wave, options = {}) {
+function createGIFAsync(options) {
+  return new Promise((resolve, reject) => {
+    _gifshot.default.createGIF(options, obj => {
+      if (!obj.error) {
+        resolve(obj.image); // Resolve with the GIF data URL
+      } else {
+        reject(obj.error); // Reject with the error
+      }
+    });
+  });
+}
+async function createRotatingGif(wave, options = {}) {
   const ROTATION_SPEED = options.rotationSpeed || 60; // RPM
   const frameDuration = options.frameDuration || 0.05; // seconds
   const sampleInterval = ROTATION_SPEED * frameDuration;
@@ -94,42 +105,33 @@ function createRotatingGif(wave, options = {}) {
   // Enable rotation
   wave.orbitControls.autoRotate = true;
   wave.orbitControls.autoRotateSpeed = ROTATION_SPEED;
-  return new Promise((resolve, reject) => {
-    const captureFrame = () => {
-      wave.render();
-      frames.push(canvas.toDataURL("image/png"));
-    };
-    const createGif = () => {
-      console.log("Creating GIF from frames...");
-      // Restore original rotation settings
-      wave.orbitControls.autoRotateSpeed = originalSpeed;
-      wave.orbitControls.autoRotate = wasAutoRotating;
-      _gifshot.default.createGIF({
-        images: frames,
-        gifWidth: width,
-        gifHeight: height,
-        numFrames: totalFrames,
-        frameDuration,
-        sampleInterval
-      }, result => {
-        frames.length = 0; // Clear frames array
-        if (!result.error) {
-          resolve(result.image);
-        } else {
-          reject(new Error(result.error));
-        }
-      });
-    };
-    const animate = () => {
-      if (frameCount < totalFrames) {
-        wave.orbitControls.update();
-        captureFrame();
-        frameCount += 1;
-        requestAnimationFrame(animate);
-      } else {
-        createGif();
-      }
-    };
-    animate();
-  });
+  const captureFrame = () => {
+    wave.render();
+    frames.push(canvas.toDataURL("image/png"));
+  };
+  const createGif = async () => {
+    console.log("Creating GIF from frames...");
+    // Restore original rotation settings
+    wave.orbitControls.autoRotateSpeed = originalSpeed;
+    wave.orbitControls.autoRotate = wasAutoRotating;
+    return createGIFAsync({
+      images: frames,
+      gifWidth: width,
+      gifHeight: height,
+      numFrames: totalFrames,
+      frameDuration,
+      sampleInterval
+    });
+  };
+  const animate = async () => {
+    if (frameCount < totalFrames) {
+      wave.orbitControls.update();
+      captureFrame();
+      frameCount += 1;
+      requestAnimationFrame(animate);
+    } else {
+      await createGif();
+    }
+  };
+  await animate();
 }

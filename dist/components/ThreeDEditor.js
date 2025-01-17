@@ -803,7 +803,7 @@ class ThreeDEditor extends _react.default.Component {
       // eslint-disable-next-line no-new-func
       const func = new Function("wave", `return wave.${funcStr}`);
       func(wave);
-      wave.render();
+      this.WaveComponent.wave.rebuildScene();
     } catch (error) {
       alert("Error executing wave function: " + error.message);
       console.error("Error executing wave function:", error);
