@@ -104,11 +104,6 @@ jobs:
         run: |
           npm install --legacy-peer-deps && npm run build
 
-      - name: Generate Directory Listings
-        uses: jayanta525/github-pages-directory-listing@v4.0.0
-        with:
-          FOLDER: build     #directory to generate index
-
       - name: Deploy Build
         uses: peaceiris/actions-gh-pages@v3
         # If you're changing the branch from main,

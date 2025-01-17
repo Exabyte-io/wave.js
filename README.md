@@ -3,13 +3,11 @@
 
 # Wave.js
 
-**W**eb-based **A**tomic **V**iewer and **E**ditor in **J**ava**S**cript. Wave.js is a library for atomic visualization and editing written in JavaScript enabling visualization of material structures from atoms up on the web. The library is aimed to be used for the development of web applications in JavaScript.
+**W**eb-based **A**tomic **V**iewer and **E**ditor in **J**ava**S**cript. Wave.js is a library for atomic visualization and editing written in JavaScript enabling visualization of material structures from atoms up on the web.
 
-The library was originally designed as part of and presently powers materials design capabilities of the [Exabyte.io](https://exabyte.io) platform. For example, [this page](https://platform.exabyte.io/demo/materials/n3HSzCmyoctgJFGGE) representing a crystal of Silicon online uses Wave.js.
+The library was originally designed as part of and presently powers materials design capabilities of the [Mat3ra.com](https://exabyte.io) platform.
 
-Exabyte.io believe in a collaborative future of materials design on the web.
-
-## Functionality
+## 1. Functionality.
 
 As below:
 
@@ -28,7 +26,7 @@ As below:
 
 The package is written in a modular way easy to extend. Contributions can be in the form of additional functionality modules developed, or feature requests and [bug/issue reports](https://help.github.com/articles/creating-an-issue/).
 
-## Installation
+## 2. Installation.
 
 From NPM for use within a software project:
 
@@ -43,19 +41,15 @@ From source to contribute to development:
 git clone git@github.com:Exabyte-io/wave.git
 ```
 
-## Contribution
+## 3. Contribution.
 
 This repository is an [open-source](LICENSE.md) work-in-progress and we welcome contributions.
 
-### Why contribute?
-
-We regularly deploy the latest code containing all accepted contributions online as part of the [Exabyte.io](https://exabyte.io) platform, so contributors will see their code in action there.
-
-### Adding new functionality
+### 3.1. Adding new functionality.
 
 We suggest forking this repository and introducing the adjustments there to be considered for merging into this repository as explained in more details [here](https://gist.github.com/Chaser324/ce0505fbed06b947d962), for example.
 
-### Source code conventions
+### 3.2. Source code conventions.
 
 Wave.js is written in EcmaScript 6th edition [[2]](#links) with the application of object-oriented design patterns encapsulating key concepts following the conventions below.
 
@@ -63,17 +57,16 @@ Wave.js is written in EcmaScript 6th edition [[2]](#links) with the application 
 
 2. The implementation of the viewer uses a native HTML node to initialize a Three.js rendering context, `components` folder further contains the wrapper React components for convenient use in web applications.
 
-
-### TODO list
+### 3.3. TODO list.
 
 Desirable features for implementation:
 
-- selection buffers
+- React Three Fiber
 - scripting console
 - other (TBA)
-    
 
-## Tests
+
+## 4. Development.
 
 There are two types of tests: asserting Wave class functionality and testing React components.
 Wave class tests use snapshot testing in which an snapshot of the WebGL [[3]](#links) context
@@ -98,7 +91,7 @@ npm install
 npm test
 ```
 
-### Important Notes
+### 4.1. Important Notes.
 
 1. Keep the tests directory structure similar to the main codebase directory structure. Every JS module in the main codebase should have a corresponding module in tests directory which implements the tests for provided functionality.
 
@@ -110,11 +103,27 @@ npm test
 
 5. Make sure to use `async` keyword for Wave class tests as they are asynchronous.
 
-## Dependencies
+### 4.2. Dependencies.
 
 This package depends on [Made.js](https://github.com/mat3ra/made), as well as a slightly [modified version of Three.js](https://github.com/Exabyte-io/three.js/commits/v0.90.0). See [package.json](package.json) for the full list.
 
-## Links
+### 4.3. Using `cove.js` for local development
+
+In case you need to link Cove.js into the app for local development you need
+
+1. Add local path of Cove.js to package.json
+```bash
+    "@exabyte-io/cove.js": "file:../../cove.js"
+```
+2. Run the app
+```bash
+    npm start
+```
+
+If you need to re-link it again, remove node_modules in cove.js and the app, run npm install, then run npm start again.
+
+
+## 5. Links.
 
 1. [Exabyte Source of Schemas and Examples (ESSE), Github Repository](https://github.com/exabyte-io/exabyte-esse)
 1. [ECMAScript 2015 Language Specifications](https://www.ecma-international.org/ecma-262/6.0/)
@@ -123,18 +132,3 @@ This package depends on [Made.js](https://github.com/mat3ra/made), as well as a 
 1. [Enzyme, A JavaScript Testing Utility For React, Github Repo](https://github.com/airbnb/enzyme)
 1. [Jest Testing Framework, Official Website](https://jestjs.io/index.html)
 1. [Git LFS, Official Website](https://git-lfs.github.com/)
-
-## Cove.js local development
-
-In case you need to link Cove.js into the app for local development you need
-
-1. Add local path of Cove.js to package.json
-```bash
-    "@exabyte-io/code.js": "file:../../cove.js"
-```
-2. Run the app
-```bash
-    npm start
-```
-
-If you need to re-link it again, remove node_modules in cove.js and the app, run npm install, then run npm start again. 
