@@ -1,17 +1,15 @@
-"use strict";
-
-require("./stylesheets/main.css");
-require("./MuiClassNameSetup");
-var _made = require("@mat3ra/made");
-var _react = _interopRequireDefault(require("react"));
-var _reactDom = _interopRequireDefault(require("react-dom"));
-var _ThreeDEditor = require("./components/ThreeDEditor");
-function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+import { jsx as _jsx } from "react/jsx-runtime";
+import "./stylesheets/main.css";
+import "./MuiClassNameSetup";
+import { Made } from "@mat3ra/made";
+import React from "react";
+import ReactDOM from "react-dom";
+import { ThreeDEditor } from "./components/ThreeDEditor";
 const domElement = document.getElementById("root");
-const material = new _made.Made.Material(_made.Made.defaultMaterialConfig);
-
+const material = new Made.Material(Made.defaultMaterialConfig);
 // eslint-disable-next-line  react/no-render-return-value
-window.threeDEditor = _reactDom.default.render(/*#__PURE__*/_react.default.createElement(_ThreeDEditor.ThreeDEditor, {
-  editable: true,
-  material: material
-}), domElement);
+window.threeDEditor = ReactDOM.render(_jsx(ThreeDEditor, { editable: true, material: material }), domElement);
+window.renderThreeDEditor = (materialConfig, newDomElement) => {
+    const currentMaterial = new Made.Material(materialConfig);
+    ReactDOM.render(_jsx(ThreeDEditor, { editable: true, material: currentMaterial }), newDomElement);
+};

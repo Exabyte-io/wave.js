@@ -20,4 +20,5 @@ export class Wave {
      */
     refillSelectedAtoms(): void;
     selectedAtoms: any[] | undefined;
+    takeGifScreenshot(options?: {}): Promise<void>;
 }

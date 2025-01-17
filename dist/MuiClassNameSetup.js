@@ -1,4 +1,2 @@
-"use strict";
-
-var _className = require("@mui/material/className");
-_className.unstable_ClassNameGenerator.configure(componentName => `wave-${componentName}`);
+import { unstable_ClassNameGenerator as ClassNameGenerator } from "@mui/material/className";
+ClassNameGenerator.configure((componentName) => `wave-${componentName}`);

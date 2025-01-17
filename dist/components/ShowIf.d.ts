@@ -10,8 +10,8 @@ export class ShowIf extends React.Component<any, any, any> {
 }
 export namespace ShowIf {
     namespace propTypes {
-        const condition: PropTypes.Validator<boolean>;
-        const children: PropTypes.Validator<NonNullable<PropTypes.ReactNodeLike>>;
+        let condition: PropTypes.Validator<boolean>;
+        let children: PropTypes.Validator<NonNullable<PropTypes.ReactNodeLike>>;
     }
 }
 import React from "react";

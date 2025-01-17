@@ -7,17 +7,17 @@ export class ModalDialog extends React.Component<any, any, any> {
 }
 export namespace ModalDialog {
     namespace propTypes {
-        const modalId: PropTypes.Validator<string>;
-        const show: PropTypes.Validator<boolean>;
-        const onHide: PropTypes.Validator<(...args: any[]) => any>;
-        const className: PropTypes.Validator<string>;
-        const isFullWidth: PropTypes.Requireable<boolean>;
-        const backdropColor: PropTypes.Requireable<string>;
+        let modalId: PropTypes.Validator<string>;
+        let show: PropTypes.Validator<boolean>;
+        let onHide: PropTypes.Validator<(...args: any[]) => any>;
+        let className: PropTypes.Validator<string>;
+        let isFullWidth: PropTypes.Requireable<boolean>;
+        let backdropColor: PropTypes.Requireable<string>;
     }
     namespace defaultProps {
-        const isFullWidth_1: boolean;
+        let isFullWidth_1: boolean;
         export { isFullWidth_1 as isFullWidth };
-        const backdropColor_1: string;
+        let backdropColor_1: string;
         export { backdropColor_1 as backdropColor };
     }
 }
