@@ -1,0 +1,33 @@
+{
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+      "node": {
+        "version": "20"
+      }
+    },
+    "customizations": {
+      "vscode": {
+        "settings": {
+          "telemetry.telemetryLevel": "off",
+          "telemetry.enableTelemetry": false,
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.wordWrap": "on",
+          "editor.tabSize": 2,
+          "files.insertFinalNewline": true,
+          "files.trimTrailingWhitespace": true,
+          "editor.fontSize": 14,
+          "editor.rulers": [80],
+          "workbench.colorCustomizations": {
+            "editorRuler.foreground": "#fdb88056"
+          }
+        },
+        "extensions": [
+          "esbenp.prettier-vscode",
+          "streetsidesoftware.code-spell-checker",
+          "mutantdino.resourcemonitor"
+        ]
+      }
+    },
+    "postCreateCommand": "bash .devcontainer/setup.sh",
+    "waitFor": "postCreateCommand"
+  }
