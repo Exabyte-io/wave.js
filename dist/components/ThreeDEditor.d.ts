@@ -233,7 +233,7 @@ export namespace ThreeDEditor {
         let material: PropTypes.Validator<NonNullable<{
             _json: import("@mat3ra/made/dist/js/material").MaterialSchemaJSON;
             toJSON(): import("@mat3ra/made/dist/js/types").MaterialJSON;
-            src: import("@mat3ra/esse/dist/js/types").FileSourceSchema;
+            src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
             updateFormula(): void;
             isNonPeriodic: boolean;
             getDerivedPropertyByName(name: string): {
@@ -270,6 +270,7 @@ export namespace ThreeDEditor {
             getDerivedProperties(): import("@mat3ra/esse/dist/js/types").DerivedPropertiesSchema;
             readonly formula: string;
             readonly unitCellFormula: string;
+            unsetFileProps(): void;
             setBasis(textOrObject: string | import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig, format?: string, unitz?: string): void;
             setBasisConstraints(constraints: import("@mat3ra/made/dist/js/constraints/constraints").Constraint[]): void;
             readonly basis: import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig;
@@ -309,12 +310,12 @@ export namespace ThreeDEditor {
             };
             setProp: ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void);
             unsetProp: ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void);
-            setProps: ((json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined) => any) & ((json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined) => any) & ((json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined) => any) & ((json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined) => any) & ((json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined) => any);
-            toJSONSafe: ((exclude?: string[] | undefined) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject);
-            toJSONQuick: ((exclude?: string[] | undefined) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject);
+            setProps: ((json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined) => any) & ((json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined) => any) & ((json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined) => any) & ((json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined) => any) & ((json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined) => any);
+            toJSONSafe: ((exclude?: string[] | undefined) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/esse/dist/js/esse/types").AnyObject);
+            toJSONQuick: ((exclude?: string[] | undefined) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((exclude?: string[] | undefined) => import("@mat3ra/esse/dist/js/esse/types").AnyObject);
             clone: ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any) & ((extraContext?: object | undefined) => any);
             validate: (() => void) & (() => void) & (() => void) & (() => void) & (() => void);
-            clean: ((config: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((config: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((config: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((config: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) & ((config: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject) => import("@mat3ra/code/dist/js/entity/in_memory").AnyObject);
+            clean: ((config: import("@mat3ra/esse/dist/js/esse/types").AnyObject) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((config: import("@mat3ra/esse/dist/js/esse/types").AnyObject) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((config: import("@mat3ra/esse/dist/js/esse/types").AnyObject) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((config: import("@mat3ra/esse/dist/js/esse/types").AnyObject) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((config: import("@mat3ra/esse/dist/js/esse/types").AnyObject) => import("@mat3ra/esse/dist/js/esse/types").AnyObject);
             isValid: (() => boolean) & (() => boolean) & (() => boolean) & (() => boolean) & (() => boolean);
             id: string;
             readonly cls: string;
@@ -331,18 +332,18 @@ export namespace ThreeDEditor {
         } & {
             consistencyChecks: object[];
             addConsistencyChecks(array: object[]): void;
-            _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            _json: import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             prop<T = undefined>(name: string, defaultValue: T): T;
             prop<T_1 = undefined>(name: string): T_1 | undefined;
             setProp(name: string, value: unknown): void;
             unsetProp(name: string): void;
-            setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;
-            toJSON(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            toJSONSafe(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            toJSONQuick(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            setProps(json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined): any;
+            toJSON(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
+            toJSONSafe(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
+            toJSONQuick(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             clone(extraContext?: object | undefined): any;
             validate(): void;
-            clean(config: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            clean(config: import("@mat3ra/esse/dist/js/esse/types").AnyObject): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             isValid(): boolean;
             id: string;
             readonly cls: string;
@@ -354,18 +355,18 @@ export namespace ThreeDEditor {
         } & {
             metadata: object;
             updateMetadata(object: object): void;
-            _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            _json: import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             prop<T_2 = undefined>(name: string, defaultValue: T_2): T_2;
             prop<T_1_1 = undefined>(name: string): T_1_1 | undefined;
             setProp(name: string, value: unknown): void;
             unsetProp(name: string): void;
-            setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;
-            toJSON(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            toJSONSafe(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            toJSONQuick(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            setProps(json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined): any;
+            toJSON(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
+            toJSONSafe(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
+            toJSONQuick(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             clone(extraContext?: object | undefined): any;
             validate(): void;
-            clean(config: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            clean(config: import("@mat3ra/esse/dist/js/esse/types").AnyObject): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             isValid(): boolean;
             id: string;
             readonly cls: string;
@@ -377,18 +378,18 @@ export namespace ThreeDEditor {
         } & {
             name: string;
             setName(name: string): void;
-            _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            _json: import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             prop<T_3 = undefined>(name: string, defaultValue: T_3): T_3;
             prop<T_1_2 = undefined>(name: string): T_1_2 | undefined;
             setProp(name: string, value: unknown): void;
             unsetProp(name: string): void;
-            setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;
-            toJSON(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            toJSONSafe(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            toJSONQuick(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            setProps(json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined): any;
+            toJSON(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
+            toJSONSafe(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
+            toJSONQuick(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             clone(extraContext?: object | undefined): any;
             validate(): void;
-            clean(config: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            clean(config: import("@mat3ra/esse/dist/js/esse/types").AnyObject): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             isValid(): boolean;
             id: string;
             readonly cls: string;
@@ -399,18 +400,18 @@ export namespace ThreeDEditor {
             getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
         } & {
             readonly isDefault: boolean;
-            _json: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            _json: import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             prop<T_4 = undefined>(name: string, defaultValue: T_4): T_4;
             prop<T_1_3 = undefined>(name: string): T_1_3 | undefined;
             setProp(name: string, value: unknown): void;
             unsetProp(name: string): void;
-            setProps(json?: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject | undefined): any;
-            toJSON(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            toJSONSafe(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
-            toJSONQuick(exclude?: string[] | undefined): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            setProps(json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined): any;
+            toJSON(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
+            toJSONSafe(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
+            toJSONQuick(exclude?: string[] | undefined): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             clone(extraContext?: object | undefined): any;
             validate(): void;
-            clean(config: import("@mat3ra/code/dist/js/entity/in_memory").AnyObject): import("@mat3ra/code/dist/js/entity/in_memory").AnyObject;
+            clean(config: import("@mat3ra/esse/dist/js/esse/types").AnyObject): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             isValid(): boolean;
             id: string;
             readonly cls: string;
