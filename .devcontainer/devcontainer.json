@@ -3,6 +3,9 @@
     "features": {
       "node": {
         "version": "20"
+      },
+      "docker-in-docker": {
+        "version": "latest"
       }
     },
     "customizations": {
