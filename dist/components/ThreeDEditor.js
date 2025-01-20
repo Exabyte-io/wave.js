@@ -560,6 +560,7 @@ export class ThreeDEditor extends React.Component {
     handleToggleCoordinatesShown() {
         const { measurementsSettings } = this.state;
         const { isCoordinatesShown, isDistanceShown, isAnglesShown } = measurementsSettings;
+        // TODO: avoid repetition of exclusive toggling logic
         if (isDistanceShown) {
             this.offMeasurementParam("isDistanceShown");
         }
