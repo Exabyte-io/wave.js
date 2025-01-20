@@ -58,6 +58,7 @@ export class ThreeDEditor extends React.Component {
             measurementsSettings: {
                 isDistanceShown: false,
                 isAnglesShown: false,
+                isCoordinatesShown: false,
                 measurementLabelsShown: false,
                 distance: 0,
                 angle: 0,
@@ -103,6 +104,7 @@ export class ThreeDEditor extends React.Component {
             this.handleChemicalConnectivityFactorChange.bind(this);
         this.handleToggleDistanceShown = this.handleToggleDistanceShown.bind(this);
         this.handleToggleAnglesShown = this.handleToggleAnglesShown.bind(this);
+        this.handleToggleCoordinatesShown = this.handleToggleCoordinatesShown.bind(this);
         this.handleSetState = this.handleSetState.bind(this);
         this.handleDeleteConnection = this.handleDeleteConnection.bind(this);
         this.handleResetMeasurements = this.handleResetMeasurements.bind(this);
@@ -284,7 +286,6 @@ export class ThreeDEditor extends React.Component {
         this.setState({ isThreejsEditorModalShown: !isThreejsEditorModalShown });
     }
 
-    // TODO: reset the colors for other buttons in the panel on call to the function below
     handleResetViewer() {
         const { measurementsSettings } = this.state;
         this.setState({
@@ -292,6 +293,7 @@ export class ThreeDEditor extends React.Component {
                 ...measurementsSettings,
                 isDistanceShown: false,
                 isAnglesShown: false,
+                isCoordinatesShown: false,
             },
         });
         this.WaveComponent.initViewer();
@@ -387,6 +389,25 @@ export class ThreeDEditor extends React.Component {
             this.onMeasurementParam("isAnglesShown", "isDistanceShown");
         } else {
             this.offMeasurementParam("isAnglesShown");
+        }
+    }
+
+    handleToggleCoordinatesShown() {
+        const { measurementsSettings } = this.state;
+        const { isCoordinatesShown, isDistanceShown, isAnglesShown } = measurementsSettings;
+
+        // TODO: avoid repetition of exclusive toggling logic
+        if (isDistanceShown) {
+            this.offMeasurementParam("isDistanceShown");
+        }
+        if (isAnglesShown) {
+            this.offMeasurementParam("isAnglesShown");
+        }
+
+        if (!isCoordinatesShown) {
+            this.onMeasurementParam("isCoordinatesShown", "isDistanceShown");
+        } else {
+            this.offMeasurementParam("isCoordinatesShown");
         }
     }
 
@@ -539,7 +560,7 @@ export class ThreeDEditor extends React.Component {
 
     getMeasurementsActions = () => {
         const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measurementsSettings;
+        const { isDistanceShown, isAnglesShown, isCoordinatesShown } = measurementsSettings;
         return [
             {
                 id: "Distances",
@@ -555,6 +576,14 @@ export class ThreeDEditor extends React.Component {
                 rightIcon: this.getCheckmark(isAnglesShown),
                 leftIcon: <LooksIcon />,
                 onClick: this.handleToggleAnglesShown,
+                shouldMenuStayOpened: true,
+            },
+            {
+                id: "Coordinates",
+                content: "Coordinates [C]",
+                rightIcon: this.getCheckmark(isCoordinatesShown),
+                leftIcon: <GpsFixed />,
+                onClick: this.handleToggleCoordinatesShown,
                 shouldMenuStayOpened: true,
             },
             {
