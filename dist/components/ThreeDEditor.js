@@ -178,7 +178,7 @@ export class ThreeDEditor extends React.Component {
         };
         this.getMeasurementsActions = () => {
             const { measurementsSettings } = this.state;
-            const { isDistanceShown, isAnglesShown } = measurementsSettings;
+            const { isDistanceShown, isAnglesShown, isCoordinatesShown } = measurementsSettings;
             return [
                 {
                     id: "Distances",
@@ -194,6 +194,14 @@ export class ThreeDEditor extends React.Component {
                     rightIcon: this.getCheckmark(isAnglesShown),
                     leftIcon: _jsx(LooksIcon, {}),
                     onClick: this.handleToggleAnglesShown,
+                    shouldMenuStayOpened: true,
+                },
+                {
+                    id: "Coordinates",
+                    content: "Coordinates [C]",
+                    rightIcon: this.getCheckmark(isCoordinatesShown),
+                    leftIcon: _jsx(GpsFixed, {}),
+                    onClick: this.handleToggleCoordinatesShown,
                     shouldMenuStayOpened: true,
                 },
                 {
@@ -239,7 +247,7 @@ export class ThreeDEditor extends React.Component {
                     title: "Auto Rotate GIF",
                     content: "Auto Rotate GIF",
                     leftIcon: _jsx(PictureInPicture, {}),
-                    onClick: this.handleStartGifRecording,
+                    onClick: () => this.handleStartGifRecording(),
                 },
                 {
                     id: "Screenshot",
@@ -261,17 +269,6 @@ export class ThreeDEditor extends React.Component {
         this.getParametersActions = () => {
             const { viewerSettings } = this.state;
             return (_jsx(ParametersMenu, { viewerSettings: viewerSettings, handleSphereRadiusChange: this.handleSphereRadiusChange, handleCellRepetitionsChange: this.handleCellRepetitionsChange, handleChemicalConnectivityFactorChange: this.handleChemicalConnectivityFactorChange }));
-        };
-        this.handleStartGifRecording = (downloadPath, rotationSpeed = 60, frameDuration = 0.05) => {
-            this.WaveComponent.wave
-                .takeGifScreenshot({
-                rotationSpeed,
-                frameDuration,
-                downloadPath,
-            })
-                .then((result) => {
-                console.log("Recorded gif", result);
-            });
         };
         this.handleMessage = (event) => {
             if (event.data && event.data.material) {
@@ -307,6 +304,7 @@ export class ThreeDEditor extends React.Component {
             measurementsSettings: {
                 isDistanceShown: false,
                 isAnglesShown: false,
+                isCoordinatesShown: false,
                 measurementLabelsShown: false,
                 distance: 0,
                 angle: 0,
@@ -352,6 +350,7 @@ export class ThreeDEditor extends React.Component {
             this.handleChemicalConnectivityFactorChange.bind(this);
         this.handleToggleDistanceShown = this.handleToggleDistanceShown.bind(this);
         this.handleToggleAnglesShown = this.handleToggleAnglesShown.bind(this);
+        this.handleToggleCoordinatesShown = this.handleToggleCoordinatesShown.bind(this);
         this.handleSetState = this.handleSetState.bind(this);
         this.handleDeleteConnection = this.handleDeleteConnection.bind(this);
         this.handleResetMeasurements = this.handleResetMeasurements.bind(this);
@@ -463,7 +462,6 @@ export class ThreeDEditor extends React.Component {
         const { isThreejsEditorModalShown } = this.state;
         this.setState({ isThreejsEditorModalShown: !isThreejsEditorModalShown });
     }
-    // TODO: reset the colors for other buttons in the panel on call to the function below
     handleResetViewer() {
         const { measurementsSettings } = this.state;
         this.setState({
@@ -471,6 +469,7 @@ export class ThreeDEditor extends React.Component {
                 ...measurementsSettings,
                 isDistanceShown: false,
                 isAnglesShown: false,
+                isCoordinatesShown: false,
             },
         });
         this.WaveComponent.initViewer();
@@ -558,6 +557,22 @@ export class ThreeDEditor extends React.Component {
             this.offMeasurementParam("isAnglesShown");
         }
     }
+    handleToggleCoordinatesShown() {
+        const { measurementsSettings } = this.state;
+        const { isCoordinatesShown, isDistanceShown, isAnglesShown } = measurementsSettings;
+        if (isDistanceShown) {
+            this.offMeasurementParam("isDistanceShown");
+        }
+        if (isAnglesShown) {
+            this.offMeasurementParam("isAnglesShown");
+        }
+        if (!isCoordinatesShown) {
+            this.onMeasurementParam("isCoordinatesShown", "isDistanceShown");
+        }
+        else {
+            this.offMeasurementParam("isCoordinatesShown");
+        }
+    }
     /**
      * Returns a cover div to cover the area and prevent user interaction with component
      */
@@ -633,6 +648,17 @@ export class ThreeDEditor extends React.Component {
             });
         }
         return toolbarConfig;
+    }
+    handleStartGifRecording(downloadPath, rotationSpeed = 60, frameDuration = 0.05) {
+        this.WaveComponent.wave
+            .takeGifScreenshot({
+            downloadPath,
+            rotationSpeed,
+            frameDuration,
+        })
+            .then((result) => {
+            console.log("Recorded gif", result);
+        });
     }
     onThreejsEditorModalHide(material) {
         let { isThreejsEditorModalShown } = this.state;

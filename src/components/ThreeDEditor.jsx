@@ -607,7 +607,7 @@ export class ThreeDEditor extends React.Component {
                 title: "Auto Rotate GIF",
                 content: "Auto Rotate GIF",
                 leftIcon: <PictureInPicture />,
-                onClick: this.handleStartGifRecording,
+                onClick: () => this.handleStartGifRecording(),
             },
             {
                 id: "Screenshot",
@@ -688,17 +688,17 @@ export class ThreeDEditor extends React.Component {
         return toolbarConfig;
     }
 
-    handleStartGifRecording = (downloadPath, rotationSpeed = 60, frameDuration = 0.05) => {
+    handleStartGifRecording(downloadPath, rotationSpeed = 60, frameDuration = 0.05) {
         this.WaveComponent.wave
             .takeGifScreenshot({
+                downloadPath,
                 rotationSpeed,
                 frameDuration,
-                downloadPath,
             })
             .then((result) => {
                 console.log("Recorded gif", result);
             });
-    };
+    }
 
     onThreejsEditorModalHide(material) {
         let { isThreejsEditorModalShown } = this.state;
