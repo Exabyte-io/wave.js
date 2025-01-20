@@ -252,6 +252,9 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             }
             if (intersectItem.type === "Mesh") {
                 const isAlreadySelected = intersectItem.userData.selected;
+                // Get atom position and draw coordinates if enabled
+                const position = new THREE.Vector3().setFromMatrixPosition(intersectItem.matrixWorld);
+                this.drawCoordinateText(position, intersectItem);
                 if (this.measurementSettings.isDistanceShown)
                     this.addIfLastNotSame(intersectItem);
                 if (this.measurementSettings.isAnglesShown)
@@ -289,7 +292,13 @@ export const MeasurementMixin = (superclass) => class extends superclass {
     getIntersectedObjects(event) {
         this.checkMouseCoordinates(event);
         const atomGroup = this.getAtomGroups();
-        const searchedIntersects = [...atomGroup];
+        const searchedIntersects = [];
+        // Always include atoms if any measurement type is enabled
+        if (this.measurementSettings.isDistanceShown ||
+            this.measurementSettings.isAnglesShown ||
+            this.measurementSettings.isCoordinatesShown) {
+            searchedIntersects.push(...atomGroup);
+        }
         if (this.measurementSettings.isDistanceShown) {
             searchedIntersects.push(...this.atomConnections.children);
         }
@@ -439,6 +448,11 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             atom.userData.selected = false;
             this.selectedAtoms.pop();
             atom.material.emissive.setHex(atom.currentHex);
+            // Remove coordinate label if it exists
+            if (atom.userData.coordinateLabel) {
+                this.measurementLabels.remove(atom.userData.coordinateLabel);
+                atom.userData.coordinateLabel = null;
+            }
             this.render();
         }
     }
@@ -517,6 +531,11 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             this.selectedAtoms.forEach((atom) => {
                 atom.userData.selected = false;
                 atom.material.emissive.setHex(atom.currentHex);
+                // Remove coordinate labels
+                if (atom.userData.coordinateLabel) {
+                    this.measurementLabels.remove(atom.userData.coordinateLabel);
+                    atom.userData.coordinateLabel = null;
+                }
             });
             this.selectedAtoms = [];
         }
@@ -557,5 +576,34 @@ export const MeasurementMixin = (superclass) => class extends superclass {
         const ac = this.calculateDistanceBetweenAtoms([firstAtom, lastAtom]);
         const angle = (ab ** 2 + bc ** 2 - ac ** 2) / (2 * ab * bc);
         return this.radiansToDegrees(Math.acos(angle)).toFixed(2);
+    }
+    /**
+     * Function that draws coordinate text.
+     * @param {THREE.Vector3} position - position of the atom
+     * @param {Object} atom - the atom object
+     */
+    drawCoordinateText(position, atom) {
+        // Remove existing coordinate label if it exists
+        if (atom.userData.coordinateLabel) {
+            this.measurementLabels.remove(atom.userData.coordinateLabel);
+        }
+        // Only show coordinates if coordinate measurement is enabled
+        if (!this.measurementSettings.isCoordinatesShown) {
+            return;
+        }
+        const label = this.createLabelSprite(`(${position.x.toFixed(3)}, ${position.y.toFixed(3)}, ${position.z.toFixed(3)})`, `coordinates-for-${atom.uuid}`);
+        // Position the label up and to the right of the atom
+        const labelPosition = position.clone();
+        labelPosition.y += 0.0;
+        labelPosition.x += 0.0;
+        label.position.copy(labelPosition);
+        label.visible = true;
+        label.scale.set(1.0, 1.0, 1.0);
+        label.lookAt(this.camera.position);
+        // Store reference to label in atom's userData
+        atom.userData.coordinateLabel = label;
+        this.measurementLabels.add(label);
+        this.scene.add(this.measurementLabels);
+        this.render();
     }
 };

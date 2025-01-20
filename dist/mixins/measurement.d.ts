@@ -184,6 +184,12 @@ export function MeasurementMixin(superclass: any): {
          * @atoms - 3 atoms between which angle should be calculated.
          */
         calculateAngleBetweenAtoms(atoms: any): string;
+        /**
+         * Function that draws coordinate text.
+         * @param {THREE.Vector3} position - position of the atom
+         * @param {Object} atom - the atom object
+         */
+        drawCoordinateText(position: THREE.Vector3, atom: Object): void;
     };
     [x: string]: any;
 };

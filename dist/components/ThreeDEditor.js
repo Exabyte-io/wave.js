@@ -189,7 +189,7 @@ export class ThreeDEditor extends React.Component {
         };
         this.getMeasurementsActions = () => {
             const { measurementsSettings } = this.state;
-            const { isDistanceShown, isAnglesShown } = measurementsSettings;
+            const { isDistanceShown, isAnglesShown, isCoordinatesShown } = measurementsSettings;
             return [
                 {
                     id: "Distances",
@@ -205,6 +205,14 @@ export class ThreeDEditor extends React.Component {
                     rightIcon: this.getCheckmark(isAnglesShown),
                     leftIcon: _jsx(LooksIcon, {}),
                     onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.ANGLE),
+                    shouldMenuStayOpened: true,
+                },
+                {
+                    id: "Coordinates",
+                    content: "Coordinates [C]",
+                    rightIcon: this.getCheckmark(isCoordinatesShown),
+                    leftIcon: _jsx(GpsFixed, {}),
+                    onClick: this.handleToggleCoordinatesShown,
                     shouldMenuStayOpened: true,
                 },
                 {
@@ -277,6 +285,7 @@ export class ThreeDEditor extends React.Component {
             measurementsSettings: {
                 isDistanceShown: false,
                 isAnglesShown: false,
+                isCoordinatesShown: false,
                 measurementLabelsShown: false,
                 distance: 0,
                 angle: 0,
@@ -321,6 +330,9 @@ export class ThreeDEditor extends React.Component {
         this.onThreejsEditorModalHide = this.onThreejsEditorModalHide.bind(this);
         this.handleChemicalConnectivityFactorChange =
             this.handleChemicalConnectivityFactorChange.bind(this);
+        this.handleToggleDistanceShown = this.handleToggleDistanceShown.bind(this);
+        this.handleToggleAnglesShown = this.handleToggleAnglesShown.bind(this);
+        this.handleToggleCoordinatesShown = this.handleToggleCoordinatesShown.bind(this);
         this.handleSetState = this.handleSetState.bind(this);
         this.handleDeleteConnection = this.handleDeleteConnection.bind(this);
         this.handleResetMeasurements = this.handleResetMeasurements.bind(this);
@@ -436,6 +448,7 @@ export class ThreeDEditor extends React.Component {
                 ...measurementsSettings,
                 isDistanceShown: false,
                 isAnglesShown: false,
+                isCoordinatesShown: false,
             },
         });
         this.WaveComponent.initViewer();

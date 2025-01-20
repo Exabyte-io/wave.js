@@ -14,6 +14,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         measurementsSettings: {
             isDistanceShown: boolean;
             isAnglesShown: boolean;
+            isCoordinatesShown: boolean;
             measurementLabelsShown: boolean;
             distance: number;
             angle: number;
@@ -51,6 +52,9 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleToggleAxes(): void;
     onThreejsEditorModalHide(material: any): void;
     handleChemicalConnectivityFactorChange(e: any): void;
+    handleToggleDistanceShown: any;
+    handleToggleAnglesShown: any;
+    handleToggleCoordinatesShown: any;
     handleSetState(newState: any): void;
     handleDeleteConnection(): void;
     handleResetMeasurements(): void;
@@ -109,7 +113,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         content: string;
         rightIcon: import("react/jsx-runtime").JSX.Element;
         leftIcon: import("react/jsx-runtime").JSX.Element;
-        onClick: () => void;
+        onClick: any;
         shouldMenuStayOpened: boolean;
         isDivider?: undefined;
     } | {
@@ -171,7 +175,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
             content: string;
             rightIcon: import("react/jsx-runtime").JSX.Element;
             leftIcon: import("react/jsx-runtime").JSX.Element;
-            onClick: () => void;
+            onClick: any;
             shouldMenuStayOpened: boolean;
             isDivider?: undefined;
         } | {
