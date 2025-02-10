@@ -1,8 +1,0 @@
-import{V as a}from"./main.js";class G{parse(h,E={}){const l=E.binary!==void 0?E.binary:!1,p=[];let d=0;h.traverse(function(t){if(t.isMesh){const o=t.geometry;if(o.isBufferGeometry!==!0)throw new Error("THREE.STLExporter: Geometry is not of type THREE.BufferGeometry.");const i=o.index,f=o.getAttribute("position");d+=i!==null?i.count/3:f.count/3,p.push({object3d:t,geometry:o})}});let e,r=80;if(l===!0){const t=d*2+d*3*4*4+80+4,o=new ArrayBuffer(t);e=new DataView(o),e.setUint32(r,d,!0),r+=4}else e="",e+=`solid exported
-`;const c=new a,m=new a,y=new a,x=new a,F=new a,u=new a;for(let t=0,o=p.length;t<o;t++){const i=p[t].object3d,f=p[t].geometry,n=f.index,b=f.getAttribute("position");if(n!==null)for(let s=0;s<n.count;s+=3){const g=n.getX(s+0),A=n.getX(s+1),B=n.getX(s+2);T(g,A,B,b,i)}else for(let s=0;s<b.count;s+=3){const g=s+0,A=s+1,B=s+2;T(g,A,B,b,i)}}return l===!1&&(e+=`endsolid exported
-`),e;function T(t,o,i,f,n){c.fromBufferAttribute(f,t),m.fromBufferAttribute(f,o),y.fromBufferAttribute(f,i),n.isSkinnedMesh===!0&&(n.boneTransform(t,c),n.boneTransform(o,m),n.boneTransform(i,y)),c.applyMatrix4(n.matrixWorld),m.applyMatrix4(n.matrixWorld),y.applyMatrix4(n.matrixWorld),z(c,m,y),w(c),w(m),w(y),l===!0?(e.setUint16(r,0,!0),r+=2):(e+=`		endloop
-`,e+=`	endfacet
-`)}function z(t,o,i){x.subVectors(i,o),F.subVectors(t,o),x.cross(F).normalize(),u.copy(x).normalize(),l===!0?(e.setFloat32(r,u.x,!0),r+=4,e.setFloat32(r,u.y,!0),r+=4,e.setFloat32(r,u.z,!0),r+=4):(e+="	facet normal "+u.x+" "+u.y+" "+u.z+`
-`,e+=`		outer loop
-`)}function w(t){l===!0?(e.setFloat32(r,t.x,!0),r+=4,e.setFloat32(r,t.y,!0),r+=4,e.setFloat32(r,t.z,!0),r+=4):e+="			vertex "+t.x+" "+t.y+" "+t.z+`
-`}}}export{G as STLExporter};
