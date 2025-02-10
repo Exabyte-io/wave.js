@@ -4,6 +4,8 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vite.dev/config/
 export default defineConfig({
+    // per https://stackoverflow.com/questions/74518887/blank-page-when-deploying-a-react-app-to-github-pages-and-vite
+    base: "/wave.js/",
     plugins: [
         react({
             jsxImportSource: "@emotion/react",
