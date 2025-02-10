@@ -103,6 +103,10 @@ jobs:
         shell: bash -l {0}
         run: |
           npm install --legacy-peer-deps && npm run build
+          mkdir pages
+          cp build/index.html pages/
+          cp build/main.js pages/
+          cp build/*css pages/
 
       - name: Deploy Build
         uses: peaceiris/actions-gh-pages@v4
@@ -112,4 +116,4 @@ jobs:
         # if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+          publish_dir: ./pages
