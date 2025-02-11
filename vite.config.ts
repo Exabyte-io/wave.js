@@ -24,6 +24,7 @@ export default defineConfig({
     build: {
         outDir: "build",
         rollupOptions: {
+            // external: ["src/app.jsx"], // Exclude app.jsx from the bundle
             output: {
                 entryFileNames: "main.js", // Name the main output bundle as main.js
                 chunkFileNames: "[name]-[hash].js", // Optional: Name for dynamic imports or shared chunks

@@ -9,6 +9,10 @@ import { ThreeDEditor } from "./components/ThreeDEditor";
 const renderThreeDEditor = (materialConfig, newDomElement) => {
     const config = materialConfig || Made.defaultMaterialConfig;
     const domElement = newDomElement || document.getElementById("root");
+    if (!domElement) {
+        console.warn("No root element found for rendering the 3D editor");
+        return;
+    }
     const currentMaterial = new Made.Material(config);
     ReactDOM.render(_jsx(ThreeDEditor, { editable: true, material: currentMaterial }), domElement);
 };
