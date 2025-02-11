@@ -616,10 +616,10 @@ export class ThreeDEditor extends React.Component {
             return (_jsx(ThreejsEditorModal, { show: isThreejsEditorModalShown, onHide: this.onThreejsEditorModalHide, materials: [originalMaterial], modalId: "threejs-editor" }));
         }
         const { isInteractive } = this.state;
-        return (_jsxs("div", { style: { position: "relative" }, children: [this.renderCoverDiv(), _jsx(IconsToolbar, { toolbarConfig: this.getToolbarConfig(), isInteractive: isInteractive, handleToggleInteractive: this.handleToggleInteractive }), this.renderWaveComponent()] }));
+        return (_jsxs("div", { className: "wave-component-holder", style: { position: "relative", height: "100%" }, children: [this.renderCoverDiv(), _jsx(IconsToolbar, { toolbarConfig: this.getToolbarConfig(), isInteractive: isInteractive, handleToggleInteractive: this.handleToggleInteractive }), this.renderWaveComponent()] }));
     }
     render() {
-        return (_jsx(ThemeProvider, { theme: DarkMaterialUITheme, children: _jsx(ScopedCssBaseline, { enableColorScheme: true, children: this.renderWaveOrThreejsEditorModal() }) }));
+        return (_jsx(ThemeProvider, { theme: DarkMaterialUITheme, children: _jsx(ScopedCssBaseline, { enableColorScheme: true, style: { height: "100%" }, children: this.renderWaveOrThreejsEditorModal() }) }));
     }
 }
 ThreeDEditor.propTypes = {
