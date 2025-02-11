@@ -6,12 +6,14 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import { ThreeDEditor } from "./components/ThreeDEditor";
-
-const domElement = document.getElementById("root");
-const material = new Made.Material(Made.defaultMaterialConfig);
 // eslint-disable-next-line  react/no-render-return-value
-window.threeDEditor = ReactDOM.render(<ThreeDEditor editable material={material} />, domElement);
-window.renderThreeDEditor = (materialConfig, newDomElement) => {
-    const currentMaterial = new Made.Material(materialConfig);
-    ReactDOM.render(<ThreeDEditor editable material={currentMaterial} />, newDomElement);
+const renderThreeDEditor = (materialConfig, newDomElement) => {
+    const config = materialConfig || Made.defaultMaterialConfig;
+    const domElement = newDomElement || document.getElementById("root");
+
+    const currentMaterial = new Made.Material(config);
+    ReactDOM.render(<ThreeDEditor editable material={currentMaterial} />, domElement);
 };
+
+window.renderThreeDEditor = renderThreeDEditor;
+export { renderThreeDEditor };
