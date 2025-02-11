@@ -27,7 +27,8 @@ export default defineConfig({
             output: {
                 entryFileNames: "main.js", // Name the main output bundle as main.js
                 chunkFileNames: "[name]-[hash].js", // Optional: Name for dynamic imports or shared chunks
-                assetFileNames: "[name]-[hash].[ext]", // Optional: Name for assets like CSS or images
+                assetFileNames: "main.[ext]", // Optional: Name for assets like CSS or images
+                // assetFileNames: "[name]-[hash].[ext]", // Optional: Name for assets like CSS or images
             },
         },
     },
