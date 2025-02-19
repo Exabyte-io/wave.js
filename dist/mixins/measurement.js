@@ -415,13 +415,12 @@ export const MeasurementMixin = (superclass) => class extends superclass {
      * @param distance - distance value that should be rendered.
      */
     drawDistanceText(distance) {
-        const label = this.createLabelSprite(`${distance.toFixed(3)}Å`, `label-for-${distance}`);
+        const label = this.createLabelSprite(`${distance.toFixed(3)}Å`, `label-for-${distance}`, { scale: 0.75 });
         const atomConnections = this.atomConnections.children;
         const line = atomConnections[atomConnections.length - 1];
         line.userData.label = label;
         label.position.set(...line.geometry.boundingSphere.center);
         label.visible = true;
-        label.scale.set(0.75, 0.75, 0.75);
         this.measurementLabels.add(label);
         this.scene.add(this.measurementLabels);
         this.render();

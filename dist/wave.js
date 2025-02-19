@@ -3,18 +3,16 @@ import "./stylesheets/main.css";
 import { mix } from "mixwith";
 import * as THREE from "three";
 import { ATOM_GROUP_NAME } from "./enums";
+import { AtomLabelsMixin } from "./mixins/atomLabels";
 import { AtomsMixin } from "./mixins/atoms";
 import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
-// eslint-disable-next-line import/no-cycle
-import { LabelsMixin } from "./mixins/labels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
-// eslint-disable-next-line import/no-cycle
-import { saveImageDataToFile } from "./utils";
+import { saveImageDataToFile } from "./utils/screenshot";
 const TV3 = THREE.Vector3;
 const TCo = THREE.Color;
 /*
@@ -193,7 +191,7 @@ class WaveBase {
 /**
  * Wave draws atoms as spheres according to the material geometry passed.
  */
-export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, LabelsMixin, MeasurementMixin) {
+export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, AtomLabelsMixin, MeasurementMixin) {
     /**
      *
      * @param {Object} config
