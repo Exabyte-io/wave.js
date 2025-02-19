@@ -194,7 +194,7 @@ export function MeasurementMixin(superclass: any): {
          * Toggles coordinate measurement for a specific atom
          * @param {THREE.Mesh} atom - The atom to toggle coordinates for
          */
-        toggleAtomCoordinateMeasurement(atom: THREE.Mesh): void;
+        toggleAtomCoordinateLabel(atom: THREE.Mesh): void;
     };
     [x: string]: any;
 };

@@ -305,15 +305,8 @@ export const MeasurementMixin = (superclass) =>
                 }
 
                 if (intersectItem.type === "Mesh") {
-                    // Handle coordinate measurement mode
-                    if (this.measurementSettings.isCoordinatesShown) {
-                        this.toggleAtomCoordinateMeasurement(intersectItem);
-                        break;
-                    }
-
                     const isAlreadySelected = intersectItem.userData.selected;
 
-                    // Get atom position and draw coordinates if enabled
                     const position = new THREE.Vector3().setFromMatrixPosition(
                         intersectItem.matrixWorld,
                     );
@@ -323,6 +316,10 @@ export const MeasurementMixin = (superclass) =>
                         this.addIfLastNotSame(intersectItem);
                     if (this.measurementSettings.isAnglesShown)
                         this.addIfTwoLastNotSame(intersectItem);
+                    if (this.measurementSettings.areCoordinatesShown) {
+                        this.toggleAtomCoordinateLabel(intersectItem);
+                        break;
+                    }
                     if (!isAlreadySelected) {
                         this.handleSetSelected(intersectItem);
                     }
@@ -366,7 +363,7 @@ export const MeasurementMixin = (superclass) =>
             if (
                 this.measurementSettings.isDistanceShown ||
                 this.measurementSettings.isAnglesShown ||
-                this.measurementSettings.isCoordinatesShown
+                this.measurementSettings.areCoordinatesShown
             ) {
                 searchedIntersects.push(...atomGroup);
             }
@@ -730,10 +727,6 @@ export const MeasurementMixin = (superclass) =>
                 this.measurementLabels.remove(atom.userData.coordinateLabel);
             }
 
-            if (!this.measurementSettings.isCoordinatesShown) {
-                return;
-            }
-
             const label = this.createLabelSprite(
                 `${position.x.toFixed(3)}, ${position.y.toFixed(3)}, ${position.z.toFixed(3)}`,
                 `coordinates-for-${atom.uuid}`,
@@ -764,7 +757,7 @@ export const MeasurementMixin = (superclass) =>
          * Toggles coordinate measurement for a specific atom
          * @param {THREE.Mesh} atom - The atom to toggle coordinates for
          */
-        toggleAtomCoordinateMeasurement(atom) {
+        toggleAtomCoordinateLabel(atom) {
             if (atom.userData.selected) {
                 this.deSelectAtom(atom);
             } else {

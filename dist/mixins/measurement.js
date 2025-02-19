@@ -251,19 +251,17 @@ export const MeasurementMixin = (superclass) => class extends superclass {
                 break;
             }
             if (intersectItem.type === "Mesh") {
-                // Handle coordinate measurement mode
-                if (this.measurementSettings.areCoordinatesShown) {
-                    this.toggleAtomCoordinateMeasurement(intersectItem);
-                    break;
-                }
                 const isAlreadySelected = intersectItem.userData.selected;
-                // Get atom position and draw coordinates if enabled
                 const position = new THREE.Vector3().setFromMatrixPosition(intersectItem.matrixWorld);
                 this.drawCoordinateText(position, intersectItem);
                 if (this.measurementSettings.isDistanceShown)
                     this.addIfLastNotSame(intersectItem);
                 if (this.measurementSettings.isAnglesShown)
                     this.addIfTwoLastNotSame(intersectItem);
+                if (this.measurementSettings.areCoordinatesShown) {
+                    this.toggleAtomCoordinateLabel(intersectItem);
+                    break;
+                }
                 if (!isAlreadySelected) {
                     this.handleSetSelected(intersectItem);
                 }
@@ -594,9 +592,6 @@ export const MeasurementMixin = (superclass) => class extends superclass {
         if (atom.userData.coordinateLabel) {
             this.measurementLabels.remove(atom.userData.coordinateLabel);
         }
-        if (!this.measurementSettings.areCoordinatesShown) {
-            return;
-        }
         const label = this.createLabelSprite(`${position.x.toFixed(3)}, ${position.y.toFixed(3)}, ${position.z.toFixed(3)}`, `coordinates-for-${atom.uuid}`);
         const labelPosition = position.clone();
         const atomRadius = this.getAtomRadiusByElement(atom.userData.symbolWithLabel, this.settings.atomRadiiScale);
@@ -617,7 +612,7 @@ export const MeasurementMixin = (superclass) => class extends superclass {
      * Toggles coordinate measurement for a specific atom
      * @param {THREE.Mesh} atom - The atom to toggle coordinates for
      */
-    toggleAtomCoordinateMeasurement(atom) {
+    toggleAtomCoordinateLabel(atom) {
         if (atom.userData.selected) {
             this.deSelectAtom(atom);
         }
