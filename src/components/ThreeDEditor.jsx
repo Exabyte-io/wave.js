@@ -58,7 +58,7 @@ export class ThreeDEditor extends React.Component {
             measurementsSettings: {
                 isDistanceShown: false,
                 isAnglesShown: false,
-                isCoordinatesShown: false,
+                areCoordinatesShown: false,
                 measurementLabelsShown: false,
                 distance: 0,
                 angle: 0,
@@ -108,8 +108,8 @@ export class ThreeDEditor extends React.Component {
         this.handleSetState = this.handleSetState.bind(this);
         this.handleDeleteConnection = this.handleDeleteConnection.bind(this);
         this.handleResetMeasurements = this.handleResetMeasurements.bind(this);
-        this.offMeasurementParam = this.offMeasurementParam.bind(this);
-        this.onMeasurementParam = this.onMeasurementParam.bind(this);
+        // this.offMeasurementParam = this.offMeasurementParam.bind(this);
+        // this.onMeasurementParam = this.onMeasurementParam.bind(this);
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
     }
@@ -293,7 +293,7 @@ export class ThreeDEditor extends React.Component {
                 ...measurementsSettings,
                 isDistanceShown: false,
                 isAnglesShown: false,
-                isCoordinatesShown: false,
+                areCoordinatesShown: false,
             },
         });
         this.WaveComponent.initViewer();
@@ -331,83 +331,36 @@ export class ThreeDEditor extends React.Component {
         this.WaveComponent.wave.deleteConnection();
     }
 
-    handleToggleDistanceShown() {
+    toggleMeasurement = (param) => {
         const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measurementsSettings;
-        if (isAnglesShown) {
-            this.offMeasurementParam("isAnglesShown");
-        }
+        this.setState(
+            {
+                measurementsSettings: {
+                    ...measurementsSettings,
+                    isDistanceShown: param === "isDistanceShown",
+                    isAnglesShown: param === "isAnglesShown",
+                    areCoordinatesShown: param === "areCoordinatesShown",
+                },
+            },
+            () => {
+                this.WaveComponent.wave.destroyListeners();
+                this.handleResetMeasurements();
+                this.WaveComponent.wave.initListeners(this.handleSetState, measurementsSettings);
+            },
+        );
+    };
 
-        if (!isDistanceShown) {
-            this.onMeasurementParam("isDistanceShown", "isAnglesShown");
-        } else {
-            this.offMeasurementParam("isDistanceShown");
-        }
-    }
+    handleToggleDistanceShown = () => this.toggleMeasurement("isDistanceShown");
+
+    handleToggleAnglesShown = () => this.toggleMeasurement("isAnglesShown");
+
+    handleToggleCoordinatesShown = () => this.toggleMeasurement("areCoordinatesShown");
 
     handleResetMeasurements() {
         const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measurementsSettings;
-        if (isDistanceShown || isAnglesShown) this.WaveComponent.wave.resetMeasurements();
-    }
-
-    offMeasurementParam(param) {
-        this.WaveComponent.wave.destroyListeners();
-        this.handleResetMeasurements();
-        this.setState((prevState) => {
-            const { measurementsSettings } = prevState;
-            return {
-                ...prevState,
-                measurementsSettings: { ...measurementsSettings, [param]: false },
-            };
-        });
-    }
-
-    onMeasurementParam(param, offParam) {
-        this.setState((prevState) => {
-            const { measurementsSettings } = prevState;
-            return {
-                ...prevState,
-                measurementsSettings: { ...measurementsSettings, [param]: true },
-            };
-        });
-        const { measurementsSettings } = this.state;
-        this.WaveComponent.wave.initListeners(this.handleSetState, {
-            ...measurementsSettings,
-            [param]: true,
-            [offParam]: false,
-        });
-    }
-
-    handleToggleAnglesShown() {
-        const { measurementsSettings } = this.state;
-        const { isAnglesShown, isDistanceShown } = measurementsSettings;
-        if (isDistanceShown) {
-            this.offMeasurementParam("isDistanceShown");
-        }
-        if (!isAnglesShown) {
-            this.onMeasurementParam("isAnglesShown", "isDistanceShown");
-        } else {
-            this.offMeasurementParam("isAnglesShown");
-        }
-    }
-
-    handleToggleCoordinatesShown() {
-        const { measurementsSettings } = this.state;
-        const { isCoordinatesShown, isDistanceShown, isAnglesShown } = measurementsSettings;
-
-        // TODO: avoid repetition of exclusive toggling logic
-        if (isDistanceShown) {
-            this.offMeasurementParam("isDistanceShown");
-        }
-        if (isAnglesShown) {
-            this.offMeasurementParam("isAnglesShown");
-        }
-
-        if (!isCoordinatesShown) {
-            this.onMeasurementParam("isCoordinatesShown", "isDistanceShown");
-        } else {
-            this.offMeasurementParam("isCoordinatesShown");
+        const { isDistanceShown, isAnglesShown, areCoordinatesShown } = measurementsSettings;
+        if (isDistanceShown || isAnglesShown || areCoordinatesShown) {
+            this.WaveComponent.wave.resetMeasurements();
         }
     }
 
@@ -560,7 +513,7 @@ export class ThreeDEditor extends React.Component {
 
     getMeasurementsActions = () => {
         const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown, isCoordinatesShown } = measurementsSettings;
+        const { isDistanceShown, isAnglesShown, areCoordinatesShown } = measurementsSettings;
         return [
             {
                 id: "Distances",
@@ -581,7 +534,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "Coordinates",
                 content: "Coordinates [C]",
-                rightIcon: this.getCheckmark(isCoordinatesShown),
+                rightIcon: this.getCheckmark(areCoordinatesShown),
                 leftIcon: <GpsFixed />,
                 onClick: this.handleToggleCoordinatesShown,
                 shouldMenuStayOpened: true,

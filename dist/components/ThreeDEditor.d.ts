@@ -14,7 +14,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         measurementsSettings: {
             isDistanceShown: boolean;
             isAnglesShown: boolean;
-            isCoordinatesShown: boolean;
+            areCoordinatesShown: boolean;
             measurementLabelsShown: boolean;
             distance: number;
             angle: number;
@@ -51,14 +51,12 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleToggleAxes(): void;
     onThreejsEditorModalHide(material: any): void;
     handleChemicalConnectivityFactorChange(e: any): void;
-    handleToggleDistanceShown(): void;
-    handleToggleAnglesShown(): void;
-    handleToggleCoordinatesShown(): void;
+    handleToggleDistanceShown: () => void;
+    handleToggleAnglesShown: () => void;
+    handleToggleCoordinatesShown: () => void;
     handleSetState(newState: any): void;
     handleDeleteConnection(): void;
     handleResetMeasurements(): void;
-    offMeasurementParam(param: any): void;
-    onMeasurementParam(param: any, offParam: any): void;
     addHotKeyListener(): void;
     removeHotKeyListener(): void;
     componentDidMount(): void;
@@ -72,6 +70,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleKeyPress: (e: any) => void;
     getPrimitiveOrConventionalMaterial(material: any, isConventionalCellShown?: boolean): any;
     _getWaveProperty(name: any): any;
+    toggleMeasurement: (param: any) => void;
     /**
      * Returns a cover div to cover the area and prevent user interaction with component
      */
