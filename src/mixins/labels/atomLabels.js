@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import { ATOM_GROUP_NAME } from "../enums";
+import { ATOM_GROUP_NAME } from "../../enums";
 import { BaseLabelsMixin } from "./baseLabels";
 
 /*

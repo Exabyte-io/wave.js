@@ -1,24 +1,24 @@
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
 import * as THREE from "three";
-
-import { LABELS_GROUP_NAME } from "../enums";
-import { setParameters } from "../utils/labelUtils";
-
+import { ELEMENT_LABELS_GROUP_NAME } from "../../enums";
+import { setParameters } from "./labelUtils";
 /*
  * Base mixin containing generic logic for dealing with labels.
  * Provides core functionality for creating and managing text labels in 3D space.
  */
-export const BaseLabelsMixin = (superclass) =>
-    class extends superclass {
-        #texturesCache = {};
-
+export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return _a = class extends superclass {
         constructor(config) {
             super(config);
+            _texturesCache.set(this, {});
             this.labelsGroup = new THREE.Group();
-            this.labelsGroup.name = LABELS_GROUP_NAME;
+            this.labelsGroup.name = ELEMENT_LABELS_GROUP_NAME;
             this.labelsGroup.visible = this.areLabelsShown;
             this.structureGroup.add(this.labelsGroup);
         }
-
         /**
          * Creates a new texture based on a 2D canvas with the supplied text
          * @param {String} text - the text to be placed on the texture;
@@ -28,7 +28,6 @@ export const BaseLabelsMixin = (superclass) =>
             const { fontFace, fontSize, fontWeight, ...textParams } = this.settings.labelsConfig;
             const canvas = document.createElement("canvas");
             const context = canvas.getContext("2d");
-
             context.font = `${fontWeight} ${fontSize}px ${fontFace}`;
             const textWidth = context.measureText(text).width;
             const basicTextSize = textWidth > fontSize ? textWidth : fontSize;
@@ -37,29 +36,24 @@ export const BaseLabelsMixin = (superclass) =>
             setParameters(canvas, { width: textSizePowOf2, height: textSizePowOf2 });
             const scaledFont = `${fontWeight} ${scaledFontSize}px ${fontFace}`;
             setParameters(context, { font: scaledFont, ...textParams });
-
             context.fillText(text, context.canvas.width / 2, (context.canvas.height / 2) * 1.15);
             context.strokeText(text, context.canvas.width / 2, (context.canvas.height / 2) * 1.15);
-
             const texture = new THREE.Texture(canvas);
             texture.needsUpdate = true;
-
             return texture;
         }
-
         /**
          * Returns cached or newly created texture with label text
          * @param {String} text - the text to be placed on the texture;
          * @return {THREE.Texture}
          */
         getLabelTextTexture(text) {
-            if (this.#texturesCache[text]) return this.#texturesCache[text];
-
+            if (__classPrivateFieldGet(this, _texturesCache, "f")[text])
+                return __classPrivateFieldGet(this, _texturesCache, "f")[text];
             const texture = this.createLabelTextTexture(text);
-            this.#texturesCache[text] = texture;
+            __classPrivateFieldGet(this, _texturesCache, "f")[text] = texture;
             return texture;
         }
-
         /**
          * Creates a sprite with a label text
          * @param {String} text - the text to be displayed on the label
@@ -79,7 +73,6 @@ export const BaseLabelsMixin = (superclass) =>
             sprite.scale.set(scale, scale, scale);
             return sprite;
         }
-
         /**
          * Creates a label as points for efficient rendering of many labels
          * @param {String} text - the text to be displayed
@@ -100,7 +93,6 @@ export const BaseLabelsMixin = (superclass) =>
             particles.name = name;
             return particles;
         }
-
         /**
          * Creates and positions multiple labels efficiently using Three.Points
          * For best performance when rendering many labels.
@@ -115,7 +107,6 @@ export const BaseLabelsMixin = (superclass) =>
             });
             this.structureGroup.add(this.labelsGroup);
         }
-
         /**
          * Creates and positions multiple labels as sprites
          * More flexible but less performant than Points for many labels
@@ -124,12 +115,7 @@ export const BaseLabelsMixin = (superclass) =>
          * @param {Function} getLabelOffset - Function to calculate offset for each label
          * @param {Function} getAdditionalData - Function to get additional data for each label
          */
-        createLabelsAsSprites(
-            labelData,
-            getNameForLabel,
-            getLabelOffset,
-            getAdditionalData = () => ({}),
-        ) {
+        createLabelsAsSprites(labelData, getNameForLabel, getLabelOffset, getAdditionalData = () => ({})) {
             this.clearLabels();
             Object.entries(labelData).forEach(([text, positions]) => {
                 for (let i = 0; i < positions.length; i += 3) {
@@ -143,7 +129,6 @@ export const BaseLabelsMixin = (superclass) =>
             });
             this.structureGroup.add(this.labelsGroup);
         }
-
         /**
          * Toggles the visibility of all labels
          */
@@ -152,11 +137,12 @@ export const BaseLabelsMixin = (superclass) =>
             this.labelsGroup.visible = this.areLabelsShown;
             this.render();
         }
-
         /**
          * Clears all labels from the labels group
          */
         clearLabels() {
             this.labelsGroup.clear();
         }
-    };
+    },
+    _texturesCache = new WeakMap(),
+    _a; };
