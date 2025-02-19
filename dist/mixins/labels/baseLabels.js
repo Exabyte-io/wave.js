@@ -25,7 +25,7 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
          * @return {THREE.Texture}
          */
         createLabelTextTexture(text) {
-            const { fontFace, fontSize, fontWeight, ...textParams } = this.settings.labelsConfig;
+            const { fontFace, fontSize, fontWeight, ...textParams } = this.settings.elementLabelsConfig;
             const canvas = document.createElement("canvas");
             const context = canvas.getContext("2d");
             context.font = `${fontWeight} ${fontSize}px ${fontFace}`;

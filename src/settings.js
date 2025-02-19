@@ -32,7 +32,7 @@ export default {
 
     areElementLabelsInitiallyShown: false,
     isViewAdjustable: true,
-    labelsConfig: {
+    elementLabelsConfig: {
         areSpritesUsed: true,
         fontFace: "Arial",
         fontSize: 96,
@@ -66,8 +66,8 @@ export default {
         toggleBonds: "b",
         toggleConventionalCell: "c",
         toggleElementLabels: "e",
+        toggleCoordinateLabels: "k",
         resetViewer: "r",
-        toggleThreejsEditorModal: "t",
         toggleDistanceShown: "d",
         toggleAnglesShown: "a",
         deleteConnection: "x",

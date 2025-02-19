@@ -59,13 +59,13 @@ export const AtomLabelsMixin = (superclass) =>
 
         /**
          * Creates labels as sprites or points
-         * depending on the settings.labelsConfig.areSpritesUsed value
+         * depending on the settings.elementLabelsConfig.areSpritesUsed value
          */
         createElementLabels() {
             const verticesHashMap = this.createVerticesHashMap();
             const getNameForLabel = (text) => `element-label-for-${text}`;
 
-            if (this.settings.labelsConfig.areSpritesUsed) {
+            if (this.settings.elementLabelsConfig.areSpritesUsed) {
                 this.createLabelsAsSprites(
                     verticesHashMap,
                     getNameForLabel,
@@ -84,7 +84,8 @@ export const AtomLabelsMixin = (superclass) =>
          * @method adjustLabelsToCameraPosition
          */
         adjustLabelsToCameraPosition() {
-            if (!this.areElementLabelsShown || !this.settings.labelsConfig.areSpritesUsed) return;
+            if (!this.areElementLabelsShown || !this.settings.elementLabelsConfig.areSpritesUsed)
+                return;
             this.labelsGroup.children.forEach((label) => {
                 const { atomPosition, atomName: element } = label.userData;
                 const offsetVector = this.getLabelOffsetVector(atomPosition, element);

@@ -23,7 +23,7 @@ declare namespace _default {
     export let initialCameraPosition: number[];
     export let areElementLabelsInitiallyShown: boolean;
     export let isViewAdjustable: boolean;
-    export namespace labelsConfig {
+    export namespace elementLabelsConfig {
         export let areSpritesUsed: boolean;
         export let fontFace: string;
         export let fontSize: number;
@@ -60,8 +60,8 @@ declare namespace _default {
         let toggleBonds: string;
         let toggleConventionalCell: string;
         let toggleElementLabels: string;
+        let toggleCoordinateLabels: string;
         let resetViewer: string;
-        let toggleThreejsEditorModal: string;
         let toggleDistanceShown: string;
         let toggleAnglesShown: string;
         let deleteConnection: string;

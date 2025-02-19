@@ -22,7 +22,7 @@ export function AtomLabelsMixin(superclass: any): {
         getLabelOffsetVector(atomPosition: THREE.Vector3, element: string): THREE.Vector3;
         /**
          * Creates labels as sprites or points
-         * depending on the settings.labelsConfig.areSpritesUsed value
+         * depending on the settings.elementLabelsConfig.areSpritesUsed value
          */
         createElementLabels(): void;
         /**

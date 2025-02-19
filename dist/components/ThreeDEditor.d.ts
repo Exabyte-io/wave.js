@@ -66,6 +66,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleSetSetting: (setting: any) => void;
     keyConfig: {
         [x: string]: () => void;
+        [x: number]: () => void;
     };
     handleKeyPress: (e: any) => void;
     getPrimitiveOrConventionalMaterial(material: any, isConventionalCellShown?: boolean): any;

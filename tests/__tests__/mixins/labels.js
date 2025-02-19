@@ -40,7 +40,7 @@ describe("Atom labels", () => {
 
     test("Labels are created for every atom and positioned in the center of atom", async () => {
         // set the flag to false to disable sprites and use points instead
-        wave = getWaveInstance({ labelsConfig: { areSpritesUsed: false } });
+        wave = getWaveInstance({ elementLabelsConfig: { areSpritesUsed: false } });
         const atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
         labelGroup = wave.scene.getObjectByName(ELEMENT_LABELS_GROUP_NAME);
         labels = labelGroup.children;
