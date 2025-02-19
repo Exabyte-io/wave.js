@@ -148,7 +148,7 @@ export class ThreeDEditor extends React.Component {
                 {
                     id: "toggle-labels",
                     disabled: false,
-                    content: "Labels [L]",
+                    content: "Element Labels [E]",
                     leftIcon: _jsx(Spellcheck, {}),
                     rightIcon: this.getCheckmark(this._getWaveProperty("areLabelsShown")),
                     onClick: this.handleToggleLabels,
