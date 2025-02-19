@@ -61,9 +61,9 @@ export const AtomLabelsMixin = (superclass) =>
          * Creates labels as sprites or points
          * depending on the settings.labelsConfig.areSpritesUsed value
          */
-        createLabels() {
+        createElementLabels() {
             const verticesHashMap = this.createVerticesHashMap();
-            const getNameForLabel = (text) => `label-for-${text}`;
+            const getNameForLabel = (text) => `element-label-for-${text}`;
 
             if (this.settings.labelsConfig.areSpritesUsed) {
                 this.createLabelsAsSprites(

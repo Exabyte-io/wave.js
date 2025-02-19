@@ -260,7 +260,7 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         if (this.isDrawBondsEnabled)
             this.drawBonds();
         this.render();
-        this.createLabels();
+        this.createElementLabels();
         this.refillSelectedAtoms();
     }
     render() {

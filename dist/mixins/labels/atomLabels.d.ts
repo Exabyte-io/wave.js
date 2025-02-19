@@ -24,7 +24,7 @@ export function AtomLabelsMixin(superclass: any): {
          * Creates labels as sprites or points
          * depending on the settings.labelsConfig.areSpritesUsed value
          */
-        createLabels(): void;
+        createElementLabels(): void;
         /**
          * Adjusts label positions in 3D space so that they don't overlap with their corresponding atoms
          * and always face the camera.
