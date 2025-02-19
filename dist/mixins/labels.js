@@ -165,7 +165,7 @@ export const LabelsMixin = (superclass) => { var _texturesCache, _a; return _a =
          * https://threejs.org/docs/#api/en/objects/Points
          * https://threejs.org/docs/?q=instanced#api/en/objects/InstancedMesh
          */
-        createLabelsAsSprites() {
+        createLabelsAsSprites(viewGroup) {
             this.labelsGroup.clear();
             const verticesHashMap = this.createVerticesHashMap();
             Object.entries(verticesHashMap).forEach(([key, vertices]) => {
