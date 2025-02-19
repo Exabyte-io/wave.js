@@ -14,3 +14,7 @@ export namespace COLORS {
     let RED: number;
     let GREEN: number;
 }
+export namespace MEASUREMENT_KEYS {
+    let DISTANCE: string;
+    let ANGLE: string;
+}

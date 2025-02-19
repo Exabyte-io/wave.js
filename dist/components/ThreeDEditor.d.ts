@@ -70,6 +70,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleKeyPress: (e: any) => void;
     getPrimitiveOrConventionalMaterial(material: any, isConventionalCellShown?: boolean): any;
     _getWaveProperty(name: any): any;
+    handleToggleMeasurement(measurementKey: any): void;
     /**
      * Returns a cover div to cover the area and prevent user interaction with component
      */

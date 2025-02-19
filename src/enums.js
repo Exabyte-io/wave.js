@@ -33,3 +33,8 @@ export const COLORS = {
     RED: 0xff0000,
     GREEN: 0x00ff00,
 };
+
+export const MEASUREMENT_KEYS = {
+    DISTANCE: "isDistanceShown",
+    ANGLE: "isAnglesShown",
+};

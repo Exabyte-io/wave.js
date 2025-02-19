@@ -30,6 +30,7 @@ import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { MEASUREMENT_KEYS } from "../enums";
 import settings from "../settings";
 import { exportToDisk } from "../utils";
 import IconsToolbar from "./IconsToolbar";
@@ -390,6 +391,39 @@ export class ThreeDEditor extends React.Component {
         }
     }
 
+    handleToggleMeasurement(measurementKey) {
+        const validMeasurementKeys = Object.values(MEASUREMENT_KEYS);
+        if (!validMeasurementKeys.includes(measurementKey)) return;
+
+        this.WaveComponent.wave.destroyListeners();
+        this.handleResetMeasurements();
+
+        this.setState(
+            (prevState) => {
+                const { measurementsSettings } = prevState;
+                const newSettings = { ...measurementsSettings };
+                const isActive = newSettings[measurementKey];
+                validMeasurementKeys.forEach((key) => {
+                    newSettings[key] = false;
+                });
+                if (!isActive) {
+                    newSettings[measurementKey] = true;
+                }
+
+                return { measurementsSettings: newSettings };
+            },
+            () => {
+                const { measurementsSettings } = this.state;
+                if (measurementsSettings[measurementKey]) {
+                    this.WaveComponent.wave.initListeners(
+                        this.handleSetState,
+                        measurementsSettings,
+                    );
+                }
+            },
+        );
+    }
+
     /**
      * Returns a cover div to cover the area and prevent user interaction with component
      */
@@ -546,7 +580,7 @@ export class ThreeDEditor extends React.Component {
                 content: "Distances [D]",
                 rightIcon: this.getCheckmark(isDistanceShown),
                 leftIcon: <HeightIcon />,
-                onClick: this.handleToggleDistanceShown,
+                onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.DISTANCE),
                 shouldMenuStayOpened: true,
             },
             {
@@ -554,7 +588,7 @@ export class ThreeDEditor extends React.Component {
                 content: "Angles [A]",
                 rightIcon: this.getCheckmark(isAnglesShown),
                 leftIcon: <LooksIcon />,
-                onClick: this.handleToggleAnglesShown,
+                onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.ANGLE),
                 shouldMenuStayOpened: true,
             },
             {
