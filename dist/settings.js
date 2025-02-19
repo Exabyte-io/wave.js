@@ -62,7 +62,7 @@ export default {
         toggleInteractive: "i",
         toggleBonds: "b",
         toggleConventionalCell: "c",
-        toggleLabels: "e",
+        toggleElementLabels: "e",
         resetViewer: "r",
         toggleThreejsEditorModal: "t",
         toggleDistanceShown: "d",

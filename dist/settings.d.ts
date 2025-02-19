@@ -59,7 +59,7 @@ declare namespace _default {
         let toggleInteractive: string;
         let toggleBonds: string;
         let toggleConventionalCell: string;
-        let toggleLabels: string;
+        let toggleElementLabels: string;
         let resetViewer: string;
         let toggleThreejsEditorModal: string;
         let toggleDistanceShown: string;

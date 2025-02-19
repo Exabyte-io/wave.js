@@ -130,14 +130,6 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
             this.structureGroup.add(this.labelsGroup);
         }
         /**
-         * Toggles the visibility of all labels
-         */
-        toggleLabels() {
-            this.areElementLabelsShown = !this.areElementLabelsShown;
-            this.labelsGroup.visible = this.areElementLabelsShown;
-            this.render();
-        }
-        /**
          * Clears all labels from the labels group
          */
         clearLabels() {

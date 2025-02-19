@@ -93,4 +93,13 @@ export const AtomLabelsMixin = (superclass) =>
                 label.lookAt(this.camera.position);
             });
         }
+
+        /**
+         * Toggles the visibility of all labels
+         */
+        toggleElementLabels() {
+            this.areElementLabelsShown = !this.areElementLabelsShown;
+            this.labelsGroup.visible = this.areElementLabelsShown;
+            this.render();
+        }
     };

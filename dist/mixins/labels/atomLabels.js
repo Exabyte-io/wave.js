@@ -77,4 +77,12 @@ export const AtomLabelsMixin = (superclass) => class extends BaseLabelsMixin(sup
             label.lookAt(this.camera.position);
         });
     }
+    /**
+     * Toggles the visibility of all labels
+     */
+    toggleElementLabels() {
+        this.areElementLabelsShown = !this.areElementLabelsShown;
+        this.labelsGroup.visible = this.areElementLabelsShown;
+        this.render();
+    }
 };

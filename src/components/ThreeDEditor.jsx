@@ -90,7 +90,7 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleBonds = this.handleToggleBonds.bind(this);
         this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
-        this.handleToggleLabels = this.handleToggleLabels.bind(this);
+        this.handleToggleElementLabels = this.handleToggleElementLabels.bind(this);
         this.handleToggleConventionalCell = this.handleToggleConventionalCell.bind(this);
         this.handleToggleIsViewAdjustable = this.handleToggleIsViewAdjustable.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);
@@ -161,7 +161,7 @@ export class ThreeDEditor extends React.Component {
         [settings.hotKeysConfig.toggleInteractive]: this.handleToggleInteractive,
         [settings.hotKeysConfig.toggleBonds]: this.handleToggleBonds,
         [settings.hotKeysConfig.toggleConventionalCell]: this.handleToggleConventionalCell,
-        [settings.hotKeysConfig.toggleLabels]: this.handleToggleLabels,
+        [settings.hotKeysConfig.toggleElementLabels]: this.handleToggleElementLabels,
         [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
         [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
         [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleDistanceShown,
@@ -216,8 +216,8 @@ export class ThreeDEditor extends React.Component {
         this._resetStateWaveComponent();
     }
 
-    handleToggleLabels() {
-        this.WaveComponent.wave.toggleLabels();
+    handleToggleElementLabels() {
+        this.WaveComponent.wave.toggleElementLabels();
         this._resetStateWaveComponent();
     }
 

@@ -31,6 +31,11 @@ export function AtomLabelsMixin(superclass: any): {
          * @method adjustLabelsToCameraPosition
          */
         adjustLabelsToCameraPosition(): void;
+        /**
+         * Toggles the visibility of all labels
+         */
+        toggleElementLabels(): void;
+        areElementLabelsShown: any;
         "__#1@#texturesCache": {};
         labelsGroup: any;
         createLabelTextTexture(text: string): THREE.Texture;
@@ -39,8 +44,6 @@ export function AtomLabelsMixin(superclass: any): {
         createLabelPoints(text: string, positions: Array<number>, name: string): THREE.Points;
         createLabelsAsPoints(labelData: Object, getNameForLabel: Function): void;
         createLabelsAsSprites(labelData: Object, getNameForLabel: Function, getLabelOffset: Function, getAdditionalData?: Function): void;
-        toggleLabels(): void;
-        areElementLabelsShown: any;
         clearLabels(): void;
     };
 };

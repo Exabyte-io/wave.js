@@ -48,11 +48,6 @@ export function BaseLabelsMixin(superclass: any): {
          */
         createLabelsAsSprites(labelData: Object, getNameForLabel: Function, getLabelOffset: Function, getAdditionalData?: Function): void;
         /**
-         * Toggles the visibility of all labels
-         */
-        toggleLabels(): void;
-        areElementLabelsShown: any;
-        /**
          * Clears all labels from the labels group
          */
         clearLabels(): void;

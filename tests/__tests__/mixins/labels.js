@@ -81,7 +81,7 @@ describe("Atom labels", () => {
 
     test("Labels visibility can be toggled", () => {
         const { areLabelsInitiallyShown } = wave.settings;
-        wave.toggleLabels();
+        wave.toggleElementLabels();
         expect(labels.every((label) => label.visible === !areLabelsInitiallyShown)).toBeTruthy();
     });
 });
