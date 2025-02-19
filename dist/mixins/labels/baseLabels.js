@@ -16,7 +16,7 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
             _texturesCache.set(this, {});
             this.labelsGroup = new THREE.Group();
             this.labelsGroup.name = ELEMENT_LABELS_GROUP_NAME;
-            this.labelsGroup.visible = this.areLabelsShown;
+            this.labelsGroup.visible = this.areElementLabelsShown;
             this.structureGroup.add(this.labelsGroup);
         }
         /**
@@ -133,8 +133,8 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
          * Toggles the visibility of all labels
          */
         toggleLabels() {
-            this.areLabelsShown = !this.areLabelsShown;
-            this.labelsGroup.visible = this.areLabelsShown;
+            this.areElementLabelsShown = !this.areElementLabelsShown;
+            this.labelsGroup.visible = this.areElementLabelsShown;
             this.render();
         }
         /**

@@ -51,7 +51,7 @@ export function BaseLabelsMixin(superclass: any): {
          * Toggles the visibility of all labels
          */
         toggleLabels(): void;
-        areLabelsShown: any;
+        areElementLabelsShown: any;
         /**
          * Clears all labels from the labels group
          */

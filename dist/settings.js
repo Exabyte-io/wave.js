@@ -28,7 +28,7 @@ export default {
     backgroundColor: "#202020",
     defaultColor: "#CCCCCC",
     initialCameraPosition: [-50, 0, 10],
-    areLabelsInitiallyShown: false,
+    areElementLabelsInitiallyShown: false,
     isViewAdjustable: true,
     labelsConfig: {
         areSpritesUsed: true,

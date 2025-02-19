@@ -150,7 +150,7 @@ export class ThreeDEditor extends React.Component {
                     disabled: false,
                     content: "Element Labels [E]",
                     leftIcon: _jsx(Spellcheck, {}),
-                    rightIcon: this.getCheckmark(this._getWaveProperty("areLabelsShown")),
+                    rightIcon: this.getCheckmark(this._getWaveProperty("areElementLabelsShown")),
                     onClick: this.handleToggleLabels,
                     shouldMenuStayOpened: true,
                 },

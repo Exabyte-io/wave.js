@@ -21,7 +21,7 @@ declare namespace _default {
     export let backgroundColor: string;
     export let defaultColor: string;
     export let initialCameraPosition: number[];
-    export let areLabelsInitiallyShown: boolean;
+    export let areElementLabelsInitiallyShown: boolean;
     export let isViewAdjustable: boolean;
     export namespace labelsConfig {
         export let areSpritesUsed: boolean;

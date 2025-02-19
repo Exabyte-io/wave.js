@@ -30,7 +30,7 @@ export default {
     defaultColor: "#CCCCCC",
     initialCameraPosition: [-50, 0, 10],
 
-    areLabelsInitiallyShown: false,
+    areElementLabelsInitiallyShown: false,
     isViewAdjustable: true,
     labelsConfig: {
         areSpritesUsed: true,

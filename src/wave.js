@@ -45,7 +45,7 @@ class WaveBase {
         this.container = DOMElement;
 
         this.updateSettings(settings);
-        this.areLabelsShown = this.settings.areLabelsInitiallyShown;
+        this.areElementLabelsShown = this.settings.areElementLabelsInitiallyShown;
 
         this.initDimensions();
         this.initRenderer();

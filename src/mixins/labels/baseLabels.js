@@ -15,7 +15,7 @@ export const BaseLabelsMixin = (superclass) =>
             super(config);
             this.labelsGroup = new THREE.Group();
             this.labelsGroup.name = ELEMENT_LABELS_GROUP_NAME;
-            this.labelsGroup.visible = this.areLabelsShown;
+            this.labelsGroup.visible = this.areElementLabelsShown;
             this.structureGroup.add(this.labelsGroup);
         }
 
@@ -148,8 +148,8 @@ export const BaseLabelsMixin = (superclass) =>
          * Toggles the visibility of all labels
          */
         toggleLabels() {
-            this.areLabelsShown = !this.areLabelsShown;
-            this.labelsGroup.visible = this.areLabelsShown;
+            this.areElementLabelsShown = !this.areElementLabelsShown;
+            this.labelsGroup.visible = this.areElementLabelsShown;
             this.render();
         }
 

@@ -36,7 +36,7 @@ class WaveBase {
         this.PADDING_RATIO = 1.25;
         this.container = DOMElement;
         this.updateSettings(settings);
-        this.areLabelsShown = this.settings.areLabelsInitiallyShown;
+        this.areElementLabelsShown = this.settings.areElementLabelsInitiallyShown;
         this.initDimensions();
         this.initRenderer();
         this.initScene();

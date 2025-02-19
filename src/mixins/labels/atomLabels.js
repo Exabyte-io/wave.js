@@ -84,12 +84,12 @@ export const AtomLabelsMixin = (superclass) =>
          * @method adjustLabelsToCameraPosition
          */
         adjustLabelsToCameraPosition() {
-            if (!this.areLabelsShown || !this.settings.labelsConfig.areSpritesUsed) return;
+            if (!this.areElementLabelsShown || !this.settings.labelsConfig.areSpritesUsed) return;
             this.labelsGroup.children.forEach((label) => {
                 const { atomPosition, atomName: element } = label.userData;
                 const offsetVector = this.getLabelOffsetVector(atomPosition, element);
                 label.position.addVectors(atomPosition, offsetVector);
-                label.visible = this.areLabelsShown;
+                label.visible = this.areElementLabelsShown;
                 label.lookAt(this.camera.position);
             });
         }

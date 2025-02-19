@@ -40,7 +40,7 @@ export function AtomLabelsMixin(superclass: any): {
         createLabelsAsPoints(labelData: Object, getNameForLabel: Function): void;
         createLabelsAsSprites(labelData: Object, getNameForLabel: Function, getLabelOffset: Function, getAdditionalData?: Function): void;
         toggleLabels(): void;
-        areLabelsShown: any;
+        areElementLabelsShown: any;
         clearLabels(): void;
     };
 };
