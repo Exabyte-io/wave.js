@@ -1,7 +1,7 @@
 import expect from "expect";
 import * as THREE from "three";
 
-import { ATOM_GROUP_NAME, LABELS_GROUP_NAME } from "../../../src/enums";
+import { ATOM_GROUP_NAME, ELEMENT_LABELS_GROUP_NAME } from "../../../src/enums";
 import { getWaveInstance } from "../../enums";
 
 describe("Atom labels", () => {
@@ -10,7 +10,7 @@ describe("Atom labels", () => {
     beforeEach(() => {
         wave = getWaveInstance();
         const atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
-        labelGroup = wave.scene.getObjectByName(LABELS_GROUP_NAME);
+        labelGroup = wave.scene.getObjectByName(ELEMENT_LABELS_GROUP_NAME);
         labels = labelGroup.children;
         atoms = atomGroup.children.filter((object) => object.type === "Mesh");
     });
@@ -42,7 +42,7 @@ describe("Atom labels", () => {
         // set the flag to false to disable sprites and use points instead
         wave = getWaveInstance({ labelsConfig: { areSpritesUsed: false } });
         const atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
-        labelGroup = wave.scene.getObjectByName(LABELS_GROUP_NAME);
+        labelGroup = wave.scene.getObjectByName(ELEMENT_LABELS_GROUP_NAME);
         labels = labelGroup.children;
         atoms = atomGroup.children.filter((object) => object.type === "Mesh");
 
