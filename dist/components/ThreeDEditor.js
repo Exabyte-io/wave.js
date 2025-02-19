@@ -92,9 +92,7 @@ export class ThreeDEditor extends React.Component {
             this.setState({
                 measurementsSettings: {
                     ...currentSettings,
-                    isDistanceShown: param === "isDistanceShown",
-                    isAnglesShown: param === "isAnglesShown",
-                    areCoordinatesShown: param === "areCoordinatesShown",
+                    [param]: !currentSettings[param],
                 },
             }, () => {
                 const { measurementsSettings } = this.state;
@@ -483,11 +481,7 @@ export class ThreeDEditor extends React.Component {
         this.WaveComponent.wave.deleteConnection();
     }
     handleResetMeasurements() {
-        const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown, areCoordinatesShown } = measurementsSettings;
-        if (isDistanceShown || isAnglesShown || areCoordinatesShown) {
-            this.WaveComponent.wave.resetMeasurements();
-        }
+        this.WaveComponent.wave.resetMeasurements();
     }
     /**
      * Returns a cover div to cover the area and prevent user interaction with component

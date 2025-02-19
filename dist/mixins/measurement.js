@@ -252,16 +252,17 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             }
             if (intersectItem.type === "Mesh") {
                 const isAlreadySelected = intersectItem.userData.selected;
-                const position = new THREE.Vector3().setFromMatrixPosition(intersectItem.matrixWorld);
-                this.drawCoordinateText(position, intersectItem);
-                if (this.measurementSettings.isDistanceShown)
-                    this.addIfLastNotSame(intersectItem);
-                if (this.measurementSettings.isAnglesShown)
-                    this.addIfTwoLastNotSame(intersectItem);
+                // Handle coordinate measurement mode
                 if (this.measurementSettings.areCoordinatesShown) {
                     this.toggleAtomCoordinateLabel(intersectItem);
                     break;
                 }
+                // Only draw coordinate text if coordinate measurement is active
+                const position = new THREE.Vector3().setFromMatrixPosition(intersectItem.matrixWorld);
+                if (this.measurementSettings.isDistanceShown)
+                    this.addIfLastNotSame(intersectItem);
+                if (this.measurementSettings.isAnglesShown)
+                    this.addIfTwoLastNotSame(intersectItem);
                 if (!isAlreadySelected) {
                     this.handleSetSelected(intersectItem);
                 }
@@ -518,6 +519,7 @@ export const MeasurementMixin = (superclass) => class extends superclass {
         return line;
     }
     resetMeasurements() {
+        // Clean up distance measurements
         if (this.measurementSettings && this.measurementSettings.isDistanceShown) {
             const connections = [...this.atomConnections.children];
             connections.forEach((connection) => {
@@ -525,22 +527,21 @@ export const MeasurementMixin = (superclass) => class extends superclass {
                 this.deleteConnection();
             });
         }
-        else {
+        // Clean up angle measurements
+        if (this.measurementSettings && this.measurementSettings.isAnglesShown) {
             const lines = [...this.angles.children];
             lines.forEach((line) => {
                 this.currentSelectedLine = line;
                 this.deleteConnection();
             });
         }
+        // Clean up coordinate labels
+        this.deleteCoordinateLabels();
+        // Reset selected atoms
         if (this.selectedAtoms.length) {
             this.selectedAtoms.forEach((atom) => {
                 atom.userData.selected = false;
                 atom.material.emissive.setHex(atom.currentHex);
-                // Remove coordinate labels
-                if (atom.userData.coordinateLabel) {
-                    this.measurementLabels.remove(atom.userData.coordinateLabel);
-                    atom.userData.coordinateLabel = null;
-                }
             });
             this.selectedAtoms = [];
         }
@@ -621,6 +622,18 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
             this.drawCoordinateText(position, atom);
         }
+        this.render();
+    }
+    deleteCoordinateLabels() {
+        const atomGroup = this.getAtomGroups();
+        atomGroup.forEach((atom) => {
+            if (atom.userData.coordinateLabel) {
+                this.measurementLabels.remove(atom.userData.coordinateLabel);
+                atom.userData.coordinateLabel = null;
+                atom.userData.selected = false;
+                atom.material.emissive.setHex(atom.currentHex);
+            }
+        });
         this.render();
     }
 };

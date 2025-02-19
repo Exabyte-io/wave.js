@@ -337,9 +337,7 @@ export class ThreeDEditor extends React.Component {
             {
                 measurementsSettings: {
                     ...currentSettings,
-                    isDistanceShown: param === "isDistanceShown",
-                    isAnglesShown: param === "isAnglesShown",
-                    areCoordinatesShown: param === "areCoordinatesShown",
+                    [param]: !currentSettings[param],
                 },
             },
             () => {
@@ -358,11 +356,7 @@ export class ThreeDEditor extends React.Component {
     handleToggleCoordinatesShown = () => this.toggleMeasurement("areCoordinatesShown");
 
     handleResetMeasurements() {
-        const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown, areCoordinatesShown } = measurementsSettings;
-        if (isDistanceShown || isAnglesShown || areCoordinatesShown) {
-            this.WaveComponent.wave.resetMeasurements();
-        }
+        this.WaveComponent.wave.resetMeasurements();
     }
 
     /**
