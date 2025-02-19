@@ -332,17 +332,18 @@ export class ThreeDEditor extends React.Component {
     }
 
     toggleMeasurement = (param) => {
-        const { measurementsSettings } = this.state;
+        const { measurementsSettings: currentSettings } = this.state;
         this.setState(
             {
                 measurementsSettings: {
-                    ...measurementsSettings,
+                    ...currentSettings,
                     isDistanceShown: param === "isDistanceShown",
                     isAnglesShown: param === "isAnglesShown",
                     areCoordinatesShown: param === "areCoordinatesShown",
                 },
             },
             () => {
+                const { measurementsSettings } = this.state;
                 this.WaveComponent.wave.destroyListeners();
                 this.handleResetMeasurements();
                 this.WaveComponent.wave.initListeners(this.handleSetState, measurementsSettings);
