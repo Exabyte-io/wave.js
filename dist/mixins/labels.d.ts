@@ -62,7 +62,7 @@ export function LabelsMixin(superclass: any): {
          * https://threejs.org/docs/#api/en/objects/Points
          * https://threejs.org/docs/?q=instanced#api/en/objects/InstancedMesh
          */
-        createLabelsAsSprites(): void;
+        createLabelsAsSprites(viewGroup: any): void;
         /**
          * Computes an offset vector for a given atom position to position labels correctly.
          * This method returns a vector pointing from the atom to the camera but with a
