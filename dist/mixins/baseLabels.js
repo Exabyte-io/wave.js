@@ -5,7 +5,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 };
 import * as THREE from "three";
 import { LABELS_GROUP_NAME } from "../enums";
-import { setParameters } from "../utils/label-utils";
+import { setParameters } from "../utils/labelUtils";
 /*
  * Base mixin containing generic logic for dealing with labels.
  * Provides core functionality for creating and managing text labels in 3D space.

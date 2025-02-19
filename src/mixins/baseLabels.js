@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 import { LABELS_GROUP_NAME } from "../enums";
-import { setParameters } from "../utils/label-utils";
+import { setParameters } from "../utils/labelUtils";
 
 /*
  * Base mixin containing generic logic for dealing with labels.
