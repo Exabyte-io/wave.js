@@ -102,13 +102,9 @@ export class ThreeDEditor extends React.Component {
         this.onThreejsEditorModalHide = this.onThreejsEditorModalHide.bind(this);
         this.handleChemicalConnectivityFactorChange =
             this.handleChemicalConnectivityFactorChange.bind(this);
-        this.handleToggleDistanceShown = this.handleToggleDistanceShown.bind(this);
-        this.handleToggleAnglesShown = this.handleToggleAnglesShown.bind(this);
         this.handleSetState = this.handleSetState.bind(this);
         this.handleDeleteConnection = this.handleDeleteConnection.bind(this);
         this.handleResetMeasurements = this.handleResetMeasurements.bind(this);
-        this.offMeasurementParam = this.offMeasurementParam.bind(this);
-        this.onMeasurementParam = this.onMeasurementParam.bind(this);
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
     }
@@ -165,8 +161,8 @@ export class ThreeDEditor extends React.Component {
         [settings.hotKeysConfig.toggleCoordinateLabels]: this.handleToggleCoordinateLabels,
         [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
         [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
-        [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleDistanceShown,
-        [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleAnglesShown,
+        // [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleDistanceShown,
+        // [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleAnglesShown,
         [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
     };
 
@@ -336,65 +332,10 @@ export class ThreeDEditor extends React.Component {
         this.WaveComponent.wave.deleteConnection();
     }
 
-    handleToggleDistanceShown() {
-        const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measurementsSettings;
-        if (isAnglesShown) {
-            this.offMeasurementParam("isAnglesShown");
-        }
-
-        if (!isDistanceShown) {
-            this.onMeasurementParam("isDistanceShown", "isAnglesShown");
-        } else {
-            this.offMeasurementParam("isDistanceShown");
-        }
-    }
-
     handleResetMeasurements() {
         const { measurementsSettings } = this.state;
         const { isDistanceShown, isAnglesShown } = measurementsSettings;
         if (isDistanceShown || isAnglesShown) this.WaveComponent.wave.resetMeasurements();
-    }
-
-    offMeasurementParam(param) {
-        this.WaveComponent.wave.destroyListeners();
-        this.handleResetMeasurements();
-        this.setState((prevState) => {
-            const { measurementsSettings } = prevState;
-            return {
-                ...prevState,
-                measurementsSettings: { ...measurementsSettings, [param]: false },
-            };
-        });
-    }
-
-    onMeasurementParam(param, offParam) {
-        this.setState((prevState) => {
-            const { measurementsSettings } = prevState;
-            return {
-                ...prevState,
-                measurementsSettings: { ...measurementsSettings, [param]: true },
-            };
-        });
-        const { measurementsSettings } = this.state;
-        this.WaveComponent.wave.initListeners(this.handleSetState, {
-            ...measurementsSettings,
-            [param]: true,
-            [offParam]: false,
-        });
-    }
-
-    handleToggleAnglesShown() {
-        const { measurementsSettings } = this.state;
-        const { isAnglesShown, isDistanceShown } = measurementsSettings;
-        if (isDistanceShown) {
-            this.offMeasurementParam("isDistanceShown");
-        }
-        if (!isAnglesShown) {
-            this.onMeasurementParam("isAnglesShown", "isDistanceShown");
-        } else {
-            this.offMeasurementParam("isAnglesShown");
-        }
     }
 
     handleToggleMeasurement(measurementKey) {
