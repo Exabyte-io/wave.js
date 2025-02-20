@@ -1,4 +1,4 @@
-export function AtomLabelsMixin(superclass: any): {
+export function ElementLabelsMixin(superclass: any): {
     new (config: any): {
         [x: string]: any;
         /**
@@ -28,9 +28,9 @@ export function AtomLabelsMixin(superclass: any): {
         /**
          * Adjusts label positions in 3D space so that they don't overlap with their corresponding atoms
          * and always face the camera.
-         * @method adjustLabelsToCameraPosition
+         * @method adjustElementLabelsToCameraPosition
          */
-        adjustLabelsToCameraPosition(): void;
+        adjustElementLabelsToCameraPosition(): void;
         /**
          * Toggles the visibility of all labels
          */

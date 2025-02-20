@@ -8,7 +8,8 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
-import { AtomLabelsMixin } from "./mixins/labels/atomLabels";
+import { ElementLabelsMixin } from "./mixins/labels/atomLabels";
+import { CoordinateLabelsMixin } from "./mixins/labels/coordinateLabels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
@@ -191,7 +192,7 @@ class WaveBase {
 /**
  * Wave draws atoms as spheres according to the material geometry passed.
  */
-export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, AtomLabelsMixin, MeasurementMixin) {
+export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, ElementLabelsMixin, CoordinateLabelsMixin, MeasurementMixin) {
     /**
      *
      * @param {Object} config
@@ -264,7 +265,7 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         this.refillSelectedAtoms();
     }
     render() {
-        this.adjustLabelsToCameraPosition();
+        this.adjustElementLabelsToCameraPosition();
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2)
             this.renderer2.render(this.scene2, this.camera2);

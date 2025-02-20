@@ -31,6 +31,17 @@ export default {
     areElementLabelsInitiallyShown: false,
     areCoordinateLabelsInitiallyShown: false,
     isViewAdjustable: true,
+    labelsConfig: {
+        areSpritesUsed: true,
+        fontFace: "Arial",
+        fontSize: 96,
+        fontWeight: "Bold",
+        fillStyle: "#EEEEEE",
+        strokeStyle: "#454545",
+        lineWidth: 2,
+        textAlign: "center",
+        textBaseline: "middle",
+    },
     elementLabelsConfig: {
         areSpritesUsed: true,
         fontFace: "Arial",

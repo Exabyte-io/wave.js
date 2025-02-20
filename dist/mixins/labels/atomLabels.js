@@ -5,7 +5,7 @@ import { BaseLabelsMixin } from "./baseLabels";
  * Mixin containing the logic for dealing with atom-specific labels.
  * Extends the base label functionality with features specific to atom labeling.
  */
-export const AtomLabelsMixin = (superclass) => class extends BaseLabelsMixin(superclass) {
+export const ElementLabelsMixin = (superclass) => class extends BaseLabelsMixin(superclass) {
     /**
      * Creates a hash map representing the positions (vertices) for atom labels.
      * The hash map uses atom names as keys and corresponding 3D positions as values.
@@ -64,9 +64,9 @@ export const AtomLabelsMixin = (superclass) => class extends BaseLabelsMixin(sup
     /**
      * Adjusts label positions in 3D space so that they don't overlap with their corresponding atoms
      * and always face the camera.
-     * @method adjustLabelsToCameraPosition
+     * @method adjustElementLabelsToCameraPosition
      */
-    adjustLabelsToCameraPosition() {
+    adjustElementLabelsToCameraPosition() {
         if (!this.areElementLabelsShown || !this.settings.elementLabelsConfig.areSpritesUsed)
             return;
         this.labelsGroup.children.forEach((label) => {

@@ -24,7 +24,7 @@ declare namespace _default {
     export let areElementLabelsInitiallyShown: boolean;
     export let areCoordinateLabelsInitiallyShown: boolean;
     export let isViewAdjustable: boolean;
-    export namespace elementLabelsConfig {
+    export namespace labelsConfig {
         export let areSpritesUsed: boolean;
         export let fontFace: string;
         export let fontSize: number;
@@ -36,7 +36,7 @@ declare namespace _default {
         export let textAlign: string;
         export let textBaseline: string;
     }
-    export namespace coordinateLabelsConfig {
+    export namespace elementLabelsConfig {
         let areSpritesUsed_1: boolean;
         export { areSpritesUsed_1 as areSpritesUsed };
         let fontFace_1: string;
@@ -55,6 +55,26 @@ declare namespace _default {
         export { textAlign_1 as textAlign };
         let textBaseline_1: string;
         export { textBaseline_1 as textBaseline };
+    }
+    export namespace coordinateLabelsConfig {
+        let areSpritesUsed_2: boolean;
+        export { areSpritesUsed_2 as areSpritesUsed };
+        let fontFace_2: string;
+        export { fontFace_2 as fontFace };
+        let fontSize_2: number;
+        export { fontSize_2 as fontSize };
+        let fontWeight_2: string;
+        export { fontWeight_2 as fontWeight };
+        let fillStyle_2: string;
+        export { fillStyle_2 as fillStyle };
+        let strokeStyle_2: string;
+        export { strokeStyle_2 as strokeStyle };
+        let lineWidth_3: number;
+        export { lineWidth_3 as lineWidth };
+        let textAlign_2: string;
+        export { textAlign_2 as textAlign };
+        let textBaseline_2: string;
+        export { textBaseline_2 as textBaseline };
     }
     export namespace labelPointsConfig {
         let size: number;
