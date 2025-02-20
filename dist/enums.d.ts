@@ -19,4 +19,5 @@ export namespace COLORS {
 export namespace MEASUREMENT_KEYS {
     let DISTANCE: string;
     let ANGLE: string;
+    let COORDINATE: string;
 }

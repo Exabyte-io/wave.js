@@ -14,7 +14,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         measurementsSettings: {
             isDistanceShown: boolean;
             isAnglesShown: boolean;
-            isCoordinatesShown: boolean;
+            areCoordinatesShown: boolean;
             measurementLabelsShown: boolean;
             distance: number;
             angle: number;
@@ -52,9 +52,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleToggleAxes(): void;
     onThreejsEditorModalHide(material: any): void;
     handleChemicalConnectivityFactorChange(e: any): void;
-    handleToggleDistanceShown: any;
-    handleToggleAnglesShown: any;
-    handleToggleCoordinatesShown: any;
+    handleToggleMeasurement(measurementKey: any): void;
     handleSetState(newState: any): void;
     handleDeleteConnection(): void;
     handleResetMeasurements(): void;
@@ -72,7 +70,6 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleKeyPress: (e: any) => void;
     getPrimitiveOrConventionalMaterial(material: any, isConventionalCellShown?: boolean): any;
     _getWaveProperty(name: any): any;
-    handleToggleMeasurement(measurementKey: any): void;
     /**
      * Returns a cover div to cover the area and prevent user interaction with component
      */
@@ -113,7 +110,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         content: string;
         rightIcon: import("react/jsx-runtime").JSX.Element;
         leftIcon: import("react/jsx-runtime").JSX.Element;
-        onClick: any;
+        onClick: () => void;
         shouldMenuStayOpened: boolean;
         isDivider?: undefined;
     } | {
@@ -175,7 +172,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
             content: string;
             rightIcon: import("react/jsx-runtime").JSX.Element;
             leftIcon: import("react/jsx-runtime").JSX.Element;
-            onClick: any;
+            onClick: () => void;
             shouldMenuStayOpened: boolean;
             isDivider?: undefined;
         } | {

@@ -252,7 +252,7 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             }
             if (intersectItem.type === "Mesh") {
                 // Handle coordinate measurement mode
-                if (this.measurementSettings.isCoordinatesShown) {
+                if (this.measurementSettings.areCoordinatesShown) {
                     this.toggleAtomCoordinateMeasurement(intersectItem);
                     break;
                 }
@@ -301,7 +301,7 @@ export const MeasurementMixin = (superclass) => class extends superclass {
         // Always include atoms if any measurement type is enabled
         if (this.measurementSettings.isDistanceShown ||
             this.measurementSettings.isAnglesShown ||
-            this.measurementSettings.isCoordinatesShown) {
+            this.measurementSettings.areCoordinatesShown) {
             searchedIntersects.push(...atomGroup);
         }
         if (this.measurementSettings.isDistanceShown) {
@@ -592,7 +592,7 @@ export const MeasurementMixin = (superclass) => class extends superclass {
         if (atom.userData.coordinateLabel) {
             this.measurementLabels.remove(atom.userData.coordinateLabel);
         }
-        if (!this.measurementSettings.isCoordinatesShown) {
+        if (!this.measurementSettings.areCoordinatesShown) {
             return;
         }
         const label = this.createLabelSprite(`${position.x.toFixed(3)}, ${position.y.toFixed(3)}, ${position.z.toFixed(3)}`, `coordinates-for-${atom.uuid}`);
