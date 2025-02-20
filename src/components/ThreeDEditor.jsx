@@ -161,8 +161,14 @@ export class ThreeDEditor extends React.Component {
         [settings.hotKeysConfig.toggleCoordinateLabels]: this.handleToggleCoordinateLabels,
         [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
         [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
-        // [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleDistanceShown,
-        // [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleAnglesShown,
+        [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleMeasurement.bind(
+            this,
+            MEASUREMENT_KEYS.DISTANCE,
+        ),
+        [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleMeasurement.bind(
+            this,
+            MEASUREMENT_KEYS.ANGLE,
+        ),
         [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
     };
 
