@@ -51,8 +51,12 @@ export const CoordinateLabelsMixin = (superclass) => class extends BaseLabelsMix
      */
     getCoordinateLabelOffsetVector(atomPosition, element) {
         const vectorToCamera = new THREE.Vector3().subVectors(this.camera.position, atomPosition);
-        const offsetLength = this.getAtomRadiusByElement(element) * 1.5;
-        return vectorToCamera.normalize().multiplyScalar(offsetLength);
+        const offsetLength = this.getAtomRadiusByElement(element);
+        const zOffset = 0.25 + this.getAtomRadiusByElement(element) * this.settings.atomRadiiScale;
+        vectorToCamera.normalize();
+        vectorToCamera.multiplyScalar(offsetLength);
+        vectorToCamera.z += zOffset;
+        return vectorToCamera;
     }
     /**
      * Creates labels as sprites or points
