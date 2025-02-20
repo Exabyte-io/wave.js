@@ -1,8 +1,8 @@
-export function AtomLabelsMixin(superclass: any): {
+export function ElementLabelsMixin(superclass: any): {
     new (config: any): {
         [x: string]: any;
-        atomLabelsGroup: any;
-        areAtomLabelsShown: any;
+        elementLabelsGroup: any;
+        areElementLabelsShown: any;
         /**
          * Creates a hash map representing the positions (vertices) for atom labels.
          * The hash map uses atom names as keys and corresponding 3D positions as values.
@@ -10,7 +10,7 @@ export function AtomLabelsMixin(superclass: any): {
          *
          * @returns {Object.<string, Array.<number>>} HashMap with atom names as keys and an array of vertices as values.
          */
-        createVerticesHashMap(): {
+        createElementVerticesHashMap(): {
             [x: string]: number[];
         };
         /**
@@ -24,19 +24,19 @@ export function AtomLabelsMixin(superclass: any): {
         getLabelOffsetVector(atomPosition: THREE.Vector3, element: string): THREE.Vector3;
         /**
          * Creates labels as sprites or points
-         * depending on the settings.atomLabelsConfig.areSpritesUsed value
+         * depending on the settings.elementLabelsConfig.areSpritesUsed value
          */
-        createAtomLabels(): void;
+        createElementLabels(): void;
         /**
          * Adjusts label positions in 3D space so that they don't overlap with their corresponding atoms
          * and always face the camera.
-         * @method adjustAtomLabelsToCameraPosition
+         * @method adjustElementLabelsToCameraPosition
          */
-        adjustAtomLabelsToCameraPosition(): void;
+        adjustElementLabelsToCameraPosition(): void;
         /**
          * Toggles the visibility of all labels
          */
-        toggleAtomLabels(): void;
+        toggleElementLabels(): void;
         "__#1@#texturesCache": {};
         createLabelTextTexture(text: string): THREE.Texture;
         getLabelTextTexture(text: string): THREE.Texture;

@@ -1,18 +1,18 @@
 import * as THREE from "three";
-import { ATOM_GROUP_NAME, LABELS_GROUP_NAME } from "../../enums";
+import { ATOM_GROUP_NAME, ELEMENT_LABELS_GROUP_NAME } from "../../enums";
 import { BaseLabelsMixin } from "./baseLabels";
 /*
  * Mixin containing the logic for dealing with atom-specific labels.
  * Extends the base label functionality with features specific to atom labeling.
  */
-export const AtomLabelsMixin = (superclass) => class extends BaseLabelsMixin(superclass) {
+export const ElementLabelsMixin = (superclass) => class extends BaseLabelsMixin(superclass) {
     constructor(config) {
         super(config);
-        this.atomLabelsGroup = new THREE.Group();
-        this.atomLabelsGroup.name = LABELS_GROUP_NAME;
-        this.areAtomLabelsShown = this.settings.areAtomLabelsInitiallyShown;
-        this.atomLabelsGroup.visible = this.areAtomLabelsShown;
-        this.structureGroup.add(this.atomLabelsGroup);
+        this.elementLabelsGroup = new THREE.Group();
+        this.elementLabelsGroup.name = ELEMENT_LABELS_GROUP_NAME;
+        this.areElementLabelsShown = this.settings.areElementLabelsInitiallyShown;
+        this.elementLabelsGroup.visible = this.areElementLabelsShown;
+        this.structureGroup.add(this.elementLabelsGroup);
     }
     /**
      * Creates a hash map representing the positions (vertices) for atom labels.
@@ -21,7 +21,7 @@ export const AtomLabelsMixin = (superclass) => class extends BaseLabelsMixin(sup
      *
      * @returns {Object.<string, Array.<number>>} HashMap with atom names as keys and an array of vertices as values.
      */
-    createVerticesHashMap() {
+    createElementVerticesHashMap() {
         const verticesHashMap = {};
         this.structureGroup.children.forEach((group) => {
             if (group.name !== ATOM_GROUP_NAME)
@@ -56,14 +56,13 @@ export const AtomLabelsMixin = (superclass) => class extends BaseLabelsMixin(sup
     }
     /**
      * Creates labels as sprites or points
-     * depending on the settings.atomLabelsConfig.areSpritesUsed value
+     * depending on the settings.elementLabelsConfig.areSpritesUsed value
      */
-    createAtomLabels() {
-        const verticesHashMap = this.createVerticesHashMap();
+    createElementLabels() {
+        const verticesHashMap = this.createElementVerticesHashMap();
         const getNameForLabel = (text) => `element-label-for-${text}`;
-        if (this.settings.atomLabelsConfig.areSpritesUsed) {
-            this.createLabelsAsSprites(verticesHashMap, getNameForLabel, this.getLabelOffsetVector.bind(this), (text, position) => ({ atomPosition: position, atomName: text }), this.atomLabelsGroup, this.settings.atomLabelsConfig);
-            console.log(this.atomLabelsGroup);
+        if (this.settings.elementLabelsConfig.areSpritesUsed) {
+            this.createLabelsAsSprites(verticesHashMap, getNameForLabel, this.getLabelOffsetVector.bind(this), (text, position) => ({ atomPosition: position, atomName: text }), this.elementLabelsGroup, this.settings.elementLabelsConfig);
         }
         else {
             this.createLabelsAsPoints(verticesHashMap, getNameForLabel);
@@ -73,27 +72,27 @@ export const AtomLabelsMixin = (superclass) => class extends BaseLabelsMixin(sup
     /**
      * Adjusts label positions in 3D space so that they don't overlap with their corresponding atoms
      * and always face the camera.
-     * @method adjustAtomLabelsToCameraPosition
+     * @method adjustElementLabelsToCameraPosition
      */
-    adjustAtomLabelsToCameraPosition() {
-        if (!this.areAtomLabelsShown || !this.settings.atomLabelsConfig.areSpritesUsed)
+    adjustElementLabelsToCameraPosition() {
+        if (!this.areElementLabelsShown || !this.settings.elementLabelsConfig.areSpritesUsed)
             return;
-        this.atomLabelsGroup.children.forEach((label) => {
+        this.elementLabelsGroup.children.forEach((label) => {
             const { atomPosition, atomName: element } = label.userData;
             const offsetVector = this.getLabelOffsetVector(atomPosition, element);
             label.position.addVectors(atomPosition, offsetVector);
-            label.visible = this.areAtomLabelsShown;
+            label.visible = this.areElementLabelsShown;
             label.lookAt(this.camera.position);
         });
     }
     /**
      * Toggles the visibility of all labels
      */
-    toggleAtomLabels() {
-        if (!this.atomLabelsGroup)
+    toggleElementLabels() {
+        if (!this.elementLabelsGroup)
             return;
-        this.areAtomLabelsShown = !this.areAtomLabelsShown;
-        this.atomLabelsGroup.visible = this.areAtomLabelsShown;
+        this.areElementLabelsShown = !this.areElementLabelsShown;
+        this.elementLabelsGroup.visible = this.areElementLabelsShown;
         this.render();
     }
 };

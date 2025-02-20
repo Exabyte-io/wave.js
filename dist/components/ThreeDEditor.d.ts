@@ -41,6 +41,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     toggleThreejsEditorModal(): void;
     handleToggleOrthographicCamera(): void;
     handleToggleElementLabels(): void;
+    handleToggleCoordinateLabels(): void;
     handleToggleConventionalCell(): void;
     handleToggleIsViewAdjustable(): void;
     handleResetViewer(): void;
@@ -65,7 +66,6 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         [x: number]: () => void;
     };
     handleKeyPress: (e: any) => void;
-    handleToggleCoordinateLabels(): void;
     getPrimitiveOrConventionalMaterial(material: any, isConventionalCellShown?: boolean): any;
     _getWaveProperty(name: any): any;
     handleToggleMeasurement(measurementKey: any): void;

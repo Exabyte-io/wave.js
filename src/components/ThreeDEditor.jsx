@@ -91,6 +91,7 @@ export class ThreeDEditor extends React.Component {
         this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
         this.handleToggleElementLabels = this.handleToggleElementLabels.bind(this);
+        this.handleToggleCoordinateLabels = this.handleToggleCoordinateLabels.bind(this);
         this.handleToggleConventionalCell = this.handleToggleConventionalCell.bind(this);
         this.handleToggleIsViewAdjustable = this.handleToggleIsViewAdjustable.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);

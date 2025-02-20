@@ -8,8 +8,8 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
-import { ElementLabelsMixin } from "./mixins/labels/atomLabels";
 import { CoordinateLabelsMixin } from "./mixins/labels/coordinateLabels";
+import { ElementLabelsMixin } from "./mixins/labels/elementLabels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
@@ -38,7 +38,6 @@ class WaveBase {
         this.container = DOMElement;
         this.updateSettings(settings);
         this.areElementLabelsShown = this.settings.areElementLabelsInitiallyShown;
-        this.areCoordinateLabelsShown = this.settings.areCoordinateLabelsInitiallyShown;
         this.initDimensions();
         this.initRenderer();
         this.initScene();
@@ -262,13 +261,13 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         if (this.isDrawBondsEnabled)
             this.drawBonds();
         this.render();
-        this.createElementLabels();
         this.createCoordinateLabels();
+        this.createElementLabels();
         this.refillSelectedAtoms();
     }
     render() {
-        this.adjustElementLabelsToCameraPosition();
         this.adjustCoordinateLabelsToCameraPosition();
+        this.adjustElementLabelsToCameraPosition();
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2)
             this.renderer2.render(this.scene2, this.camera2);

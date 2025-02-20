@@ -17,11 +17,10 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
         /**
          * Creates a new texture based on a 2D canvas with the supplied text
          * @param {String} text - the text to be placed on the texture;
-         * @param {Object} config - configuration for the label text (optional)
          * @return {THREE.Texture}
          */
-        createLabelTextTexture(text, config = this.settings.labelsConfig) {
-            const { fontFace, fontSize, fontWeight, ...textParams } = config;
+        createLabelTextTexture(text) {
+            const { fontFace, fontSize, fontWeight, ...textParams } = this.settings.elementLabelsConfig;
             const canvas = document.createElement("canvas");
             const context = canvas.getContext("2d");
             context.font = `${fontWeight} ${fontSize}px ${fontFace}`;
@@ -41,35 +40,33 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
         /**
          * Returns cached or newly created texture with label text
          * @param {String} text - the text to be placed on the texture;
-         * @param {Object} config - configuration for the label text
          * @return {THREE.Texture}
          */
-        getLabelTextTexture(text, config) {
-            const cacheKey = `${text}-${config.fontFace}-${config.fontSize}`;
-            if (__classPrivateFieldGet(this, _texturesCache, "f")[cacheKey])
-                return __classPrivateFieldGet(this, _texturesCache, "f")[cacheKey];
-            const texture = this.createLabelTextTexture(text, config);
-            __classPrivateFieldGet(this, _texturesCache, "f")[cacheKey] = texture;
+        getLabelTextTexture(text) {
+            if (__classPrivateFieldGet(this, _texturesCache, "f")[text])
+                return __classPrivateFieldGet(this, _texturesCache, "f")[text];
+            const texture = this.createLabelTextTexture(text);
+            __classPrivateFieldGet(this, _texturesCache, "f")[text] = texture;
             return texture;
         }
         /**
          * Creates a sprite with a label text
          * @param {String} text - the text to be displayed on the label
          * @param {String} name - the name of the created sprite
-         * @param {Object} config - configuration for the label text
-         * @param {Object} options - additional options for the sprite (scale, etc.)
+         * @param {Object} config - additional options for the sprite (scale, etc.)
          * @return {THREE.Sprite}
          */
-        createLabelSprite(text, name, config, options = {}) {
-            const texture = this.getLabelTextTexture(text, config);
+        createLabelSprite(text, name, config = this.settings.elementLabelsConfig) {
             const spriteMaterial = new THREE.SpriteMaterial({
-                map: texture,
+                map: this.getLabelTextTexture(text, config),
                 ...this.settings.labelSpriteConfig,
             });
             const sprite = new THREE.Sprite(spriteMaterial);
             sprite.name = name;
-            const scale = options.scale || 0.25;
-            sprite.scale.set(scale, scale, scale);
+            // Apply scale from config if provided
+            if (config && config.scale) {
+                sprite.scale.set(config.scale, config.scale, 1);
+            }
             return sprite;
         }
         /**
@@ -77,57 +74,66 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
          * @param {String} text - the text to be displayed
          * @param {Array<number>} positions - array of positions [x1,y1,z1,x2,y2,z2,...]
          * @param {String} name - name for the points object
-         * @param {Object} config - configuration for the label text
+         * @param {Object} config - additional options for the points (size, etc.)
          * @returns {THREE.Points}
          */
-        createLabelPoints(text, positions, name, config) {
-            const texture = this.getLabelTextTexture(text, config);
+        createLabelPoints(text, positions, name, config = this.settings.labelPointsConfig) {
             const geometry = new THREE.BufferGeometry();
             geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-            const material = new THREE.PointsMaterial({
-                ...this.settings.labelPointsConfig,
-                map: texture,
+            const material = new THREE.PointsMaterial(config);
+            const points = new THREE.Points(geometry, material);
+            points.name = name;
+            return points;
+        }
+        /**
+         * Creates and positions multiple labels efficiently using Three.Points
+         * For best performance when rendering many labels.
+         * @param {Object} labelData - Map of label text to array of positions
+         * @param {Function} getNameForLabel - Function to generate name for each label
+         */
+        createLabelsAsPoints(verticesHashMap, getNameForLabel, targetGroup, config) {
+            if (!targetGroup) {
+                console.warn("No target group provided for labels");
+                return;
+            }
+            targetGroup.clear();
+            Object.entries(verticesHashMap).forEach(([key, vertices]) => {
+                const points = this.createLabelPoints(key, vertices, getNameForLabel(key), config);
+                targetGroup.add(points);
             });
-            const particles = new THREE.Points(geometry, material);
-            particles.visible = true;
-            particles.name = name;
-            return particles;
+            // Only add to structureGroup if not already added
+            if (!this.structureGroup.children.includes(targetGroup)) {
+                this.structureGroup.add(targetGroup);
+            }
         }
         /**
          * Creates and positions multiple labels as sprites
+         * More flexible but less performant than Points for many labels
          * @param {Object} labelData - Map of label text to array of positions
          * @param {Function} getNameForLabel - Function to generate name for each label
          * @param {Function} getLabelOffset - Function to calculate offset for each label
          * @param {Function} getAdditionalData - Function to get additional data for each label
-         * @param {THREE.Group} targetGroup - The group to add the labels to
-         * @param {Object} config - Configuration for the label text
          */
-        createLabelsAsSprites(labelData, getNameForLabel, getLabelOffset, getAdditionalData, targetGroup, config) {
+        createLabelsAsSprites(verticesHashMap, getNameForLabel, getOffsetVector, getUserData, targetGroup, config) {
+            if (!targetGroup) {
+                console.warn("No target group provided for labels");
+                return;
+            }
             targetGroup.clear();
-            Object.entries(labelData).forEach(([text, positions]) => {
-                for (let i = 0; i < positions.length; i += 3) {
-                    const position = new THREE.Vector3().fromArray(positions, i);
-                    const labelSprite = this.createLabelSprite(text, getNameForLabel(text), config);
-                    const offset = getLabelOffset(position, text);
-                    labelSprite.userData = { ...getAdditionalData(text, position) };
-                    labelSprite.position.addVectors(position, offset);
+            Object.entries(verticesHashMap).forEach(([key, vertices]) => {
+                for (let i = 0; i < vertices.length; i += 3) {
+                    const position = new THREE.Vector3().fromArray(vertices, i);
+                    const labelSprite = this.createLabelSprite(key, getNameForLabel(key), config);
+                    const offsetVector = getOffsetVector(position, key);
+                    labelSprite.userData = getUserData(key, position);
+                    labelSprite.position.addVectors(position, offsetVector);
                     targetGroup.add(labelSprite);
                 }
             });
-        }
-        /**
-         * Creates and positions multiple labels efficiently using Three.Points
-         * @param {Object} labelData - Map of label text to array of positions
-         * @param {Function} getNameForLabel - Function to generate name for each label
-         * @param {THREE.Group} targetGroup - The group to add the labels to
-         * @param {Object} config - Configuration for the label text
-         */
-        createLabelsAsPoints(labelData, getNameForLabel, targetGroup, config) {
-            targetGroup.clear();
-            Object.entries(labelData).forEach(([text, positions]) => {
-                const points = this.createLabelPoints(text, positions, getNameForLabel(text), config);
-                targetGroup.add(points);
-            });
+            // Only add to structureGroup if not already added
+            if (!this.structureGroup.children.includes(targetGroup)) {
+                this.structureGroup.add(targetGroup);
+            }
         }
     },
     _texturesCache = new WeakMap(),

@@ -1,21 +1,21 @@
 import * as THREE from "three";
 
-import { ATOM_GROUP_NAME, LABELS_GROUP_NAME } from "../../enums";
+import { ATOM_GROUP_NAME, COORDINATE_LABELS_GROUP_NAME } from "../../enums";
 import { BaseLabelsMixin } from "./baseLabels";
 
 /*
  * Mixin containing the logic for dealing with atom-specific labels.
  * Extends the base label functionality with features specific to atom labeling.
  */
-export const AtomLabelsMixin = (superclass) =>
+export const CoordinateLabelsMixin = (superclass) =>
     class extends BaseLabelsMixin(superclass) {
         constructor(config) {
             super(config);
-            this.atomLabelsGroup = new THREE.Group();
-            this.atomLabelsGroup.name = LABELS_GROUP_NAME;
-            this.areAtomLabelsShown = this.settings.areAtomLabelsInitiallyShown;
-            this.atomLabelsGroup.visible = this.areAtomLabelsShown;
-            this.structureGroup.add(this.atomLabelsGroup);
+            this.coordinateLabelsGroup = new THREE.Group();
+            this.coordinateLabelsGroup.name = COORDINATE_LABELS_GROUP_NAME;
+            this.areCoordinateLabelsShown = this.settings.areCoordinateLabelsInitiallyShown;
+            this.coordinateLabelsGroup.visible = this.areCoordinateLabelsShown;
+            this.structureGroup.add(this.coordinateLabelsGroup);
         }
 
         /**
@@ -32,11 +32,11 @@ export const AtomLabelsMixin = (superclass) =>
 
                 group.children.forEach((atom) => {
                     if (atom instanceof THREE.Mesh) {
-                        const text = atom.userData.symbolWithLabel;
                         const position = new THREE.Vector3().setFromMatrixPosition(
                             atom.matrixWorld,
                         );
                         const { x, y, z } = position;
+                        const text = `${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`;
                         if (!verticesHashMap[text]) {
                             verticesHashMap[text] = [x, y, z];
                             return;
@@ -57,35 +57,39 @@ export const AtomLabelsMixin = (superclass) =>
          * @param {String} element - The name of the atom.
          * @returns {THREE.Vector3} - Offset vector for the label.
          */
-        getLabelOffsetVector(atomPosition, element) {
+        getCoordinateLabelOffsetVector(atomPosition, element) {
             const vectorToCamera = new THREE.Vector3().subVectors(
                 this.camera.position,
                 atomPosition,
             );
-            const offsetLength = this.getAtomRadiusByElement(element);
+            const offsetLength = this.getAtomRadiusByElement(element) * 1.5;
             return vectorToCamera.normalize().multiplyScalar(offsetLength);
         }
 
         /**
          * Creates labels as sprites or points
-         * depending on the settings.atomLabelsConfig.areSpritesUsed value
+         * depending on the settings.coordinateLabelsConfig.areSpritesUsed value
          */
-        createAtomLabels() {
+        createCoordinateLabels() {
             const verticesHashMap = this.createVerticesHashMap();
-            const getNameForLabel = (text) => `element-label-for-${text}`;
+            const getNameForLabel = (text) => `coordinate-label-for-${text}`;
 
-            if (this.settings.atomLabelsConfig.areSpritesUsed) {
+            if (this.settings.coordinateLabelsConfig.areSpritesUsed) {
                 this.createLabelsAsSprites(
                     verticesHashMap,
                     getNameForLabel,
-                    this.getLabelOffsetVector.bind(this),
+                    this.getCoordinateLabelOffsetVector.bind(this),
                     (text, position) => ({ atomPosition: position, atomName: text }),
-                    this.atomLabelsGroup,
-                    this.settings.atomLabelsConfig,
+                    this.coordinateLabelsGroup,
+                    this.settings.coordinateLabelsConfig,
                 );
-                console.log(this.atomLabelsGroup);
             } else {
-                this.createLabelsAsPoints(verticesHashMap, getNameForLabel);
+                this.createLabelsAsPoints(
+                    verticesHashMap,
+                    getNameForLabel,
+                    this.coordinateLabelsGroup,
+                    this.settings.coordinateLabelsConfig,
+                );
             }
             this.render();
         }
@@ -93,15 +97,19 @@ export const AtomLabelsMixin = (superclass) =>
         /**
          * Adjusts label positions in 3D space so that they don't overlap with their corresponding atoms
          * and always face the camera.
-         * @method adjustAtomLabelsToCameraPosition
+         * @method adjustCoordinateLabelsToCameraPosition
          */
-        adjustAtomLabelsToCameraPosition() {
-            if (!this.areAtomLabelsShown || !this.settings.atomLabelsConfig.areSpritesUsed) return;
-            this.atomLabelsGroup.children.forEach((label) => {
+        adjustCoordinateLabelsToCameraPosition() {
+            if (
+                !this.areCoordinateLabelsShown ||
+                !this.settings.coordinateLabelsConfig.areSpritesUsed
+            )
+                return;
+            this.coordinateLabelsGroup.children.forEach((label) => {
                 const { atomPosition, atomName: element } = label.userData;
-                const offsetVector = this.getLabelOffsetVector(atomPosition, element);
+                const offsetVector = this.getCoordinateLabelOffsetVector(atomPosition, element);
                 label.position.addVectors(atomPosition, offsetVector);
-                label.visible = this.areAtomLabelsShown;
+                label.visible = this.areCoordinateLabelsShown;
                 label.lookAt(this.camera.position);
             });
         }
@@ -109,10 +117,10 @@ export const AtomLabelsMixin = (superclass) =>
         /**
          * Toggles the visibility of all labels
          */
-        toggleAtomLabels() {
-            if (!this.atomLabelsGroup) return;
-            this.areAtomLabelsShown = !this.areAtomLabelsShown;
-            this.atomLabelsGroup.visible = this.areAtomLabelsShown;
+        toggleCoordinateLabels() {
+            if (!this.coordinateLabelsGroup) return;
+            this.areCoordinateLabelsShown = !this.areCoordinateLabelsShown;
+            this.coordinateLabelsGroup.visible = this.areCoordinateLabelsShown;
             this.render();
         }
     };

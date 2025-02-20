@@ -1,6 +1,5 @@
 import * as THREE from "three";
 
-import { ELEMENT_LABELS_GROUP_NAME } from "../../enums";
 import { setParameters } from "./labelUtils";
 
 /*
@@ -10,14 +9,6 @@ import { setParameters } from "./labelUtils";
 export const BaseLabelsMixin = (superclass) =>
     class extends superclass {
         #texturesCache = {};
-
-        constructor(config) {
-            super(config);
-            this.labelsGroup = new THREE.Group();
-            this.labelsGroup.name = ELEMENT_LABELS_GROUP_NAME;
-            this.labelsGroup.visible = this.areElementLabelsShown;
-            this.structureGroup.add(this.labelsGroup);
-        }
 
         /**
          * Creates a new texture based on a 2D canvas with the supplied text
@@ -65,19 +56,22 @@ export const BaseLabelsMixin = (superclass) =>
          * Creates a sprite with a label text
          * @param {String} text - the text to be displayed on the label
          * @param {String} name - the name of the created sprite
-         * @param {Object} options - additional options for the sprite (scale, etc.)
+         * @param {Object} config - additional options for the sprite (scale, etc.)
          * @return {THREE.Sprite}
          */
-        createLabelSprite(text, name, options = {}) {
-            const texture = this.getLabelTextTexture(text);
+        createLabelSprite(text, name, config = this.settings.elementLabelsConfig) {
             const spriteMaterial = new THREE.SpriteMaterial({
-                map: texture,
+                map: this.getLabelTextTexture(text, config),
                 ...this.settings.labelSpriteConfig,
             });
             const sprite = new THREE.Sprite(spriteMaterial);
             sprite.name = name;
-            const scale = options.scale || 0.25;
-            sprite.scale.set(scale, scale, scale);
+
+            // Apply scale from config if provided
+            if (config && config.scale) {
+                sprite.scale.set(config.scale, config.scale, 1);
+            }
+
             return sprite;
         }
 
@@ -86,20 +80,16 @@ export const BaseLabelsMixin = (superclass) =>
          * @param {String} text - the text to be displayed
          * @param {Array<number>} positions - array of positions [x1,y1,z1,x2,y2,z2,...]
          * @param {String} name - name for the points object
+         * @param {Object} config - additional options for the points (size, etc.)
          * @returns {THREE.Points}
          */
-        createLabelPoints(text, positions, name) {
-            const texture = this.getLabelTextTexture(text);
+        createLabelPoints(text, positions, name, config = this.settings.labelPointsConfig) {
             const geometry = new THREE.BufferGeometry();
             geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-            const material = new THREE.PointsMaterial({
-                ...this.settings.labelPointsConfig,
-                map: texture,
-            });
-            const particles = new THREE.Points(geometry, material);
-            particles.visible = true;
-            particles.name = name;
-            return particles;
+            const material = new THREE.PointsMaterial(config);
+            const points = new THREE.Points(geometry, material);
+            points.name = name;
+            return points;
         }
 
         /**
@@ -108,13 +98,21 @@ export const BaseLabelsMixin = (superclass) =>
          * @param {Object} labelData - Map of label text to array of positions
          * @param {Function} getNameForLabel - Function to generate name for each label
          */
-        createLabelsAsPoints(labelData, getNameForLabel) {
-            this.clearLabels();
-            Object.entries(labelData).forEach(([text, positions]) => {
-                const points = this.createLabelPoints(text, positions, getNameForLabel(text));
-                this.labelsGroup.add(points);
+        createLabelsAsPoints(verticesHashMap, getNameForLabel, targetGroup, config) {
+            if (!targetGroup) {
+                console.warn("No target group provided for labels");
+                return;
+            }
+
+            targetGroup.clear();
+            Object.entries(verticesHashMap).forEach(([key, vertices]) => {
+                const points = this.createLabelPoints(key, vertices, getNameForLabel(key), config);
+                targetGroup.add(points);
             });
-            this.structureGroup.add(this.labelsGroup);
+            // Only add to structureGroup if not already added
+            if (!this.structureGroup.children.includes(targetGroup)) {
+                this.structureGroup.add(targetGroup);
+            }
         }
 
         /**
@@ -126,29 +124,32 @@ export const BaseLabelsMixin = (superclass) =>
          * @param {Function} getAdditionalData - Function to get additional data for each label
          */
         createLabelsAsSprites(
-            labelData,
+            verticesHashMap,
             getNameForLabel,
-            getLabelOffset,
-            getAdditionalData = () => ({}),
+            getOffsetVector,
+            getUserData,
+            targetGroup,
+            config,
         ) {
-            this.clearLabels();
-            Object.entries(labelData).forEach(([text, positions]) => {
-                for (let i = 0; i < positions.length; i += 3) {
-                    const position = new THREE.Vector3().fromArray(positions, i);
-                    const labelSprite = this.createLabelSprite(text, getNameForLabel(text));
-                    const offset = getLabelOffset(position, text);
-                    labelSprite.userData = { position, text, ...getAdditionalData(text, position) };
-                    labelSprite.position.addVectors(position, offset);
-                    this.labelsGroup.add(labelSprite);
+            if (!targetGroup) {
+                console.warn("No target group provided for labels");
+                return;
+            }
+
+            targetGroup.clear();
+            Object.entries(verticesHashMap).forEach(([key, vertices]) => {
+                for (let i = 0; i < vertices.length; i += 3) {
+                    const position = new THREE.Vector3().fromArray(vertices, i);
+                    const labelSprite = this.createLabelSprite(key, getNameForLabel(key), config);
+                    const offsetVector = getOffsetVector(position, key);
+                    labelSprite.userData = getUserData(key, position);
+                    labelSprite.position.addVectors(position, offsetVector);
+                    targetGroup.add(labelSprite);
                 }
             });
-            this.structureGroup.add(this.labelsGroup);
-        }
-
-        /**
-         * Clears all labels from the labels group
-         */
-        clearLabels() {
-            this.labelsGroup.clear();
+            // Only add to structureGroup if not already added
+            if (!this.structureGroup.children.includes(targetGroup)) {
+                this.structureGroup.add(targetGroup);
+            }
         }
     };
