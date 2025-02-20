@@ -499,11 +499,14 @@ export const MeasurementMixin = (superclass) =>
          * @param line - on which this text is rendered.
          */
         drawAngleText(angle, position, line) {
-            const label = this.createLabelSprite(`${angle}º`, `label-for-${angle}`);
+            const label = this.createLabelSprite(
+                `${angle}º`,
+                `label-for-${angle}`,
+                this.settings.measurementLabelsConfig,
+            );
             line.userData.label = label;
             label.position.set(...position);
             label.visible = true;
-            label.scale.set(0.75, 0.75, 0.75);
             this.measurementLabels.add(label);
             this.scene.add(this.measurementLabels);
             this.render();
@@ -517,7 +520,7 @@ export const MeasurementMixin = (superclass) =>
             const label = this.createLabelSprite(
                 `${distance.toFixed(3)}Å`,
                 `label-for-${distance}`,
-                { scale: 0.75 },
+                this.settings.measurementLabelsConfig,
             );
             const atomConnections = this.atomConnections.children;
             const line = atomConnections[atomConnections.length - 1];

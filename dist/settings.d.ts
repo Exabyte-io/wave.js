@@ -113,5 +113,29 @@ declare namespace _default {
         let toggleAnglesShown: string;
         let deleteConnection: string;
     }
+    export namespace measurementLabelsConfig {
+        let areSpritesUsed_3: boolean;
+        export { areSpritesUsed_3 as areSpritesUsed };
+        let fontFace_3: string;
+        export { fontFace_3 as fontFace };
+        let fontSize_3: number;
+        export { fontSize_3 as fontSize };
+        let fontWeight_3: string;
+        export { fontWeight_3 as fontWeight };
+        let fillStyle_3: string;
+        export { fillStyle_3 as fillStyle };
+        let strokeStyle_3: string;
+        export { strokeStyle_3 as strokeStyle };
+        let lineWidth_4: number;
+        export { lineWidth_4 as lineWidth };
+        let textAlign_3: string;
+        export { textAlign_3 as textAlign };
+        let textBaseline_3: string;
+        export { textBaseline_3 as textBaseline };
+        let scaleWidth_1: number;
+        export { scaleWidth_1 as scaleWidth };
+        let scaleHeight_1: number;
+        export { scaleHeight_1 as scaleHeight };
+    }
 }
 export default _default;

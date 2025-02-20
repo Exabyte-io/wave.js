@@ -100,4 +100,18 @@ export default {
         toggleAnglesShown: "a",
         deleteConnection: "x",
     },
+
+    measurementLabelsConfig: {
+        areSpritesUsed: true,
+        fontFace: "Arial",
+        fontSize: 72,
+        fontWeight: "Normal",
+        fillStyle: "#CCCCCC",
+        strokeStyle: "#454545",
+        lineWidth: 1,
+        textAlign: "center",
+        textBaseline: "middle",
+        scaleWidth: 1.5,
+        scaleHeight: 0.4,
+    },
 };
