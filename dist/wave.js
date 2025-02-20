@@ -38,6 +38,7 @@ class WaveBase {
         this.container = DOMElement;
         this.updateSettings(settings);
         this.areElementLabelsShown = this.settings.areElementLabelsInitiallyShown;
+        this.areCoordinateLabelsShown = this.settings.areCoordinateLabelsInitiallyShown;
         this.initDimensions();
         this.initRenderer();
         this.initScene();
@@ -262,10 +263,12 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
             this.drawBonds();
         this.render();
         this.createElementLabels();
+        this.createCoordinateLabels();
         this.refillSelectedAtoms();
     }
     render() {
         this.adjustElementLabelsToCameraPosition();
+        this.adjustCoordinateLabelsToCameraPosition();
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2)
             this.renderer2.render(this.scene2, this.camera2);

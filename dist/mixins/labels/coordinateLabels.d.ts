@@ -1,6 +1,8 @@
 export function CoordinateLabelsMixin(superclass: any): {
     new (config: any): {
         [x: string]: any;
+        "__#3@#coordinateLabelsGroup": any;
+        areCoordinateLabelsShown: any;
         /**
          * Creates a hash map representing the positions (vertices) for coordinate labels.
          * The hash map uses coordinates as keys and corresponding 3D positions as values.
@@ -34,15 +36,12 @@ export function CoordinateLabelsMixin(superclass: any): {
          * Toggles the visibility of all coordinate labels
          */
         toggleCoordinateLabels(): void;
-        areCoordinateLabelsShown: any;
         "__#1@#texturesCache": {};
-        labelsGroup: any;
-        createLabelTextTexture(text: string): THREE.Texture;
-        getLabelTextTexture(text: string): THREE.Texture;
-        createLabelSprite(text: string, name: string, options?: Object): THREE.Sprite;
-        createLabelPoints(text: string, positions: Array<number>, name: string): THREE.Points;
-        createLabelsAsPoints(labelData: Object, getNameForLabel: Function): void;
-        createLabelsAsSprites(labelData: Object, getNameForLabel: Function, getLabelOffset: Function, getAdditionalData?: Function): void;
-        clearLabels(): void;
+        createLabelTextTexture(text: string, config?: Object): THREE.Texture;
+        getLabelTextTexture(text: string, config: Object): THREE.Texture;
+        createLabelSprite(text: string, name: string, config: Object, options?: Object): THREE.Sprite;
+        createLabelPoints(text: string, positions: Array<number>, name: string, config: Object): THREE.Points;
+        createLabelsAsSprites(labelData: Object, getNameForLabel: Function, getLabelOffset: Function, getAdditionalData: Function, targetGroup: THREE.Group, config: Object): void;
+        createLabelsAsPoints(labelData: Object, getNameForLabel: Function, targetGroup: THREE.Group, config: Object): void;
     };
 };
