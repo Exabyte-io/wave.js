@@ -728,7 +728,7 @@ export const MeasurementMixin = (superclass) =>
          * @param {Object} atom - the atom object
          */
         drawCoordinateText(position, atom) {
-            // Remove existing coordinate label if it exists
+            // TODO: Remove this label creation and reuse CoordianteLabelsMixin solution
             if (atom.userData.coordinateLabel) {
                 this.measurementLabels.remove(atom.userData.coordinateLabel);
             }
@@ -740,6 +740,7 @@ export const MeasurementMixin = (superclass) =>
             const label = this.createLabelSprite(
                 `${position.x.toFixed(3)}, ${position.y.toFixed(3)}, ${position.z.toFixed(3)}`,
                 `coordinates-for-${atom.uuid}`,
+                this.settings.coordinateLabelsConfig,
             );
 
             const labelPosition = position.clone();
@@ -747,13 +748,10 @@ export const MeasurementMixin = (superclass) =>
                 atom.userData.symbolWithLabel,
                 this.settings.atomRadiiScale,
             );
-            labelPosition.y += 0.0;
-            labelPosition.x += 0.0;
-            labelPosition.z += atomRadius;
+            labelPosition.z += atomRadius * 1.2;
 
             label.position.copy(labelPosition);
             label.visible = true;
-            label.scale.set(1.0, 1.0, 1.0);
             label.lookAt(this.camera.position);
 
             // Store reference to label in atom's userData
