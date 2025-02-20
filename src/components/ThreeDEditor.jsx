@@ -172,6 +172,10 @@ export class ThreeDEditor extends React.Component {
             this,
             MEASUREMENT_KEYS.ANGLE,
         ),
+        [settings.hotKeysConfig.toggleCoordinatesShown]: this.handleToggleMeasurement.bind(
+            this,
+            MEASUREMENT_KEYS.COORDINATE,
+        ),
         [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
     };
 

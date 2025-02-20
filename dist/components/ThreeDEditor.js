@@ -67,6 +67,7 @@ export class ThreeDEditor extends React.Component {
             [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
             [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_KEYS.DISTANCE),
             [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_KEYS.ANGLE),
+            [settings.hotKeysConfig.toggleCoordinatesShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_KEYS.COORDINATE),
             [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
         };
         this.handleKeyPress = (e) => {
