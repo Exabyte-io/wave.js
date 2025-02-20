@@ -22,6 +22,7 @@ declare namespace _default {
     export let defaultColor: string;
     export let initialCameraPosition: number[];
     export let areElementLabelsInitiallyShown: boolean;
+    export let areCoordinateLabelsInitiallyShown: boolean;
     export let isViewAdjustable: boolean;
     export namespace elementLabelsConfig {
         export let areSpritesUsed: boolean;
@@ -34,6 +35,26 @@ declare namespace _default {
         export { lineWidth_1 as lineWidth };
         export let textAlign: string;
         export let textBaseline: string;
+    }
+    export namespace coordinateLabelsConfig {
+        let areSpritesUsed_1: boolean;
+        export { areSpritesUsed_1 as areSpritesUsed };
+        let fontFace_1: string;
+        export { fontFace_1 as fontFace };
+        let fontSize_1: number;
+        export { fontSize_1 as fontSize };
+        let fontWeight_1: string;
+        export { fontWeight_1 as fontWeight };
+        let fillStyle_1: string;
+        export { fillStyle_1 as fillStyle };
+        let strokeStyle_1: string;
+        export { strokeStyle_1 as strokeStyle };
+        let lineWidth_2: number;
+        export { lineWidth_2 as lineWidth };
+        let textAlign_1: string;
+        export { textAlign_1 as textAlign };
+        let textBaseline_1: string;
+        export { textBaseline_1 as textBaseline };
     }
     export namespace labelPointsConfig {
         let size: number;

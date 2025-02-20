@@ -31,6 +31,7 @@ export default {
     initialCameraPosition: [-50, 0, 10],
 
     areElementLabelsInitiallyShown: false,
+    areCoordinateLabelsInitiallyShown: false,
     isViewAdjustable: true,
     elementLabelsConfig: {
         areSpritesUsed: true,
@@ -40,6 +41,17 @@ export default {
         fillStyle: "#EEEEEE",
         strokeStyle: "#454545",
         lineWidth: 2,
+        textAlign: "center",
+        textBaseline: "middle",
+    },
+    coordinateLabelsConfig: {
+        areSpritesUsed: true,
+        fontFace: "Arial",
+        fontSize: 72,
+        fontWeight: "Normal",
+        fillStyle: "#CCCCCC",
+        strokeStyle: "#454545",
+        lineWidth: 1,
         textAlign: "center",
         textBaseline: "middle",
     },

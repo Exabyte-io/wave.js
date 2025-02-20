@@ -162,6 +162,7 @@ export class ThreeDEditor extends React.Component {
         [settings.hotKeysConfig.toggleBonds]: this.handleToggleBonds,
         [settings.hotKeysConfig.toggleConventionalCell]: this.handleToggleConventionalCell,
         [settings.hotKeysConfig.toggleElementLabels]: this.handleToggleElementLabels,
+        [settings.hotKeysConfig.toggleCoordinateLabels]: this.handleToggleCoordinateLabels,
         [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
         [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
         [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleDistanceShown,
@@ -218,6 +219,11 @@ export class ThreeDEditor extends React.Component {
 
     handleToggleElementLabels() {
         this.WaveComponent.wave.toggleElementLabels();
+        this._resetStateWaveComponent();
+    }
+
+    handleToggleCoordinateLabels() {
+        this.WaveComponent.wave.toggleCoordinateLabels();
         this._resetStateWaveComponent();
     }
 
@@ -544,7 +550,16 @@ export class ThreeDEditor extends React.Component {
                 content: "Element Labels [E]",
                 leftIcon: <Spellcheck />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areElementLabelsShown")),
-                onClick: this.handleToggleLabels,
+                onClick: this.handleToggleElementLabels,
+                shouldMenuStayOpened: true,
+            },
+            {
+                id: "toggle-coordinate-labels",
+                disabled: false,
+                content: "Coordinate Labels [K]",
+                leftIcon: <Spellcheck />,
+                rightIcon: this.getCheckmark(this._getWaveProperty("areCoordinateLabelsShown")),
+                onClick: this.handleToggleCoordinateLabels,
                 shouldMenuStayOpened: true,
             },
             {

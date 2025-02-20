@@ -69,6 +69,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         [x: number]: () => void;
     };
     handleKeyPress: (e: any) => void;
+    handleToggleCoordinateLabels(): void;
     getPrimitiveOrConventionalMaterial(material: any, isConventionalCellShown?: boolean): any;
     _getWaveProperty(name: any): any;
     handleToggleMeasurement(measurementKey: any): void;
@@ -85,7 +86,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         content: string;
         leftIcon: import("react/jsx-runtime").JSX.Element;
         rightIcon: import("react/jsx-runtime").JSX.Element;
-        onClick: any;
+        onClick: () => void;
         shouldMenuStayOpened: boolean;
         isDivider?: undefined;
     } | {
@@ -157,41 +158,6 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     })[];
     getParametersActions: () => import("react/jsx-runtime").JSX.Element;
     getToolbarConfig(): ({
-        id: string;
-        title: string;
-        header: string;
-        leftIcon: import("react/jsx-runtime").JSX.Element;
-        actions: ({
-            id: string;
-            disabled: boolean;
-            content: string;
-            leftIcon: import("react/jsx-runtime").JSX.Element;
-            rightIcon: import("react/jsx-runtime").JSX.Element;
-            onClick: any;
-            shouldMenuStayOpened: boolean;
-            isDivider?: undefined;
-        } | {
-            id: string;
-            isDivider: boolean;
-            disabled?: undefined;
-            content?: undefined;
-            leftIcon?: undefined;
-            rightIcon?: undefined;
-            onClick?: undefined;
-            shouldMenuStayOpened?: undefined;
-        } | {
-            id: string;
-            disabled: boolean;
-            content: string;
-            leftIcon: import("react/jsx-runtime").JSX.Element;
-            onClick: () => void;
-            shouldMenuStayOpened: boolean;
-            rightIcon?: undefined;
-            isDivider?: undefined;
-        })[];
-        onClick: () => void;
-        contentObject?: undefined;
-    } | {
         id: string;
         title: string;
         header: string;

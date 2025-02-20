@@ -10,6 +10,7 @@ export const MIN_ANGLE_POINTS_DISTANCE: 0.7;
 export const MEASUREMENT_LABELS_GROUP_NAME: "Measure_Labels";
 export const ANGLE: "ANGLE";
 export const ELEMENT_LABELS_GROUP_NAME: "Element_Labels_Group";
+export const COORDINATE_LABELS_GROUP_NAME: "Coordinate_Labels_Group";
 export namespace COLORS {
     let RED: number;
     let GREEN: number;
