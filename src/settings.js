@@ -56,6 +56,8 @@ export default {
         textAlign: "center",
         textBaseline: "middle",
         scale: 1,
+        scaleWidth: 0.5,
+        scaleHeight: 0.5,
     },
     coordinateLabelsConfig: {
         areSpritesUsed: true,

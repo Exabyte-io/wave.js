@@ -57,6 +57,8 @@ declare namespace _default {
         export { textBaseline_1 as textBaseline };
         let scale_1: number;
         export { scale_1 as scale };
+        export let scaleWidth: number;
+        export let scaleHeight: number;
     }
     export namespace coordinateLabelsConfig {
         let areSpritesUsed_2: boolean;
@@ -79,8 +81,10 @@ declare namespace _default {
         export { textBaseline_2 as textBaseline };
         let scale_2: number;
         export { scale_2 as scale };
-        export let scaleWidth: number;
-        export let scaleHeight: number;
+        let scaleWidth_1: number;
+        export { scaleWidth_1 as scaleWidth };
+        let scaleHeight_1: number;
+        export { scaleHeight_1 as scaleHeight };
     }
     export namespace labelPointsConfig {
         let size: number;
@@ -132,10 +136,10 @@ declare namespace _default {
         export { textAlign_3 as textAlign };
         let textBaseline_3: string;
         export { textBaseline_3 as textBaseline };
-        let scaleWidth_1: number;
-        export { scaleWidth_1 as scaleWidth };
-        let scaleHeight_1: number;
-        export { scaleHeight_1 as scaleHeight };
+        let scaleWidth_2: number;
+        export { scaleWidth_2 as scaleWidth };
+        let scaleHeight_2: number;
+        export { scaleHeight_2 as scaleHeight };
     }
 }
 export default _default;
