@@ -5,15 +5,17 @@ export function BaseLabelsMixin(superclass: any): {
         /**
          * Creates a new texture based on a 2D canvas with the supplied text
          * @param {String} text - the text to be placed on the texture;
+         * @param {Object} config - additional options for the texture (scaleWidth, scaleHeight, etc.)
          * @return {THREE.Texture}
          */
-        createLabelTextTexture(text: string): THREE.Texture;
+        createLabelTextTexture(text: string, config?: Object): THREE.Texture;
         /**
          * Returns cached or newly created texture with label text
          * @param {String} text - the text to be placed on the texture;
+         * @param {Object} config - additional options for the texture (scaleWidth, scaleHeight, etc.)
          * @return {THREE.Texture}
          */
-        getLabelTextTexture(text: string): THREE.Texture;
+        getLabelTextTexture(text: string, config: Object): THREE.Texture;
         /**
          * Creates a sprite with a label text
          * @param {String} text - the text to be displayed on the label
@@ -21,7 +23,7 @@ export function BaseLabelsMixin(superclass: any): {
          * @param {Object} config - additional options for the sprite (scale, etc.)
          * @return {THREE.Sprite}
          */
-        createLabelSprite(text: string, name: string, config?: Object): THREE.Sprite;
+        createLabelSprite(text: string, name: string, config: Object): THREE.Sprite;
         /**
          * Creates a label as points for efficient rendering of many labels
          * @param {String} text - the text to be displayed

@@ -79,6 +79,8 @@ declare namespace _default {
         export { textBaseline_2 as textBaseline };
         let scale_2: number;
         export { scale_2 as scale };
+        export let scaleWidth: number;
+        export let scaleHeight: number;
     }
     export namespace labelPointsConfig {
         let size: number;

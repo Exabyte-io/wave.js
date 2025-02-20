@@ -53,7 +53,7 @@ export default {
         lineWidth: 2,
         textAlign: "center",
         textBaseline: "middle",
-        scale: 0.4,
+        scale: 1,
     },
     coordinateLabelsConfig: {
         areSpritesUsed: true,
@@ -65,7 +65,9 @@ export default {
         lineWidth: 1,
         textAlign: "center",
         textBaseline: "middle",
-        scale: 1.25,
+        scale: 1.5,
+        scaleWidth: 2.5,
+        scaleHeight: 0.25,
     },
     labelPointsConfig: {
         size: 1.5,

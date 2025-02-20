@@ -38,9 +38,9 @@ export function AtomLabelsMixin(superclass: any): {
          */
         toggleAtomLabels(): void;
         "__#1@#texturesCache": {};
-        createLabelTextTexture(text: string): THREE.Texture;
-        getLabelTextTexture(text: string): THREE.Texture;
-        createLabelSprite(text: string, name: string, config?: Object): THREE.Sprite;
+        createLabelTextTexture(text: string, config?: Object): THREE.Texture;
+        getLabelTextTexture(text: string, config: Object): THREE.Texture;
+        createLabelSprite(text: string, name: string, config: Object): THREE.Sprite;
         createLabelPoints(text: string, positions: Array<number>, name: string, config?: Object): THREE.Points;
         createLabelsAsPoints(verticesHashMap: any, getNameForLabel: Function, targetGroup: any, config: any): void;
         createLabelsAsSprites(verticesHashMap: any, getNameForLabel: Function, getOffsetVector: any, getUserData: any, targetGroup: any, config: any): void;
