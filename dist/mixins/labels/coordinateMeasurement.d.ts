@@ -21,21 +21,13 @@ export function CoordinateMeasurementMixin(superclass: any): {
         /**
          * Selects an atom and creates its coordinate label
          * @param {THREE.Mesh} atom - The atom to select
-         * @param {THREE.Vector3} position - The position of the atom
          */
-        selectAtomCoordinate(atom: THREE.Mesh, position: THREE.Vector3): void;
+        selectAtomCoordinate(atom: THREE.Mesh): void;
         /**
          * Deselects an atom and removes its coordinate label
          * @param {THREE.Mesh} atom - The atom to deselect
          */
         deselectAtomCoordinate(atom: THREE.Mesh): void;
-        /**
-         * Creates a single coordinate label with proper positioning and offset
-         * @param {string} text - The coordinate text to display
-         * @param {THREE.Vector3} position - The position where to place the label
-         * @returns {THREE.Sprite} The created label
-         */
-        createSingleCoordinateLabel(text: string, position: THREE.Vector3): THREE.Sprite;
         /**
          * Clears all coordinate measurements and resets atoms
          */
@@ -44,6 +36,18 @@ export function CoordinateMeasurementMixin(superclass: any): {
          * Updates coordinate measurement labels during camera movement
          */
         adjustCoordinateMeasurementLabels(): void;
+        coordinateLabelsGroup: any;
+        areCoordinateLabelsShown: any;
+        formatCoordinates(position: THREE.Vector3): Array<number>;
+        createCoordinateText(coordinates: Array<number>, separator?: string): string;
+        createSingleCoordinateLabel(text: string, position: THREE.Vector3, prefix?: string): THREE.Sprite;
+        createCoordinateVerticesHashMap(): {
+            [x: string]: number[];
+        };
+        getCoordinateLabelOffsetVector(atomPosition: THREE.Vector3, element: string): THREE.Vector3;
+        createCoordinateLabels(): void;
+        adjustCoordinateLabelsToCameraPosition(): void;
+        toggleCoordinateLabels(): void;
         "__#1@#texturesCache": {};
         createLabelTextTexture(text: string, config?: Object): THREE.Texture;
         getLabelTextTexture(text: string, config: Object): THREE.Texture;

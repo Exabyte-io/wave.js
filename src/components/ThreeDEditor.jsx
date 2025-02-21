@@ -29,6 +29,7 @@ import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
 import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
+import _ from "underscore.string";
 
 import { MEASUREMENT_KEYS } from "../enums";
 import settings from "../settings";
@@ -37,7 +38,6 @@ import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
 import { WaveComponent } from "./WaveComponent";
-import _ from "underscore";
 
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls

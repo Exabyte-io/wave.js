@@ -1,14 +1,14 @@
 import * as THREE from "three";
 
 import { COORDINATE_LABELS_GROUP_NAME } from "../../enums";
-import { BaseLabelsMixin } from "./baseLabels";
+import { CoordinateLabelsMixin } from "./coordinateLabels";
 
 /*
  * Mixin containing the logic for coordinate measurements.
  * Handles selection, label creation, and clipboard operations for coordinate measurements.
  */
 export const CoordinateMeasurementMixin = (superclass) =>
-    class extends BaseLabelsMixin(superclass) {
+    class extends CoordinateLabelsMixin(superclass) {
         constructor(config) {
             super(config);
             this.coordinateMeasurementGroup = new THREE.Group();
@@ -51,12 +51,10 @@ export const CoordinateMeasurementMixin = (superclass) =>
         toggleAtomCoordinateSelection(atom) {
             if (!this.isCoordinateMeasurementActive) return;
 
-            const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-
             if (this.selectedAtomsForCoordinates.has(atom.uuid)) {
                 this.deselectAtomCoordinate(atom);
             } else {
-                this.selectAtomCoordinate(atom, position);
+                this.selectAtomCoordinate(atom);
             }
             this.copyCoordinatesToClipboard();
             this.render();
@@ -65,24 +63,20 @@ export const CoordinateMeasurementMixin = (superclass) =>
         /**
          * Selects an atom and creates its coordinate label
          * @param {THREE.Mesh} atom - The atom to select
-         * @param {THREE.Vector3} position - The position of the atom
          */
-        selectAtomCoordinate(atom, position) {
+        selectAtomCoordinate(atom) {
             this.selectedAtomsForCoordinates.add(atom.uuid);
             atom.userData.selected = true;
             atom.material.emissive.setHex(0xff0000);
 
-            const coordinates = [
-                parseFloat(position.x.toFixed(3)),
-                parseFloat(position.y.toFixed(3)),
-                parseFloat(position.z.toFixed(3)),
-            ];
+            const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
+            const coordinates = this.formatCoordinates(position);
 
             atom.userData.coordinateArrayIndex = this.coordinatesArray.length;
             this.coordinatesArray.push(coordinates);
 
-            const text = coordinates.join(", ");
-            const label = this.createSingleCoordinateLabel(text, position);
+            const text = this.createCoordinateText(coordinates);
+            const label = this.createSingleCoordinateLabel(text, position, "measurement");
             label.visible = true;
             atom.userData.coordinateLabel = label;
             this.coordinateMeasurementGroup.add(label);
@@ -115,22 +109,6 @@ export const CoordinateMeasurementMixin = (superclass) =>
                 this.coordinateMeasurementGroup.remove(atom.userData.coordinateLabel);
                 atom.userData.coordinateLabel = null;
             }
-        }
-
-        /**
-         * Creates a single coordinate label with proper positioning and offset
-         * @param {string} text - The coordinate text to display
-         * @param {THREE.Vector3} position - The position where to place the label
-         * @returns {THREE.Sprite} The created label
-         */
-        createSingleCoordinateLabel(text, position) {
-            const name = `coordinate-measurement-${text}`;
-            const label = this.createLabelSprite(text, name, this.settings.coordinateLabelsConfig);
-            const offsetVector = this.getCoordinateLabelOffsetVector(position, text);
-            label.userData = { atomPosition: position, atomName: text };
-            label.position.addVectors(position, offsetVector);
-            label.lookAt(this.camera.position);
-            return label;
         }
 
         /**

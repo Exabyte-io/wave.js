@@ -15,6 +15,45 @@ export const CoordinateLabelsMixin = (superclass) => class extends BaseLabelsMix
         this.structureGroup.add(this.coordinateLabelsGroup);
     }
     /**
+     * Formats coordinates into an array of fixed precision values
+     * @param {THREE.Vector3} position - The position vector to format
+     * @returns {Array<number>} Array of [x,y,z] coordinates with fixed precision
+     */
+    formatCoordinates(position) {
+        const precision = this.settings.roundPrecision;
+        return [
+            Number(position.x.toFixed(precision)),
+            Number(position.y.toFixed(precision)),
+            Number(position.z.toFixed(precision)),
+        ];
+    }
+    /**
+     * Creates a display text from coordinates
+     * @param {Array<number>} coordinates - Array of [x,y,z] coordinates
+     * @param {string} separator - Separator between coordinates
+     * @returns {string} Formatted coordinate text
+     */
+    createCoordinateText(coordinates, separator = "  ") {
+        const precision = this.settings.roundPrecision;
+        return coordinates.map((coord) => coord.toFixed(precision)).join(separator);
+    }
+    /**
+     * Creates a single coordinate label with proper positioning and offset
+     * @param {string} text - The coordinate text to display
+     * @param {THREE.Vector3} position - The position where to place the label
+     * @param {string} prefix - Optional prefix for the label name
+     * @returns {THREE.Sprite} The created label
+     */
+    createSingleCoordinateLabel(text, position, prefix = "coordinate") {
+        const name = `${prefix}-label-${text}`;
+        const label = this.createLabelSprite(text, name, this.settings.coordinateLabelsConfig);
+        const offsetVector = this.getCoordinateLabelOffsetVector(position, text);
+        label.userData = { atomPosition: position, atomName: text };
+        label.position.addVectors(position, offsetVector);
+        label.lookAt(this.camera.position);
+        return label;
+    }
+    /**
      * Creates a hash map representing the positions (vertices) for atom labels.
      * The hash map uses atom names as keys and corresponding 3D positions as values.
      * If an atom name already exists in the hash map, it appends the atom's coordinates to the associated entry.
@@ -29,9 +68,9 @@ export const CoordinateLabelsMixin = (superclass) => class extends BaseLabelsMix
             group.children.forEach((atom) => {
                 if (atom instanceof THREE.Mesh) {
                     const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
+                    const coordinates = this.formatCoordinates(position);
+                    const text = this.createCoordinateText(coordinates);
                     const { x, y, z } = position;
-                    const precision = this.settings.roundPrecision;
-                    const text = `${x.toFixed(precision)}, ${y.toFixed(precision)}, ${z.toFixed(precision)}`;
                     if (!verticesHashMap[text]) {
                         verticesHashMap[text] = [x, y, z];
                         return;
