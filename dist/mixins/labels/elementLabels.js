@@ -65,7 +65,7 @@ export const ElementLabelsMixin = (superclass) => class extends BaseLabelsMixin(
             this.createLabelsAsSprites(verticesHashMap, getNameForLabel, this.getLabelOffsetVector.bind(this), (text, position) => ({ atomPosition: position, atomName: text }), this.elementLabelsGroup, this.settings.elementLabelsConfig);
         }
         else {
-            this.createLabelsAsPoints(verticesHashMap, getNameForLabel);
+            this.createLabelsAsPoints(verticesHashMap, getNameForLabel, this.elementLabelsGroup, this.settings.elementLabelsConfig);
         }
         this.render();
     }

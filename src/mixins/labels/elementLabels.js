@@ -84,7 +84,12 @@ export const ElementLabelsMixin = (superclass) =>
                     this.settings.elementLabelsConfig,
                 );
             } else {
-                this.createLabelsAsPoints(verticesHashMap, getNameForLabel);
+                this.createLabelsAsPoints(
+                    verticesHashMap,
+                    getNameForLabel,
+                    this.elementLabelsGroup,
+                    this.settings.elementLabelsConfig,
+                );
             }
             this.render();
         }
