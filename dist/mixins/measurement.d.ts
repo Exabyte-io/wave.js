@@ -189,7 +189,7 @@ export function MeasurementMixin(superclass: any): {
          * @param {THREE.Vector3} position - position of the atom
          * @param {Object} atom - the atom object
          */
-        drawCoordinateText(position: THREE.Vector3): void;
+        drawCoordinateText(position: THREE.Vector3, atom: Object): void;
         /**
          * Toggles coordinate measurement for a specific atom
          * @param {THREE.Mesh} atom - The atom to toggle coordinates for

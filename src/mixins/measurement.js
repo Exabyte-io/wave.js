@@ -727,10 +727,10 @@ export const MeasurementMixin = (superclass) =>
          * @param {THREE.Vector3} position - position of the atom
          * @param {Object} atom - the atom object
          */
-        drawCoordinateText(position) {
+        drawCoordinateText(position, atom) {
             const label = this.createLabelSprite(
                 `${position.x.toFixed(3)}, ${position.y.toFixed(3)}, ${position.z.toFixed(3)}`,
-                `label-for-${position}`,
+                `label-for-${atom.userData.symbolWithLabel}`,
                 this.settings.coordinateLabelsConfig,
             );
             label.position.set(...position);
