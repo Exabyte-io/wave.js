@@ -1,6 +1,7 @@
 export function AtomLabelsMixin(superclass: any): {
     new (config: any): {
         [x: string]: any;
+        labelTypes: string[];
         atomLabelsGroup: any;
         areAtomLabelsShown: any;
         /**
@@ -10,7 +11,7 @@ export function AtomLabelsMixin(superclass: any): {
          *
          * @returns {Object.<string, Array.<number>>} HashMap with atom names as keys and an array of vertices as values.
          */
-        createVerticesHashMap(): {
+        createVerticesHashMap(labelType: any): {
             [x: string]: number[];
         };
         /**

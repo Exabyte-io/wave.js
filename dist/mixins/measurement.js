@@ -16,11 +16,11 @@ export const MeasurementMixin = (superclass) => class extends superclass {
         this.intersected = null;
         this.atomConnections = new THREE.Group();
         this.angles = new THREE.Group();
-        this.measurementLabels = new THREE.Group();
+        this.measurementLabelsGroup = new THREE.Group();
         this.currentSelectedLine = null;
         this.atomConnections.name = ATOM_CONNECTIONS_GROUP_NAME;
         this.angles.name = "Angles";
-        this.measurementLabels.name = MEASUREMENT_LABELS_GROUP_NAME;
+        this.measurementLabelsGroup.name = MEASUREMENT_LABELS_GROUP_NAME;
     }
     destroyListeners() {
         const canvas = this.renderer.domElement;
@@ -34,6 +34,12 @@ export const MeasurementMixin = (superclass) => class extends superclass {
      */
     initListeners(updateState, settings) {
         this.measurementSettings = settings;
+        if (settings.areCoordinatesShown) {
+            this.toggleCoordinateMeasurement();
+            if (!this.scene.children.includes(this.coordinateMeasurementGroup)) {
+                this.scene.add(this.coordinateMeasurementGroup);
+            }
+        }
         clickFunction = this.onClick.bind(this, updateState);
         pointerMoveFunction = this.onPointerMove.bind(this);
         const canvas = this.renderer.domElement;
@@ -182,7 +188,7 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             }
         });
         this.selectedAtoms = this.selectedAtoms.filter((atom) => atom);
-        this.measurementLabels.remove(label);
+        this.measurementLabelsGroup.remove(label);
         this.angles.remove(this.currentSelectedLine);
         this.atomConnections.remove(connectionA);
         this.atomConnections.remove(connectionB);
@@ -213,7 +219,7 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             }
         });
         this.selectedAtoms = this.selectedAtoms.filter((atom) => atom);
-        this.measurementLabels.remove(this.currentSelectedLine.userData.label);
+        this.measurementLabelsGroup.remove(this.currentSelectedLine.userData.label);
         this.atomConnections.remove(this.currentSelectedLine);
         this.currentSelectedLine = null;
         this.render();
@@ -253,13 +259,10 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             if (intersectItem.type === "Mesh") {
                 // Handle coordinate measurement mode
                 if (this.measurementSettings.areCoordinatesShown) {
-                    this.toggleAtomCoordinateMeasurement(intersectItem);
+                    this.toggleAtomCoordinateSelection(intersectItem);
                     break;
                 }
                 const isAlreadySelected = intersectItem.userData.selected;
-                // Get atom position and draw coordinates if enabled
-                const position = new THREE.Vector3().setFromMatrixPosition(intersectItem.matrixWorld);
-                this.drawCoordinateText(position, intersectItem);
                 if (this.measurementSettings.isDistanceShown)
                     this.addIfLastNotSame(intersectItem);
                 if (this.measurementSettings.isAnglesShown)
@@ -419,8 +422,8 @@ export const MeasurementMixin = (superclass) => class extends superclass {
         line.userData.label = label;
         label.position.set(...position);
         label.visible = true;
-        this.measurementLabels.add(label);
-        this.scene.add(this.measurementLabels);
+        this.measurementLabelsGroup.add(label);
+        this.scene.add(this.measurementLabelsGroup);
         this.render();
     }
     /**
@@ -434,8 +437,8 @@ export const MeasurementMixin = (superclass) => class extends superclass {
         line.userData.label = label;
         label.position.set(...line.geometry.boundingSphere.center);
         label.visible = true;
-        this.measurementLabels.add(label);
-        this.scene.add(this.measurementLabels);
+        this.measurementLabelsGroup.add(label);
+        this.scene.add(this.measurementLabelsGroup);
         this.render();
     }
     handleSetSelected(intersectItem) {
@@ -453,11 +456,6 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             atom.userData.selected = false;
             this.selectedAtoms.pop();
             atom.material.emissive.setHex(atom.currentHex);
-            // Remove coordinate label if it exists
-            if (atom.userData.coordinateLabel) {
-                this.measurementLabels.remove(atom.userData.coordinateLabel);
-                atom.userData.coordinateLabel = null;
-            }
             this.render();
         }
     }
@@ -525,22 +523,20 @@ export const MeasurementMixin = (superclass) => class extends superclass {
                 this.deleteConnection();
             });
         }
-        else {
+        else if (this.measurementSettings && this.measurementSettings.isAnglesShown) {
             const lines = [...this.angles.children];
             lines.forEach((line) => {
                 this.currentSelectedLine = line;
                 this.deleteConnection();
             });
         }
+        else if (this.measurementSettings && this.measurementSettings.areCoordinatesShown) {
+            this.clearCoordinateMeasurements();
+        }
         if (this.selectedAtoms.length) {
             this.selectedAtoms.forEach((atom) => {
                 atom.userData.selected = false;
                 atom.material.emissive.setHex(atom.currentHex);
-                // Remove coordinate labels
-                if (atom.userData.coordinateLabel) {
-                    this.measurementLabels.remove(atom.userData.coordinateLabel);
-                    atom.userData.coordinateLabel = null;
-                }
             });
             this.selectedAtoms = [];
         }
@@ -581,34 +577,5 @@ export const MeasurementMixin = (superclass) => class extends superclass {
         const ac = this.calculateDistanceBetweenAtoms([firstAtom, lastAtom]);
         const angle = (ab ** 2 + bc ** 2 - ac ** 2) / (2 * ab * bc);
         return this.radiansToDegrees(Math.acos(angle)).toFixed(2);
-    }
-    /**
-     * Function that draws coordinate text.
-     * @param {THREE.Vector3} position - position of the atom
-     * @param {Object} atom - the atom object
-     */
-    drawCoordinateText(position, atom) {
-        const label = this.createLabelSprite(`${position.x.toFixed(3)}, ${position.y.toFixed(3)}, ${position.z.toFixed(3)}`, `label-for-${atom.uuid}`, this.settings.coordinateLabelsConfig);
-        label.position.set(...position);
-        label.visible = true;
-        atom.userData.coordinateLabel = label;
-        this.measurementLabels.add(label);
-        this.scene.add(this.measurementLabels);
-        this.render();
-    }
-    /**
-     * Toggles coordinate measurement for a specific atom
-     * @param {THREE.Mesh} atom - The atom to toggle coordinates for
-     */
-    toggleAtomCoordinateMeasurement(atom) {
-        if (atom.userData.selected) {
-            this.deSelectAtom(atom);
-        }
-        else {
-            this.handleSetSelected(atom);
-            const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-            this.drawCoordinateText(position, atom);
-        }
-        this.render();
     }
 };

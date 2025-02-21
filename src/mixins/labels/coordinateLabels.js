@@ -25,7 +25,7 @@ export const CoordinateLabelsMixin = (superclass) =>
          *
          * @returns {Object.<string, Array.<number>>} HashMap with atom names as keys and an array of vertices as values.
          */
-        createVerticesHashMap() {
+        createCoordinateVerticesHashMap() {
             const verticesHashMap = {};
             this.structureGroup.children.forEach((group) => {
                 if (group.name !== ATOM_GROUP_NAME) return;
@@ -67,7 +67,8 @@ export const CoordinateLabelsMixin = (superclass) =>
             );
             const offsetLength = this.getAtomRadiusByElement(element);
             const zOffset =
-                0.25 + this.getAtomRadiusByElement(element) * this.settings.atomRadiiScale;
+                this.settings.coordinateLabelsConfig.offsetVector[2] +
+                this.getAtomRadiusByElement(element) * this.settings.atomRadiiScale;
 
             vectorToCamera.normalize();
             vectorToCamera.multiplyScalar(offsetLength);
@@ -82,7 +83,7 @@ export const CoordinateLabelsMixin = (superclass) =>
          * depending on the settings.coordinateLabelsConfig.areSpritesUsed value
          */
         createCoordinateLabels() {
-            const verticesHashMap = this.createVerticesHashMap();
+            const verticesHashMap = this.createCoordinateVerticesHashMap();
             const getNameForLabel = (text) => `coordinate-label-for-${text}`;
 
             if (this.settings.coordinateLabelsConfig.areSpritesUsed) {

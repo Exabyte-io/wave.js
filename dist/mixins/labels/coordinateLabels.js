@@ -21,7 +21,7 @@ export const CoordinateLabelsMixin = (superclass) => class extends BaseLabelsMix
      *
      * @returns {Object.<string, Array.<number>>} HashMap with atom names as keys and an array of vertices as values.
      */
-    createVerticesHashMap() {
+    createCoordinateVerticesHashMap() {
         const verticesHashMap = {};
         this.structureGroup.children.forEach((group) => {
             if (group.name !== ATOM_GROUP_NAME)
@@ -53,7 +53,8 @@ export const CoordinateLabelsMixin = (superclass) => class extends BaseLabelsMix
     getCoordinateLabelOffsetVector(atomPosition, element) {
         const vectorToCamera = new THREE.Vector3().subVectors(this.camera.position, atomPosition);
         const offsetLength = this.getAtomRadiusByElement(element);
-        const zOffset = 0.25 + this.getAtomRadiusByElement(element) * this.settings.atomRadiiScale;
+        const zOffset = this.settings.coordinateLabelsConfig.offsetVector[2] +
+            this.getAtomRadiusByElement(element) * this.settings.atomRadiiScale;
         vectorToCamera.normalize();
         vectorToCamera.multiplyScalar(offsetLength);
         vectorToCamera.z += zOffset;
@@ -64,7 +65,7 @@ export const CoordinateLabelsMixin = (superclass) => class extends BaseLabelsMix
      * depending on the settings.coordinateLabelsConfig.areSpritesUsed value
      */
     createCoordinateLabels() {
-        const verticesHashMap = this.createVerticesHashMap();
+        const verticesHashMap = this.createCoordinateVerticesHashMap();
         const getNameForLabel = (text) => `coordinate-label-for-${text}`;
         if (this.settings.coordinateLabelsConfig.areSpritesUsed) {
             this.createLabelsAsSprites(verticesHashMap, getNameForLabel, this.getCoordinateLabelOffsetVector.bind(this), (text, position) => ({ atomPosition: position, atomName: text }), this.coordinateLabelsGroup, this.settings.coordinateLabelsConfig);

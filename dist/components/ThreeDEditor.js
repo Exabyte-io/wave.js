@@ -60,14 +60,13 @@ export class ThreeDEditor extends React.Component {
             [settings.hotKeysConfig.toggleOrbitControls]: this.handleToggleOrbitControls,
             [settings.hotKeysConfig.toggleInteractive]: this.handleToggleInteractive,
             [settings.hotKeysConfig.toggleBonds]: this.handleToggleBonds,
-            [settings.hotKeysConfig.toggleConventionalCell]: this.handleToggleConventionalCell,
             [settings.hotKeysConfig.toggleElementLabels]: this.handleToggleElementLabels,
             [settings.hotKeysConfig.toggleCoordinateLabels]: this.handleToggleCoordinateLabels,
             [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
             [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
             [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_KEYS.DISTANCE),
             [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_KEYS.ANGLE),
-            [settings.hotKeysConfig.toggleCoordinatesShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_KEYS.COORDINATE),
+            [settings.hotKeysConfig.toggleCopyCoordinatesShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_KEYS.COORDINATE),
             [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
         };
         this.handleKeyPress = (e) => {
@@ -141,7 +140,7 @@ export class ThreeDEditor extends React.Component {
                 {
                     id: "toggle-cell",
                     disabled: false,
-                    content: "Conventional Cell [C]",
+                    content: "Conventional Cell",
                     leftIcon: _jsx(FormatShapes, {}),
                     rightIcon: this.getCheckmark(isConventionalCellShown),
                     onClick: this.handleToggleConventionalCell,
@@ -210,7 +209,7 @@ export class ThreeDEditor extends React.Component {
                 },
                 {
                     id: "Coordinates",
-                    content: "Coordinates [C]",
+                    content: "Copy Coordinates [C]",
                     rightIcon: this.getCheckmark(areCoordinatesShown),
                     leftIcon: _jsx(GpsFixed, {}),
                     onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.COORDINATE),

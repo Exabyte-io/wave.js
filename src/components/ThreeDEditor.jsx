@@ -159,7 +159,6 @@ export class ThreeDEditor extends React.Component {
         [settings.hotKeysConfig.toggleOrbitControls]: this.handleToggleOrbitControls,
         [settings.hotKeysConfig.toggleInteractive]: this.handleToggleInteractive,
         [settings.hotKeysConfig.toggleBonds]: this.handleToggleBonds,
-        [settings.hotKeysConfig.toggleConventionalCell]: this.handleToggleConventionalCell,
         [settings.hotKeysConfig.toggleElementLabels]: this.handleToggleElementLabels,
         [settings.hotKeysConfig.toggleCoordinateLabels]: this.handleToggleCoordinateLabels,
         [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
@@ -172,7 +171,7 @@ export class ThreeDEditor extends React.Component {
             this,
             MEASUREMENT_KEYS.ANGLE,
         ),
-        [settings.hotKeysConfig.toggleCoordinatesShown]: this.handleToggleMeasurement.bind(
+        [settings.hotKeysConfig.toggleCopyCoordinatesShown]: this.handleToggleMeasurement.bind(
             this,
             MEASUREMENT_KEYS.COORDINATE,
         ),
@@ -493,7 +492,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-cell",
                 disabled: false,
-                content: "Conventional Cell [C]",
+                content: "Conventional Cell",
                 leftIcon: <FormatShapes />,
                 rightIcon: this.getCheckmark(isConventionalCellShown),
                 onClick: this.handleToggleConventionalCell,
@@ -563,7 +562,7 @@ export class ThreeDEditor extends React.Component {
             },
             {
                 id: "Coordinates",
-                content: "Coordinates [C]",
+                content: "Copy Coordinates [C]",
                 rightIcon: this.getCheckmark(areCoordinatesShown),
                 leftIcon: <GpsFixed />,
                 onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.COORDINATE),

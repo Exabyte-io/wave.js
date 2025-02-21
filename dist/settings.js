@@ -71,6 +71,7 @@ export default {
         scale: 1.5,
         scaleWidth: 2.5,
         scaleHeight: 0.25,
+        offsetVector: [0, 0, 0.25],
     },
     labelPointsConfig: {
         size: 1.5,
@@ -92,12 +93,12 @@ export default {
         toggleOrbitControls: "o",
         toggleInteractive: "i",
         toggleBonds: "b",
-        toggleConventionalCell: "c",
         toggleElementLabels: "e",
         toggleCoordinateLabels: "k",
         resetViewer: "r",
         toggleDistanceShown: "d",
         toggleAnglesShown: "a",
+        toggleCopyCoordinatesShown: "c",
         deleteConnection: "x",
     },
     measurementLabelsConfig: {

@@ -10,7 +10,7 @@ export function CoordinateLabelsMixin(superclass: any): {
          *
          * @returns {Object.<string, Array.<number>>} HashMap with atom names as keys and an array of vertices as values.
          */
-        createVerticesHashMap(): {
+        createCoordinateVerticesHashMap(): {
             [x: string]: number[];
         };
         /**

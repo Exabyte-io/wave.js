@@ -86,6 +86,7 @@ declare namespace _default {
         export { scaleWidth_1 as scaleWidth };
         let scaleHeight_1: number;
         export { scaleHeight_1 as scaleHeight };
+        export let offsetVector: number[];
     }
     export namespace labelPointsConfig {
         let size: number;
@@ -110,12 +111,12 @@ declare namespace _default {
         let toggleOrbitControls: string;
         let toggleInteractive: string;
         let toggleBonds: string;
-        let toggleConventionalCell: string;
         let toggleElementLabels: string;
         let toggleCoordinateLabels: string;
         let resetViewer: string;
         let toggleDistanceShown: string;
         let toggleAnglesShown: string;
+        let toggleCopyCoordinatesShown: string;
         let deleteConnection: string;
     }
     export namespace measurementLabelsConfig {
