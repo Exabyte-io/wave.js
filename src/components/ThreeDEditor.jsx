@@ -37,6 +37,7 @@ import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
 import { WaveComponent } from "./WaveComponent";
+import _ from "underscore";
 
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
@@ -445,7 +446,9 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "rotate-zoom",
                 disabled: false,
-                content: "Rotate/Zoom [O]",
+                content: `Rotate/Zoom [${_.capitalize(
+                    settings.hotKeysConfig.toggleOrbitControls,
+                )}]`,
                 leftIcon: <ThreeDRotation />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areOrbitControlsEnabled")),
                 onClick: this.handleToggleOrbitControls,
@@ -483,7 +486,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-bonds",
                 disabled: false,
-                content: "Bonds [B]",
+                content: `Bonds [${_.capitalize(settings.hotKeysConfig.toggleBonds)}]`,
                 leftIcon: <Dehaze />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("isDrawBondsEnabled")),
                 onClick: this.handleToggleBonds,
@@ -501,7 +504,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-labels",
                 disabled: false,
-                content: "Element Labels [E]",
+                content: `Elements [${_.capitalize(settings.hotKeysConfig.toggleElementLabels)}]`,
                 leftIcon: <Spellcheck />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areElementLabelsShown")),
                 onClick: this.handleToggleElementLabels,
@@ -510,7 +513,9 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-coordinate-labels",
                 disabled: false,
-                content: "Coordinate Labels [K]",
+                content: `Coordinates [${_.capitalize(
+                    settings.hotKeysConfig.toggleCoordinateLabels,
+                )}]`,
                 leftIcon: <Spellcheck />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areCoordinateLabelsShown")),
                 onClick: this.handleToggleCoordinateLabels,
@@ -532,7 +537,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "reset-view",
                 disabled: false,
-                content: "Reset View [R]",
+                content: `Reset View [${_.capitalize(settings.hotKeysConfig.resetViewer)}]`,
                 leftIcon: <Replay />,
                 onClick: this.handleResetViewer,
                 shouldMenuStayOpened: true,
@@ -546,7 +551,7 @@ export class ThreeDEditor extends React.Component {
         return [
             {
                 id: "Distances",
-                content: "Distances [D]",
+                content: `Distances [${_.capitalize(settings.hotKeysConfig.toggleDistanceShown)}]`,
                 rightIcon: this.getCheckmark(isDistanceShown),
                 leftIcon: <HeightIcon />,
                 onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.DISTANCE),
@@ -554,7 +559,7 @@ export class ThreeDEditor extends React.Component {
             },
             {
                 id: "Angles",
-                content: "Angles [A]",
+                content: `Angles [${_.capitalize(settings.hotKeysConfig.toggleAnglesShown)}]`,
                 rightIcon: this.getCheckmark(isAnglesShown),
                 leftIcon: <LooksIcon />,
                 onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.ANGLE),
@@ -562,7 +567,9 @@ export class ThreeDEditor extends React.Component {
             },
             {
                 id: "Coordinates",
-                content: "Copy Coordinates [C]",
+                content: `Copy Coordinates [${_.capitalize(
+                    settings.hotKeysConfig.toggleCopyCoordinatesShown,
+                )}]`,
                 rightIcon: this.getCheckmark(areCoordinatesShown),
                 leftIcon: <GpsFixed />,
                 onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.COORDINATE),
@@ -570,7 +577,9 @@ export class ThreeDEditor extends React.Component {
             },
             {
                 id: "Delete",
-                content: "Delete connection [X]",
+                content: `Delete connection [${_.capitalize(
+                    settings.hotKeysConfig.deleteConnection,
+                )}]`,
                 leftIcon: <DeleteIcon />,
                 onClick: this.handleDeleteConnection,
                 shouldMenuStayOpened: true,

@@ -78,7 +78,6 @@ export const CoordinateMeasurementMixin = (superclass) =>
                 parseFloat(position.z.toFixed(3)),
             ];
 
-            // Add coordinates to array and store index in atom userData
             atom.userData.coordinateArrayIndex = this.coordinatesArray.length;
             this.coordinatesArray.push(coordinates);
 
@@ -98,10 +97,8 @@ export const CoordinateMeasurementMixin = (superclass) =>
             atom.userData.selected = false;
             atom.material.emissive.setHex(atom.currentHex || 0);
 
-            // Remove coordinates from array
             if (typeof atom.userData.coordinateArrayIndex === "number") {
                 this.coordinatesArray.splice(atom.userData.coordinateArrayIndex, 1);
-                // Update indices for remaining atoms
                 this.selectedAtomsForCoordinates.forEach((uuid) => {
                     const otherAtom = this.scene.getObjectByProperty("uuid", uuid);
                     if (

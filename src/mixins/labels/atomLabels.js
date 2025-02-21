@@ -3,6 +3,11 @@ import * as THREE from "three";
 import { ATOM_GROUP_NAME, LABELS_GROUP_NAME } from "../../enums";
 import { BaseLabelsMixin } from "./baseLabels";
 
+const labelTypes = {
+    element: "element",
+    coordinate: "coordinate",
+};
+
 /*
  * Mixin containing the logic for dealing with atom-specific labels.
  * Extends the base label functionality with features specific to atom labeling.
@@ -11,11 +16,13 @@ export const AtomLabelsMixin = (superclass) =>
     class extends BaseLabelsMixin(superclass) {
         constructor(config) {
             super(config);
+            this.labelTypes = [labelTypes.element, labelTypes.coordinate];
             this.atomLabelsGroup = new THREE.Group();
             this.atomLabelsGroup.name = LABELS_GROUP_NAME;
             this.areAtomLabelsShown = this.settings.areAtomLabelsInitiallyShown;
             this.atomLabelsGroup.visible = this.areAtomLabelsShown;
             this.structureGroup.add(this.atomLabelsGroup);
+
         }
 
         /**
@@ -25,7 +32,7 @@ export const AtomLabelsMixin = (superclass) =>
          *
          * @returns {Object.<string, Array.<number>>} HashMap with atom names as keys and an array of vertices as values.
          */
-        createVerticesHashMap() {
+        createVerticesHashMap(labelType, ) {
             const verticesHashMap = {};
             this.structureGroup.children.forEach((group) => {
                 if (group.name !== ATOM_GROUP_NAME) return;
