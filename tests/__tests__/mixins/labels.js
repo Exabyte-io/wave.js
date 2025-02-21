@@ -49,7 +49,7 @@ describe("Atom labels", () => {
         const basisAtomsNumber = wave.structure.basis.elements.length;
         const doAllAtomsHaveLabels = atoms.every((atom) => {
             const atomName = atom.userData.symbolWithLabel;
-            const labelName = `labels-for-${atomName}`;
+            const labelName = `element-label-for-${atomName}`;
             const labelPointsByAtomName = labels.find(
                 (labelPoints) => labelPoints.name === labelName,
             );
@@ -74,14 +74,16 @@ describe("Atom labels", () => {
         expect(doAllAtomsHaveLabels).toBeTruthy();
     });
 
-    test("Initial labels visibility matches the settings", async () => {
-        const { areLabelsInitiallyShown } = wave.settings;
-        expect(labelGroup.visible === areLabelsInitiallyShown).toBeTruthy();
+    test("Initial element labels visibility matches the settings", async () => {
+        const { areElementLabelsInitiallyShown } = wave.settings;
+        expect(labelGroup.visible === areElementLabelsInitiallyShown).toBeTruthy();
     });
 
-    test("Labels visibility can be toggled", () => {
-        const { areLabelsInitiallyShown } = wave.settings;
+    test("Element labels visibility can be toggled", () => {
+        const { areElementLabelsInitiallyShown } = wave.settings;
         wave.toggleElementLabels();
-        expect(labels.every((label) => label.visible === !areLabelsInitiallyShown)).toBeTruthy();
+        expect(
+            labels.every((label) => label.visible === !areElementLabelsInitiallyShown),
+        ).toBeTruthy();
     });
 });

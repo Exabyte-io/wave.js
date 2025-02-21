@@ -532,6 +532,9 @@ export const MeasurementMixin = (superclass) => class extends superclass {
         }
         else if (this.measurementSettings && this.measurementSettings.areCoordinatesShown) {
             this.clearCoordinateMeasurements();
+            while (this.measurementLabelsGroup.children.length) {
+                this.measurementLabelsGroup.remove(this.measurementLabelsGroup.children[0]);
+            }
         }
         if (this.selectedAtoms.length) {
             this.selectedAtoms.forEach((atom) => {
@@ -539,6 +542,9 @@ export const MeasurementMixin = (superclass) => class extends superclass {
                 atom.material.emissive.setHex(atom.currentHex);
             });
             this.selectedAtoms = [];
+        }
+        while (this.measurementLabelsGroup.children.length) {
+            this.measurementLabelsGroup.remove(this.measurementLabelsGroup.children[0]);
         }
         this.render();
     }

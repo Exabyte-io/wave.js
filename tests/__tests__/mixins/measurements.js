@@ -40,13 +40,13 @@ describe("distance measurements", () => {
     test("onClick event for 2 atoms", async () => {
         const [atomA, atomB] = atoms;
         makeClickOnTwoAtoms(wave, atoms, stateUpdate);
-        const { selectedAtoms, atomConnections, measurementLabels } = wave;
+        const { selectedAtoms, atomConnections, measurementLabelsGroup } = wave;
 
         expect(selectedAtoms.length).toEqual(2);
         expect(selectedAtoms[0]).toEqual(atomA);
         expect(selectedAtoms[1]).toEqual(atomB);
         expect(atomConnections.children.length).toEqual(1);
-        expect(measurementLabels.children.length).toEqual(1);
+        expect(measurementLabelsGroup.children.length).toEqual(1);
     });
 
     test("onClick on connection line between atoms", async () => {
