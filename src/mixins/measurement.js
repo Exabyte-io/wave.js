@@ -727,35 +727,14 @@ export const MeasurementMixin = (superclass) =>
          * @param {THREE.Vector3} position - position of the atom
          * @param {Object} atom - the atom object
          */
-        drawCoordinateText(position, atom) {
-            // TODO: Remove this label creation and reuse CoordianteLabelsMixin solution
-            if (atom.userData.coordinateLabel) {
-                this.measurementLabels.remove(atom.userData.coordinateLabel);
-            }
-
-            if (!this.measurementSettings.areCoordinatesShown) {
-                return;
-            }
-
+        drawCoordinateText(position) {
             const label = this.createLabelSprite(
                 `${position.x.toFixed(3)}, ${position.y.toFixed(3)}, ${position.z.toFixed(3)}`,
-                `coordinates-for-${atom.uuid}`,
+                `label-for-${position}`,
                 this.settings.coordinateLabelsConfig,
             );
-
-            const labelPosition = position.clone();
-            const atomRadius = this.getAtomRadiusByElement(
-                atom.userData.symbolWithLabel,
-                this.settings.atomRadiiScale,
-            );
-            labelPosition.z += atomRadius * 1.2;
-
-            label.position.copy(labelPosition);
+            label.position.set(...position);
             label.visible = true;
-            label.lookAt(this.camera.position);
-
-            // Store reference to label in atom's userData
-            atom.userData.coordinateLabel = label;
             this.measurementLabels.add(label);
             this.scene.add(this.measurementLabels);
             this.render();
