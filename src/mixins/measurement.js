@@ -656,6 +656,9 @@ export const MeasurementMixin = (superclass) =>
                 });
             } else if (this.measurementSettings && this.measurementSettings.areCoordinatesShown) {
                 this.clearCoordinateMeasurements();
+                while (this.measurementLabelsGroup.children.length) {
+                    this.measurementLabelsGroup.remove(this.measurementLabelsGroup.children[0]);
+                }
             }
 
             if (this.selectedAtoms.length) {
@@ -665,6 +668,11 @@ export const MeasurementMixin = (superclass) =>
                 });
                 this.selectedAtoms = [];
             }
+
+            while (this.measurementLabelsGroup.children.length) {
+                this.measurementLabelsGroup.remove(this.measurementLabelsGroup.children[0]);
+            }
+
             this.render();
         }
 
