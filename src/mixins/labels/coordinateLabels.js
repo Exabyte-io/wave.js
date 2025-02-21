@@ -36,7 +36,10 @@ export const CoordinateLabelsMixin = (superclass) =>
                             atom.matrixWorld,
                         );
                         const { x, y, z } = position;
-                        const text = `${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}`;
+                        const precision = this.settings.roundPrecision;
+                        const text = `${x.toFixed(precision)}, ${y.toFixed(precision)}, ${z.toFixed(
+                            precision,
+                        )}`;
                         if (!verticesHashMap[text]) {
                             verticesHashMap[text] = [x, y, z];
                             return;

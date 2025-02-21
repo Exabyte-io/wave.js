@@ -588,9 +588,10 @@ export const MeasurementMixin = (superclass) => class extends superclass {
      * @param {Object} atom - the atom object
      */
     drawCoordinateText(position, atom) {
-        const label = this.createLabelSprite(`${position.x.toFixed(3)}, ${position.y.toFixed(3)}, ${position.z.toFixed(3)}`, `label-for-${atom.userData.symbolWithLabel}`, this.settings.coordinateLabelsConfig);
+        const label = this.createLabelSprite(`${position.x.toFixed(3)}, ${position.y.toFixed(3)}, ${position.z.toFixed(3)}`, `label-for-${atom.uuid}`, this.settings.coordinateLabelsConfig);
         label.position.set(...position);
         label.visible = true;
+        atom.userData.coordinateLabel = label;
         this.measurementLabels.add(label);
         this.scene.add(this.measurementLabels);
         this.render();
