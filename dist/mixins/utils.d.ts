@@ -1,4 +1,4 @@
-export function createRotatingGif(wave: any, options?: {}): Promise<void>;
+export function createRotatingGifData(wave: any, options?: {}): Promise<any>;
 export function UtilsMixin(superclass: any): {
     new (): {
         [x: string]: any;

@@ -14,7 +14,6 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         measurementsSettings: {
             isDistanceShown: boolean;
             isAnglesShown: boolean;
-            isCoordinatesShown: boolean;
             measurementLabelsShown: boolean;
             distance: number;
             angle: number;
@@ -53,7 +52,6 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleChemicalConnectivityFactorChange(e: any): void;
     handleToggleDistanceShown(): void;
     handleToggleAnglesShown(): void;
-    handleToggleCoordinatesShown(): void;
     handleSetState(newState: any): void;
     handleDeleteConnection(): void;
     handleResetMeasurements(): void;
@@ -61,7 +59,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     onMeasurementParam(param: any, offParam: any): void;
     addHotKeyListener(): void;
     removeHotKeyListener(): void;
-    handleStartGifRecording(downloadPath: any, rotationSpeed?: number, frameDuration?: number): void;
+    handleStartGifRecording(downloadPath: any, rotationSpeed?: number, frameDuration?: number): Promise<void>;
     handleMessage: (event: any) => void;
     doWaveFunc(funcStr: any): void;
     handleSetCameraToFitCell(): void;

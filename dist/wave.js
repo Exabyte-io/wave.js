@@ -2,6 +2,7 @@
 import "./stylesheets/main.css";
 import { mix } from "mixwith";
 import * as THREE from "three";
+import { saveImageDataToFile } from "@exabyte-io/cove.js/dist/utils/downloader";
 import { ATOM_GROUP_NAME } from "./enums";
 import { AtomsMixin } from "./mixins/atoms";
 import { BondsMixin } from "./mixins/bonds";
@@ -12,10 +13,9 @@ import { ControlsMixin } from "./mixins/controls";
 import { LabelsMixin } from "./mixins/labels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
-import { createRotatingGif } from "./mixins/utils";
+import { createRotatingGifData } from "./mixins/utils";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
-import { saveImageDataToFile } from "./utils";
 const TV3 = THREE.Vector3;
 const TCo = THREE.Color;
 /*
@@ -209,7 +209,10 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         this.doFunc = this.doFunc.bind(this);
     }
     takeScreenshot() {
-        saveImageDataToFile(this.renderer.domElement.toDataURL("image/png"));
+        saveImageDataToFile(this.getScreenshotImage());
+    }
+    getScreenshotImage() {
+        return this.renderer.domElement.toDataURL("image/png");
     }
     clearView() {
         while (this.structureGroup.children.length) {
@@ -277,25 +280,8 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         func(this);
     } // for scripting
     async takeGifScreenshot(options = {}) {
-        try {
-            const gifDataUrl = await createRotatingGif(this, options);
-            // Use custom filename from options or fall back to default
-            const fileName = options.downloadPath
-                ? options.downloadPath.split("/").pop() // Extract filename from path
-                : (this._structure.name || this._structure.formula || "wave-visualization") +
-                    ".gif";
-            // Download the GIF
-            const a = document.createElement("a");
-            a.href = gifDataUrl;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            return gifDataUrl;
-        }
-        catch (error) {
-            console.error("Error creating GIF:", error);
-            throw error;
-        }
+        const gifDataUrl = await createRotatingGifData(this, options);
+        const fileName = this._structure.name || this._structure.formula || "wave-visualization" + ".gif";
+        saveImageDataToFile(gifDataUrl, fileName);
     }
 }

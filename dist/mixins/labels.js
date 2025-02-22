@@ -6,7 +6,6 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 import * as THREE from "three";
 import { ATOM_GROUP_NAME, LABELS_GROUP_NAME } from "../enums";
 // eslint-disable-next-line import/no-cycle
-import { setParameters } from "../utils";
 /*
  * Mixin containing the logic for dealing with atom labels.
  * Dynamically draws labels over atoms.
@@ -35,9 +34,9 @@ export const LabelsMixin = (superclass) => { var _texturesCache, _a; return _a =
             const basicTextSize = textWidth > fontSize ? textWidth : fontSize;
             const textSizePowOf2 = 2 ** Math.floor(Math.log2(basicTextSize));
             const scaledFontSize = (fontSize * textSizePowOf2) / basicTextSize;
-            setParameters(canvas, { width: textSizePowOf2, height: textSizePowOf2 });
+            Object.assign(canvas, { width: textSizePowOf2, height: textSizePowOf2 });
             const scaledFont = `${fontWeight} ${scaledFontSize}px ${fontFace}`;
-            setParameters(context, { font: scaledFont, ...textParams });
+            Object.assign(context, { font: scaledFont, ...textParams });
             context.fillText(text, context.canvas.width / 2, (context.canvas.height / 2) * 1.15);
             context.strokeText(text, context.canvas.width / 2, (context.canvas.height / 2) * 1.15);
             const texture = new THREE.Texture(canvas);
