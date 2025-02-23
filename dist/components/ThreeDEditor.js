@@ -4,6 +4,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
 import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
 import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
+import { AlertProvider } from "@exabyte-io/cove.js/src/theme/provider";
 import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
@@ -637,7 +638,7 @@ export class ThreeDEditor extends React.Component {
         return (_jsxs("div", { className: "wave-component-holder", style: { position: "relative", height: "100%" }, children: [this.renderCoverDiv(), _jsx(IconsToolbar, { toolbarConfig: this.getToolbarConfig(), isInteractive: isInteractive, handleToggleInteractive: this.handleToggleInteractive }), this.renderWaveComponent()] }));
     }
     render() {
-        return (_jsx(ThemeProvider, { theme: DarkMaterialUITheme, children: _jsx(ScopedCssBaseline, { enableColorScheme: true, style: { height: "100%" }, children: this.renderWaveOrThreejsEditorModal() }) }));
+        return (_jsx(ThemeProvider, { theme: DarkMaterialUITheme, children: _jsx(ScopedCssBaseline, { enableColorScheme: true, style: { height: "100%" }, children: _jsx(AlertProvider, { children: this.renderWaveOrThreejsEditorModal() }) }) }));
     }
     doWaveFunc(funcStr) {
         if (!this.WaveComponent || !this.WaveComponent.wave) {

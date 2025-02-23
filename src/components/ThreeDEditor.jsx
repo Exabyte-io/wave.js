@@ -4,6 +4,7 @@
 import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
 import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
 import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
+import { AlertProvider } from "@exabyte-io/cove.js/src/theme/provider";
 import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
@@ -748,7 +749,7 @@ export class ThreeDEditor extends React.Component {
         return (
             <ThemeProvider theme={DarkMaterialUITheme}>
                 <ScopedCssBaseline enableColorScheme style={{ height: "100%" }}>
-                    {this.renderWaveOrThreejsEditorModal()}
+                    <AlertProvider>{this.renderWaveOrThreejsEditorModal()}</AlertProvider>
                 </ScopedCssBaseline>
             </ThemeProvider>
         );

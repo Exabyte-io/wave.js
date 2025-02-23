@@ -1,8 +1,6 @@
+import { showInfoAlert, showWarningAlert, showSuccessAlert, } from "@exabyte-io/cove.js/dist/other/alerts";
 import { saveImageDataToFile } from "@exabyte-io/cove.js/dist/utils/downloader";
 import { createGIFAsync } from "./utils";
-/*
- * Mixin containing the logic for dealing with the images, GIFs.
- */
 export const ImageMixin = (superclass) => class extends superclass {
     takeScreenshot() {
         saveImageDataToFile(this.getScreenshotImage());
@@ -12,48 +10,60 @@ export const ImageMixin = (superclass) => class extends superclass {
         canvas.getContext("2d", { willReadFrequently: true });
         return canvas.toDataURL("image/png");
     }
+    async updateScene() {
+        return new Promise((resolve) => {
+            const checkRender = () => {
+                this.renderer.render(this.scene, this.camera); // Ensure scene updates
+                requestAnimationFrame(() => resolve()); // Wait for the next frame
+            };
+            checkRender();
+        });
+    }
     async createRotatingGifData(options = {}) {
-        const sampleInterval = options.sampleInterval || 20; // parts of image in pixels
-        const totalGifDuration = options.totalDuration || 3; // seconds
-        const animationDuration = options.animationDuration || 1; // seconds
-        const FPS = 60; // frames per second
-        const animationFrames = FPS * animationDuration;
-        const totalGifFrames = animationFrames;
-        const autoRotateSpeed = FPS / animationDuration; // RPM
-        const frameDuration = totalGifDuration / totalGifFrames;
-        // const animationStep = animationDuration / totalFrames;
+        const sampleInterval = options.sampleInterval || 20; // Parts of image in pixels
+        const totalGifDuration = options.totalDuration || 3; // Seconds
+        const animationDuration = options.animationDuration || 1; // Seconds
+        const totalFrames = options.totalFrames || 60; // Number of frames in GIF
+        const autoRotateSpeed = 60 / animationDuration; // RPM
+        const frameDuration = totalGifDuration / totalFrames;
         const canvas = this.renderer.domElement;
         canvas.willReadFrequently = true;
         const { width, height } = canvas;
         if (this.orbitControls.autoRotate) {
-            // eslint-disable-next-line no-alert
-            alert("Please disable auto-rotation before creating a GIF.");
-            return;
+            showWarningAlert("Please disable auto-rotation before creating a GIF.");
+            return null;
         }
         // Store original auto-rotate settings
         const originalSpeed = this.orbitControls.autoRotateSpeed;
         this.orbitControls.autoRotateSpeed = autoRotateSpeed;
         this.orbitControls.autoRotate = true;
         const frames = [];
-        for (let i = 0; i < animationFrames; i += 1) {
-            this.performOrbitControlsAnimation(() => frames.push(this.getScreenshotImage()));
+        for (let i = 0; i < totalFrames; i += 1) {
+            this.orbitControls.update(); // Move scene to new position
+            // eslint-disable-next-line no-await-in-loop
+            await this.updateScene(); // Wait for rendering to finish
+            frames.push(this.getScreenshotImage()); // Capture screenshot
         }
+        showInfoAlert("GIF is being created. Please wait...");
         const gifData = await createGIFAsync({
-            // ...options,
             images: frames,
             gifWidth: width,
             gifHeight: height,
             sampleInterval,
             frameDuration,
         });
-        this.orbitControls.rotateSpeed = originalSpeed;
+        // Restore original rotation settings
+        this.orbitControls.autoRotateSpeed = originalSpeed;
         this.orbitControls.autoRotate = false;
         canvas.willReadFrequently = false;
         return gifData;
     }
     async takeGifScreenshot(options = {}) {
         const gifDataUrl = await this.createRotatingGifData(options);
+        if (!gifDataUrl)
+            return;
         const fileName = (this._structure.name || this._structure.formula || "wave-visualization") + ".gif";
+        showSuccessAlert("GIF is created. Proceeding to download.");
         saveImageDataToFile(gifDataUrl, fileName);
     }
 };
