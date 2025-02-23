@@ -497,7 +497,7 @@ body {
 }
 
 .three-renderer {
-    height: 100vh;
+    height: 100%;
 }
 
 .three-renderer canvas:first-child {

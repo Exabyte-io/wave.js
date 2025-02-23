@@ -732,7 +732,7 @@ export class ThreeDEditor extends React.Component {
         const { isInteractive } = this.state;
 
         return (
-            <div style={{ position: "relative" }}>
+            <div className="wave-component-holder" style={{ position: "relative", height: "100%" }}>
                 {this.renderCoverDiv()}
                 <IconsToolbar
                     toolbarConfig={this.getToolbarConfig()}
@@ -747,7 +747,7 @@ export class ThreeDEditor extends React.Component {
     render() {
         return (
             <ThemeProvider theme={DarkMaterialUITheme}>
-                <ScopedCssBaseline enableColorScheme>
+                <ScopedCssBaseline enableColorScheme style={{ height: "100%" }}>
                     {this.renderWaveOrThreejsEditorModal()}
                 </ScopedCssBaseline>
             </ThemeProvider>

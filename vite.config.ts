@@ -4,6 +4,8 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vite.dev/config/
 export default defineConfig({
+    // per https://stackoverflow.com/questions/74518887/blank-page-when-deploying-a-react-app-to-github-pages-and-vite
+    base: "/wave.js/",
     plugins: [
         react({
             jsxImportSource: "@emotion/react",
@@ -22,10 +24,11 @@ export default defineConfig({
     build: {
         outDir: "build",
         rollupOptions: {
+            // external: ["src/app.jsx"], // Exclude app.jsx from the bundle
             output: {
                 entryFileNames: "main.js", // Name the main output bundle as main.js
                 chunkFileNames: "[name]-[hash].js", // Optional: Name for dynamic imports or shared chunks
-                assetFileNames: "[name]-[hash].[ext]", // Optional: Name for assets like CSS or images
+                assetFileNames: "main.[ext]", // Optional: Name for assets like CSS or images
             },
         },
     },
