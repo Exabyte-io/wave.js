@@ -67,67 +67,24 @@ export const ApplyGlow = (meshObjet, baseColor, offset = 0) => {
     }
 };
 
-function createGIFAsync(options) {
+export function createGIFAsync({
+    images,
+    gifWidth,
+    gifHeight,
+    numFrames,
+    frameDuration,
+    sampleInterval,
+}) {
     return new Promise((resolve, reject) => {
-        gifshot.createGIF(options, (obj) => {
-            if (!obj.error) {
-                resolve(obj.image); // Resolve with the GIF data URL
-            } else {
-                reject(obj.error); // Reject with the error
-            }
-        });
+        gifshot.createGIF(
+            { images, gifWidth, gifHeight, numFrames, frameDuration, sampleInterval },
+            (obj) => {
+                if (!obj.error) {
+                    resolve(obj.image); // Resolve with the GIF data URL
+                } else {
+                    reject(obj.error); // Reject with the error
+                }
+            },
+        );
     });
-}
-
-export async function createRotatingGif(wave, options = {}) {
-    const ROTATION_SPEED = options.rotationSpeed || 60; // RPM
-    const frameDuration = options.frameDuration || 0.05; // seconds
-    const sampleInterval = ROTATION_SPEED * frameDuration;
-    const canvas = wave.renderer.domElement;
-    const frames = [];
-    let frameCount = 0;
-    const totalFrames = ROTATION_SPEED;
-    const { width } = canvas;
-    const { height } = canvas;
-
-    // Store original auto-rotate settings
-    const wasAutoRotating = wave.orbitControls.autoRotate;
-    const originalSpeed = wave.orbitControls.autoRotateSpeed;
-
-    // Enable rotation
-    wave.orbitControls.autoRotate = true;
-    wave.orbitControls.autoRotateSpeed = ROTATION_SPEED;
-
-    const captureFrame = () => {
-        wave.render();
-        frames.push(canvas.toDataURL("image/png"));
-    };
-
-    const createGif = async () => {
-        console.log("Creating GIF from frames...");
-        // Restore original rotation settings
-        wave.orbitControls.autoRotateSpeed = originalSpeed;
-        wave.orbitControls.autoRotate = wasAutoRotating;
-
-        return createGIFAsync({
-            images: frames,
-            gifWidth: width,
-            gifHeight: height,
-            numFrames: totalFrames,
-            frameDuration,
-            sampleInterval,
-        });
-    };
-
-    const animate = async () => {
-        if (frameCount < totalFrames) {
-            wave.orbitControls.update();
-            captureFrame();
-            frameCount += 1;
-            requestAnimationFrame(animate);
-        } else {
-            await createGif();
-        }
-    };
-    await animate();
 }

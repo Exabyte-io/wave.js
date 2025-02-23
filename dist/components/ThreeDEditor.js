@@ -3,6 +3,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 // import "../MuiClassNameSetup";
 import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
 import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
+import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
 import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
@@ -29,7 +30,6 @@ import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
 import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
-import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
 import settings from "../settings";
 import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";
@@ -262,29 +262,6 @@ export class ThreeDEditor extends React.Component {
             const { viewerSettings } = this.state;
             return (_jsx(ParametersMenu, { viewerSettings: viewerSettings, handleSphereRadiusChange: this.handleSphereRadiusChange, handleCellRepetitionsChange: this.handleCellRepetitionsChange, handleChemicalConnectivityFactorChange: this.handleChemicalConnectivityFactorChange }));
         };
-        this.handleMessage = (event) => {
-            if (event.data && event.data.material) {
-                try {
-                    const newMaterial = new Made.Material(event.data.material);
-                    this.setState({
-                        originalMaterial: newMaterial,
-                        material: newMaterial.clone(),
-                    }, () => {
-                        // Force Wave component to update after state change
-                        if (this.WaveComponent) {
-                            this.WaveComponent.wave.rebuildScene();
-                        }
-                    });
-                }
-                catch (error) {
-                    alert("Error creating material: " + error.message);
-                }
-            }
-            else if (event.data && event.data.action && this[event.data.action]) {
-                const { action, parameters } = event.data;
-                this[action](...parameters);
-            }
-        };
         const { boundaryConditions, isConventionalCellShown, material } = this.props;
         // TODO : overloading a bunch of props and state attributes here..
         this.state = {
@@ -349,19 +326,16 @@ export class ThreeDEditor extends React.Component {
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
-        this.handleMessage = this.handleMessage.bind(this);
         this.doWaveFunc = this.doWaveFunc.bind(this);
         this.handleSetCameraToFitCell = this.handleSetCameraToFitCell.bind(this);
     }
     componentDidMount() {
         this.addHotKeyListener();
-        window.addEventListener("message", this.handleMessage);
     }
     componentWillUnmount() {
         this.handleResetMeasurements();
         this.WaveComponent.wave.destroyListeners();
         this.removeHotKeyListener();
-        window.removeEventListener("message", this.handleMessage);
     }
     // TODO: update component to fully controlled or fully uncontrolled with a key?
     // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
@@ -678,7 +652,6 @@ export class ThreeDEditor extends React.Component {
             this.WaveComponent.wave.rebuildScene();
         }
         catch (error) {
-            alert("Error executing wave function: " + error.message);
             console.error("Error executing wave function:", error);
         }
     }

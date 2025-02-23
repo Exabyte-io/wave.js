@@ -3,6 +3,7 @@
 
 import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
 import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
+import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
 import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
@@ -31,7 +32,6 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import settings from "../settings";
-import { exportToDisk } from "../utils";
 import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
@@ -111,21 +111,18 @@ export class ThreeDEditor extends React.Component {
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
-        this.handleMessage = this.handleMessage.bind(this);
         this.doWaveFunc = this.doWaveFunc.bind(this);
         this.handleSetCameraToFitCell = this.handleSetCameraToFitCell.bind(this);
     }
 
     componentDidMount() {
         this.addHotKeyListener();
-        window.addEventListener("message", this.handleMessage);
     }
 
     componentWillUnmount() {
         this.handleResetMeasurements();
         this.WaveComponent.wave.destroyListeners();
         this.removeHotKeyListener();
-        window.removeEventListener("message", this.handleMessage);
     }
 
     // TODO: update component to fully controlled or fully uncontrolled with a key?
@@ -688,16 +685,13 @@ export class ThreeDEditor extends React.Component {
         return toolbarConfig;
     }
 
-    handleStartGifRecording(downloadPath, rotationSpeed = 60, frameDuration = 0.05) {
-        this.WaveComponent.wave
-            .takeGifScreenshot({
-                downloadPath,
-                rotationSpeed,
-                frameDuration,
-            })
-            .then((result) => {
-                console.log("Recorded gif", result);
-            });
+    async handleStartGifRecording(downloadPath, rotationSpeed = 60, frameDuration = 0.05) {
+        await this.WaveComponent.wave.takeGifScreenshot({
+            downloadPath,
+            rotationSpeed,
+            frameDuration,
+        });
+        console.log("Recorded gif");
     }
 
     onThreejsEditorModalHide(material) {
@@ -760,31 +754,6 @@ export class ThreeDEditor extends React.Component {
         );
     }
 
-    handleMessage = (event) => {
-        if (event.data && event.data.material) {
-            try {
-                const newMaterial = new Made.Material(event.data.material);
-                this.setState(
-                    {
-                        originalMaterial: newMaterial,
-                        material: newMaterial.clone(),
-                    },
-                    () => {
-                        // Force Wave component to update after state change
-                        if (this.WaveComponent) {
-                            this.WaveComponent.wave.rebuildScene();
-                        }
-                    },
-                );
-            } catch (error) {
-                alert("Error creating material: " + error.message);
-            }
-        } else if (event.data && event.data.action && this[event.data.action]) {
-            const { action, parameters } = event.data;
-            this[action](...parameters);
-        }
-    };
-
     doWaveFunc(funcStr) {
         if (!this.WaveComponent || !this.WaveComponent.wave) {
             console.error("Wave component not initialized");
@@ -798,7 +767,6 @@ export class ThreeDEditor extends React.Component {
             func(wave);
             this.WaveComponent.wave.rebuildScene();
         } catch (error) {
-            alert("Error executing wave function: " + error.message);
             console.error("Error executing wave function:", error);
         }
     }

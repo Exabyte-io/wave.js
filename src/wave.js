@@ -10,14 +10,13 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
+import { ImageMixin } from "./mixins/image";
 // eslint-disable-next-line import/no-cycle
 import { LabelsMixin } from "./mixins/labels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
-import { createRotatingGif } from "./mixins/utils";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
-import { saveImageDataToFile } from "./utils";
 
 const TV3 = THREE.Vector3;
 const TCo = THREE.Color;
@@ -247,6 +246,7 @@ export class Wave extends mix(WaveBase).with(
     BoundaryMixin,
     LabelsMixin,
     MeasurementMixin,
+    ImageMixin,
 ) {
     /**
      *
@@ -259,10 +259,6 @@ export class Wave extends mix(WaveBase).with(
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
-    }
-
-    takeScreenshot() {
-        saveImageDataToFile(this.renderer.domElement.toDataURL("image/png"));
     }
 
     clearView() {
@@ -338,29 +334,4 @@ export class Wave extends mix(WaveBase).with(
     doFunc(func) {
         func(this);
     } // for scripting
-
-    async takeGifScreenshot(options = {}) {
-        try {
-            const gifDataUrl = await createRotatingGif(this, options);
-
-            // Use custom filename from options or fall back to default
-            const fileName = options.downloadPath
-                ? options.downloadPath.split("/").pop() // Extract filename from path
-                : (this._structure.name || this._structure.formula || "wave-visualization") +
-                  ".gif";
-
-            // Download the GIF
-            const a = document.createElement("a");
-            a.href = gifDataUrl;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            return gifDataUrl;
-        } catch (error) {
-            console.error("Error creating GIF:", error);
-            throw error;
-        }
-    }
 }

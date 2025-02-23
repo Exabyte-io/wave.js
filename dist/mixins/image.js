@@ -26,6 +26,7 @@ export const ImageMixin = (superclass) => class extends superclass {
         canvas.willReadFrequently = true;
         const { width, height } = canvas;
         if (this.orbitControls.autoRotate) {
+            // eslint-disable-next-line no-alert
             alert("Please disable auto-rotation before creating a GIF.");
             return;
         }
@@ -52,7 +53,7 @@ export const ImageMixin = (superclass) => class extends superclass {
     }
     async takeGifScreenshot(options = {}) {
         const gifDataUrl = await this.createRotatingGifData(options);
-        const fileName = this._structure.name || this._structure.formula || "wave-visualization" + ".gif";
+        const fileName = (this._structure.name || this._structure.formula || "wave-visualization") + ".gif";
         saveImageDataToFile(gifDataUrl, fileName);
     }
 };
