@@ -59,9 +59,9 @@ export const ApplyGlow = (meshObjet, baseColor, offset = 0) => {
         meshObjet.material.emissive.setHSL(hue, saturation, atomHSL.l);
     }
 };
-function createGIFAsync(options) {
+export function createGIFAsync({ images, gifWidth, gifHeight, numFrames, frameDuration, sampleInterval, }) {
     return new Promise((resolve, reject) => {
-        gifshot.createGIF(options, (obj) => {
+        gifshot.createGIF({ images, gifWidth, gifHeight, numFrames, frameDuration, sampleInterval }, (obj) => {
             if (!obj.error) {
                 resolve(obj.image); // Resolve with the GIF data URL
             }
@@ -70,38 +70,4 @@ function createGIFAsync(options) {
             }
         });
     });
-}
-export async function createRotatingGifData(wave, options = {}) {
-    const ROTATION_SPEED = options.rotationSpeed || 60; // RPM
-    const frameDuration = options.frameDuration || 0.05; // seconds
-    const sampleInterval = ROTATION_SPEED * frameDuration;
-    const frames = [];
-    const totalFrames = ROTATION_SPEED;
-    const canvas = wave.renderer.domElement;
-    canvas.willReadFrequently = true;
-    const { width } = canvas;
-    const { height } = canvas;
-    if (wave.orbitControls.autoRotate) {
-        alert("Please disable auto-rotation before creating a GIF.");
-        return;
-    }
-    // Store original auto-rotate settings
-    const originalSpeed = wave.orbitControls.autoRotateSpeed;
-    wave.orbitControls.autoRotateSpeed = ROTATION_SPEED;
-    wave.orbitControls.autoRotate = true;
-    for (let i = 0; i < totalFrames; i += 1) {
-        wave.performOrbitControlsAnimation(() => frames.push(wave.getScreenshotImage()));
-    }
-    const gifData = await createGIFAsync({
-        images: frames,
-        gifWidth: width,
-        gifHeight: height,
-        numFrames: totalFrames,
-        frameDuration,
-        sampleInterval,
-    });
-    wave.orbitControls.rotateSpeed = originalSpeed;
-    wave.orbitControls.autoRotate = false;
-    canvas.willReadFrequently = false;
-    return gifData;
 }

@@ -2,7 +2,6 @@
 import "./stylesheets/main.css";
 import { mix } from "mixwith";
 import * as THREE from "three";
-import { saveImageDataToFile } from "@exabyte-io/cove.js/dist/utils/downloader";
 import { ATOM_GROUP_NAME } from "./enums";
 import { AtomsMixin } from "./mixins/atoms";
 import { BondsMixin } from "./mixins/bonds";
@@ -13,8 +12,8 @@ import { ControlsMixin } from "./mixins/controls";
 import { LabelsMixin } from "./mixins/labels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
-import { createRotatingGifData } from "./mixins/utils";
 import SETTINGS from "./settings";
+import { ImageMixin } from "./mixins/image";
 // eslint-disable-next-line import/no-cycle
 const TV3 = THREE.Vector3;
 const TCo = THREE.Color;
@@ -195,7 +194,7 @@ class WaveBase {
 /**
  * Wave draws atoms as spheres according to the material geometry passed.
  */
-export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, LabelsMixin, MeasurementMixin) {
+export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, LabelsMixin, MeasurementMixin, ImageMixin) {
     /**
      *
      * @param {Object} config
@@ -207,12 +206,6 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
-    }
-    takeScreenshot() {
-        saveImageDataToFile(this.getScreenshotImage());
-    }
-    getScreenshotImage() {
-        return this.renderer.domElement.toDataURL("image/png");
     }
     clearView() {
         while (this.structureGroup.children.length) {
@@ -279,9 +272,4 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
     doFunc(func) {
         func(this);
     } // for scripting
-    async takeGifScreenshot(options = {}) {
-        const gifDataUrl = await createRotatingGifData(this, options);
-        const fileName = this._structure.name || this._structure.formula || "wave-visualization" + ".gif";
-        saveImageDataToFile(gifDataUrl, fileName);
-    }
 }

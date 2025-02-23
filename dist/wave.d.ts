@@ -10,8 +10,6 @@ export class Wave {
     rebuildScene(): void;
     render(): void;
     doFunc(func: any): void;
-    takeScreenshot(): void;
-    getScreenshotImage(): any;
     clearView(): void;
     adjustCamerasAndOrbitControlsToCell(): void;
     collectAllAtoms(): any[];
@@ -21,5 +19,4 @@ export class Wave {
      */
     refillSelectedAtoms(): void;
     selectedAtoms: any[] | undefined;
-    takeGifScreenshot(options?: {}): Promise<void>;
 }

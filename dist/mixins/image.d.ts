@@ -1,7 +1,10 @@
 export function ImageMixin(superclass: any): {
-    new (config: any): {
+    new (): {
         [x: string]: any;
-        drawUnitCell: any;
+        takeScreenshot(): void;
+        getScreenshotImage(): any;
+        createRotatingGifData(options?: {}): Promise<any>;
+        takeGifScreenshot(options?: {}): Promise<void>;
     };
     [x: string]: any;
 };
