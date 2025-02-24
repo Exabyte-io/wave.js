@@ -328,7 +328,6 @@ export class ThreeDEditor extends React.Component {
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
         this.doWaveFunc = this.doWaveFunc.bind(this);
-        this.handleSetCameraToFitCell = this.handleSetCameraToFitCell.bind(this);
     }
     componentDidMount() {
         this.addHotKeyListener();
@@ -655,10 +654,6 @@ export class ThreeDEditor extends React.Component {
         catch (error) {
             console.error("Error executing wave function:", error);
         }
-    }
-    handleSetCameraToFitCell() {
-        this.WaveComponent.wave.adjustCamerasAndOrbitControlsToCell();
-        this.WaveComponent.wave.rebuildScene();
     }
 }
 ThreeDEditor.propTypes = {
