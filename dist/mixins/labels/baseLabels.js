@@ -4,12 +4,25 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 import * as THREE from "three";
+import { ATOM_GROUP_NAME } from "../../enums";
 export class LabelsHolder {
     constructor(config) {
         this.labelType = config.labelType || "labels";
         this.threeJsGroupName = config.threeJsGroupName || "LABELS_GROUP_NAME";
         this.areShown = config.areShown || false;
-        this.threeJsGroup = new THREE.Group({ name: this.threeJsGroupName });
+        this.threeJsGroup = new THREE.Group();
+        this.threeJsGroup.name = this.threeJsGroupName;
+        this.threeJsGroup.visible = this.areShown;
+        // Config for label creation
+        this.config = config.config || {};
+        // Processing functions
+        this.textProcessor = config.textProcessor || (() => "");
+        this.getOffsetVector = config.getOffsetVector || (() => new THREE.Vector3());
+        this.getUserData =
+            config.getUserData ||
+                ((text, position) => ({ atomPosition: position, atomName: text }));
+        this.getNameForLabel =
+            config.getNameForLabel || ((text) => `${this.labelType}-label-for-${text}`);
     }
 }
 /*
@@ -22,12 +35,52 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
             _texturesCache.set(this, {});
             this.labelHolders = [];
         }
-        static initializeLabelHolders({ labelType, threeJsGroupName, areShown }) {
-            this.labelHolders.push(new LabelsHolder({
-                labelType,
-                threeJsGroupName,
-                areShown,
-            }));
+        /**
+         * Initializes a label holder with provided configuration
+         * @param {Object} config - Configuration for the label holder
+         * @returns {LabelsHolder} The initialized label holder
+         */
+        initializeLabelHolder(config) {
+            const labelHolder = new LabelsHolder(config);
+            this.labelHolders.push(labelHolder);
+            // Add the group to structure group
+            this.structureGroup.add(labelHolder.threeJsGroup);
+            this.labelHolders.push(labelHolder);
+        }
+        /**
+         * Finds a label holder by type
+         * @param {string} labelType - The type of label holder to find
+         * @returns {LabelsHolder|undefined} The found label holder or undefined
+         */
+        findLabelHolder(labelType) {
+            return this.labelHolders.find((holder) => holder.labelType === labelType);
+        }
+        /**
+         * Creates a hash map representing the positions for labels.
+         * @param {LabelsHolder} labelHolder - The label holder to create vertices for
+         * @returns {Object.<string, Array.<number>>} HashMap with label text as keys and an array of vertices as values.
+         */
+        createVerticesHashMap(labelHolder) {
+            if (!labelHolder || !labelHolder.textProcessor)
+                return {};
+            const verticesHashMap = {};
+            this.structureGroup.children.forEach((group) => {
+                if (group.name !== ATOM_GROUP_NAME)
+                    return;
+                group.children.forEach((atom) => {
+                    if (atom instanceof THREE.Mesh) {
+                        const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
+                        const { x, y, z } = position;
+                        const text = labelHolder.textProcessor(atom, position);
+                        if (!verticesHashMap[text]) {
+                            verticesHashMap[text] = [x, y, z];
+                            return;
+                        }
+                        verticesHashMap[text].push(x, y, z);
+                    }
+                });
+            });
+            return verticesHashMap;
         }
         /**
          * Creates a new texture based on a 2D canvas with the supplied text
@@ -159,6 +212,65 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
             if (!this.structureGroup.children.includes(targetGroup)) {
                 this.structureGroup.add(targetGroup);
             }
+        }
+        /**
+         * Creates labels for a specific label type
+         * @param {string} labelType - Type of label to create
+         */
+        createLabels(labelType) {
+            const labelHolder = this.findLabelHolder(labelType);
+            if (!labelHolder)
+                return;
+            const verticesHashMap = this.createVerticesHashMap(labelHolder);
+            labelHolder.threeJsGroup.clear();
+            if (labelHolder.config.areSpritesUsed) {
+                this.createLabelsAsSprites(verticesHashMap, labelHolder.getNameForLabel, labelHolder.getOffsetVector, labelHolder.getUserData, labelHolder.threeJsGroup, labelHolder.config);
+            }
+            else {
+                this.createLabelsAsPoints(verticesHashMap, labelHolder.getNameForLabel, labelHolder.threeJsGroup, labelHolder.config);
+            }
+            this.render();
+        }
+        /**
+         * Creates all labels
+         */
+        createAllLabels() {
+            this.labelHolders.forEach((holder) => this.createLabels(holder.labelType));
+        }
+        /**
+         * Adjusts labels to camera position
+         * @param {string} labelType - Type of label to adjust
+         */
+        adjustLabelsToCameraPosition(labelType) {
+            const labelHolder = this.findLabelHolder(labelType);
+            if (!labelHolder || !labelHolder.areShown || !labelHolder.config.areSpritesUsed)
+                return;
+            labelHolder.threeJsGroup.children.forEach((label) => {
+                const { atomPosition, atomName } = label.userData;
+                const offsetVector = labelHolder.getOffsetVector(atomPosition, atomName);
+                label.position.copy(atomPosition).add(offsetVector);
+                label.lookAt(this.camera.position);
+            });
+        }
+        /**
+         * Adjust all labels to camera position
+         */
+        adjustAllLabelsToCameraPosition() {
+            this.labelHolders.forEach((holder) => this.adjustLabelsToCameraPosition(holder.labelType));
+        }
+        /**
+         * Toggles visibility for a specific label type
+         * @param {string} labelType - Type of label to toggle
+         * @returns {boolean} New visibility state
+         */
+        toggleLabels(labelType) {
+            const labelHolder = this.findLabelHolder(labelType);
+            if (!labelHolder || !labelHolder.threeJsGroup)
+                return false;
+            labelHolder.areShown = !labelHolder.areShown;
+            labelHolder.threeJsGroup.visible = labelHolder.areShown;
+            this.render();
+            return labelHolder.areShown;
         }
     },
     _texturesCache = new WeakMap(),

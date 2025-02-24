@@ -1,11 +1,11 @@
 import * as THREE from "three";
 import { COORDINATE_LABELS_GROUP_NAME } from "../../enums";
-import { CoordinateLabelsMixin } from "./coordinateLabels";
+import { BaseLabelsMixin } from "./baseLabels";
 /*
  * Mixin containing the logic for coordinate measurements.
  * Handles selection, label creation, and clipboard operations for coordinate measurements.
  */
-export const CoordinateMeasurementMixin = (superclass) => class extends CoordinateLabelsMixin(superclass) {
+export const CoordinateMeasurementMixin = (superclass) => class extends BaseLabelsMixin(superclass) {
     constructor(config) {
         super(config);
         this.coordinateMeasurementGroup = new THREE.Group();

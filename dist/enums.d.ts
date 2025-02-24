@@ -21,3 +21,8 @@ export namespace MEASUREMENT_KEYS {
     let ANGLE: string;
     let COORDINATE: string;
 }
+export namespace LABEL_TYPES {
+    let COORDINATE_1: string;
+    export { COORDINATE_1 as COORDINATE };
+    export let ELEMENT: string;
+}

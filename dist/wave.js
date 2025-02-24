@@ -8,9 +8,8 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
-import { CoordinateLabelsMixin } from "./mixins/labels/coordinateLabels";
+import { AtomLabelsMixin } from "./mixins/labels/atomLabels";
 import { CoordinateMeasurementMixin } from "./mixins/labels/coordinateMeasurement";
-import { ElementLabelsMixin } from "./mixins/labels/elementLabels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
@@ -38,7 +37,6 @@ class WaveBase {
         this.PADDING_RATIO = 1.25;
         this.container = DOMElement;
         this.updateSettings(settings);
-        this.areElementLabelsShown = this.settings.areElementLabelsInitiallyShown;
         this.initDimensions();
         this.initRenderer();
         this.initScene();
@@ -193,7 +191,7 @@ class WaveBase {
 /**
  * Wave draws atoms as spheres according to the material geometry passed.
  */
-export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, ElementLabelsMixin, CoordinateLabelsMixin, CoordinateMeasurementMixin, MeasurementMixin) {
+export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, AtomLabelsMixin, CoordinateMeasurementMixin, MeasurementMixin) {
     /**
      *
      * @param {Object} config
@@ -205,6 +203,7 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
+        this.initializeAllLabelHolders();
     }
     takeScreenshot() {
         saveImageDataToFile(this.renderer.domElement.toDataURL("image/png"));
@@ -262,14 +261,11 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         if (this.isDrawBondsEnabled)
             this.drawBonds();
         this.render();
-        this.createCoordinateLabels();
-        this.createElementLabels();
+        this.createAllLabels();
         this.refillSelectedAtoms();
     }
     render() {
-        this.adjustCoordinateLabelsToCameraPosition();
-        this.adjustElementLabelsToCameraPosition();
-        this.adjustCoordinateMeasurementLabels();
+        this.adjustAllLabelsToCameraPosition();
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2)
             this.renderer2.render(this.scene2, this.camera2);

@@ -4,12 +4,37 @@ export class LabelsHolder {
     threeJsGroupName: any;
     areShown: any;
     threeJsGroup: any;
+    config: any;
+    textProcessor: any;
+    getOffsetVector: any;
+    getUserData: any;
+    getNameForLabel: any;
 }
 export function BaseLabelsMixin(superclass: any): {
     new (config: any): {
         [x: string]: any;
         "__#1@#texturesCache": {};
         labelHolders: any[];
+        /**
+         * Initializes a label holder with provided configuration
+         * @param {Object} config - Configuration for the label holder
+         * @returns {LabelsHolder} The initialized label holder
+         */
+        initializeLabelHolder(config: Object): LabelsHolder;
+        /**
+         * Finds a label holder by type
+         * @param {string} labelType - The type of label holder to find
+         * @returns {LabelsHolder|undefined} The found label holder or undefined
+         */
+        findLabelHolder(labelType: string): LabelsHolder | undefined;
+        /**
+         * Creates a hash map representing the positions for labels.
+         * @param {LabelsHolder} labelHolder - The label holder to create vertices for
+         * @returns {Object.<string, Array.<number>>} HashMap with label text as keys and an array of vertices as values.
+         */
+        createVerticesHashMap(labelHolder: LabelsHolder): {
+            [x: string]: number[];
+        };
         /**
          * Creates a new texture based on a 2D canvas with the supplied text
          * @param {String} text - the text to be placed on the texture;
@@ -57,11 +82,30 @@ export function BaseLabelsMixin(superclass: any): {
          * @param {Function} getAdditionalData - Function to get additional data for each label
          */
         createLabelsAsSprites(verticesHashMap: any, getNameForLabel: Function, getOffsetVector: any, getUserData: any, targetGroup: any, config: any): void;
+        /**
+         * Creates labels for a specific label type
+         * @param {string} labelType - Type of label to create
+         */
+        createLabels(labelType: string): void;
+        /**
+         * Creates all labels
+         */
+        createAllLabels(): void;
+        /**
+         * Adjusts labels to camera position
+         * @param {string} labelType - Type of label to adjust
+         */
+        adjustLabelsToCameraPosition(labelType: string): void;
+        /**
+         * Adjust all labels to camera position
+         */
+        adjustAllLabelsToCameraPosition(): void;
+        /**
+         * Toggles visibility for a specific label type
+         * @param {string} labelType - Type of label to toggle
+         * @returns {boolean} New visibility state
+         */
+        toggleLabels(labelType: string): boolean;
     };
     [x: string]: any;
-    initializeLabelHolders({ labelType, threeJsGroupName, areShown }: {
-        labelType: any;
-        threeJsGroupName: any;
-        areShown: any;
-    }): void;
 };

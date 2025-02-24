@@ -1,14 +1,14 @@
 import * as THREE from "three";
 
 import { COORDINATE_LABELS_GROUP_NAME } from "../../enums";
-import { CoordinateLabelsMixin } from "./coordinateLabels";
+import { BaseLabelsMixin } from "./baseLabels";
 
 /*
  * Mixin containing the logic for coordinate measurements.
  * Handles selection, label creation, and clipboard operations for coordinate measurements.
  */
 export const CoordinateMeasurementMixin = (superclass) =>
-    class extends CoordinateLabelsMixin(superclass) {
+    class extends BaseLabelsMixin(superclass) {
         constructor(config) {
             super(config);
             this.coordinateMeasurementGroup = new THREE.Group();
@@ -67,7 +67,7 @@ export const CoordinateMeasurementMixin = (superclass) =>
         selectAtomCoordinate(atom) {
             this.selectedAtomsForCoordinates.add(atom.uuid);
             atom.userData.selected = true;
-            atom.material.emissive.setHex(0xff0000);
+            atom.material.emissive.setHex(this.settings.colors.amber);
 
             const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
             const { x, y, z } = position;

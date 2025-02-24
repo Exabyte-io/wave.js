@@ -36,36 +36,23 @@ export function CoordinateMeasurementMixin(superclass: any): {
          * Updates coordinate measurement labels during camera movement
          */
         adjustCoordinateMeasurementLabels(): void;
-        coordinateLabelsGroup: any;
-        areCoordinateLabelsShown: any;
-        initializeLabelHolders(): import("./baseLabels").LabelsHolder;
-        createCoordinateText(coordinates: Array<number>, separator?: string): string;
-        createSingleCoordinateLabel(text: string, position: THREE.Vector3, prefix?: string): THREE.Sprite;
-        createCoordinateVerticesHashMap(): {
-            [x: string]: number[];
-        };
-        getCoordinateLabelOffsetVector(atomPosition: THREE.Vector3, element: string): THREE.Vector3;
-        createCoordinateLabels(): void;
-        adjustCoordinateLabelsToCameraPosition(): void;
-        toggleCoordinateLabels(): void;
         "__#1@#texturesCache": {};
         labelHolders: any[];
-        createLabelTextTexture(text: string, config?: Object): THREE.
-        /**
-         * Copies the current array of coordinates to clipboard
-         */
-        Texture /**
-         * Copies the current array of coordinates to clipboard
-         */;
+        initializeLabelHolder(config: Object): LabelsHolder;
+        findLabelHolder(labelType: string): LabelsHolder | undefined;
+        createVerticesHashMap(labelHolder: LabelsHolder): {
+            [x: string]: number[];
+        };
+        createLabelTextTexture(text: string, config?: Object): THREE.Texture;
         getLabelTextTexture(text: string, config: Object): THREE.Texture;
         createLabelSprite(text: string, name: string, config: Object): THREE.Sprite;
         createLabelPoints(text: string, positions: Array<number>, name: string, config?: Object): THREE.Points;
         createLabelsAsPoints(verticesHashMap: any, getNameForLabel: Function, targetGroup: any, config: any): void;
         createLabelsAsSprites(verticesHashMap: any, getNameForLabel: Function, getOffsetVector: any, getUserData: any, targetGroup: any, config: any): void;
+        createLabels(labelType: string): void;
+        createAllLabels(): void;
+        adjustLabelsToCameraPosition(labelType: string): void;
+        adjustAllLabelsToCameraPosition(): void;
+        toggleLabels(labelType: string): boolean;
     };
-    initializeLabelHolders({ labelType, threeJsGroupName, areShown }: {
-        labelType: any;
-        threeJsGroupName: any;
-        areShown: any;
-    }): void;
 };

@@ -1,49 +1,47 @@
 export function AtomLabelsMixin(superclass: any): {
     new (config: any): {
         [x: string]: any;
-        labelTypes: string[];
-        atomLabelsGroup: any;
-        areAtomLabelsShown: any;
         /**
-         * Creates a hash map representing the positions (vertices) for atom labels.
-         * The hash map uses atom names as keys and corresponding 3D positions as values.
-         * If an atom name already exists in the hash map, it appends the atom's coordinates to the associated entry.
-         *
-         * @returns {Object.<string, Array.<number>>} HashMap with atom names as keys and an array of vertices as values.
+         * Initialize all label holders
+         * To be implemented by the sub-class if needed
          */
-        createVerticesHashMap(labelType: any): {
+        initializeAllLabelHolders(): void;
+        coordinateLabelsHolder: import("./baseLabels").LabelsHolder | undefined;
+        elementLabelsHolder: import("./baseLabels").LabelsHolder | undefined;
+        /**
+         * Creates a coordinate display text from coordinates
+         * @param {Array<number>} coordinates - Array of [x,y,z] coordinates
+         * @param {string} separator - Separator between coordinates
+         * @returns {string} Formatted coordinate text
+         */
+        createCoordinateText(coordinates: Array<number>, separator?: string): string;
+        /**
+         * Computes an offset vector for coordinate labels
+         */
+        getCoordinateLabelOffsetVector(atomPosition: any, element: any): any;
+        /**
+         * Computes an offset vector for element labels
+         */
+        getElementLabelOffsetVector(atomPosition: any, element: any): any;
+        toggleElementLabels(): void;
+        toggleCoordinateLabels(): void;
+        "__#1@#texturesCache": {};
+        labelHolders: any[];
+        initializeLabelHolder(config: Object): LabelsHolder;
+        findLabelHolder(labelType: string): LabelsHolder | undefined;
+        createVerticesHashMap(labelHolder: LabelsHolder): {
             [x: string]: number[];
         };
-        /**
-         * Computes an offset vector for a given atom position to position labels correctly.
-         * This method returns a vector pointing from the atom to the camera but with a
-         * length equal to the sphere radius.
-         * @param {THREE.Vector3} atomPosition - The 3D position of the atom.
-         * @param {String} element - The name of the atom.
-         * @returns {THREE.Vector3} - Offset vector for the label.
-         */
-        getLabelOffsetVector(atomPosition: THREE.Vector3, element: string): THREE.Vector3;
-        /**
-         * Creates labels as sprites or points
-         * depending on the settings.atomLabelsConfig.areSpritesUsed value
-         */
-        createAtomLabels(): void;
-        /**
-         * Adjusts label positions in 3D space so that they don't overlap with their corresponding atoms
-         * and always face the camera.
-         * @method adjustAtomLabelsToCameraPosition
-         */
-        adjustAtomLabelsToCameraPosition(): void;
-        /**
-         * Toggles the visibility of all labels
-         */
-        toggleAtomLabels(): void;
-        "__#1@#texturesCache": {};
         createLabelTextTexture(text: string, config?: Object): THREE.Texture;
         getLabelTextTexture(text: string, config: Object): THREE.Texture;
         createLabelSprite(text: string, name: string, config: Object): THREE.Sprite;
         createLabelPoints(text: string, positions: Array<number>, name: string, config?: Object): THREE.Points;
         createLabelsAsPoints(verticesHashMap: any, getNameForLabel: Function, targetGroup: any, config: any): void;
         createLabelsAsSprites(verticesHashMap: any, getNameForLabel: Function, getOffsetVector: any, getUserData: any, targetGroup: any, config: any): void;
+        createLabels(labelType: string): void;
+        createAllLabels(): void;
+        adjustLabelsToCameraPosition(labelType: string): void;
+        adjustAllLabelsToCameraPosition(): void;
+        toggleLabels(labelType: string): boolean;
     };
 };

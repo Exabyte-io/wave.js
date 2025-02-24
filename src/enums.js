@@ -41,3 +41,8 @@ export const MEASUREMENT_KEYS = {
     ANGLE: "areAnglesShown",
     COORDINATE: "areCoordinatesShown",
 };
+
+export const LABEL_TYPES = {
+    COORDINATE: "coordinate",
+    ELEMENT: "element",
+};

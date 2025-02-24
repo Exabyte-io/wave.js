@@ -10,9 +10,8 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
-import { CoordinateLabelsMixin } from "./mixins/labels/coordinateLabels";
+import { AtomLabelsMixin } from "./mixins/labels/atomLabels";
 import { CoordinateMeasurementMixin } from "./mixins/labels/coordinateMeasurement";
-import { ElementLabelsMixin } from "./mixins/labels/elementLabels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
@@ -47,7 +46,6 @@ class WaveBase {
         this.container = DOMElement;
 
         this.updateSettings(settings);
-        this.areElementLabelsShown = this.settings.areElementLabelsInitiallyShown;
 
         this.initDimensions();
         this.initRenderer();
@@ -243,8 +241,7 @@ export class Wave extends mix(WaveBase).with(
     RepetitionMixin,
     ControlsMixin,
     BoundaryMixin,
-    ElementLabelsMixin,
-    CoordinateLabelsMixin,
+    AtomLabelsMixin,
     CoordinateMeasurementMixin,
     MeasurementMixin,
 ) {
@@ -259,6 +256,7 @@ export class Wave extends mix(WaveBase).with(
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
+        this.initializeAllLabelHolders();
     }
 
     takeScreenshot() {
@@ -325,15 +323,12 @@ export class Wave extends mix(WaveBase).with(
         this.drawBoundaries();
         if (this.isDrawBondsEnabled) this.drawBonds();
         this.render();
-        this.createCoordinateLabels();
-        this.createElementLabels();
+        this.createAllLabels();
         this.refillSelectedAtoms();
     }
 
     render() {
-        this.adjustCoordinateLabelsToCameraPosition();
-        this.adjustElementLabelsToCameraPosition();
-        this.adjustCoordinateMeasurementLabels();
+        this.adjustAllLabelsToCameraPosition();
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2) this.renderer2.render(this.scene2, this.camera2);
     }
