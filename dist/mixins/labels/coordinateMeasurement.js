@@ -60,7 +60,7 @@ export const CoordinateMeasurementMixin = (superclass) => class extends Coordina
     selectAtomCoordinate(atom) {
         this.selectedAtomsForCoordinates.add(atom.uuid);
         atom.userData.selected = true;
-        atom.material.emissive.setHex(0xff0000);
+        atom.material.emissive.setHex(this.settings.colors.amber);
         const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
         const { x, y, z } = position;
         atom.userData.coordinateArrayIndex = this.coordinatesArray.length;

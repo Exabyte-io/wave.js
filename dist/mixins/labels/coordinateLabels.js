@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { ATOM_GROUP_NAME, COORDINATE_LABELS_GROUP_NAME } from "../../enums";
-import { BaseLabelsMixin } from "./baseLabels";
+import { BaseLabelsMixin, LabelsHolder } from "./baseLabels";
 /*
  * Mixin containing the logic for dealing with atom-specific labels.
  * Extends the base label functionality with features specific to atom labeling.
@@ -13,6 +13,14 @@ export const CoordinateLabelsMixin = (superclass) => class extends BaseLabelsMix
         this.areCoordinateLabelsShown = this.settings.areCoordinateLabelsInitiallyShown;
         this.coordinateLabelsGroup.visible = this.areCoordinateLabelsShown;
         this.structureGroup.add(this.coordinateLabelsGroup);
+        this.labelHolders.push(this.initializeLabelHolders());
+    }
+    initializeLabelHolders() {
+        return new LabelsHolder({
+            labelType: "coordinates",
+            threeJsGroupName: COORDINATE_LABELS_GROUP_NAME,
+            areShown: this.areCoordinateLabelsShown,
+        });
     }
     /**
      * Creates a display text from coordinates

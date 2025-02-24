@@ -1,5 +1,14 @@
 import * as THREE from "three";
 
+export class LabelsHolder {
+    constructor(config) {
+        this.labelType = config.labelType || "labels";
+        this.threeJsGroupName = config.threeJsGroupName || "LABELS_GROUP_NAME";
+        this.areShown = config.areShown || false;
+        this.threeJsGroup = new THREE.Group({ name: this.threeJsGroupName });
+    }
+}
+
 /*
  * Base mixin containing generic logic for dealing with labels.
  * Provides core functionality for creating and managing text labels in 3D space.
@@ -7,6 +16,21 @@ import * as THREE from "three";
 export const BaseLabelsMixin = (superclass) =>
     class extends superclass {
         #texturesCache = {};
+
+        constructor(config) {
+            super(config);
+            this.labelHolders = [];
+        }
+
+        static initializeLabelHolders({ labelType, threeJsGroupName, areShown }) {
+            this.labelHolders.push(
+                new LabelsHolder({
+                    labelType,
+                    threeJsGroupName,
+                    areShown,
+                }),
+            );
+        }
 
         /**
          * Creates a new texture based on a 2D canvas with the supplied text

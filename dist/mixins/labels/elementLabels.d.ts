@@ -38,6 +38,7 @@ export function ElementLabelsMixin(superclass: any): {
          */
         toggleElementLabels(): void;
         "__#1@#texturesCache": {};
+        labelHolders: any[];
         createLabelTextTexture(text: string, config?: Object): THREE.Texture;
         getLabelTextTexture(text: string, config: Object): THREE.Texture;
         createLabelSprite(text: string, name: string, config: Object): THREE.Sprite;
@@ -45,4 +46,9 @@ export function ElementLabelsMixin(superclass: any): {
         createLabelsAsPoints(verticesHashMap: any, getNameForLabel: Function, targetGroup: any, config: any): void;
         createLabelsAsSprites(verticesHashMap: any, getNameForLabel: Function, getOffsetVector: any, getUserData: any, targetGroup: any, config: any): void;
     };
+    initializeLabelHolders({ labelType, threeJsGroupName, areShown }: {
+        labelType: any;
+        threeJsGroupName: any;
+        areShown: any;
+    }): void;
 };

@@ -1,7 +1,15 @@
+export class LabelsHolder {
+    constructor(config: any);
+    labelType: any;
+    threeJsGroupName: any;
+    areShown: any;
+    threeJsGroup: any;
+}
 export function BaseLabelsMixin(superclass: any): {
-    new (): {
+    new (config: any): {
         [x: string]: any;
         "__#1@#texturesCache": {};
+        labelHolders: any[];
         /**
          * Creates a new texture based on a 2D canvas with the supplied text
          * @param {String} text - the text to be placed on the texture;
@@ -51,4 +59,9 @@ export function BaseLabelsMixin(superclass: any): {
         createLabelsAsSprites(verticesHashMap: any, getNameForLabel: Function, getOffsetVector: any, getUserData: any, targetGroup: any, config: any): void;
     };
     [x: string]: any;
+    initializeLabelHolders({ labelType, threeJsGroupName, areShown }: {
+        labelType: any;
+        threeJsGroupName: any;
+        areShown: any;
+    }): void;
 };

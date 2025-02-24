@@ -38,6 +38,7 @@ export function CoordinateMeasurementMixin(superclass: any): {
         adjustCoordinateMeasurementLabels(): void;
         coordinateLabelsGroup: any;
         areCoordinateLabelsShown: any;
+        initializeLabelHolders(): import("./baseLabels").LabelsHolder;
         createCoordinateText(coordinates: Array<number>, separator?: string): string;
         createSingleCoordinateLabel(text: string, position: THREE.Vector3, prefix?: string): THREE.Sprite;
         createCoordinateVerticesHashMap(): {
@@ -48,11 +49,23 @@ export function CoordinateMeasurementMixin(superclass: any): {
         adjustCoordinateLabelsToCameraPosition(): void;
         toggleCoordinateLabels(): void;
         "__#1@#texturesCache": {};
-        createLabelTextTexture(text: string, config?: Object): THREE.Texture;
+        labelHolders: any[];
+        createLabelTextTexture(text: string, config?: Object): THREE.
+        /**
+         * Copies the current array of coordinates to clipboard
+         */
+        Texture /**
+         * Copies the current array of coordinates to clipboard
+         */;
         getLabelTextTexture(text: string, config: Object): THREE.Texture;
         createLabelSprite(text: string, name: string, config: Object): THREE.Sprite;
         createLabelPoints(text: string, positions: Array<number>, name: string, config?: Object): THREE.Points;
         createLabelsAsPoints(verticesHashMap: any, getNameForLabel: Function, targetGroup: any, config: any): void;
         createLabelsAsSprites(verticesHashMap: any, getNameForLabel: Function, getOffsetVector: any, getUserData: any, targetGroup: any, config: any): void;
     };
+    initializeLabelHolders({ labelType, threeJsGroupName, areShown }: {
+        labelType: any;
+        threeJsGroupName: any;
+        areShown: any;
+    }): void;
 };
