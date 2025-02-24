@@ -1,0 +1,69 @@
+import { showInfoAlert, showSuccessAlert, showWarningAlert, } from "@exabyte-io/cove.js/dist/other/alerts";
+import { saveImageDataToFile } from "@exabyte-io/cove.js/dist/utils/downloader";
+import { createGIFAsync } from "./utils";
+export const ImageMixin = (superclass) => class extends superclass {
+    takeScreenshot() {
+        saveImageDataToFile(this.getScreenshotImage());
+    }
+    getScreenshotImage() {
+        const canvas = this.renderer.domElement;
+        canvas.getContext("2d", { willReadFrequently: true });
+        return canvas.toDataURL("image/png");
+    }
+    async updateScene() {
+        return new Promise((resolve) => {
+            const checkRender = () => {
+                this.renderer.render(this.scene, this.camera); // Ensure scene updates
+                requestAnimationFrame(() => resolve()); // Wait for the next frame
+            };
+            checkRender();
+        });
+    }
+    async createRotatingGifData(options = {}) {
+        const sampleInterval = options.sampleInterval || 20; // Parts of image in pixels
+        const totalGifDuration = options.totalDuration || 3; // Seconds
+        const animationDuration = options.animationDuration || 1; // Seconds
+        const totalFrames = options.totalFrames || 60; // Number of frames in GIF
+        const autoRotateSpeed = 60 / animationDuration; // RPM
+        const frameDuration = totalGifDuration / totalFrames;
+        const canvas = this.renderer.domElement;
+        canvas.willReadFrequently = true;
+        const { width, height } = canvas;
+        if (this.orbitControls.autoRotate) {
+            showWarningAlert("Please disable auto-rotation before creating a GIF.");
+            return null;
+        }
+        // Store original auto-rotate settings
+        const originalSpeed = this.orbitControls.autoRotateSpeed;
+        this.orbitControls.autoRotateSpeed = autoRotateSpeed;
+        this.orbitControls.autoRotate = true;
+        const frames = [];
+        for (let i = 0; i < totalFrames; i += 1) {
+            this.orbitControls.update(); // Move scene to new position
+            // eslint-disable-next-line no-await-in-loop
+            await this.updateScene(); // Wait for rendering to finish
+            frames.push(this.getScreenshotImage()); // Capture screenshot
+        }
+        showInfoAlert("GIF is being created. Please wait...");
+        const gifData = await createGIFAsync({
+            images: frames,
+            gifWidth: width,
+            gifHeight: height,
+            sampleInterval,
+            frameDuration,
+        });
+        // Restore original rotation settings
+        this.orbitControls.autoRotateSpeed = originalSpeed;
+        this.orbitControls.autoRotate = false;
+        canvas.willReadFrequently = false;
+        return gifData;
+    }
+    async takeGifScreenshot(options = {}) {
+        const gifDataUrl = await this.createRotatingGifData(options);
+        if (!gifDataUrl)
+            return;
+        const fileName = (this._structure.name || this._structure.formula || "wave-visualization") + ".gif";
+        showSuccessAlert("GIF is created. Proceeding to download.");
+        saveImageDataToFile(gifDataUrl, fileName);
+    }
+};

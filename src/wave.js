@@ -10,13 +10,13 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
+import { ImageMixin } from "./mixins/image";
 // eslint-disable-next-line import/no-cycle
 import { LabelsMixin } from "./mixins/labels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
-import { saveImageDataToFile } from "./utils";
 
 const TV3 = THREE.Vector3;
 const TCo = THREE.Color;
@@ -58,6 +58,7 @@ class WaveBase {
 
         this.handleResize = this.handleResize.bind(this);
         this.setBackground = this.setBackground.bind(this);
+        this.doFunc = this.doFunc.bind(this);
     }
 
     updateSettings(settings) {
@@ -245,6 +246,7 @@ export class Wave extends mix(WaveBase).with(
     BoundaryMixin,
     LabelsMixin,
     MeasurementMixin,
+    ImageMixin,
 ) {
     /**
      *
@@ -257,10 +259,6 @@ export class Wave extends mix(WaveBase).with(
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
-    }
-
-    takeScreenshot() {
-        saveImageDataToFile(this.renderer.domElement.toDataURL("image/png"));
     }
 
     clearView() {

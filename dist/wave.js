@@ -8,13 +8,13 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
+import { ImageMixin } from "./mixins/image";
 // eslint-disable-next-line import/no-cycle
 import { LabelsMixin } from "./mixins/labels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
-import { saveImageDataToFile } from "./utils";
 const TV3 = THREE.Vector3;
 const TCo = THREE.Color;
 /*
@@ -47,6 +47,7 @@ class WaveBase {
         this.setupLights();
         this.handleResize = this.handleResize.bind(this);
         this.setBackground = this.setBackground.bind(this);
+        this.doFunc = this.doFunc.bind(this);
     }
     updateSettings(settings) {
         this.settings = { ...SETTINGS, ...settings };
@@ -193,7 +194,7 @@ class WaveBase {
 /**
  * Wave draws atoms as spheres according to the material geometry passed.
  */
-export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, LabelsMixin, MeasurementMixin) {
+export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, LabelsMixin, MeasurementMixin, ImageMixin) {
     /**
      *
      * @param {Object} config
@@ -205,9 +206,6 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
-    }
-    takeScreenshot() {
-        saveImageDataToFile(this.renderer.domElement.toDataURL("image/png"));
     }
     clearView() {
         while (this.structureGroup.children.length) {

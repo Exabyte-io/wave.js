@@ -1,3 +1,4 @@
+import gifshot from "gifshot";
 import * as THREE from "three";
 
 export const UtilsMixin = (superclass) =>
@@ -65,3 +66,25 @@ export const ApplyGlow = (meshObjet, baseColor, offset = 0) => {
         meshObjet.material.emissive.setHSL(hue, saturation, atomHSL.l);
     }
 };
+
+export function createGIFAsync({
+    images,
+    gifWidth,
+    gifHeight,
+    numFrames,
+    frameDuration,
+    sampleInterval,
+}) {
+    return new Promise((resolve, reject) => {
+        gifshot.createGIF(
+            { images, gifWidth, gifHeight, numFrames, frameDuration, sampleInterval },
+            (obj) => {
+                if (!obj.error) {
+                    resolve(obj.image); // Resolve with the GIF data URL
+                } else {
+                    reject(obj.error); // Reject with the error
+                }
+            },
+        );
+    });
+}
