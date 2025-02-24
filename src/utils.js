@@ -173,14 +173,3 @@ export function materialsToThreeDSceneData(materials, shift = [2, 0, 0]) {
     }
     return wave.scene.toJSON();
 }
-
-/**
- * Sets multiple parameters of the target object.
- * @param {Object} targetObject - the object to receive new property values.
- * @param {Object} parameters - the object containing key-value pairs to be set.
- */
-export function setParameters(targetObject, parameters) {
-    Object.keys(parameters).forEach((key) => {
-        targetObject[key] = parameters[key];
-    });
-}

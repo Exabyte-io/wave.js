@@ -212,11 +212,5 @@ export function ThreeDSceneDataToMaterial(scene: any): {
  * Atoms are slightly shifted along X axis if multiple materials are passed.
  */
 export function materialsToThreeDSceneData(materials: any, shift?: number[]): any;
-/**
- * Sets multiple parameters of the target object.
- * @param {Object} targetObject - the object to receive new property values.
- * @param {Object} parameters - the object containing key-value pairs to be set.
- */
-export function setParameters(targetObject: Object, parameters: Object): void;
 export function exportToDisk(content: string, name?: string, extension?: string, mime?: string): void;
 import { Made } from "@mat3ra/made";

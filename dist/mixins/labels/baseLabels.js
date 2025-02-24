@@ -4,7 +4,6 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 import * as THREE from "three";
-import { setParameters } from "./labelUtils";
 /*
  * Base mixin containing generic logic for dealing with labels.
  * Provides core functionality for creating and managing text labels in 3D space.
@@ -26,11 +25,11 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
             const context = canvas.getContext("2d");
             const canvasWidth = 256 * scaleWidth;
             const canvasHeight = 256 * scaleHeight;
-            setParameters(canvas, {
+            Object.assign(canvas, {
                 width: canvasWidth,
                 height: canvasHeight,
             });
-            setParameters(context, {
+            Object.assign(context, {
                 font: `${fontWeight} ${fontSize}px ${fontFace}`,
                 textAlign: "center",
                 textBaseline: "middle",
