@@ -4,12 +4,6 @@ export function CoordinateLabelsMixin(superclass: any): {
         coordinateLabelsGroup: any;
         areCoordinateLabelsShown: any;
         /**
-         * Formats coordinates into an array of fixed precision values
-         * @param {THREE.Vector3} position - The position vector to format
-         * @returns {Array<number>} Array of [x,y,z] coordinates with fixed precision
-         */
-        formatCoordinates(position: THREE.Vector3): Array<number>;
-        /**
          * Creates a display text from coordinates
          * @param {Array<number>} coordinates - Array of [x,y,z] coordinates
          * @param {string} separator - Separator between coordinates

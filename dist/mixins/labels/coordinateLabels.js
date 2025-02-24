@@ -15,19 +15,6 @@ export const CoordinateLabelsMixin = (superclass) => class extends BaseLabelsMix
         this.structureGroup.add(this.coordinateLabelsGroup);
     }
     /**
-     * Formats coordinates into an array of fixed precision values
-     * @param {THREE.Vector3} position - The position vector to format
-     * @returns {Array<number>} Array of [x,y,z] coordinates with fixed precision
-     */
-    formatCoordinates(position) {
-        const precision = this.settings.roundPrecision;
-        return [
-            Number(position.x.toFixed(precision)),
-            Number(position.y.toFixed(precision)),
-            Number(position.z.toFixed(precision)),
-        ];
-    }
-    /**
      * Creates a display text from coordinates
      * @param {Array<number>} coordinates - Array of [x,y,z] coordinates
      * @param {string} separator - Separator between coordinates
@@ -68,9 +55,8 @@ export const CoordinateLabelsMixin = (superclass) => class extends BaseLabelsMix
             group.children.forEach((atom) => {
                 if (atom instanceof THREE.Mesh) {
                     const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-                    const coordinates = this.formatCoordinates(position);
-                    const text = this.createCoordinateText(coordinates);
                     const { x, y, z } = position;
+                    const text = this.createCoordinateText([x, y, z]);
                     if (!verticesHashMap[text]) {
                         verticesHashMap[text] = [x, y, z];
                         return;

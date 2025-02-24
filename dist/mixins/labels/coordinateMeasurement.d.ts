@@ -38,7 +38,6 @@ export function CoordinateMeasurementMixin(superclass: any): {
         adjustCoordinateMeasurementLabels(): void;
         coordinateLabelsGroup: any;
         areCoordinateLabelsShown: any;
-        formatCoordinates(position: THREE.Vector3): Array<number>;
         createCoordinateText(coordinates: Array<number>, separator?: string): string;
         createSingleCoordinateLabel(text: string, position: THREE.Vector3, prefix?: string): THREE.Sprite;
         createCoordinateVerticesHashMap(): {

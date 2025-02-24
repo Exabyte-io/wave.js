@@ -62,10 +62,10 @@ export const CoordinateMeasurementMixin = (superclass) => class extends Coordina
         atom.userData.selected = true;
         atom.material.emissive.setHex(0xff0000);
         const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-        const coordinates = this.formatCoordinates(position);
+        const { x, y, z } = position;
         atom.userData.coordinateArrayIndex = this.coordinatesArray.length;
-        this.coordinatesArray.push(coordinates);
-        const text = this.createCoordinateText(coordinates);
+        this.coordinatesArray.push([x, y, z]);
+        const text = this.createCoordinateText([x, y, z]);
         const label = this.createSingleCoordinateLabel(text, position, "measurement");
         label.visible = true;
         atom.userData.coordinateLabel = label;
