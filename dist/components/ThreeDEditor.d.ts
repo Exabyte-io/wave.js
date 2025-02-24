@@ -13,7 +13,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         isThreejsEditorModalShown: boolean;
         measurementsSettings: {
             isDistanceShown: boolean;
-            isAnglesShown: boolean;
+            areAnglesShown: boolean;
             areCoordinatesShown: boolean;
             measurementLabelsShown: boolean;
             distance: number;

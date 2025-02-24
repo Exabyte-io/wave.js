@@ -35,6 +35,6 @@ export const COLORS = {
 };
 export const MEASUREMENT_KEYS = {
     DISTANCE: "isDistanceShown",
-    ANGLE: "isAnglesShown",
+    ANGLE: "areAnglesShown",
     COORDINATE: "areCoordinatesShown",
 };

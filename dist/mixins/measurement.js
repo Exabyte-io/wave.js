@@ -265,7 +265,7 @@ export const MeasurementMixin = (superclass) => class extends superclass {
                 const isAlreadySelected = intersectItem.userData.selected;
                 if (this.measurementSettings.isDistanceShown)
                     this.addIfLastNotSame(intersectItem);
-                if (this.measurementSettings.isAnglesShown)
+                if (this.measurementSettings.areAnglesShown)
                     this.addIfTwoLastNotSame(intersectItem);
                 if (!isAlreadySelected) {
                     this.handleSetSelected(intersectItem);
@@ -303,14 +303,14 @@ export const MeasurementMixin = (superclass) => class extends superclass {
         const searchedIntersects = [];
         // Always include atoms if any measurement type is enabled
         if (this.measurementSettings.isDistanceShown ||
-            this.measurementSettings.isAnglesShown ||
+            this.measurementSettings.areAnglesShown ||
             this.measurementSettings.areCoordinatesShown) {
             searchedIntersects.push(...atomGroup);
         }
         if (this.measurementSettings.isDistanceShown) {
             searchedIntersects.push(...this.atomConnections.children);
         }
-        if (this.measurementSettings.isAnglesShown) {
+        if (this.measurementSettings.areAnglesShown) {
             searchedIntersects.push(...this.angles.children);
         }
         return this.raycaster.intersectObjects(searchedIntersects, false);
@@ -342,7 +342,7 @@ export const MeasurementMixin = (superclass) => class extends superclass {
     shouldCalculateAngles() {
         return (this.selectedAtoms.length &&
             !(this.selectedAtoms.length % 3) &&
-            this.measurementSettings.isAnglesShown);
+            this.measurementSettings.areAnglesShown);
     }
     /**
      * Function that used for getting control points that used for drawing curve line.
@@ -523,7 +523,7 @@ export const MeasurementMixin = (superclass) => class extends superclass {
                 this.deleteConnection();
             });
         }
-        else if (this.measurementSettings && this.measurementSettings.isAnglesShown) {
+        else if (this.measurementSettings && this.measurementSettings.areAnglesShown) {
             const lines = [...this.angles.children];
             lines.forEach((line) => {
                 this.currentSelectedLine = line;

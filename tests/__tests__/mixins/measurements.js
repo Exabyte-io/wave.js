@@ -10,7 +10,7 @@ describe("distance measurements", () => {
     const stateUpdate = jest.fn();
     const measurementSettings = {
         isDistanceShown: true,
-        isAnglesShown: false,
+        areAnglesShown: false,
         measurementLabelsShown: false,
         distance: 0,
         angle: 0,
@@ -163,7 +163,7 @@ describe("angles measurements", () => {
     const stateUpdate = jest.fn();
     const measurementSettings = {
         isDistanceShown: false,
-        isAnglesShown: true,
+        areAnglesShown: true,
         measurementLabelsShown: false,
         distance: 0,
         angle: 0,

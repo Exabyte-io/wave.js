@@ -58,7 +58,7 @@ export class ThreeDEditor extends React.Component {
             // isDistanceAndAnglesShown: false,
             measurementsSettings: {
                 isDistanceShown: false,
-                isAnglesShown: false,
+                areAnglesShown: false,
                 areCoordinatesShown: false,
                 measurementLabelsShown: false,
                 distance: 0,
@@ -306,7 +306,7 @@ export class ThreeDEditor extends React.Component {
             measurementsSettings: {
                 ...measurementsSettings,
                 isDistanceShown: false,
-                isAnglesShown: false,
+                areAnglesShown: false,
                 areCoordinatesShown: false,
             },
         });
@@ -347,8 +347,8 @@ export class ThreeDEditor extends React.Component {
 
     handleResetMeasurements() {
         const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measurementsSettings;
-        if (isDistanceShown || isAnglesShown) this.WaveComponent.wave.resetMeasurements();
+        const { isDistanceShown, areAnglesShown } = measurementsSettings;
+        if (isDistanceShown || areAnglesShown) this.WaveComponent.wave.resetMeasurements();
     }
 
     handleToggleMeasurement(measurementKey) {
@@ -542,7 +542,7 @@ export class ThreeDEditor extends React.Component {
 
     getMeasurementsActions = () => {
         const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown, areCoordinatesShown } = measurementsSettings;
+        const { isDistanceShown, areAnglesShown, areCoordinatesShown } = measurementsSettings;
         return [
             {
                 id: "Distances",
@@ -555,7 +555,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "Angles",
                 content: `Angles [${settings.hotKeysConfig.toggleAnglesShown.toUpperCase()}]`,
-                rightIcon: this.getCheckmark(isAnglesShown),
+                rightIcon: this.getCheckmark(areAnglesShown),
                 leftIcon: <LooksIcon />,
                 onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.ANGLE),
                 shouldMenuStayOpened: true,
