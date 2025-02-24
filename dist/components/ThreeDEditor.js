@@ -4,6 +4,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
 import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
 import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
+import { showErrorAlert } from "@exabyte-io/cove.js/src/other/alerts";
 import { AlertProvider } from "@exabyte-io/cove.js/src/theme/provider";
 import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
@@ -86,6 +87,29 @@ export class ThreeDEditor extends React.Component {
             const handler = keyConfigAdjusted[e.key.toLowerCase()];
             if (handler) {
                 handler.call(this);
+            }
+        };
+        this.handleMessage = (event) => {
+            if (event.data && event.data.material) {
+                try {
+                    const newMaterial = new Made.Material(event.data.material);
+                    this.setState({
+                        originalMaterial: newMaterial,
+                        material: newMaterial.clone(),
+                    }, () => {
+                        // Force Wave component to update after state change
+                        if (this.WaveComponent) {
+                            this.WaveComponent.wave.rebuildScene();
+                        }
+                    });
+                }
+                catch (error) {
+                    showErrorAlert("Error creating material: " + error.message);
+                }
+            }
+            else if (event.data && event.data.action && this[event.data.action]) {
+                const { action, parameters } = event.data;
+                this[action](...parameters);
             }
         };
         this.getViewSettingsActions = () => {
@@ -328,14 +352,17 @@ export class ThreeDEditor extends React.Component {
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
         this.doWaveFunc = this.doWaveFunc.bind(this);
+        this.handleMessage = this.handleMessage.bind(this);
     }
     componentDidMount() {
         this.addHotKeyListener();
+        window.addEventListener("message", this.handleMessage);
     }
     componentWillUnmount() {
         this.handleResetMeasurements();
         this.WaveComponent.wave.destroyListeners();
         this.removeHotKeyListener();
+        window.removeEventListener("message", this.handleMessage);
     }
     // TODO: update component to fully controlled or fully uncontrolled with a key?
     // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
