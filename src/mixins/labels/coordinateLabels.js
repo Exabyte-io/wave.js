@@ -1,22 +1,12 @@
 import * as THREE from "three";
 
-import { COORDINATE_LABELS_GROUP_NAME, ELEMENT_LABELS_GROUP_NAME, LABEL_TYPES } from "../../enums";
+import { COORDINATE_LABELS_GROUP_NAME, LABEL_TYPES } from "../../enums";
 import { BaseLabelsMixin } from "./baseLabels";
 
-export const AtomLabelsMixin = (superclass) =>
+export const CoordinateLabelsMixin = (superclass) =>
     class extends BaseLabelsMixin(superclass) {
         constructor(config) {
             super(config);
-            this.initializeAllLabelsHolders();
-            this.areCoordinateLabelsShown = this.findLabelsHolder(LABEL_TYPES.COORDINATE).areShown;
-            this.areElementLabelsShown = this.findLabelsHolder(LABEL_TYPES.ELEMENT).areShown;
-        }
-
-        /**
-         * Initialize all label holders for atoms (elements, coordinates)
-         * @returns {void}
-         */
-        initializeAllLabelsHolders() {
             this.initializeLabelsHolder({
                 labelType: LABEL_TYPES.COORDINATE,
                 threeJsGroupName: COORDINATE_LABELS_GROUP_NAME,
@@ -29,17 +19,6 @@ export const AtomLabelsMixin = (superclass) =>
                 getOffsetVector: this.getCoordinateLabelOffsetVector.bind(this),
                 getUserData: (text, position) => ({ atomPosition: position, atomName: text }),
                 getNameForLabel: (text) => `coordinate-label-for-${text}`,
-            });
-
-            this.initializeLabelsHolder({
-                labelType: LABEL_TYPES.ELEMENT,
-                threeJsGroupName: ELEMENT_LABELS_GROUP_NAME,
-                areShown: this.settings.areElementLabelsInitiallyShown,
-                config: this.settings.elementLabelsConfig,
-                textProcessor: (atom) => atom.userData.symbolWithLabel,
-                getOffsetVector: this.getElementLabelOffsetVector.bind(this),
-                getUserData: (text, position) => ({ atomPosition: position, atomName: text }),
-                getNameForLabel: (text) => `element-label-for-${text}`,
             });
         }
 
@@ -74,25 +53,8 @@ export const AtomLabelsMixin = (superclass) =>
             return vectorToCamera;
         }
 
-        /**
-         * Computes an offset vector for element labels
-         */
-        getElementLabelOffsetVector(atomPosition, element) {
-            const vectorToCamera = new THREE.Vector3().subVectors(
-                this.camera.position,
-                atomPosition,
-            );
-            const offsetLength = this.getAtomRadiusByElement(element);
-            return vectorToCamera.normalize().multiplyScalar(offsetLength);
-        }
-
-        toggleElementLabels() {
-            this.toggleLabels(LABEL_TYPES.ELEMENT);
-            this.areElementLabelsShown = this.findLabelsHolder(LABEL_TYPES.ELEMENT).areShown;
-        }
-
         toggleCoordinateLabels() {
             this.toggleLabels(LABEL_TYPES.COORDINATE);
-            this.areCoordinateLabelsShown = this.findLabelsHolder(LABEL_TYPES.COORDINATE).areShown;
+            this.areCoordinateLabelsShown = !this.areCoordinateLabelsShown;
         }
     };

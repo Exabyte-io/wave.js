@@ -1,14 +1,14 @@
 import * as THREE from "three";
 
 import { COORDINATE_LABELS_GROUP_NAME, LABEL_TYPES } from "../../enums";
-import { AtomLabelsMixin } from "./atomLabels";
+import { CoordinateLabelsMixin } from "./coordinateLabels";
 
 /*
  * Mixin containing the logic for coordinate measurements.
  * Handles selection, label creation, and clipboard operations for coordinate measurements.
  */
 export const CoordinateMeasurementMixin = (superclass) =>
-    class extends AtomLabelsMixin(superclass) {
+    class extends CoordinateLabelsMixin(superclass) {
         constructor(config) {
             super(config);
             this.selectedAtomsIds = new Set();
