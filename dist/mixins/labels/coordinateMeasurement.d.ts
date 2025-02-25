@@ -1,7 +1,7 @@
 export function CoordinateMeasurementMixin(superclass: any): {
     new (config: any): {
         [x: string]: any;
-        selectedAtomsForCoordinates: Set<any>;
+        selectedAtomsIds: Set<any>;
         coordinatesArray: any[];
         isCoordinateMeasurementActive: boolean;
         /**
@@ -16,7 +16,7 @@ export function CoordinateMeasurementMixin(superclass: any): {
          * Selects or deselects an atom for coordinate measurement and updates the group
          * @param {THREE.Mesh} atom - The atom to toggle selection for
          */
-        toggleAtomCoordinateSelection(atom: THREE.Mesh): void;
+        toggleAtomSelection(atom: THREE.Mesh): void;
         /**
          * Selects an atom and creates its coordinate label
          * @param {THREE.Mesh} atom - The atom to select
@@ -31,10 +31,6 @@ export function CoordinateMeasurementMixin(superclass: any): {
          * Clears all coordinate measurements and resets atoms
          */
         clearCoordinateMeasurements(): void;
-        /**
-         * Updates coordinate measurement labels during camera movement
-         */
-        adjustCoordinateMeasurementLabels(): void;
         areCoordinateLabelsShown: any;
         areElementLabelsShown: any;
         initializeAllLabelsHolders(): void;

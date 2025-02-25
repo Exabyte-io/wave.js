@@ -1,33 +1,45 @@
 import * as THREE from "three";
 
-import { COORDINATE_LABELS_GROUP_NAME } from "../../enums";
-import { BaseLabelsMixin } from "./baseLabels";
+import { COORDINATE_LABELS_GROUP_NAME, LABEL_TYPES } from "../../enums";
+import { AtomLabelsMixin } from "./atomLabels";
 
 /*
  * Mixin containing the logic for coordinate measurements.
  * Handles selection, label creation, and clipboard operations for coordinate measurements.
  */
 export const CoordinateMeasurementMixin = (superclass) =>
-    class extends BaseLabelsMixin(superclass) {
+    class extends AtomLabelsMixin(superclass) {
         constructor(config) {
             super(config);
-            this.coordinateMeasurementGroup = new THREE.Group();
-            this.coordinateMeasurementGroup.name = COORDINATE_LABELS_GROUP_NAME;
-            this.selectedAtomsForCoordinates = new Set();
+            this.selectedAtomsIds = new Set();
             this.coordinatesArray = [];
             this.isCoordinateMeasurementActive = false;
-            this.structureGroup.add(this.coordinateMeasurementGroup);
         }
 
         /**
-         * Toggles coordinate measurement mode on/off
+         * Toggles coordinate measurement mode on/off and initializes the label holder
          */
         toggleCoordinateMeasurement() {
             this.isCoordinateMeasurementActive = !this.isCoordinateMeasurementActive;
             if (!this.isCoordinateMeasurementActive) {
                 this.clearCoordinateMeasurements();
             }
-            this.coordinateMeasurementGroup.visible = this.isCoordinateMeasurementActive;
+            this.initializeLabelsHolder({
+                labelType: LABEL_TYPES.COORDINATE_MEASUREMENT,
+                threeJsGroupName: COORDINATE_LABELS_GROUP_NAME,
+                areShown: this.isCoordinateMeasurementActive,
+                config: this.settings.coordinateLabelsConfig,
+                textProcessor: (atom, position) => {
+                    const { x, y, z } = position;
+                    return this.createCoordinateText([x, y, z]);
+                },
+                getOffsetVector: this.getCoordinateLabelOffsetVector.bind(this),
+                getUserData: (text, position) => ({ atomPosition: position, atomName: text }),
+                getNameForLabel: (text) => `coordinate-measurement-label-for-${text}`,
+            });
+
+            this.findLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.visible =
+                this.isCoordinateMeasurementActive;
             this.render();
         }
 
@@ -45,18 +57,26 @@ export const CoordinateMeasurementMixin = (superclass) =>
         }
 
         /**
-         * Selects or deselects an atom for coordinate measurement
+         * Selects or deselects an atom for coordinate measurement and updates the group
          * @param {THREE.Mesh} atom - The atom to toggle selection for
          */
-        toggleAtomCoordinateSelection(atom) {
+        toggleAtomSelection(atom) {
             if (!this.isCoordinateMeasurementActive) return;
 
-            if (this.selectedAtomsForCoordinates.has(atom.uuid)) {
+            if (this.selectedAtomsIds.has(atom.uuid)) {
                 this.deselectAtomCoordinate(atom);
             } else {
                 this.selectAtomCoordinate(atom);
             }
             this.copyCoordinatesToClipboard();
+
+            this.selectedAtomsIds.forEach((uuid) => {
+                const atomMesh = this.scene.getObjectByProperty("uuid", uuid);
+                this.findLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.add(
+                    atomMesh,
+                );
+            });
+
             this.render();
         }
 
@@ -65,7 +85,7 @@ export const CoordinateMeasurementMixin = (superclass) =>
          * @param {THREE.Mesh} atom - The atom to select
          */
         selectAtomCoordinate(atom) {
-            this.selectedAtomsForCoordinates.add(atom.uuid);
+            this.selectedAtomsIds.add(atom.uuid);
             atom.userData.selected = true;
             atom.material.emissive.setHex(this.settings.colors.amber);
 
@@ -73,12 +93,6 @@ export const CoordinateMeasurementMixin = (superclass) =>
             const { x, y, z } = position;
             atom.userData.coordinateArrayIndex = this.coordinatesArray.length;
             this.coordinatesArray.push([x, y, z]);
-
-            const text = this.createCoordinateText([x, y, z]);
-            const label = this.createSingleCoordinateLabel(text, position, "measurement");
-            label.visible = true;
-            atom.userData.coordinateLabel = label;
-            this.coordinateMeasurementGroup.add(label);
         }
 
         /**
@@ -86,13 +100,13 @@ export const CoordinateMeasurementMixin = (superclass) =>
          * @param {THREE.Mesh} atom - The atom to deselect
          */
         deselectAtomCoordinate(atom) {
-            this.selectedAtomsForCoordinates.delete(atom.uuid);
+            this.selectedAtomsIds.delete(atom.uuid);
             atom.userData.selected = false;
             atom.material.emissive.setHex(atom.currentHex || 0);
 
             if (typeof atom.userData.coordinateArrayIndex === "number") {
                 this.coordinatesArray.splice(atom.userData.coordinateArrayIndex, 1);
-                this.selectedAtomsForCoordinates.forEach((uuid) => {
+                this.selectedAtomsIds.forEach((uuid) => {
                     const otherAtom = this.scene.getObjectByProperty("uuid", uuid);
                     if (
                         otherAtom &&
@@ -114,31 +128,17 @@ export const CoordinateMeasurementMixin = (superclass) =>
          * Clears all coordinate measurements and resets atoms
          */
         clearCoordinateMeasurements() {
-            this.selectedAtomsForCoordinates.forEach((uuid) => {
+            this.selectedAtomsIds.forEach((uuid) => {
                 const atom = this.scene.getObjectByProperty("uuid", uuid);
                 if (atom) {
                     this.deselectAtomCoordinate(atom);
                 }
             });
-            this.selectedAtomsForCoordinates.clear();
+            this.selectedAtomsIds.clear();
             this.coordinatesArray = [];
 
             while (this.coordinateMeasurementGroup.children.length) {
                 this.coordinateMeasurementGroup.remove(this.coordinateMeasurementGroup.children[0]);
             }
-        }
-
-        /**
-         * Updates coordinate measurement labels during camera movement
-         */
-        adjustCoordinateMeasurementLabels() {
-            if (!this.isCoordinateMeasurementActive) return;
-
-            this.coordinateMeasurementGroup.children.forEach((label) => {
-                const { atomPosition, atomName } = label.userData;
-                const offsetVector = this.getCoordinateLabelOffsetVector(atomPosition, atomName);
-                label.position.copy(atomPosition).add(offsetVector);
-                label.lookAt(this.camera.position);
-            });
         }
     };

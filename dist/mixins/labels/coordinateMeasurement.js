@@ -8,7 +8,7 @@ import { AtomLabelsMixin } from "./atomLabels";
 export const CoordinateMeasurementMixin = (superclass) => class extends AtomLabelsMixin(superclass) {
     constructor(config) {
         super(config);
-        this.selectedAtomsForCoordinates = new Set();
+        this.selectedAtomsIds = new Set();
         this.coordinatesArray = [];
         this.isCoordinateMeasurementActive = false;
     }
@@ -33,6 +33,8 @@ export const CoordinateMeasurementMixin = (superclass) => class extends AtomLabe
             getUserData: (text, position) => ({ atomPosition: position, atomName: text }),
             getNameForLabel: (text) => `coordinate-measurement-label-for-${text}`,
         });
+        this.findLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.visible =
+            this.isCoordinateMeasurementActive;
         this.render();
     }
     /**
@@ -50,17 +52,20 @@ export const CoordinateMeasurementMixin = (superclass) => class extends AtomLabe
      * Selects or deselects an atom for coordinate measurement and updates the group
      * @param {THREE.Mesh} atom - The atom to toggle selection for
      */
-    toggleAtomCoordinateSelection(atom) {
+    toggleAtomSelection(atom) {
         if (!this.isCoordinateMeasurementActive)
             return;
-        if (this.selectedAtomsForCoordinates.has(atom.uuid)) {
+        if (this.selectedAtomsIds.has(atom.uuid)) {
             this.deselectAtomCoordinate(atom);
         }
         else {
             this.selectAtomCoordinate(atom);
         }
         this.copyCoordinatesToClipboard();
-        this.findLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.add(atom);
+        this.selectedAtomsIds.forEach((uuid) => {
+            const atomMesh = this.scene.getObjectByProperty("uuid", uuid);
+            this.findLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.add(atomMesh);
+        });
         this.render();
     }
     /**
@@ -68,7 +73,7 @@ export const CoordinateMeasurementMixin = (superclass) => class extends AtomLabe
      * @param {THREE.Mesh} atom - The atom to select
      */
     selectAtomCoordinate(atom) {
-        this.selectedAtomsForCoordinates.add(atom.uuid);
+        this.selectedAtomsIds.add(atom.uuid);
         atom.userData.selected = true;
         atom.material.emissive.setHex(this.settings.colors.amber);
         const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
@@ -81,12 +86,12 @@ export const CoordinateMeasurementMixin = (superclass) => class extends AtomLabe
      * @param {THREE.Mesh} atom - The atom to deselect
      */
     deselectAtomCoordinate(atom) {
-        this.selectedAtomsForCoordinates.delete(atom.uuid);
+        this.selectedAtomsIds.delete(atom.uuid);
         atom.userData.selected = false;
         atom.material.emissive.setHex(atom.currentHex || 0);
         if (typeof atom.userData.coordinateArrayIndex === "number") {
             this.coordinatesArray.splice(atom.userData.coordinateArrayIndex, 1);
-            this.selectedAtomsForCoordinates.forEach((uuid) => {
+            this.selectedAtomsIds.forEach((uuid) => {
                 const otherAtom = this.scene.getObjectByProperty("uuid", uuid);
                 if (otherAtom &&
                     otherAtom.userData.coordinateArrayIndex > atom.userData.coordinateArrayIndex) {
@@ -104,29 +109,16 @@ export const CoordinateMeasurementMixin = (superclass) => class extends AtomLabe
      * Clears all coordinate measurements and resets atoms
      */
     clearCoordinateMeasurements() {
-        this.selectedAtomsForCoordinates.forEach((uuid) => {
+        this.selectedAtomsIds.forEach((uuid) => {
             const atom = this.scene.getObjectByProperty("uuid", uuid);
             if (atom) {
                 this.deselectAtomCoordinate(atom);
             }
         });
-        this.selectedAtomsForCoordinates.clear();
+        this.selectedAtomsIds.clear();
         this.coordinatesArray = [];
         while (this.coordinateMeasurementGroup.children.length) {
             this.coordinateMeasurementGroup.remove(this.coordinateMeasurementGroup.children[0]);
         }
-    }
-    /**
-     * Updates coordinate measurement labels during camera movement
-     */
-    adjustCoordinateMeasurementLabels() {
-        if (!this.isCoordinateMeasurementActive)
-            return;
-        this.coordinateMeasurementGroup.children.forEach((label) => {
-            const { atomPosition, atomName } = label.userData;
-            const offsetVector = this.getCoordinateLabelOffsetVector(atomPosition, atomName);
-            label.position.copy(atomPosition).add(offsetVector);
-            label.lookAt(this.camera.position);
-        });
     }
 };
