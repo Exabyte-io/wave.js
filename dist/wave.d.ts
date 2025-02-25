@@ -10,7 +10,6 @@ export class Wave {
     rebuildScene(): void;
     render(): void;
     doFunc(func: any): void;
-    takeScreenshot(): void;
     clearView(): void;
     adjustCamerasAndOrbitControlsToCell(): void;
     collectAllAtoms(): any[];

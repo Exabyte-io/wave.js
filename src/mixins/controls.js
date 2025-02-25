@@ -25,6 +25,9 @@ const OrbitControlsMixin = (superclass) =>
 
             this.initSecondAxes = this.initSecondAxes.bind(this);
             this.updateSecondAxes = this.updateSecondAxes.bind(this);
+
+            // Bind methods to context to avoid losing `this` reference in requestAnimationFrame
+            this.performOrbitControlsAnimation = this.performOrbitControlsAnimation.bind(this);
         }
 
         initOrbitControls(enabled = false) {
@@ -75,14 +78,25 @@ const OrbitControlsMixin = (superclass) =>
         enableOrbitControlsAnimation() {
             if (!this.orbitControls) return;
             this.orbitControls.autoRotate = true;
-            this.animationFrameId = window.requestAnimationFrame(this.enableOrbitControlsAnimation);
+            this.performOrbitControlsAnimation();
+        }
+
+        // eslint-disable-next-line class-methods-use-this
+        performOrbitControlsAnimation(action = () => {}) {
+            this.animationFrameId = window.requestAnimationFrame(
+                this.performOrbitControlsAnimation,
+            );
             // required if controls.enableDamping or controls.autoRotate are set to true
             this.orbitControls.update();
             this.render();
+            if (typeof action === "function") {
+                action();
+            }
         }
 
         disableOrbitControlsAnimation() {
             if (!this.orbitControls) return;
+            this.orbitControls.autoRotate = false;
             window.cancelAnimationFrame(this.animationFrameId);
             this.animationFrameId = null;
         }

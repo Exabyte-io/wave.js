@@ -1,16 +1,4 @@
 /**
- * Helper to save textual/bitmap data to a file.
- * @param {String} strData - Textual data
- * @param {String} filename
- */
-export function saveFile(strData: string, filename: string): void;
-/**
- * Save image data file with type
- * @param {String} imgData
- * @param {String} type
- */
-export function saveImageDataToFile(imgData: string, type?: string): void;
-/**
  * Converts a given scene data to a material.
  * Lattice is constructed from the LineSegments object.
  * Basis is constructed based on all SphereMesh objects.
@@ -212,5 +200,4 @@ export function ThreeDSceneDataToMaterial(scene: any): {
  * Atoms are slightly shifted along X axis if multiple materials are passed.
  */
 export function materialsToThreeDSceneData(materials: any, shift?: number[]): any;
-export function exportToDisk(content: string, name?: string, extension?: string, mime?: string): void;
 import { Made } from "@mat3ra/made";

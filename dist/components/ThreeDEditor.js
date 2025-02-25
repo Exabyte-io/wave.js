@@ -3,6 +3,8 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 // import "../MuiClassNameSetup";
 import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
 import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
+import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
+import { AlertProvider } from "@exabyte-io/cove.js/src/theme/provider";
 import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
@@ -31,7 +33,6 @@ import PropTypes from "prop-types";
 import React from "react";
 import { MEASUREMENT_KEYS } from "../enums";
 import settings from "../settings";
-import { exportToDisk } from "../utils";
 import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
@@ -254,6 +255,13 @@ export class ThreeDEditor extends React.Component {
             ];
             return [
                 {
+                    id: "StartGif",
+                    title: "Auto Rotate GIF",
+                    content: "Auto Rotate GIF",
+                    leftIcon: _jsx(PictureInPicture, {}),
+                    onClick: () => this.handleStartGifRecording(),
+                },
+                {
                     id: "Screenshot",
                     title: "Screenshot",
                     content: "Screenshot",
@@ -336,6 +344,8 @@ export class ThreeDEditor extends React.Component {
         this.handleResetMeasurements = this.handleResetMeasurements.bind(this);
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
+        this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
+        this.doWaveFunc = this.doWaveFunc.bind(this);
     }
     componentDidMount() {
         this.addHotKeyListener();
@@ -582,6 +592,14 @@ export class ThreeDEditor extends React.Component {
         }
         return toolbarConfig;
     }
+    async handleStartGifRecording(downloadPath, rotationSpeed = 60, frameDuration = 0.05) {
+        await this.WaveComponent.wave.takeGifScreenshot({
+            downloadPath,
+            rotationSpeed,
+            frameDuration,
+        });
+        console.log("Recorded gif");
+    }
     onThreejsEditorModalHide(material) {
         let { isThreejsEditorModalShown } = this.state;
         isThreejsEditorModalShown = !isThreejsEditorModalShown;
@@ -614,14 +632,29 @@ export class ThreeDEditor extends React.Component {
         return (_jsxs("div", { className: "wave-component-holder", style: { position: "relative", height: "100%" }, children: [this.renderCoverDiv(), _jsx(IconsToolbar, { toolbarConfig: this.getToolbarConfig(), isInteractive: isInteractive, handleToggleInteractive: this.handleToggleInteractive }), this.renderWaveComponent()] }));
     }
     render() {
-        return (_jsx(ThemeProvider, { theme: DarkMaterialUITheme, children: _jsx(ScopedCssBaseline, { enableColorScheme: true, style: { height: "100%" }, children: this.renderWaveOrThreejsEditorModal() }) }));
+        return (_jsx(ThemeProvider, { theme: DarkMaterialUITheme, children: _jsx(ScopedCssBaseline, { enableColorScheme: true, style: { height: "100%" }, children: _jsx(AlertProvider, { children: this.renderWaveOrThreejsEditorModal() }) }) }));
+    }
+    doWaveFunc(funcStr) {
+        if (!this.WaveComponent || !this.WaveComponent.wave) {
+            console.error("Wave component not initialized");
+            return;
+        }
+        const { wave } = this.WaveComponent;
+        try {
+            // eslint-disable-next-line no-new-func
+            const func = new Function("wave", `return wave.${funcStr}`);
+            func(wave);
+            this.WaveComponent.wave.rebuildScene();
+        }
+        catch (error) {
+            console.error("Error executing wave function:", error);
+        }
     }
 }
 ThreeDEditor.propTypes = {
     material: PropTypes.instanceOf(Made.Material).isRequired,
     editable: PropTypes.bool,
-    isConventionalCellShown: PropTypes.bool,
-    // eslint-disable-next-line react/forbid-prop-types
+    isConventionalCellShown: PropTypes.bool, // eslint-disable-next-line react/forbid-prop-types
     boundaryConditions: PropTypes.object,
     onUpdate: PropTypes.func,
 };

@@ -8,12 +8,13 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
+import { ImageMixin } from "./mixins/image";
 import { AtomLabelsMixin } from "./mixins/labels/atomLabels";
 import { CoordinateMeasurementMixin } from "./mixins/labels/coordinateMeasurement";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
-import { saveImageDataToFile } from "./utils/screenshot";
+// eslint-disable-next-line import/no-cycle
 const TV3 = THREE.Vector3;
 const TCo = THREE.Color;
 /*
@@ -37,6 +38,7 @@ class WaveBase {
         this.PADDING_RATIO = 1.25;
         this.container = DOMElement;
         this.updateSettings(settings);
+        this.areLabelsShown = this.settings.areLabelsInitiallyShown;
         this.initDimensions();
         this.initRenderer();
         this.initScene();
@@ -45,6 +47,7 @@ class WaveBase {
         this.setupLights();
         this.handleResize = this.handleResize.bind(this);
         this.setBackground = this.setBackground.bind(this);
+        this.doFunc = this.doFunc.bind(this);
     }
     updateSettings(settings) {
         this.settings = { ...SETTINGS, ...settings };
@@ -191,7 +194,7 @@ class WaveBase {
 /**
  * Wave draws atoms as spheres according to the material geometry passed.
  */
-export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, AtomLabelsMixin, CoordinateMeasurementMixin, MeasurementMixin) {
+export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, AtomLabelsMixin, CoordinateMeasurementMixin, MeasurementMixin, ImageMixin) {
     /**
      *
      * @param {Object} config
@@ -204,9 +207,6 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
         this.initializeAllLabelsHolders();
-    }
-    takeScreenshot() {
-        saveImageDataToFile(this.renderer.domElement.toDataURL("image/png"));
     }
     clearView() {
         while (this.structureGroup.children.length) {

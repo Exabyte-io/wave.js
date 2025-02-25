@@ -10,12 +10,13 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
+import { ImageMixin } from "./mixins/image";
 import { AtomLabelsMixin } from "./mixins/labels/atomLabels";
 import { CoordinateMeasurementMixin } from "./mixins/labels/coordinateMeasurement";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
-import { saveImageDataToFile } from "./utils/screenshot";
+// eslint-disable-next-line import/no-cycle
 
 const TV3 = THREE.Vector3;
 const TCo = THREE.Color;
@@ -46,6 +47,7 @@ class WaveBase {
         this.container = DOMElement;
 
         this.updateSettings(settings);
+        this.areLabelsShown = this.settings.areLabelsInitiallyShown;
 
         this.initDimensions();
         this.initRenderer();
@@ -56,6 +58,7 @@ class WaveBase {
 
         this.handleResize = this.handleResize.bind(this);
         this.setBackground = this.setBackground.bind(this);
+        this.doFunc = this.doFunc.bind(this);
     }
 
     updateSettings(settings) {
@@ -244,6 +247,7 @@ export class Wave extends mix(WaveBase).with(
     AtomLabelsMixin,
     CoordinateMeasurementMixin,
     MeasurementMixin,
+    ImageMixin,
 ) {
     /**
      *
@@ -257,10 +261,6 @@ export class Wave extends mix(WaveBase).with(
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
         this.initializeAllLabelsHolders();
-    }
-
-    takeScreenshot() {
-        saveImageDataToFile(this.renderer.domElement.toDataURL("image/png"));
     }
 
     clearView() {

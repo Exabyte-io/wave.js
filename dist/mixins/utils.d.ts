@@ -1,3 +1,11 @@
+export function createGIFAsync({ images, gifWidth, gifHeight, numFrames, frameDuration, sampleInterval, }: {
+    images: any;
+    gifWidth: any;
+    gifHeight: any;
+    numFrames: any;
+    frameDuration: any;
+    sampleInterval: any;
+}): Promise<any>;
 export function UtilsMixin(superclass: any): {
     new (): {
         [x: string]: any;
