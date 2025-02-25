@@ -315,7 +315,7 @@ export const MeasurementMixin = (superclass) =>
                 if (intersectItem.type === "Mesh") {
                     // Handle coordinate measurement mode
                     if (this.measurementSettings.areCoordinatesShown) {
-                        this.toggleAtomCoordinateSelection(intersectItem);
+                        this.toggleSelection(intersectItem);
                         break;
                     }
 

@@ -259,7 +259,7 @@ export const MeasurementMixin = (superclass) => class extends superclass {
             if (intersectItem.type === "Mesh") {
                 // Handle coordinate measurement mode
                 if (this.measurementSettings.areCoordinatesShown) {
-                    this.toggleAtomCoordinateSelection(intersectItem);
+                    this.toggleSelection(intersectItem);
                     break;
                 }
                 const isAlreadySelected = intersectItem.userData.selected;
