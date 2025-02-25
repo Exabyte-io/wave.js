@@ -25,4 +25,5 @@ export namespace LABEL_TYPES {
     let COORDINATE_1: string;
     export { COORDINATE_1 as COORDINATE };
     export let ELEMENT: string;
+    export let COORDINATE_MEASUREMENT: string;
 }

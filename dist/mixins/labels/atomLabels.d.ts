@@ -7,7 +7,7 @@ export function AtomLabelsMixin(superclass: any): {
          * Initialize all label holders for atoms (elements, coordinates)
          * @returns {void}
          */
-        initializeAllLabelHolders(): void;
+        initializeAllLabelsHolders(): void;
         /**
          * Creates a coordinate display text from coordinates
          * @param {Array<number>} coordinates - Array of [x,y,z] coordinates
@@ -26,10 +26,10 @@ export function AtomLabelsMixin(superclass: any): {
         toggleElementLabels(): void;
         toggleCoordinateLabels(): void;
         "__#1@#texturesCache": {};
-        labelHolders: any[];
-        initializeLabelHolder(config: Object): LabelsHolder;
-        findLabelHolder(labelType: string): LabelsHolder | undefined;
-        createVerticesHashMap(labelHolder: LabelsHolder): {
+        labelsHolders: any[];
+        initializeLabelsHolder(config: Object): import("./labelsHolder").LabelsHolder;
+        findLabelsHolder(labelType: string): import("./labelsHolder").LabelsHolder | undefined;
+        createVerticesHashMap(labelsHolder: any, sourceGroup?: THREE.Group): {
             [x: string]: number[];
         };
         createLabelTextTexture(text: string, config?: Object): THREE.Texture;
@@ -38,8 +38,8 @@ export function AtomLabelsMixin(superclass: any): {
         createLabelPoints(text: string, positions: Array<number>, name: string, config?: Object): THREE.Points;
         createLabelsAsPoints(verticesHashMap: any, getNameForLabel: Function, targetGroup: any, config: any): void;
         createLabelsAsSprites(verticesHashMap: any, getNameForLabel: Function, getOffsetVector: any, getUserData: any, targetGroup: any, config: any): void;
-        createLabels(labelType: string): void;
-        createAllLabels(): void;
+        createLabels(labelType: string, sourceGroup?: THREE.Group): void;
+        createAllLabels(sourceGroup?: THREE.Group): void;
         adjustLabelsToCameraPosition(labelType: string): void;
         adjustAllLabelsToCameraPosition(): void;
         toggleLabels(labelType: string): boolean;

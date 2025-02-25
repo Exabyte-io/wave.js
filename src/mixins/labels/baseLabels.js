@@ -1,28 +1,7 @@
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME } from "../../enums";
-
-export class LabelsHolder {
-    constructor(config) {
-        this.labelType = config.labelType || "labels";
-        this.threeJsGroupName = config.threeJsGroupName || "LABELS_GROUP_NAME";
-        this.areShown = config.areShown || false;
-        this.threeJsGroup = new THREE.Group();
-        this.threeJsGroup.name = this.threeJsGroupName;
-        this.threeJsGroup.visible = this.areShown;
-
-        this.config = config.config || {};
-
-        // Processing functions
-        this.textProcessor = config.textProcessor || (() => "");
-        this.getOffsetVector = config.getOffsetVector || (() => new THREE.Vector3());
-        this.getUserData =
-            config.getUserData ||
-            ((text, position) => ({ atomPosition: position, atomName: text }));
-        this.getNameForLabel =
-            config.getNameForLabel || ((text) => `${this.labelType}-label-for-${text}`);
-    }
-}
+import { LabelsHolder } from "./labelsHolder";
 
 /*
  * Base mixin containing generic logic for dealing with labels.
@@ -34,7 +13,7 @@ export const BaseLabelsMixin = (superclass) =>
 
         constructor(config) {
             super(config);
-            this.labelHolders = [];
+            this.labelsHolders = [];
         }
 
         /**
@@ -42,10 +21,10 @@ export const BaseLabelsMixin = (superclass) =>
          * @param {Object} config - Configuration for the label holder
          * @returns {LabelsHolder} The initialized label holder
          */
-        initializeLabelHolder(config) {
-            const labelHolder = new LabelsHolder(config);
-            this.structureGroup.add(labelHolder.threeJsGroup);
-            this.labelHolders.push(labelHolder);
+        initializeLabelsHolder(config) {
+            const labelsHolder = new LabelsHolder(config);
+            this.structureGroup.add(labelsHolder.threeJsGroup);
+            this.labelsHolders.push(labelsHolder);
         }
 
         /**
@@ -53,20 +32,21 @@ export const BaseLabelsMixin = (superclass) =>
          * @param {string} labelType - The type of label holder to find
          * @returns {LabelsHolder|undefined} The found label holder or undefined
          */
-        findLabelHolder(labelType) {
-            return this.labelHolders.find((holder) => holder.labelType === labelType);
+        findLabelsHolder(labelType) {
+            return this.labelsHolders.find((holder) => holder.labelType === labelType);
         }
 
         /**
          * Creates a hash map representing the positions for labels.
-         * @param {LabelsHolder} labelHolder - The label holder to create vertices for
+         * @param {labelsHolder} labelsHolder - The label holder to create vertices for
+         * @param {THREE.Group} [sourceGroup=this.structureGroup] - The group to extract atoms from
          * @returns {Object.<string, Array.<number>>} HashMap with label text as keys and an array of vertices as values.
          */
-        createVerticesHashMap(labelHolder) {
-            if (!labelHolder || !labelHolder.textProcessor) return {};
+        createVerticesHashMap(labelsHolder, sourceGroup = this.structureGroup) {
+            if (!labelsHolder || !labelsHolder.textProcessor) return {};
 
             const verticesHashMap = {};
-            this.structureGroup.children.forEach((group) => {
+            sourceGroup.children.forEach((group) => {
                 if (group.name !== ATOM_GROUP_NAME) return;
 
                 group.children.forEach((atom) => {
@@ -76,7 +56,7 @@ export const BaseLabelsMixin = (superclass) =>
                         );
                         const { x, y, z } = position;
 
-                        const text = labelHolder.textProcessor(atom, position);
+                        const text = labelsHolder.textProcessor(atom, position);
 
                         if (!verticesHashMap[text]) {
                             verticesHashMap[text] = [x, y, z];
@@ -254,29 +234,30 @@ export const BaseLabelsMixin = (superclass) =>
         /**
          * Creates labels for a specific label type
          * @param {string} labelType - Type of label to create
+         * @param {THREE.Group} [sourceGroup=this.structureGroup] - Group to extract atoms from
          */
-        createLabels(labelType) {
-            const labelHolder = this.findLabelHolder(labelType);
-            if (!labelHolder) return;
+        createLabels(labelType, sourceGroup = this.structureGroup) {
+            const labelsHolder = this.findLabelsHolder(labelType);
+            if (!labelsHolder) return;
 
-            const verticesHashMap = this.createVerticesHashMap(labelHolder);
-            labelHolder.threeJsGroup.clear();
+            const verticesHashMap = this.createVerticesHashMap(labelsHolder, sourceGroup);
+            labelsHolder.threeJsGroup.clear();
 
-            if (labelHolder.config.areSpritesUsed) {
+            if (labelsHolder.config.areSpritesUsed) {
                 this.createLabelsAsSprites(
                     verticesHashMap,
-                    labelHolder.getNameForLabel,
-                    labelHolder.getOffsetVector,
-                    labelHolder.getUserData,
-                    labelHolder.threeJsGroup,
-                    labelHolder.config,
+                    labelsHolder.getNameForLabel,
+                    labelsHolder.getOffsetVector,
+                    labelsHolder.getUserData,
+                    labelsHolder.threeJsGroup,
+                    labelsHolder.config,
                 );
             } else {
                 this.createLabelsAsPoints(
                     verticesHashMap,
-                    labelHolder.getNameForLabel,
-                    labelHolder.threeJsGroup,
-                    labelHolder.config,
+                    labelsHolder.getNameForLabel,
+                    labelsHolder.threeJsGroup,
+                    labelsHolder.config,
                 );
             }
             this.render();
@@ -284,9 +265,12 @@ export const BaseLabelsMixin = (superclass) =>
 
         /**
          * Creates all labels
+         * @param {THREE.Group} [sourceGroup=this.structureGroup] - Group to extract atoms from
          */
-        createAllLabels() {
-            this.labelHolders.forEach((holder) => this.createLabels(holder.labelType));
+        createAllLabels(sourceGroup = this.structureGroup) {
+            this.labelsHolders.forEach((holder) =>
+                this.createLabels(holder.labelType, sourceGroup),
+            );
         }
 
         /**
@@ -294,12 +278,13 @@ export const BaseLabelsMixin = (superclass) =>
          * @param {string} labelType - Type of label to adjust
          */
         adjustLabelsToCameraPosition(labelType) {
-            const labelHolder = this.findLabelHolder(labelType);
-            if (!labelHolder || !labelHolder.areShown || !labelHolder.config.areSpritesUsed) return;
+            const labelsHolder = this.findLabelsHolder(labelType);
+            if (!labelsHolder || !labelsHolder.areShown || !labelsHolder.config.areSpritesUsed)
+                return;
 
-            labelHolder.threeJsGroup.children.forEach((label) => {
+            labelsHolder.threeJsGroup.children.forEach((label) => {
                 const { atomPosition, atomName } = label.userData;
-                const offsetVector = labelHolder.getOffsetVector(atomPosition, atomName);
+                const offsetVector = labelsHolder.getOffsetVector(atomPosition, atomName);
                 label.position.copy(atomPosition).add(offsetVector);
                 label.lookAt(this.camera.position);
             });
@@ -309,7 +294,7 @@ export const BaseLabelsMixin = (superclass) =>
          * Adjust all labels to camera position
          */
         adjustAllLabelsToCameraPosition() {
-            this.labelHolders.forEach((holder) =>
+            this.labelsHolders.forEach((holder) =>
                 this.adjustLabelsToCameraPosition(holder.labelType),
             );
         }
@@ -320,11 +305,12 @@ export const BaseLabelsMixin = (superclass) =>
          * @returns {boolean} New visibility state
          */
         toggleLabels(labelType) {
-            const labelHolder = this.findLabelHolder(labelType);
-            if (!labelHolder || !labelHolder.threeJsGroup) return false;
+            const labelsHolder = this.findLabelsHolder(labelType);
+            if (!labelsHolder || !labelsHolder.threeJsGroup) return false;
 
-            labelHolder.areShown = !labelHolder.areShown;
-            labelHolder.threeJsGroup.visible = labelHolder.areShown;
+            labelsHolder.areShown = !labelsHolder.areShown;
+            labelsHolder.threeJsGroup.visible = labelsHolder.areShown;
             this.render();
+            return labelsHolder.areShown;
         }
     };

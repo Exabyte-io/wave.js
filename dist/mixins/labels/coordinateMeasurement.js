@@ -1,29 +1,38 @@
 import * as THREE from "three";
-import { COORDINATE_LABELS_GROUP_NAME } from "../../enums";
-import { BaseLabelsMixin } from "./baseLabels";
+import { COORDINATE_LABELS_GROUP_NAME, LABEL_TYPES } from "../../enums";
+import { AtomLabelsMixin } from "./atomLabels";
 /*
  * Mixin containing the logic for coordinate measurements.
  * Handles selection, label creation, and clipboard operations for coordinate measurements.
  */
-export const CoordinateMeasurementMixin = (superclass) => class extends BaseLabelsMixin(superclass) {
+export const CoordinateMeasurementMixin = (superclass) => class extends AtomLabelsMixin(superclass) {
     constructor(config) {
         super(config);
-        this.coordinateMeasurementGroup = new THREE.Group();
-        this.coordinateMeasurementGroup.name = COORDINATE_LABELS_GROUP_NAME;
         this.selectedAtomsForCoordinates = new Set();
         this.coordinatesArray = [];
         this.isCoordinateMeasurementActive = false;
-        this.structureGroup.add(this.coordinateMeasurementGroup);
     }
     /**
-     * Toggles coordinate measurement mode on/off
+     * Toggles coordinate measurement mode on/off and initializes the label holder
      */
     toggleCoordinateMeasurement() {
         this.isCoordinateMeasurementActive = !this.isCoordinateMeasurementActive;
         if (!this.isCoordinateMeasurementActive) {
             this.clearCoordinateMeasurements();
         }
-        this.coordinateMeasurementGroup.visible = this.isCoordinateMeasurementActive;
+        this.initializeLabelsHolder({
+            labelType: LABEL_TYPES.COORDINATE_MEASUREMENT,
+            threeJsGroupName: COORDINATE_LABELS_GROUP_NAME,
+            areShown: this.isCoordinateMeasurementActive,
+            config: this.settings.coordinateLabelsConfig,
+            textProcessor: (atom, position) => {
+                const { x, y, z } = position;
+                return this.createCoordinateText([x, y, z]);
+            },
+            getOffsetVector: this.getCoordinateLabelOffsetVector.bind(this),
+            getUserData: (text, position) => ({ atomPosition: position, atomName: text }),
+            getNameForLabel: (text) => `coordinate-measurement-label-for-${text}`,
+        });
         this.render();
     }
     /**
@@ -38,7 +47,7 @@ export const CoordinateMeasurementMixin = (superclass) => class extends BaseLabe
         navigator.clipboard.writeText(coordsText).catch(console.error);
     }
     /**
-     * Selects or deselects an atom for coordinate measurement
+     * Selects or deselects an atom for coordinate measurement and updates the group
      * @param {THREE.Mesh} atom - The atom to toggle selection for
      */
     toggleAtomCoordinateSelection(atom) {
@@ -51,6 +60,7 @@ export const CoordinateMeasurementMixin = (superclass) => class extends BaseLabe
             this.selectAtomCoordinate(atom);
         }
         this.copyCoordinatesToClipboard();
+        this.findLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.add(atom);
         this.render();
     }
     /**
@@ -65,11 +75,6 @@ export const CoordinateMeasurementMixin = (superclass) => class extends BaseLabe
         const { x, y, z } = position;
         atom.userData.coordinateArrayIndex = this.coordinatesArray.length;
         this.coordinatesArray.push([x, y, z]);
-        const text = this.createCoordinateText([x, y, z]);
-        const label = this.createSingleCoordinateLabel(text, position, "measurement");
-        label.visible = true;
-        atom.userData.coordinateLabel = label;
-        this.coordinateMeasurementGroup.add(label);
     }
     /**
      * Deselects an atom and removes its coordinate label

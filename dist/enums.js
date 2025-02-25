@@ -41,4 +41,5 @@ export const MEASUREMENT_KEYS = {
 export const LABEL_TYPES = {
     COORDINATE: "coordinate",
     ELEMENT: "element",
+    COORDINATE_MEASUREMENT: "coordinateMeasurement",
 };

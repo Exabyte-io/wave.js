@@ -1,38 +1,27 @@
-export class LabelsHolder {
-    constructor(config: any);
-    labelType: any;
-    threeJsGroupName: any;
-    areShown: any;
-    threeJsGroup: any;
-    config: any;
-    textProcessor: any;
-    getOffsetVector: any;
-    getUserData: any;
-    getNameForLabel: any;
-}
 export function BaseLabelsMixin(superclass: any): {
     new (config: any): {
         [x: string]: any;
         "__#1@#texturesCache": {};
-        labelHolders: any[];
+        labelsHolders: any[];
         /**
          * Initializes a label holder with provided configuration
          * @param {Object} config - Configuration for the label holder
          * @returns {LabelsHolder} The initialized label holder
          */
-        initializeLabelHolder(config: Object): LabelsHolder;
+        initializeLabelsHolder(config: Object): LabelsHolder;
         /**
          * Finds a label holder by type
          * @param {string} labelType - The type of label holder to find
          * @returns {LabelsHolder|undefined} The found label holder or undefined
          */
-        findLabelHolder(labelType: string): LabelsHolder | undefined;
+        findLabelsHolder(labelType: string): LabelsHolder | undefined;
         /**
          * Creates a hash map representing the positions for labels.
-         * @param {LabelsHolder} labelHolder - The label holder to create vertices for
+         * @param {labelsHolder} labelsHolder - The label holder to create vertices for
+         * @param {THREE.Group} [sourceGroup=this.structureGroup] - The group to extract atoms from
          * @returns {Object.<string, Array.<number>>} HashMap with label text as keys and an array of vertices as values.
          */
-        createVerticesHashMap(labelHolder: LabelsHolder): {
+        createVerticesHashMap(labelsHolder: any, sourceGroup?: THREE.Group): {
             [x: string]: number[];
         };
         /**
@@ -85,12 +74,14 @@ export function BaseLabelsMixin(superclass: any): {
         /**
          * Creates labels for a specific label type
          * @param {string} labelType - Type of label to create
+         * @param {THREE.Group} [sourceGroup=this.structureGroup] - Group to extract atoms from
          */
-        createLabels(labelType: string): void;
+        createLabels(labelType: string, sourceGroup?: THREE.Group): void;
         /**
          * Creates all labels
+         * @param {THREE.Group} [sourceGroup=this.structureGroup] - Group to extract atoms from
          */
-        createAllLabels(): void;
+        createAllLabels(sourceGroup?: THREE.Group): void;
         /**
          * Adjusts labels to camera position
          * @param {string} labelType - Type of label to adjust
@@ -109,3 +100,4 @@ export function BaseLabelsMixin(superclass: any): {
     };
     [x: string]: any;
 };
+import { LabelsHolder } from "./labelsHolder";
