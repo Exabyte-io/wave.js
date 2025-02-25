@@ -24,8 +24,10 @@ export const LabelsAsPointsMixin = (superclass) =>
         /**
          * Creates and positions multiple labels efficiently using Three.Points
          * For best performance when rendering many labels.
-         * @param {Object} labelData - Map of label text to array of positions
-         * @param {Function} getNameForLabel - Function to generate name for each label
+         * @param {Object} verticesHashMap - Object with label names as keys and arrays of positions as values
+         * @param {Function} getNameForLabel - Function to get the name for a label
+         * @param {THREE.Group} targetGroup - Group to add the labels to
+         * @param {Object} config - Additional options for the points (size, etc.)
          */
         createLabelsAsPoints(verticesHashMap, getNameForLabel, targetGroup, config) {
             if (!targetGroup) {
@@ -50,7 +52,7 @@ export const LabelsAsPointsMixin = (superclass) =>
          * @param {THREE.Group} [sourceGroup=this.structureGroup] - Group to extract atoms from
          */
         createLabels(labelType, sourceGroup = this.structureGroup) {
-            const labelsHolder = this.findLabelsHolder(labelType);
+            const labelsHolder = this.getLabelsHolder(labelType);
             if (!labelsHolder) return;
 
             const verticesHashMap = this.createVerticesHashMap(labelsHolder, sourceGroup);

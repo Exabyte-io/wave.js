@@ -13,7 +13,9 @@ export const BaseLabelsMixin = (superclass) =>
 
         constructor(config) {
             super(config);
-            this.labelsHolders = [];
+            if (!this.labelsHolders) {
+                this.labelsHolders = [];
+            }
         }
 
         /**
@@ -32,7 +34,7 @@ export const BaseLabelsMixin = (superclass) =>
          * @param {string} labelType - The type of label holder to find
          * @returns {LabelsHolder|undefined} The found label holder or undefined
          */
-        findLabelsHolder(labelType) {
+        getLabelsHolder(labelType) {
             return this.labelsHolders.find((holder) => holder.labelType === labelType);
         }
 
@@ -156,10 +158,6 @@ export const BaseLabelsMixin = (superclass) =>
         /**
          * Creates and positions multiple labels as sprites
          * More flexible but less performant than Points for many labels
-         * @param {Object} labelData - Map of label text to array of positions
-         * @param {Function} getNameForLabel - Function to generate name for each label
-         * @param {Function} getLabelOffset - Function to calculate offset for each label
-         * @param {Function} getAdditionalData - Function to get additional data for each label
          */
         createLabelsAsSprites(
             verticesHashMap,
@@ -197,7 +195,7 @@ export const BaseLabelsMixin = (superclass) =>
          * @param {THREE.Group} [sourceGroup=this.structureGroup] - Group to extract atoms from
          */
         createLabels(labelType, sourceGroup = this.structureGroup) {
-            const labelsHolder = this.findLabelsHolder(labelType);
+            const labelsHolder = this.getLabelsHolder(labelType);
             if (!labelsHolder) return;
 
             const verticesHashMap = this.createVerticesHashMap(labelsHolder, sourceGroup);
@@ -217,7 +215,7 @@ export const BaseLabelsMixin = (superclass) =>
         }
 
         /**
-         * Creates all labels
+         * Creates labels for each of labelsHolders
          * @param {THREE.Group} [sourceGroup=this.structureGroup] - Group to extract atoms from
          */
         createAllLabels(sourceGroup = this.structureGroup) {
@@ -227,11 +225,11 @@ export const BaseLabelsMixin = (superclass) =>
         }
 
         /**
-         * Adjusts labels to camera position
+         * Adjusts labels to camera position. Applied to labels of a specific type.
          * @param {string} labelType - Type of label to adjust
          */
         adjustLabelsToCameraPosition(labelType) {
-            const labelsHolder = this.findLabelsHolder(labelType);
+            const labelsHolder = this.getLabelsHolder(labelType);
             if (!labelsHolder || !labelsHolder.areShown || !labelsHolder.config.areSpritesUsed)
                 return;
 
@@ -244,7 +242,7 @@ export const BaseLabelsMixin = (superclass) =>
         }
 
         /**
-         * Adjust all labels to camera position
+         * Adjust all labels to camera position after camera movement. Applied to all existing labels.
          */
         adjustAllLabelsToCameraPosition() {
             this.labelsHolders.forEach((holder) =>
@@ -258,7 +256,7 @@ export const BaseLabelsMixin = (superclass) =>
          * @returns {boolean} New visibility state
          */
         toggleLabels(labelType) {
-            const labelsHolder = this.findLabelsHolder(labelType);
+            const labelsHolder = this.getLabelsHolder(labelType);
             if (!labelsHolder || !labelsHolder.threeJsGroup) return false;
 
             labelsHolder.areShown = !labelsHolder.areShown;

@@ -38,7 +38,7 @@ export const CoordinateMeasurementMixin = (superclass) =>
                 getNameForLabel: (text) => `coordinate-measurement-label-for-${text}`,
             });
 
-            this.findLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.visible =
+            this.getLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.visible =
                 this.isCoordinateMeasurementActive;
             this.render();
         }
@@ -72,9 +72,7 @@ export const CoordinateMeasurementMixin = (superclass) =>
 
             this.selectedAtomsIds.forEach((uuid) => {
                 const atomMesh = this.scene.getObjectByProperty("uuid", uuid);
-                this.findLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.add(
-                    atomMesh,
-                );
+                this.getLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.add(atomMesh);
             });
 
             this.render();
