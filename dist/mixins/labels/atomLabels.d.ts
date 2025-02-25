@@ -1,13 +1,13 @@
 export function AtomLabelsMixin(superclass: any): {
     new (config: any): {
         [x: string]: any;
+        areCoordinateLabelsShown: any;
+        areElementLabelsShown: any;
         /**
-         * Initialize all label holders
-         * To be implemented by the sub-class if needed
+         * Initialize all label holders for atoms (elements, coordinates)
+         * @returns {void}
          */
         initializeAllLabelHolders(): void;
-        coordinateLabelsHolder: import("./baseLabels").LabelsHolder | undefined;
-        elementLabelsHolder: import("./baseLabels").LabelsHolder | undefined;
         /**
          * Creates a coordinate display text from coordinates
          * @param {Array<number>} coordinates - Array of [x,y,z] coordinates

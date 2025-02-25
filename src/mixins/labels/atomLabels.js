@@ -5,12 +5,19 @@ import { BaseLabelsMixin } from "./baseLabels";
 
 export const AtomLabelsMixin = (superclass) =>
     class extends BaseLabelsMixin(superclass) {
+        constructor(config) {
+            super(config);
+            this.initializeAllLabelHolders();
+            this.areCoordinateLabelsShown = this.findLabelHolder(LABEL_TYPES.COORDINATE).areShown;
+            this.areElementLabelsShown = this.findLabelHolder(LABEL_TYPES.ELEMENT).areShown;
+        }
+
         /**
-         * Initialize all label holders
-         * To be implemented by the sub-class if needed
+         * Initialize all label holders for atoms (elements, coordinates)
+         * @returns {void}
          */
         initializeAllLabelHolders() {
-            this.coordinateLabelsHolder = this.initializeLabelHolder({
+            this.initializeLabelHolder({
                 labelType: LABEL_TYPES.COORDINATE,
                 threeJsGroupName: COORDINATE_LABELS_GROUP_NAME,
                 areShown: this.settings.areCoordinateLabelsInitiallyShown,
@@ -24,7 +31,7 @@ export const AtomLabelsMixin = (superclass) =>
                 getNameForLabel: (text) => `coordinate-label-for-${text}`,
             });
 
-            this.elementLabelsHolder = this.initializeLabelHolder({
+            this.initializeLabelHolder({
                 labelType: LABEL_TYPES.ELEMENT,
                 threeJsGroupName: ELEMENT_LABELS_GROUP_NAME,
                 areShown: this.settings.areElementLabelsInitiallyShown,
@@ -81,9 +88,11 @@ export const AtomLabelsMixin = (superclass) =>
 
         toggleElementLabels() {
             this.toggleLabels(LABEL_TYPES.ELEMENT);
+            this.areElementLabelsShown = this.findLabelHolder(LABEL_TYPES.ELEMENT).areShown;
         }
 
         toggleCoordinateLabels() {
             this.toggleLabels(LABEL_TYPES.COORDINATE);
+            this.areCoordinateLabelsShown = this.findLabelHolder(LABEL_TYPES.COORDINATE).areShown;
         }
     };

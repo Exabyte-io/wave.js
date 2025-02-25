@@ -147,7 +147,7 @@ export class ThreeDEditor extends React.Component {
                     shouldMenuStayOpened: true,
                 },
                 {
-                    id: "toggle-labels",
+                    id: "toggle-element-labels",
                     disabled: false,
                     content: `Elements [${settings.hotKeysConfig.toggleElementLabels.toUpperCase()}]`,
                     leftIcon: _jsx(Spellcheck, {}),

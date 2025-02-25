@@ -11,7 +11,6 @@ export class LabelsHolder {
         this.threeJsGroup.name = this.threeJsGroupName;
         this.threeJsGroup.visible = this.areShown;
 
-        // Config for label creation
         this.config = config.config || {};
 
         // Processing functions
@@ -45,11 +44,7 @@ export const BaseLabelsMixin = (superclass) =>
          */
         initializeLabelHolder(config) {
             const labelHolder = new LabelsHolder(config);
-            this.labelHolders.push(labelHolder);
-
-            // Add the group to structure group
             this.structureGroup.add(labelHolder.threeJsGroup);
-
             this.labelHolders.push(labelHolder);
         }
 
@@ -331,7 +326,5 @@ export const BaseLabelsMixin = (superclass) =>
             labelHolder.areShown = !labelHolder.areShown;
             labelHolder.threeJsGroup.visible = labelHolder.areShown;
             this.render();
-
-            return labelHolder.areShown;
         }
     };
