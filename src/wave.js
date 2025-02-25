@@ -11,8 +11,9 @@ import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
 import { ImageMixin } from "./mixins/image";
-import { AtomLabelsMixin } from "./mixins/labels/atomLabels";
+import { CoordinateLabelsMixin } from "./mixins/labels/coordinateLabels";
 import { CoordinateMeasurementMixin } from "./mixins/labels/coordinateMeasurement";
+import { ElementLabelsMixin } from "./mixins/labels/elementLabels";
 import { MeasurementMixin } from "./mixins/measurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
@@ -244,7 +245,8 @@ export class Wave extends mix(WaveBase).with(
     RepetitionMixin,
     ControlsMixin,
     BoundaryMixin,
-    AtomLabelsMixin,
+    ElementLabelsMixin,
+    CoordinateLabelsMixin,
     CoordinateMeasurementMixin,
     MeasurementMixin,
     ImageMixin,
@@ -260,7 +262,6 @@ export class Wave extends mix(WaveBase).with(
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
-        this.initializeAllLabelsHolders();
     }
 
     clearView() {
