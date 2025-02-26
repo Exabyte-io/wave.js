@@ -1,5 +1,15 @@
-import { ELEMENT_COLORS, ELEMENT_VDW_RADII } from "@exabyte-io/periodic-table.js";
+import { ELEMENT_COLORS, PERIODIC_TABLE } from "@mat3ra/periodic-table";
 import * as THREE from "three";
+
+declare module "@mat3ra/periodic-table" {
+    interface Element {
+        van_der_Waals_radius_pm: number;
+    }
+}
+
+const vdwRadiiMapAngstrom = Object.keys(PERIODIC_TABLE).map(
+    (key) => PERIODIC_TABLE[key].van_der_Waals_radius_pm / 100,
+);
 
 export default {
     // atoms
@@ -12,7 +22,7 @@ export default {
     sphereRadius: 1.5,
     sphereQuality: 16,
     elementColors: ELEMENT_COLORS,
-    vdwRadii: ELEMENT_VDW_RADII,
+    vdwRadii: vdwRadiiMapAngstrom,
     // line
     lineWidth: 2,
     lineMaterial: {
@@ -40,40 +50,49 @@ export default {
         fontFace: "Arial",
         fontSize: 96,
         fontWeight: "Bold",
-        fillStyle: "#EEEEEE",
-        strokeStyle: "#454545",
-        lineWidth: 2,
-        textAlign: "center",
-        textBaseline: "middle",
+        scale: 1,
+        scaleWidth: 0.5,
+        scaleHeight: 0.5,
+        textParameters: {
+            fillStyle: "#EEEEEE",
+            strokeStyle: "#454545",
+            lineWidth: 2,
+            textAlign: "center",
+            textBaseline: "middle",
+        },
     },
     elementLabelsConfig: {
         areSpritesUsed: true,
         fontFace: "Arial",
         fontSize: 96,
         fontWeight: "Bold",
-        fillStyle: "#EEEEEE",
-        strokeStyle: "#454545",
-        lineWidth: 2,
-        textAlign: "center",
-        textBaseline: "middle",
         scale: 1,
         scaleWidth: 0.5,
         scaleHeight: 0.5,
+        textParameters: {
+            fillStyle: "#EEEEEE",
+            strokeStyle: "#454545",
+            lineWidth: 2,
+            textAlign: "center",
+            textBaseline: "middle",
+        },
     },
     coordinateLabelsConfig: {
         areSpritesUsed: true,
         fontFace: "Arial",
         fontSize: 72,
         fontWeight: "Normal",
-        fillStyle: "#CCCCCC",
-        strokeStyle: "#454545",
-        lineWidth: 1,
-        textAlign: "center",
-        textBaseline: "middle",
         scale: 1.5,
         scaleWidth: 2.5,
         scaleHeight: 0.25,
         offsetVector: [0, 0, 0.25],
+        textParameters: {
+            fillStyle: "#CCCCCC",
+            strokeStyle: "#454545",
+            lineWidth: 1,
+            textAlign: "center",
+            textBaseline: "middle",
+        },
     },
     labelPointsConfig: {
         size: 1.5,
