@@ -15,8 +15,7 @@ import {
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
-export const AngleMeasurementMixin = <T extends Constructor>(superclass: T) =>
-    class extends BaseMeasurementMixin(superclass) {
+export class AngleMeasuremenManager extends BaseMeasurementManager {
         angleConnections: THREE.Group;
 
         currentSelectedAngle: THREE.Line | null = null;
@@ -28,6 +27,7 @@ export const AngleMeasurementMixin = <T extends Constructor>(superclass: T) =>
             this.angleConnections = new THREE.Group();
             this.angleConnections.name = ATOM_CONNECTIONS_GROUP_NAME;
             this.measurementsGroup.add(this.angleConnections);
+            // TODO: add to structure group instead
             this.scene.add(this.angleConnections);
 
             this.currentSelectedAngle = null;

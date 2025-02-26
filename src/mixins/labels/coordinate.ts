@@ -9,7 +9,7 @@ export class CoordinateLabelsManager extends BaseLabelsManager {
 
     THREEGroupName = "coordinates-labels";
 
-    areShown = false;
+    isVisible = false;
 
     config: settings.coordinateLabelsConfig;
 

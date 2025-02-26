@@ -2,32 +2,12 @@ import * as THREE from "three";
 
 import settings from "../../settings";
 import { ATOM_GROUP_NAME } from "../../enums";
+import { BaseTHREEGroupManager } from "../base";
 
-export class BaseLabelsManager {
+export class BaseLabelsManager extends BaseTHREEGroupManager {
     labelType: string;
 
-    THREEGroupName: string;
-
-    areShown: boolean;
-
-    THREEGroup: THREE.Group;
-
-    config: any;
-
-    // reference to wave class objects
-    waveStructureGroup: THREE.Group;
-    waveCamera: THREE.Camera;
-
-
     #THREETexturesCache = {};
-
-    constructor(waveStructureGroup: THREE.Group) {
-        this.THREEGroup = new THREE.Group();
-        this.THREEGroup.name = this.THREEGroupName;
-        this.THREEGroup.visible = this.areShown;
-        this.waveStructureGroup = waveStructureGroup;
-        this.waveStructureGroup.add(this.THREEGroup);
-    }
 
     textProcessor(atom: THREE.Mesh, position: THREE.Vector3) {
         return atom.name + " " + atom.position.x;
@@ -58,8 +38,8 @@ export class BaseLabelsManager {
     }
 
     toggleLabelsVisibility() {
-        this.areShown = !this.areShown;
-        this.THREEGroup.visible = this.areShown;
+        this.isVisible = !this.isVisible;
+        this.THREEGroup.visible = this.isVisible;
     }
 
     /**
@@ -203,7 +183,7 @@ export class BaseLabelsManager {
      * @param {string} labelType - Type of label to adjust
      */
     adjustLabelsToCameraPosition() {
-        if (!this.areShown || !this.config.areSpritesUsed)
+        if (!this.isVisible || !this.config.areSpritesUsed)
             return;
 
         this.THREEGroup.children.forEach((label) => {
