@@ -12,9 +12,10 @@ import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
 import { ImageMixin } from "./mixins/image";
 import { CoordinateLabelsMixin } from "./mixins/labels/coordinateLabels";
-import { CoordinateMeasurementMixin } from "./mixins/labels/coordinateMeasurement";
 import { ElementLabelsMixin } from "./mixins/labels/elementLabels";
-import { MeasurementMixin } from "./mixins/measurement";
+import { AngleMeasurementMixin } from "./mixins/measurements/angleMeasurement";
+import { CoordinateMeasurementMixin } from "./mixins/measurements/coordinateMeasurement";
+import { DistanceMeasurementMixin } from "./mixins/measurements/distanceMeasurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
@@ -248,7 +249,8 @@ export class Wave extends mix(WaveBase).with(
     ElementLabelsMixin,
     CoordinateLabelsMixin,
     CoordinateMeasurementMixin,
-    MeasurementMixin,
+    DistanceMeasurementMixin,
+    AngleMeasurementMixin,
     ImageMixin,
 ) {
     /**

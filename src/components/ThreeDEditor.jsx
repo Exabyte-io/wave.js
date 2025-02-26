@@ -32,7 +32,7 @@ import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { MEASUREMENT_KEYS } from "../enums";
+import { MEASUREMENT_MODES } from "../enums";
 import settings from "../settings";
 import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";
@@ -168,15 +168,15 @@ export class ThreeDEditor extends React.Component {
         [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
         [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleMeasurement.bind(
             this,
-            MEASUREMENT_KEYS.DISTANCE,
+            MEASUREMENT_MODES.DISTANCE,
         ),
         [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleMeasurement.bind(
             this,
-            MEASUREMENT_KEYS.ANGLE,
+            MEASUREMENT_MODES.ANGLE,
         ),
         [settings.hotKeysConfig.toggleCopyCoordinatesShown]: this.handleToggleMeasurement.bind(
             this,
-            MEASUREMENT_KEYS.COORDINATE,
+            MEASUREMENT_MODES.COORDINATE,
         ),
         [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
     };
@@ -354,30 +354,28 @@ export class ThreeDEditor extends React.Component {
         if (isDistanceShown || areAnglesShown) this.WaveComponent.wave.resetMeasurements();
     }
 
-    handleToggleMeasurement(measurementKey) {
-        const validMeasurementKeys = Object.values(MEASUREMENT_KEYS);
-        if (!validMeasurementKeys.includes(measurementKey)) return;
-
+    handleToggleMeasurement(measurementMode) {
         this.WaveComponent.wave.destroyListeners();
         this.handleResetMeasurements();
+        this.WaveComponent.wave.setMeasurementMode(measurementMode);
 
         this.setState(
             (prevState) => {
                 const { measurementsSettings } = prevState;
                 const newSettings = { ...measurementsSettings };
-                const isActive = newSettings[measurementKey];
-                validMeasurementKeys.forEach((key) => {
+                const isActive = newSettings[measurementMode];
+                Object.values(MEASUREMENT_MODES).forEach((key) => {
                     newSettings[key] = false;
                 });
                 if (!isActive) {
-                    newSettings[measurementKey] = true;
+                    newSettings[measurementMode] = true;
                 }
 
                 return { measurementsSettings: newSettings };
             },
             () => {
                 const { measurementsSettings } = this.state;
-                if (measurementsSettings[measurementKey]) {
+                if (measurementsSettings[measurementMode]) {
                     this.WaveComponent.wave.initListeners(
                         this.handleSetState,
                         measurementsSettings,
@@ -552,7 +550,7 @@ export class ThreeDEditor extends React.Component {
                 content: `Distances [${settings.hotKeysConfig.toggleDistanceShown.toUpperCase()}]`,
                 rightIcon: this.getCheckmark(isDistanceShown),
                 leftIcon: <HeightIcon />,
-                onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.DISTANCE),
+                onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.DISTANCE),
                 shouldMenuStayOpened: true,
             },
             {
@@ -560,7 +558,7 @@ export class ThreeDEditor extends React.Component {
                 content: `Angles [${settings.hotKeysConfig.toggleAnglesShown.toUpperCase()}]`,
                 rightIcon: this.getCheckmark(areAnglesShown),
                 leftIcon: <LooksIcon />,
-                onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.ANGLE),
+                onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.ANGLE),
                 shouldMenuStayOpened: true,
             },
             {
@@ -568,7 +566,7 @@ export class ThreeDEditor extends React.Component {
                 content: `Copy Coordinates [${settings.hotKeysConfig.toggleCopyCoordinatesShown.toUpperCase()}]`,
                 rightIcon: this.getCheckmark(areCoordinatesShown),
                 leftIcon: <GpsFixed />,
-                onClick: () => this.handleToggleMeasurement(MEASUREMENT_KEYS.COORDINATE),
+                onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.COORDINATE),
                 shouldMenuStayOpened: true,
             },
             {
