@@ -50,6 +50,7 @@ export const CoordinateMeasurementMixin = <T extends Constructor>(superclass: T)
             if (index >= 0) {
                 // Deselect atom
                 atom.userData.selected = false;
+                // @ts-ignore
                 atom.material.emissive.setHex(atom.currentHex);
                 this.selectedAtoms.splice(index, 1);
             } else {

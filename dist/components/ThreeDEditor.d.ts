@@ -18,6 +18,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
             measurementLabelsShown: boolean;
             distance: number;
             angle: number;
+            coordinates: never[];
         };
         viewerTriggerResize: boolean;
         viewerSettings: {
@@ -52,7 +53,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleToggleAxes(): void;
     onThreejsEditorModalHide(material: any): void;
     handleChemicalConnectivityFactorChange(e: any): void;
-    handleToggleMeasurement(measurementKey: any): void;
+    handleToggleMeasurement(measurementMode: any): void;
     handleSetState(newState: any): void;
     handleDeleteConnection(): void;
     handleResetMeasurements(): void;

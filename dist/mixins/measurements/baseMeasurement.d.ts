@@ -1,32 +1,82 @@
-export function BaseMeasurementMixin(superclass: any): {
+import * as THREE from "three";
+type Constructor<T = {}> = new (...args: any[]) => T;
+export declare const BaseMeasurementMixin: <T extends Constructor>(superclass: T) => {
     new (config: any): {
         [x: string]: any;
-        selectedAtoms: any[];
-        intersected: any;
-        measurementLabelsGroup: any;
+        selectedAtoms: THREE.Object3D[];
+        highlightedAtom: THREE.Object3D | null;
+        raycaster: THREE.Raycaster;
+        pointer: THREE.Vector2;
+        measurementsGroup: THREE.Group;
+        measurementSettings: any;
+        currentMeasurementMode: string;
+        scene: THREE.Scene;
+        structureGroup: THREE.Group;
+        renderer: THREE.WebGLRenderer;
+        camera: THREE.Camera;
+        settings: any;
+        atomClickHandlers: {
+            mode: string;
+            handleClick: any;
+        }[] | undefined;
+        initializeMeasurement(measurementMode: string, handleAtomClick: any): void;
         destroyListeners(): void;
         /**
          * Function to initialize listeners for checking DOM events.
          * @param {Function} updateState - functions for updating data in react.
          * @param settings - measurements settings object, this object helps to define state in this class.
          */
-        initListeners(updateState: Function, settings: any): void;
-        measurementSettings: any;
+        initListeners(updateState: any, settings: any): void;
         initRaycaster(): void;
-        raycaster: any;
-        pointer: any;
-        getAtomGroups(): any[];
-        handleSetSelected(intersectItem: any): void;
-        getPointsFromMatrixWorld(firstMatrix: any, secondMatrix: any): any[];
-        checkMouseCoordinates(event: any): void;
-        setHexForAtom(intersectItem: any): void;
+        getAtomGroups(): THREE.Object3D[];
+        handleSetSelected(intersectItem: THREE.Object3D): void;
+        checkMouseCoordinates(event: MouseEvent): void;
+        setHexForAtom(intersectItem: THREE.Object3D): void;
         setDefaultHexForAtom(): void;
-        createMeasurementLabel(text: any, name: any, position: any): any;
-        onClick(updateState: any, event: any): void;
-        onPointerMove(event: any): void;
+        /**
+         * Set the current measurement mode, deactivating the previous one
+         * @param {string} mode - The measurement mode to activate
+         * @returns {boolean} True if the mode was activated, false if it was deactivated
+         */
+        setMeasurementMode(mode: string): boolean;
+        /**
+         * Update the visibility of measurement UI elements based on current mode
+         * @private
+         */
+        _updateMeasurementVisibility(): void;
+        createMeasurementLabel(text: string, name: string, position: THREE.Vector3): THREE.Sprite<THREE.Object3DEventMap>;
+        /**
+         * Checks if the given measurement mode is currently active
+         * @param mode The measurement mode to check
+         * @returns True if the specified mode is active
+         */
+        isMeasurementModeActive(mode: string): boolean;
+        /**
+         * Function that handles clicks on atoms, forwarding to the appropriate handler
+         * based on the current measurement mode.
+         */
+        onClick(updateState: any, event: MouseEvent): void;
+        onPointerMove(event: MouseEvent): void;
+        /**
+         * Resets all measurements and clears selected atoms
+         */
         resetMeasurements(): void;
-        addConnection(atom: any, connectionId: any): void;
-        calculateDistanceBetweenAtoms(atoms: any): any;
+        "__#1@#texturesCache": {};
+        labelsHolders: any[];
+        initializeLabelsHolder(config: Object): import("../labels/labelsHolder").LabelsHolder;
+        getLabelsHolder(labelType: string): import("../labels/labelsHolder").LabelsHolder | undefined;
+        createVerticesHashMap(labelsHolder: any, sourceGroup?: THREE.Group): {
+            [x: string]: number[];
+        };
+        createLabelTextTexture(text: string, config?: Object): THREE.Texture;
+        getLabelTextTexture(text: string, config: Object): THREE.Texture;
+        createLabelSprite(text: string, name: string, config: Object): THREE.Sprite;
+        createLabelsAsSprites(verticesHashMap: any, getNameForLabel: any, getOffsetVector: any, getUserData: any, targetGroup: any, config: any): void;
+        createLabels(labelType: string, sourceGroup?: THREE.Group): void;
+        createAllLabels(sourceGroup?: THREE.Group): void;
+        adjustLabelsToCameraPosition(labelType: string): void;
+        adjustAllLabelsToCameraPosition(): void;
+        toggleLabels(labelType: string): boolean;
     };
-    [x: string]: any;
 };
+export {};

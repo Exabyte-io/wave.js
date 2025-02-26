@@ -13,7 +13,7 @@ export function AtomsMixin(superclass: any): {
         _basis: any;
         readonly basis: any;
         initSphereParameters(): void;
-        sphereMesh: any;
+        sphereMesh: THREE.Mesh<THREE.SphereGeometry, THREE.MeshLambertMaterial, THREE.Object3DEventMap> | undefined;
         /**
          * Prepares a sphere mesh object
          * @param {String} color
@@ -26,8 +26,9 @@ export function AtomsMixin(superclass: any): {
             color: any;
             radius: number;
         };
-        createAtomsGroup(basis: any, atomRadiiScale: any): any;
+        createAtomsGroup(basis: any, atomRadiiScale: any): THREE.Group<THREE.Object3DEventMap>;
         getAtomRadiusByElement(element: any, scale?: number, radiimap?: any): number;
     };
     [x: string]: any;
 };
+import * as THREE from "three";

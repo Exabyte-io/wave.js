@@ -58,6 +58,7 @@ export const AngleMeasurementMixin = <T extends Constructor>(superclass: T) =>
             this.addConnectionDataToAtom(atomA, line.uuid);
             this.addConnectionDataToAtom(atomB, line.uuid);
             this.angleConnections.add(line);
+            this.measurementsGroup.add(this.angleConnections);
             return line;
         }
 

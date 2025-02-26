@@ -31,27 +31,21 @@ export function CoordinateMeasurementMixin(superclass: any): {
          * Clears all coordinate measurements and resets atoms
          */
         clearCoordinateMeasurements(): void;
-        areCoordinateLabelsShown: any;
-        areElementLabelsShown: any;
-        initializeAllLabelsHolders(): void;
         createCoordinateText(coordinates: Array<number>, separator?: string): string;
-        getCoordinateLabelOffsetVector(atomPosition: any, element: any): any;
-        getElementLabelOffsetVector(atomPosition: any, element: any): any;
-        toggleElementLabels(): void;
+        getCoordinateLabelOffsetVector(atomPosition: any, element: any): THREE.Vector3;
         toggleCoordinateLabels(): void;
+        areCoordinateLabelsShown: any;
         "__#1@#texturesCache": {};
         labelsHolders: any[];
         initializeLabelsHolder(config: Object): import("./labelsHolder").LabelsHolder;
-        findLabelsHolder(labelType: string): import("./labelsHolder").LabelsHolder | undefined;
+        getLabelsHolder(labelType: string): import("./labelsHolder").LabelsHolder | undefined;
         createVerticesHashMap(labelsHolder: any, sourceGroup?: THREE.Group): {
             [x: string]: number[];
         };
         createLabelTextTexture(text: string, config?: Object): THREE.Texture;
         getLabelTextTexture(text: string, config: Object): THREE.Texture;
         createLabelSprite(text: string, name: string, config: Object): THREE.Sprite;
-        createLabelPoints(text: string, positions: Array<number>, name: string, config?: Object): THREE.Points;
-        createLabelsAsPoints(verticesHashMap: any, getNameForLabel: Function, targetGroup: any, config: any): void;
-        createLabelsAsSprites(verticesHashMap: any, getNameForLabel: Function, getOffsetVector: any, getUserData: any, targetGroup: any, config: any): void;
+        createLabelsAsSprites(verticesHashMap: any, getNameForLabel: any, getOffsetVector: any, getUserData: any, targetGroup: any, config: any): void;
         createLabels(labelType: string, sourceGroup?: THREE.Group): void;
         createAllLabels(sourceGroup?: THREE.Group): void;
         adjustLabelsToCameraPosition(labelType: string): void;
@@ -59,3 +53,4 @@ export function CoordinateMeasurementMixin(superclass: any): {
         toggleLabels(labelType: string): boolean;
     };
 };
+import * as THREE from "three";

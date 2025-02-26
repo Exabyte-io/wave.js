@@ -24,7 +24,7 @@ export const ATOM_GROUP_NAME = "Atoms";
 export const ATOM_CONNECTIONS_GROUP_NAME = "Atom_Connections";
 export const ATOM_CONNECTION_LINE_NAME = "Atom_Connection";
 export const MIN_ANGLE_POINTS_DISTANCE = 0.7;
-export const MEASUREMENT_LABELS_GROUP_NAME = "Measure_Labels";
+export const MEASUREMENT_GROUP_NAME = "Measurements_Group";
 export const ANGLE = "ANGLE";
 export const LABELS_GROUP_NAME = "Labels_Group";
 export const ELEMENT_LABELS_GROUP_NAME = "Element_Labels_Group";
@@ -33,7 +33,8 @@ export const COLORS = {
     RED: 0xff0000,
     GREEN: 0x00ff00,
 };
-export const MEASUREMENT_KEYS = {
+export const MEASUREMENT_MODES = {
+    NONE: "none",
     DISTANCE: "isDistanceShown",
     ANGLE: "areAnglesShown",
     COORDINATE: "areCoordinatesShown",

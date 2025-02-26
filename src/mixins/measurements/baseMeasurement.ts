@@ -198,11 +198,13 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
 
             const intersectItem = intersects[0].object;
             if (intersectItem.type === "Mesh") {
-                this.atomClickHandlers
-                    .filter((handler) => handler.mode === this.currentMeasurementMode)
-                    .forEach((handler) => {
-                        handler.handleClick(intersectItem, updateState);
-                    });
+                if (this.atomClickHandlers) {
+                    this.atomClickHandlers
+                        .filter((handler) => handler.mode === this.currentMeasurementMode)
+                        .forEach((handler) => {
+                            handler.handleClick(intersectItem, updateState);
+                        });
+                }
                 this.render();
             }
         }

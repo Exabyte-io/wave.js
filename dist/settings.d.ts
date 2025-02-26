@@ -91,13 +91,13 @@ declare namespace _default {
     export namespace labelPointsConfig {
         let size: number;
         let depthTest: boolean;
-        let depthFunc: any;
+        let depthFunc: 7;
         let transparent: boolean;
     }
     export namespace labelSpriteConfig {
         let transparent_1: boolean;
         export { transparent_1 as transparent };
-        let depthFunc_1: any;
+        let depthFunc_1: 3;
         export { depthFunc_1 as depthFunc };
         let depthTest_1: boolean;
         export { depthTest_1 as depthTest };

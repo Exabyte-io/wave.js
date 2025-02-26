@@ -14,7 +14,9 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
         constructor(config) {
             super(config);
             _texturesCache.set(this, {});
-            this.labelsHolders = [];
+            if (!this.labelsHolders) {
+                this.labelsHolders = [];
+            }
         }
         /**
          * Initializes a label holder with provided configuration
@@ -31,7 +33,7 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
          * @param {string} labelType - The type of label holder to find
          * @returns {LabelsHolder|undefined} The found label holder or undefined
          */
-        findLabelsHolder(labelType) {
+        getLabelsHolder(labelType) {
             return this.labelsHolders.find((holder) => holder.labelType === labelType);
         }
         /**
@@ -128,49 +130,8 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
             return sprite;
         }
         /**
-         * Creates a label as points for efficient rendering of many labels
-         * @param {String} text - the text to be displayed
-         * @param {Array<number>} positions - array of positions [x1,y1,z1,x2,y2,z2,...]
-         * @param {String} name - name for the points object
-         * @param {Object} config - additional options for the points (size, etc.)
-         * @returns {THREE.Points}
-         */
-        createLabelPoints(text, positions, name, config = this.settings.labelPointsConfig) {
-            const geometry = new THREE.BufferGeometry();
-            geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-            const material = new THREE.PointsMaterial(config);
-            const points = new THREE.Points(geometry, material);
-            points.name = name;
-            return points;
-        }
-        /**
-         * Creates and positions multiple labels efficiently using Three.Points
-         * For best performance when rendering many labels.
-         * @param {Object} labelData - Map of label text to array of positions
-         * @param {Function} getNameForLabel - Function to generate name for each label
-         */
-        createLabelsAsPoints(verticesHashMap, getNameForLabel, targetGroup, config) {
-            if (!targetGroup) {
-                console.warn("No target group provided for labels");
-                return;
-            }
-            targetGroup.clear();
-            Object.entries(verticesHashMap).forEach(([key, vertices]) => {
-                const points = this.createLabelPoints(key, vertices, getNameForLabel(key), config);
-                targetGroup.add(points);
-            });
-            // Only add to structureGroup if not already added
-            if (!this.structureGroup.children.includes(targetGroup)) {
-                this.structureGroup.add(targetGroup);
-            }
-        }
-        /**
          * Creates and positions multiple labels as sprites
          * More flexible but less performant than Points for many labels
-         * @param {Object} labelData - Map of label text to array of positions
-         * @param {Function} getNameForLabel - Function to generate name for each label
-         * @param {Function} getLabelOffset - Function to calculate offset for each label
-         * @param {Function} getAdditionalData - Function to get additional data for each label
          */
         createLabelsAsSprites(verticesHashMap, getNameForLabel, getOffsetVector, getUserData, targetGroup, config) {
             if (!targetGroup) {
@@ -199,7 +160,7 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
          * @param {THREE.Group} [sourceGroup=this.structureGroup] - Group to extract atoms from
          */
         createLabels(labelType, sourceGroup = this.structureGroup) {
-            const labelsHolder = this.findLabelsHolder(labelType);
+            const labelsHolder = this.getLabelsHolder(labelType);
             if (!labelsHolder)
                 return;
             const verticesHashMap = this.createVerticesHashMap(labelsHolder, sourceGroup);
@@ -207,24 +168,21 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
             if (labelsHolder.config.areSpritesUsed) {
                 this.createLabelsAsSprites(verticesHashMap, labelsHolder.getNameForLabel, labelsHolder.getOffsetVector, labelsHolder.getUserData, labelsHolder.threeJsGroup, labelsHolder.config);
             }
-            else {
-                this.createLabelsAsPoints(verticesHashMap, labelsHolder.getNameForLabel, labelsHolder.threeJsGroup, labelsHolder.config);
-            }
             this.render();
         }
         /**
-         * Creates all labels
+         * Creates labels for each of labelsHolders
          * @param {THREE.Group} [sourceGroup=this.structureGroup] - Group to extract atoms from
          */
         createAllLabels(sourceGroup = this.structureGroup) {
             this.labelsHolders.forEach((holder) => this.createLabels(holder.labelType, sourceGroup));
         }
         /**
-         * Adjusts labels to camera position
+         * Adjusts labels to camera position. Applied to labels of a specific type.
          * @param {string} labelType - Type of label to adjust
          */
         adjustLabelsToCameraPosition(labelType) {
-            const labelsHolder = this.findLabelsHolder(labelType);
+            const labelsHolder = this.getLabelsHolder(labelType);
             if (!labelsHolder || !labelsHolder.areShown || !labelsHolder.config.areSpritesUsed)
                 return;
             labelsHolder.threeJsGroup.children.forEach((label) => {
@@ -235,7 +193,7 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
             });
         }
         /**
-         * Adjust all labels to camera position
+         * Adjust all labels to camera position after camera movement. Applied to all existing labels.
          */
         adjustAllLabelsToCameraPosition() {
             this.labelsHolders.forEach((holder) => this.adjustLabelsToCameraPosition(holder.labelType));
@@ -246,7 +204,7 @@ export const BaseLabelsMixin = (superclass) => { var _texturesCache, _a; return 
          * @returns {boolean} New visibility state
          */
         toggleLabels(labelType) {
-            const labelsHolder = this.findLabelsHolder(labelType);
+            const labelsHolder = this.getLabelsHolder(labelType);
             if (!labelsHolder || !labelsHolder.threeJsGroup)
                 return false;
             labelsHolder.areShown = !labelsHolder.areShown;

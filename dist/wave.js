@@ -9,9 +9,11 @@ import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
 import { ImageMixin } from "./mixins/image";
-import { AtomLabelsMixin } from "./mixins/labels/atomLabels";
-import { CoordinateMeasurementMixin } from "./mixins/labels/coordinateMeasurement";
-import { MeasurementMixin } from "./mixins/measurement";
+import { CoordinateLabelsMixin } from "./mixins/labels/coordinateLabels";
+import { ElementLabelsMixin } from "./mixins/labels/elementLabels";
+import { AngleMeasurementMixin } from "./mixins/measurements/angleMeasurement";
+import { CoordinateMeasurementMixin } from "./mixins/measurements/coordinateMeasurement";
+import { DistanceMeasurementMixin } from "./mixins/measurements/distanceMeasurement";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
@@ -194,7 +196,7 @@ class WaveBase {
 /**
  * Wave draws atoms as spheres according to the material geometry passed.
  */
-export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, AtomLabelsMixin, CoordinateMeasurementMixin, MeasurementMixin, ImageMixin) {
+export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, ElementLabelsMixin, CoordinateLabelsMixin, CoordinateMeasurementMixin, DistanceMeasurementMixin, AngleMeasurementMixin, ImageMixin) {
     /**
      *
      * @param {Object} config
@@ -206,7 +208,6 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
-        this.initializeAllLabelsHolders();
     }
     clearView() {
         while (this.structureGroup.children.length) {

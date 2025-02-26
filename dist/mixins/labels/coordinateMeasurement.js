@@ -1,11 +1,11 @@
 import * as THREE from "three";
 import { COORDINATE_LABELS_GROUP_NAME, LABEL_TYPES } from "../../enums";
-import { AtomLabelsMixin } from "./atomLabels";
+import { CoordinateLabelsMixin } from "./coordinateLabels";
 /*
  * Mixin containing the logic for coordinate measurements.
  * Handles selection, label creation, and clipboard operations for coordinate measurements.
  */
-export const CoordinateMeasurementMixin = (superclass) => class extends AtomLabelsMixin(superclass) {
+export const CoordinateMeasurementMixin = (superclass) => class extends CoordinateLabelsMixin(superclass) {
     constructor(config) {
         super(config);
         this.selectedAtomsIds = new Set();
@@ -33,7 +33,7 @@ export const CoordinateMeasurementMixin = (superclass) => class extends AtomLabe
             getUserData: (text, position) => ({ atomPosition: position, atomName: text }),
             getNameForLabel: (text) => `coordinate-measurement-label-for-${text}`,
         });
-        this.findLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.visible =
+        this.getLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.visible =
             this.isCoordinateMeasurementActive;
         this.render();
     }
@@ -64,7 +64,7 @@ export const CoordinateMeasurementMixin = (superclass) => class extends AtomLabe
         this.copyCoordinatesToClipboard();
         this.selectedAtomsIds.forEach((uuid) => {
             const atomMesh = this.scene.getObjectByProperty("uuid", uuid);
-            this.findLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.add(atomMesh);
+            this.getLabelsHolder(LABEL_TYPES.COORDINATE_MEASUREMENT).threeJsGroup.add(atomMesh);
         });
         this.render();
     }
