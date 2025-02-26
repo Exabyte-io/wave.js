@@ -10,6 +10,7 @@ export declare const BaseMeasurementMixin: <T extends Constructor>(superclass: T
         measurementsGroup: THREE.Group;
         measurementSettings: any;
         currentMeasurementMode: string;
+        isMeasurementOn: boolean;
         scene: THREE.Scene;
         structureGroup: THREE.Group;
         renderer: THREE.WebGLRenderer;
@@ -34,7 +35,7 @@ export declare const BaseMeasurementMixin: <T extends Constructor>(superclass: T
         setHexForAtom(intersectItem: THREE.Object3D): void;
         setDefaultHexForAtom(): void;
         /**
-         * Set the current measurement mode, deactivating the previous one
+         * Set the current measurement mode, activating or deactivating it
          * @param {string} mode - The measurement mode to activate
          * @returns {boolean} True if the mode was activated, false if it was deactivated
          */

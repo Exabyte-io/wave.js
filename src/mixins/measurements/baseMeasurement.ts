@@ -25,7 +25,10 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
 
         measurementSettings: any;
 
-        currentMeasurementMode: string = MEASUREMENT_MODES.NONE;
+        currentMeasurementMode = "";
+
+        // New flag to determine if any measurement mode is active
+        isMeasurementOn = false;
 
         scene!: THREE.Scene;
 
@@ -138,22 +141,29 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
         }
 
         /**
-         * Set the current measurement mode, deactivating the previous one
+         * Set the current measurement mode, activating or deactivating it
          * @param {string} mode - The measurement mode to activate
          * @returns {boolean} True if the mode was activated, false if it was deactivated
          */
         setMeasurementMode(mode: string): boolean {
-            if (this.currentMeasurementMode === mode) {
-                this.currentMeasurementMode = MEASUREMENT_MODES.NONE;
+            // If the same mode is toggled, turn it off
+            if (this.currentMeasurementMode === mode && this.isMeasurementOn) {
+                this.currentMeasurementMode = "";
+                this.isMeasurementOn = false;
                 this.resetMeasurements();
+                this._updateMeasurementVisibility();
                 return false;
             }
 
-            this.resetMeasurements();
+            // If switching from one mode to another, reset first
+            if (this.isMeasurementOn) {
+                this.resetMeasurements();
+            }
+
+            // Activate the new mode
             this.currentMeasurementMode = mode;
-
+            this.isMeasurementOn = true;
             this._updateMeasurementVisibility();
-
             return true;
         }
 
@@ -162,8 +172,7 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
          * @private
          */
         _updateMeasurementVisibility() {
-            this.measurementsGroup.visible = this.currentMeasurementMode !== MEASUREMENT_MODES.NONE;
-
+            this.measurementsGroup.visible = this.isMeasurementOn;
             this.render();
         }
 
@@ -183,7 +192,7 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
          * @returns True if the specified mode is active
          */
         isMeasurementModeActive(mode: string): boolean {
-            return this.currentMeasurementMode === mode;
+            return this.isMeasurementOn && this.currentMeasurementMode === mode;
         }
 
         /**
@@ -191,6 +200,7 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
          * based on the current measurement mode.
          */
         onClick(updateState: any, event: MouseEvent): void {
+            if (!this.isMeasurementOn) return;
             this.checkMouseCoordinates(event);
             const intersects = this.raycaster.intersectObjects(this.getAtomGroups(), true);
 
@@ -210,6 +220,8 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
         }
 
         onPointerMove(event: MouseEvent) {
+            if (!this.isMeasurementOn) return;
+
             this.checkMouseCoordinates(event);
             const intersects = this.raycaster.intersectObjects([...this.getAtomGroups()], true);
 

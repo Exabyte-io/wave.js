@@ -17,7 +17,6 @@ export namespace COLORS {
     let GREEN: number;
 }
 export namespace MEASUREMENT_MODES {
-    let NONE: string;
     let DISTANCE: string;
     let ANGLE: string;
     let COORDINATE: string;

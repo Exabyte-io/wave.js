@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { ATOM_GROUP_NAME, COLORS, MEASUREMENT_GROUP_NAME, MEASUREMENT_MODES } from "../../enums";
+import { ATOM_GROUP_NAME, COLORS, MEASUREMENT_GROUP_NAME } from "../../enums";
 import { BaseLabelsMixin } from "../labels/baseLabels";
 let clickFunction = null;
 let pointerMoveFunction = null;
@@ -11,7 +11,9 @@ export const BaseMeasurementMixin = (superclass) => class extends BaseLabelsMixi
         this.raycaster = new THREE.Raycaster();
         this.pointer = new THREE.Vector2();
         this.measurementsGroup = new THREE.Group();
-        this.currentMeasurementMode = MEASUREMENT_MODES.NONE;
+        this.currentMeasurementMode = "";
+        // New flag to determine if any measurement mode is active
+        this.isMeasurementOn = false;
         this.initRaycaster();
         this.selectedAtoms = [];
         this.measurementsGroup = new THREE.Group();
@@ -94,18 +96,26 @@ export const BaseMeasurementMixin = (superclass) => class extends BaseLabelsMixi
         }
     }
     /**
-     * Set the current measurement mode, deactivating the previous one
+     * Set the current measurement mode, activating or deactivating it
      * @param {string} mode - The measurement mode to activate
      * @returns {boolean} True if the mode was activated, false if it was deactivated
      */
     setMeasurementMode(mode) {
-        if (this.currentMeasurementMode === mode) {
-            this.currentMeasurementMode = MEASUREMENT_MODES.NONE;
+        // If the same mode is toggled, turn it off
+        if (this.currentMeasurementMode === mode && this.isMeasurementOn) {
+            this.currentMeasurementMode = "";
+            this.isMeasurementOn = false;
             this.resetMeasurements();
+            this._updateMeasurementVisibility();
             return false;
         }
-        this.resetMeasurements();
+        // If switching from one mode to another, reset first
+        if (this.isMeasurementOn) {
+            this.resetMeasurements();
+        }
+        // Activate the new mode
         this.currentMeasurementMode = mode;
+        this.isMeasurementOn = true;
         this._updateMeasurementVisibility();
         return true;
     }
@@ -114,7 +124,7 @@ export const BaseMeasurementMixin = (superclass) => class extends BaseLabelsMixi
      * @private
      */
     _updateMeasurementVisibility() {
-        this.measurementsGroup.visible = this.currentMeasurementMode !== MEASUREMENT_MODES.NONE;
+        this.measurementsGroup.visible = this.isMeasurementOn;
         this.render();
     }
     createMeasurementLabel(text, name, position) {
@@ -132,13 +142,15 @@ export const BaseMeasurementMixin = (superclass) => class extends BaseLabelsMixi
      * @returns True if the specified mode is active
      */
     isMeasurementModeActive(mode) {
-        return this.currentMeasurementMode === mode;
+        return this.isMeasurementOn && this.currentMeasurementMode === mode;
     }
     /**
      * Function that handles clicks on atoms, forwarding to the appropriate handler
      * based on the current measurement mode.
      */
     onClick(updateState, event) {
+        if (!this.isMeasurementOn)
+            return;
         this.checkMouseCoordinates(event);
         const intersects = this.raycaster.intersectObjects(this.getAtomGroups(), true);
         if (!intersects.length)
@@ -157,6 +169,8 @@ export const BaseMeasurementMixin = (superclass) => class extends BaseLabelsMixi
     }
     onPointerMove(event) {
         var _a;
+        if (!this.isMeasurementOn)
+            return;
         this.checkMouseCoordinates(event);
         const intersects = this.raycaster.intersectObjects([...this.getAtomGroups()], true);
         for (const { object: intersectItem } of intersects) {

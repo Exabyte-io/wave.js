@@ -356,17 +356,16 @@ export class ThreeDEditor extends React.Component {
     handleToggleMeasurement(measurementMode) {
         this.WaveComponent.wave.destroyListeners();
         this.handleResetMeasurements();
-        this.WaveComponent.wave.setMeasurementMode(measurementMode);
+        const isActive = this.WaveComponent.wave.setMeasurementMode(measurementMode);
 
         this.setState(
             (prevState) => {
                 const { measurementsSettings } = prevState;
                 const newSettings = { ...measurementsSettings };
-                const isActive = newSettings[measurementMode];
                 Object.values(MEASUREMENT_MODES).forEach((key) => {
                     newSettings[key] = false;
                 });
-                if (!isActive) {
+                if (isActive) {
                     newSettings[measurementMode] = true;
                 }
 

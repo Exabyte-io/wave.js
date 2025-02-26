@@ -4,6 +4,7 @@ export declare const CoordinateMeasurementMixin: <T extends Constructor>(supercl
     new (config: any): {
         [x: string]: any;
         currentSelectedCoordinate: THREE.Sprite | null;
+        coordinateLabels: THREE.Group;
         /**
          * Copies the current array of coordinates to clipboard
          */
@@ -26,6 +27,7 @@ export declare const CoordinateMeasurementMixin: <T extends Constructor>(supercl
         measurementsGroup: THREE.Group;
         measurementSettings: any;
         currentMeasurementMode: string;
+        isMeasurementOn: boolean;
         scene: THREE.Scene;
         structureGroup: THREE.Group;
         renderer: THREE.WebGLRenderer;
@@ -55,9 +57,7 @@ export declare const CoordinateMeasurementMixin: <T extends Constructor>(supercl
         labelsHolders: any[];
         initializeLabelsHolder(config: Object): import("../labels/labelsHolder").LabelsHolder;
         getLabelsHolder(labelType: string): import("../labels/labelsHolder").LabelsHolder | undefined;
-        createVerticesHashMap(labelsHolder: any, sourceGroup?: THREE.Group /**
-         * Toggle selection of atom for coordinate display
-         */): {
+        createVerticesHashMap(labelsHolder: any, sourceGroup?: THREE.Group): {
             [x: string]: number[];
         };
         createLabelTextTexture(text: string, config?: Object): THREE.Texture;

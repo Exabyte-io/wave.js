@@ -37,7 +37,6 @@ export const COLORS = {
 };
 
 export const MEASUREMENT_MODES = {
-    NONE: "none",
     DISTANCE: "isDistanceShown",
     ANGLE: "areAnglesShown",
     COORDINATE: "areCoordinatesShown",

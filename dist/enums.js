@@ -34,7 +34,6 @@ export const COLORS = {
     GREEN: 0x00ff00,
 };
 export const MEASUREMENT_MODES = {
-    NONE: "none",
     DISTANCE: "isDistanceShown",
     ANGLE: "areAnglesShown",
     COORDINATE: "areCoordinatesShown",

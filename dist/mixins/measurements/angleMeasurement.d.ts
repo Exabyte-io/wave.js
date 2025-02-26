@@ -39,6 +39,7 @@ export declare const AngleMeasurementMixin: <T extends Constructor>(superclass: 
         measurementsGroup: THREE.Group;
         measurementSettings: any;
         currentMeasurementMode: string;
+        isMeasurementOn: boolean;
         scene: THREE.Scene;
         structureGroup: THREE.Group;
         renderer: THREE.WebGLRenderer;

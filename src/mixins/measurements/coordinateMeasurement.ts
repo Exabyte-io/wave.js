@@ -9,6 +9,8 @@ export const CoordinateMeasurementMixin = <T extends Constructor>(superclass: T)
     class extends BaseMeasurementMixin(superclass) {
         currentSelectedCoordinate: THREE.Sprite | null = null;
 
+        coordinateLabels: THREE.Group;
+
         constructor(config: any) {
             super(config);
             this.coordinateLabels = new THREE.Group();

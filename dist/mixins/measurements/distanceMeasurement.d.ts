@@ -19,6 +19,7 @@ export declare const DistanceMeasurementMixin: <T extends Constructor>(superclas
         measurementsGroup: THREE.Group;
         measurementSettings: any;
         currentMeasurementMode: string;
+        isMeasurementOn: boolean;
         scene: THREE.Scene;
         structureGroup: THREE.Group;
         renderer: THREE.WebGLRenderer;
