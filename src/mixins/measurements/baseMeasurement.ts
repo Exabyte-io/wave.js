@@ -17,10 +17,10 @@ let pointerMoveFunction: PointerMoveHandler | null = null;
 type Constructor<T = {}> = new (...args: any[]) => T;
 
 export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
-    class extends superclass {
+    class extends BaseLabelsMixin(superclass) {
         selectedAtoms: THREE.Object3D[] = [];
 
-        intersected: THREE.Object3D | null = null;
+        highlightedAtom: THREE.Object3D;
 
         raycaster: THREE.Raycaster;
 
@@ -48,7 +48,6 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
             super(config);
             this.initRaycaster();
             this.selectedAtoms = [];
-            this.intersected = null;
             this.measurementsGroup = new THREE.Group();
             this.measurementsGroup.name = MEASUREMENT_LABELS_GROUP_NAME;
         }
@@ -121,20 +120,20 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
         }
 
         setHexForAtom(intersectItem: THREE.Object3D) {
-            if (this.intersected !== intersectItem) {
-                if (this.intersected) {
-                    this.intersected.material.emissive?.setHex(this.intersected.currentHex);
+            if (this.highlightedAtom !== intersectItem) {
+                if (this.highlightedAtom) {
+                    this.highlightedAtom.material.emissive?.setHex(this.highlightedAtom.currentHex);
                 }
-                this.intersected = intersectItem;
-                this.intersected.currentHex = this.intersected.material.emissive.getHex();
-                this.intersected.material.emissive.setHex(COLORS.RED);
+                this.highlightedAtom = intersectItem;
+                this.highlightedAtom.currentHex = this.highlightedAtom.material.emissive.getHex();
+                this.highlightedAtom.material.emissive.setHex(COLORS.RED);
                 this.render();
             }
         }
 
         setDefaultHexForAtom() {
-            if (this.intersected) {
-                this.intersected.material.emissive.setHex(this.intersected.currentHex);
+            if (this.highlightedAtom) {
+                this.highlightedAtom.material.emissive.setHex(this.highlightedAtom.currentHex);
             }
         }
 
@@ -169,11 +168,7 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
         }
 
         createMeasurementLabel(text: string, name: string, position: THREE.Vector3) {
-            const label = BaseLabelsMixin.createLabelSprite(
-                text,
-                name,
-                this.settings.measurementLabelsConfig,
-            );
+            const label = this.createLabelSprite(text, name, this.settings.measurementLabelsConfig);
             label.position.copy(position);
             label.visible = true;
             this.measurementsGroup.add(label);
@@ -208,6 +203,7 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
                     .forEach((handler) => {
                         handler.handleClick(intersectItem, updateState);
                     });
+                this.render();
             }
         }
 
@@ -216,9 +212,8 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
             const intersects = this.raycaster.intersectObjects([...this.getAtomGroups()], true);
 
             for (const { object: intersectItem } of intersects) {
-                if (this.intersected && this.intersected !== intersectItem) {
+                if (this.highlightedAtom && this.highlightedAtom !== intersectItem) {
                     this.setDefaultHexForAtom();
-                    this.intersected = null;
                 }
                 if (!intersectItem.userData?.selected) {
                     if (intersectItem.type === "Mesh") {
@@ -229,10 +224,9 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
             }
 
             if (!intersects.length) {
-                if (this.intersected) {
+                if (this.highlightedAtom) {
                     this.setDefaultHexForAtom();
                 }
-                this.intersected = null;
             }
         }
 

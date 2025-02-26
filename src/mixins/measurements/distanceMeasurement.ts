@@ -1,10 +1,11 @@
 import * as THREE from "three";
-import { BaseMeasurementMixin } from "./baseMeasurement";
+
 import {
     ATOM_CONNECTION_LINE_NAME,
     ATOM_CONNECTIONS_GROUP_NAME,
     MEASUREMENT_MODES,
 } from "../../enums";
+import { BaseMeasurementMixin } from "./baseMeasurement";
 import { calculateDistanceBetweenAtoms, drawLineBetweenAtoms } from "./threeJsUtils";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -21,6 +22,7 @@ export const DistanceMeasurementMixin = <T extends Constructor>(superclass: T) =
             super(config);
             this.atomConnections = new THREE.Group();
             this.atomConnections.name = ATOM_CONNECTIONS_GROUP_NAME;
+            this.structureGroup.add(this.atomConnections);
             this.currentSelectedLine = null;
             this.drawLineBetweenAtoms = drawLineBetweenAtoms.bind(this);
             this.initializeMeasurement(MEASUREMENT_MODES.DISTANCE, this.handleDistanceAtomClick);
@@ -71,7 +73,6 @@ export const DistanceMeasurementMixin = <T extends Constructor>(superclass: T) =
             atom: THREE.Object3D,
             updateState: (distance: number) => void,
         ): void {
-            console.log(this);
             if (!this.isMeasurementModeActive(MEASUREMENT_MODES.DISTANCE)) return;
             if (this.selectedAtoms.length < 2) {
                 this.selectedAtoms.push(atom);
