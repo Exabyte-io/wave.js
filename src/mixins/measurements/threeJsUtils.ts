@@ -5,55 +5,94 @@ import { ATOM_CONNECTION_LINE_NAME } from "../../enums";
 /**
  * TODO: import from a shared utils file
  * Converts radians to degrees
- * @param radians - Angle in radians
- * @returns Angle in degrees
  */
 export function radiansToDegrees(radians: number): number {
     return radians * (180 / Math.PI);
 }
 
 /**
+ * Gets the world position of an object
+ */
+export function getWorldPosition(object: THREE.Object3D): THREE.Vector3 {
+    return new THREE.Vector3().setFromMatrixPosition(object.matrixWorld);
+}
+
+/**
+ * Calculates the angle between three points in 3D space
+ */
+export function calculateAngleBetweenPoints(
+    pointA: THREE.Vector3,
+    pointB: THREE.Vector3,
+    pointC: THREE.Vector3,
+): number {
+    const vecA = new THREE.Vector3().subVectors(pointA, pointB);
+    const vecC = new THREE.Vector3().subVectors(pointC, pointB);
+
+    const angleRadians = vecA.angleTo(vecC);
+    return radiansToDegrees(angleRadians);
+}
+
+/**
  * Calculates angle between three atoms
- * @param atoms - Array of three atoms forming an angle
- * @returns Angle in degrees as a string with 2 decimal places
  */
 export function calculateAngleBetweenAtoms(atoms: THREE.Object3D[]): number {
     const [firstAtom, centerAtom, lastAtom] = atoms;
 
-    // Get positions from matrix world
-    const firstPos = new THREE.Vector3().setFromMatrixPosition(firstAtom.matrixWorld);
-    const centerPos = new THREE.Vector3().setFromMatrixPosition(centerAtom.matrixWorld);
-    const lastPos = new THREE.Vector3().setFromMatrixPosition(lastAtom.matrixWorld);
+    const firstPos = getWorldPosition(firstAtom);
+    const centerPos = getWorldPosition(centerAtom);
+    const lastPos = getWorldPosition(lastAtom);
 
-    // Calculate vectors from center to first and last atoms
-    const vecA = new THREE.Vector3().subVectors(firstPos, centerPos);
-    const vecB = new THREE.Vector3().subVectors(lastPos, centerPos);
+    return parseFloat(calculateAngleBetweenPoints(firstPos, centerPos, lastPos).toFixed(2));
+}
 
-    // Calculate angle
-    const angleRadians = vecA.angleTo(vecB);
-    return radiansToDegrees(angleRadians).toFixed(2);
+/**
+ * Calculates the distance between two points
+ */
+export function calculateDistance(pointA: THREE.Vector3, pointB: THREE.Vector3): number {
+    return pointA.distanceTo(pointB);
 }
 
 /**
  * Calculates distance between two atoms
- * @param atomA - First atom
- * @param atomB - Second atom
- * @returns Distance in Angstroms
  */
 export function calculateDistanceBetweenAtoms(
     atomA: THREE.Object3D,
     atomB: THREE.Object3D,
 ): number {
-    const pointA = new THREE.Vector3().setFromMatrixPosition(atomA.matrixWorld);
-    const pointB = new THREE.Vector3().setFromMatrixPosition(atomB.matrixWorld);
-    return pointA.distanceTo(pointB);
+    const pointA = getWorldPosition(atomA);
+    const pointB = getWorldPosition(atomB);
+    return calculateDistance(pointA, pointB);
+}
+
+/**
+ * Calculates the midpoint between two points
+ */
+export function calculateMidpoint(pointA: THREE.Vector3, pointB: THREE.Vector3): THREE.Vector3 {
+    return new THREE.Vector3().addVectors(pointA, pointB).multiplyScalar(0.5);
+}
+
+/**
+ * Creates a position for a label at an angle between three points
+ */
+export function calculateAngleLabelPosition(line: THREE.Line, offset: number): THREE.Vector3 {
+    const positions = line.geometry.attributes.position.array;
+
+    const pointA = new THREE.Vector3(positions[0], positions[1], positions[2]);
+    const pointB = new THREE.Vector3(positions[3], positions[4], positions[5]);
+    const pointC = new THREE.Vector3(positions[6], positions[7], positions[8]);
+
+    const vecA = new THREE.Vector3().subVectors(pointA, pointB).normalize();
+    const vecC = new THREE.Vector3().subVectors(pointC, pointB).normalize();
+
+    // Calculate the bisector
+    const bisector = new THREE.Vector3().addVectors(vecA, vecC).normalize();
+
+    // Create the offset position
+    return pointB.clone().add(bisector.multiplyScalar(offset));
 }
 
 /**
  * Gets positions from matrix world for two atoms
- * @param firstMatrix - Matrix world of first atom
- * @param secondMatrix - Matrix world of second atom
- * @returns Array of two Vector3 positions
  */
 export function getPointsFromMatrixWorld(
     firstMatrix: THREE.Matrix4,
@@ -64,12 +103,15 @@ export function getPointsFromMatrixWorld(
     return [firstPoint, secondPoint];
 }
 
-export function drawLineBetweenAtoms(this: any, selectedAtoms: THREE.Object3D[]) {
+/**
+ * Creates a line between two atoms
+ */
+export function drawLineBetweenAtoms(this: any, selectedAtoms: THREE.Object3D[]): THREE.Line {
     const [firstAtom, secondAtom] = selectedAtoms;
-    const [firstAtomPoint, secondAtomPoint] = getPointsFromMatrixWorld(
-        firstAtom.matrixWorld,
-        secondAtom.matrixWorld,
-    );
+
+    const firstAtomPoint = getWorldPosition(firstAtom);
+    const secondAtomPoint = getWorldPosition(secondAtom);
+
     const geometry = new THREE.BufferGeometry().setFromPoints([firstAtomPoint, secondAtomPoint]);
     const material = new THREE.LineBasicMaterial({ color: this.settings.colors.amber });
     const line = new THREE.Line(geometry, material);
@@ -82,8 +124,6 @@ export function drawLineBetweenAtoms(this: any, selectedAtoms: THREE.Object3D[])
 
 /**
  * Gets the position of the center of a THREE.Line
- * @param line - The THREE.Line object
- * @returns The position of the center as a THREE.Vector3
  */
 export function getLineCenterCoordinate(line: THREE.Line): THREE.Vector3 {
     const geometry = line.geometry as THREE.BufferGeometry;
@@ -92,6 +132,5 @@ export function getLineCenterCoordinate(line: THREE.Line): THREE.Vector3 {
     const start = new THREE.Vector3(positions[0], positions[1], positions[2]);
     const end = new THREE.Vector3(positions[3], positions[4], positions[5]);
 
-    const center = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
-    return center;
+    return calculateMidpoint(start, end);
 }
