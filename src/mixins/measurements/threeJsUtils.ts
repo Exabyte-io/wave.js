@@ -17,7 +17,7 @@ export function radiansToDegrees(radians: number): number {
  * @param atoms - Array of three atoms forming an angle
  * @returns Angle in degrees as a string with 2 decimal places
  */
-export function calculateAngleBetweenAtoms(atoms: THREE.Object3D[]): string {
+export function calculateAngleBetweenAtoms(atoms: THREE.Object3D[]): number {
     const [firstAtom, centerAtom, lastAtom] = atoms;
 
     // Get positions from matrix world

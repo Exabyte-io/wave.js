@@ -15,29 +15,29 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
     class extends BaseLabelsMixin(superclass) {
         selectedAtoms: THREE.Object3D[] = [];
 
-        highlightedAtom: THREE.Object3D;
+        highlightedAtom: THREE.Object3D | null = null;
 
-        raycaster: THREE.Raycaster;
+        raycaster: THREE.Raycaster = new THREE.Raycaster();
 
-        pointer: THREE.Vector2;
+        pointer: THREE.Vector2 = new THREE.Vector2();
 
-        measurementsGroup: THREE.Group;
+        measurementsGroup: THREE.Group = new THREE.Group();
 
         measurementSettings: any;
 
         currentMeasurementMode: string = MEASUREMENT_MODES.NONE;
 
-        scene: THREE.Scene;
+        scene!: THREE.Scene;
 
-        structureGroup: THREE.Group;
+        structureGroup!: THREE.Group;
 
-        renderer: THREE.WebGLRenderer;
+        renderer!: THREE.WebGLRenderer;
 
-        camera: THREE.Camera;
+        camera!: THREE.Camera;
 
         settings: any;
 
-        atomClickHandlers: { mode: string; handleClick: any }[];
+        atomClickHandlers: { mode: string; handleClick: any }[] | undefined;
 
         constructor(config: any) {
             super(config);
@@ -103,7 +103,7 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
 
         handleSetSelected(intersectItem: THREE.Object3D) {
             intersectItem.userData.selected = true;
-            intersectItem.material.emissive.setHex(0xff0000);
+            (intersectItem as any).material?.emissive?.setHex(0xff0000);
             this.render();
         }
 
@@ -117,18 +117,24 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
         setHexForAtom(intersectItem: THREE.Object3D) {
             if (this.highlightedAtom !== intersectItem) {
                 if (this.highlightedAtom) {
-                    this.highlightedAtom.material.emissive?.setHex(this.highlightedAtom.currentHex);
+                    (this.highlightedAtom as any).material?.emissive?.setHex(
+                        (this.highlightedAtom as any).currentHex,
+                    );
                 }
                 this.highlightedAtom = intersectItem;
-                this.highlightedAtom.currentHex = this.highlightedAtom.material.emissive.getHex();
-                this.highlightedAtom.material.emissive.setHex(COLORS.RED);
+                (this.highlightedAtom as any).currentHex = (
+                    this.highlightedAtom as any
+                ).material.emissive.getHex();
+                (this.highlightedAtom as any).material.emissive.setHex(COLORS.RED);
                 this.render();
             }
         }
 
         setDefaultHexForAtom() {
             if (this.highlightedAtom) {
-                this.highlightedAtom.material.emissive.setHex(this.highlightedAtom.currentHex);
+                (this.highlightedAtom as any).material.emissive.setHex(
+                    (this.highlightedAtom as any).currentHex,
+                );
             }
         }
 
@@ -233,7 +239,7 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
                 this.selectedAtoms.forEach((atom) => {
                     if (atom) {
                         atom.userData.selected = false;
-                        atom.material.emissive.setHex(atom.currentHex);
+                        (atom as any).material.emissive.setHex((atom as any).currentHex);
                     }
                 });
                 this.selectedAtoms = [];
