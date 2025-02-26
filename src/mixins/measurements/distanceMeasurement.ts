@@ -1,12 +1,12 @@
 import * as THREE from "three";
 
-import {
-    ATOM_CONNECTION_LINE_NAME,
-    ATOM_CONNECTIONS_GROUP_NAME,
-    MEASUREMENT_MODES,
-} from "../../enums";
+import { ATOM_CONNECTIONS_GROUP_NAME, MEASUREMENT_MODES } from "../../enums";
 import { BaseMeasurementMixin } from "./baseMeasurement";
-import { calculateDistanceBetweenAtoms, drawLineBetweenAtoms } from "./threeJsUtils";
+import {
+    calculateDistanceBetweenAtoms,
+    drawLineBetweenAtoms,
+    getLineCenterCoordinate,
+} from "./threeJsUtils";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -16,26 +16,30 @@ export const DistanceMeasurementMixin = <T extends Constructor>(superclass: T) =
 
         currentSelectedLine: THREE.Line | null;
 
-        drawLineBetweenAtoms: (selectedAtoms: THREE.Object3D[]) => THREE.Line;
+        drawLineBetweenAtoms: (
+            selectedAtoms: THREE.Object3D[],
+            structureGroup: THREE.Object3D,
+        ) => THREE.Line;
 
         constructor(config: any) {
             super(config);
             this.atomConnections = new THREE.Group();
             this.atomConnections.name = ATOM_CONNECTIONS_GROUP_NAME;
-            this.structureGroup.add(this.atomConnections);
+
+            this.measurementsGroup.add(this.atomConnections);
+            this.scene.add(this.atomConnections);
+
             this.currentSelectedLine = null;
             this.drawLineBetweenAtoms = drawLineBetweenAtoms.bind(this);
             this.initializeMeasurement(MEASUREMENT_MODES.DISTANCE, this.handleDistanceAtomClick);
         }
 
-        drawDistanceText(distance: number): void {
+        drawDistanceText(distance: number, line: THREE.Line): void {
             const label = this.createMeasurementLabel(
                 `${distance.toFixed(3)}Å`,
                 `label-for-${distance}`,
-                this.atomConnections.children[this.atomConnections.children.length - 1].geometry
-                    .boundingSphere.center,
+                getLineCenterCoordinate(line),
             );
-            const line = this.atomConnections.children[this.atomConnections.children.length - 1];
             line.userData.label = label;
         }
 
@@ -61,30 +65,36 @@ export const DistanceMeasurementMixin = <T extends Constructor>(superclass: T) =
             this.render();
         }
 
-        resetDistanceMeasurements(): void {
-            const connections = [...this.atomConnections.children];
-            connections.forEach((connection) => {
-                this.currentSelectedLine = connection as THREE.Line;
-                this.deleteConnection();
-            });
+        addConnectionDataToAtom(atom: THREE.Object3D, connectionId: string) {
+            if (!atom.userData.connections) {
+                atom.userData.connections = [];
+            }
+            atom.userData.connections.push(connectionId);
         }
 
         handleDistanceAtomClick(
             atom: THREE.Object3D,
-            updateState: (distance: number) => void,
+            updateState: (state: { distance: number }) => void,
         ): void {
             if (!this.isMeasurementModeActive(MEASUREMENT_MODES.DISTANCE)) return;
             if (this.selectedAtoms.length < 2) {
                 this.selectedAtoms.push(atom);
                 this.handleSetSelected(atom);
-                console.log(this.selectedAtoms);
 
                 if (this.selectedAtoms.length === 2) {
                     const [firstAtom, secondAtom] = this.selectedAtoms;
                     const distance = calculateDistanceBetweenAtoms(firstAtom, secondAtom);
-                    this.drawLineBetweenAtoms(this.selectedAtoms as THREE.Object3D[]);
-                    this.drawDistanceText(distance);
-                    updateState(distance);
+                    const line = this.drawLineBetweenAtoms(
+                        this.selectedAtoms as THREE.Object3D[],
+                        this.measurementsGroup,
+                    );
+                    this.addConnectionDataToAtom(firstAtom, line.uuid);
+                    this.addConnectionDataToAtom(secondAtom, line.uuid);
+                    this.measurementsGroup.add(line);
+                    this.scene.add(this.measurementsGroup);
+                    this.drawDistanceText(distance, line);
+                    this.render();
+                    updateState({ distance });
                     this.selectedAtoms = [];
                 }
             }

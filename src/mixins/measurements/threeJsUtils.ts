@@ -1,4 +1,5 @@
 import * as THREE from "three";
+
 import { ATOM_CONNECTION_LINE_NAME } from "../../enums";
 
 /**
@@ -63,14 +64,7 @@ export function getPointsFromMatrixWorld(
     return [firstPoint, secondPoint];
 }
 
-export function addConnection(atom: THREE.Object3D, connectionId: string) {
-    if (!atom.userData.connections) {
-        atom.userData.connections = [];
-    }
-    atom.userData.connections.push(connectionId);
-}
-
-export function drawLineBetweenAtoms(this: any, selectedAtoms: THREE.Object3D[]): THREE.Line {
+export function drawLineBetweenAtoms(this: any, selectedAtoms: THREE.Object3D[]) {
     const [firstAtom, secondAtom] = selectedAtoms;
     const [firstAtomPoint, secondAtomPoint] = getPointsFromMatrixWorld(
         firstAtom.matrixWorld,
@@ -79,11 +73,25 @@ export function drawLineBetweenAtoms(this: any, selectedAtoms: THREE.Object3D[])
     const geometry = new THREE.BufferGeometry().setFromPoints([firstAtomPoint, secondAtomPoint]);
     const material = new THREE.LineBasicMaterial({ color: this.settings.colors.amber });
     const line = new THREE.Line(geometry, material);
-    addConnection(firstAtom, line.uuid);
-    addConnection(secondAtom, line.uuid);
+
     line.userData.atoms = [firstAtom.uuid, secondAtom.uuid];
     line.name = ATOM_CONNECTION_LINE_NAME;
-    this.atomConnections.add(line);
-    this.scene.add(this.atomConnections);
+
     return line;
+}
+
+/**
+ * Gets the position of the center of a THREE.Line
+ * @param line - The THREE.Line object
+ * @returns The position of the center as a THREE.Vector3
+ */
+export function getLineCenterCoordinate(line: THREE.Line): THREE.Vector3 {
+    const geometry = line.geometry as THREE.BufferGeometry;
+    const positions = geometry.attributes.position.array;
+
+    const start = new THREE.Vector3(positions[0], positions[1], positions[2]);
+    const end = new THREE.Vector3(positions[3], positions[4], positions[5]);
+
+    const center = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+    return center;
 }

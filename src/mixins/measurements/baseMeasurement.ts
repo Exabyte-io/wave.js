@@ -1,11 +1,6 @@
 import * as THREE from "three";
 
-import {
-    ATOM_GROUP_NAME,
-    COLORS,
-    MEASUREMENT_LABELS_GROUP_NAME,
-    MEASUREMENT_MODES,
-} from "../../enums";
+import { ATOM_GROUP_NAME, COLORS, MEASUREMENT_GROUP_NAME, MEASUREMENT_MODES } from "../../enums";
 import { BaseLabelsMixin } from "../labels/baseLabels";
 
 type ClickHandler = (event: MouseEvent) => void;
@@ -49,17 +44,17 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
             this.initRaycaster();
             this.selectedAtoms = [];
             this.measurementsGroup = new THREE.Group();
-            this.measurementsGroup.name = MEASUREMENT_LABELS_GROUP_NAME;
+            this.measurementsGroup.name = MEASUREMENT_GROUP_NAME;
         }
 
-        initializeMeasurement(measurementMode: string, func: any) {
+        initializeMeasurement(measurementMode: string, handleAtomClick: any) {
             if (!this.atomClickHandlers) {
                 this.atomClickHandlers = [];
             }
             this.atomClickHandlers.push({
                 mode: measurementMode,
 
-                handleClick: func.bind(this),
+                handleClick: handleAtomClick.bind(this),
             });
             this.scene.add(this.measurementsGroup);
             this.structureGroup.add(this.measurementsGroup);
