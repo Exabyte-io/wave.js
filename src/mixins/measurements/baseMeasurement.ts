@@ -53,7 +53,6 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
             }
             this.atomClickHandlers.push({
                 mode: measurementMode,
-
                 handleClick: handleAtomClick.bind(this),
             });
             this.scene.add(this.measurementsGroup);
@@ -229,6 +228,7 @@ export const BaseMeasurementMixin = <T extends Constructor>(superclass: T) =>
                     this.setDefaultHexForAtom();
                 }
             }
+            this.render();
         }
 
         /**
