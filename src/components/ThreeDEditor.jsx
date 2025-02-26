@@ -64,6 +64,7 @@ export class ThreeDEditor extends React.Component {
                 measurementLabelsShown: false,
                 distance: 0,
                 angle: 0,
+                coordinates: [],
             },
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
@@ -349,9 +350,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleResetMeasurements() {
-        const { measurementsSettings } = this.state;
-        const { isDistanceShown, areAnglesShown } = measurementsSettings;
-        if (isDistanceShown || areAnglesShown) this.WaveComponent.wave.resetMeasurements();
+        this.WaveComponent.wave.resetMeasurements();
     }
 
     handleToggleMeasurement(measurementMode) {
