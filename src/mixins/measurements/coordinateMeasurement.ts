@@ -13,6 +13,7 @@ export const CoordinateMeasurementMixin = <T extends Constructor>(superclass: T)
             super(config);
             this.coordinateLabels = new THREE.Group();
             this.scene.add(this.coordinateLabels);
+            this.measurementsGroup.add(this.coordinateLabels);
 
             this.currentSelectedCoordinate = null;
             this.initializeMeasurement(
@@ -27,14 +28,14 @@ export const CoordinateMeasurementMixin = <T extends Constructor>(superclass: T)
         copyCoordinatesToClipboard() {
             const coordinatesArray = this.selectedAtoms.map((atom) => {
                 const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-                return [position.x, position.y, position.z];
+                return this.coordinatesToPrecision(position);
             });
 
             if (coordinatesArray.length === 0) return;
             const coordsText =
                 coordinatesArray.length === 1
-                    ? JSON.stringify(this.coordinatesArray[0])
-                    : JSON.stringify(this.coordinatesArray);
+                    ? JSON.stringify(coordinatesArray[0])
+                    : JSON.stringify(coordinatesArray);
 
             navigator.clipboard.writeText(coordsText).catch(console.error);
         }
@@ -51,49 +52,12 @@ export const CoordinateMeasurementMixin = <T extends Constructor>(superclass: T)
                 atom.userData.selected = false;
                 atom.material.emissive.setHex(atom.currentHex);
                 this.selectedAtoms.splice(index, 1);
-
-                // Remove the coordinate label for this atom
-                this.updateCoordinateLabels();
             } else {
-                // Select atom
                 this.selectedAtoms.push(atom);
                 this.handleSetSelected(atom);
-
-                // Add coordinate label for this atom
-                this.updateCoordinateLabels();
             }
 
             this.render();
-        }
-
-        /**
-         * Update coordinate labels for all selected atoms
-         */
-        updateCoordinateLabels(): void {
-            this.selectedAtoms.forEach((atom) => {
-                if (!atom) return;
-
-                const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-                const coordText = `(${position.x.toFixed(2)}, ${position.y.toFixed(
-                    2,
-                )}, ${position.z.toFixed(2)})`;
-
-                const label = this.createMeasurementLabel(
-                    coordText,
-                    `coord-label-${atom.uuid}`,
-                    position,
-                );
-
-                // Offset the label a bit above the atom
-                label.position.y += 0.5;
-
-                this.coordinateMeasurementGroup.add(label);
-            });
-
-            // Add the group to the scene if not already added
-            if (!this.scene.children.includes(this.coordinateMeasurementGroup)) {
-                this.scene.add(this.coordinateMeasurementGroup);
-            }
         }
 
         /**
@@ -101,20 +65,26 @@ export const CoordinateMeasurementMixin = <T extends Constructor>(superclass: T)
          */
         handleCoordinateAtomClick(
             atom: THREE.Object3D,
-            updateState: (coords: string) => void,
+            updateState: (state: { coordinates: number[] }) => void,
         ): void {
             if (!this.isMeasurementModeActive(MEASUREMENT_MODES.COORDINATE)) return;
 
             this.toggleAtomSelection(atom);
 
             if (this.selectedAtoms.length > 0) {
-                // Update state with coordinates of the last selected atom
                 const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-                const coordText = `(${position.x.toFixed(2)}, ${position.y.toFixed(
-                    2,
-                )}, ${position.z.toFixed(2)})`;
-                updateState(coordText);
+                const coordinates = this.coordinatesToPrecision(position);
+                updateState({ coordinates });
             }
             this.copyCoordinatesToClipboard();
+        }
+
+        coordinatesToPrecision(position: THREE.Vector3): number[] {
+            const { roundPrecision } = this.settings;
+            return [
+                parseFloat(position.x.toFixed(roundPrecision)),
+                parseFloat(position.y.toFixed(roundPrecision)),
+                parseFloat(position.z.toFixed(roundPrecision)),
+            ];
         }
     };
