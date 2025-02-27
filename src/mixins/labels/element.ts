@@ -17,15 +17,6 @@ export class ElementLabelsManager extends BaseLabelsManager {
     }
 
     getOffsetVector(position: THREE.Vector3, camera: THREE.Camera, offsetLength = 0) {
-        const vectorToCamera = new THREE.Vector3().subVectors(camera.position, position);
-        const zOffset =
-            settings.coordinateLabelsConfig.offsetVector[2] +
-            offsetLength * settings.atomRadiiScale;
-
-        vectorToCamera.normalize();
-        vectorToCamera.multiplyScalar(offsetLength);
-        vectorToCamera.z += zOffset;
-
-        return vectorToCamera;
+        return super.getOffsetVector(position, camera, offsetLength);
     }
 }

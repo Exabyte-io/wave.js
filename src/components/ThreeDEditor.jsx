@@ -442,7 +442,8 @@ export class ThreeDEditor extends React.Component {
 
     getViewSettingsActions = () => {
         const { viewerSettings, isConventionalCellShown } = this.state;
-
+        const areLabelsVisibleByType = (type) =>
+            this.WaveComponent?.wave?.areLabelsVisibleByType(type);
         return [
             {
                 id: "rotate-zoom",
@@ -505,7 +506,9 @@ export class ThreeDEditor extends React.Component {
                 disabled: false,
                 content: `Elements [${settings.hotKeysConfig.toggleElementLabels.toUpperCase()}]`,
                 leftIcon: <Spellcheck />,
-                rightIcon: this.getCheckmark(this._getWaveProperty("areElementLabelsShown")),
+                rightIcon: this.getCheckmark(
+                    areLabelsVisibleByType && areLabelsVisibleByType("element"),
+                ),
                 onClick: this.handleToggleElementLabels,
                 shouldMenuStayOpened: true,
             },
@@ -514,7 +517,9 @@ export class ThreeDEditor extends React.Component {
                 disabled: false,
                 content: `Coordinates [${settings.hotKeysConfig.toggleCoordinateLabels.toUpperCase()}]`,
                 leftIcon: <Spellcheck />,
-                rightIcon: this.getCheckmark(this._getWaveProperty("areCoordinateLabelsShown")),
+                rightIcon: this.getCheckmark(
+                    areLabelsVisibleByType && areLabelsVisibleByType("coordinate"),
+                ),
                 onClick: this.handleToggleCoordinateLabels,
                 shouldMenuStayOpened: true,
             },

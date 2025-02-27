@@ -9,12 +9,19 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
 
     #THREETexturesCache: { [key: string]: THREE.Texture } = {};
 
-    textProcessor(atom: THREE.Mesh, position: THREE.Vector3) {
-        return Error("textProcessor method must be implemented in a subclass");
+    textProcessor(atom: THREE.Mesh, position: THREE.Vector3): string {
+        return "";
     }
 
     getOffsetVector(position: THREE.Vector3, camera: THREE.Camera, offsetLength = 0) {
-        return Error("getOffsetVector method must be implemented in a subclass");
+        const vectorToCamera = new THREE.Vector3().subVectors(camera.position, position);
+        const zOffset = offsetLength * settings.atomRadiiScale;
+
+        vectorToCamera.normalize();
+        vectorToCamera.multiplyScalar(offsetLength);
+        vectorToCamera.z += zOffset;
+
+        return vectorToCamera;
     }
 
     getUserData(text: string, position: THREE.Vector3) {
@@ -26,8 +33,7 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
     }
 
     toggleLabelsVisibility() {
-        this.isVisible = !this.isVisible;
-        this.THREEGroup.visible = this.isVisible;
+        this.toggleVisibility();
     }
 
     /**

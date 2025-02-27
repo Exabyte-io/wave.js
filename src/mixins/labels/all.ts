@@ -8,6 +8,11 @@ export const AllLabelsMixin = (superclass) =>
     class extends superclass {
         labelManagers = [];
 
+        constructor(config: any) {
+            super(config);
+            this.initializeLabelManagers();
+        }
+
         initializeLabelManagers() {
             const elementLabelsManager = new ElementLabelsManager(this.structureGroup, this.camera);
             const coordinateLabelsManager = new CoordinateLabelsManager(
@@ -17,22 +22,25 @@ export const AllLabelsMixin = (superclass) =>
             this.labelManagers.push(elementLabelsManager, coordinateLabelsManager);
         }
 
-        getLabelManagerByType(labelType) {
-            return this.labelManagers.find((holder) => holder.labelType === labelType);
+        getLabelManagerByType(labelType: string) {
+            return this.labelManagers.find((manager) => manager.labelType === labelType);
         }
 
-        createAllLabels(sourceGroup = this.structureGroup) {
-            this.labelManagers.forEach((holder) => holder.createLabels());
+        createAllLabels() {
+            this.labelManagers.forEach((manager) => manager.createLabels());
         }
 
         adjustAllLabelsToCameraPosition() {
-            this.labelManagers.forEach((holder) => holder.adjustLabelsToCameraPosition());
+            this.labelManagers.forEach((manager) => manager.adjustLabelsToCameraPosition());
         }
 
-        toggleLabelsVisibilityByType(labelType) {
+        toggleLabelsVisibilityByType(labelType: string) {
             const labelManager = this.getLabelManagerByType(labelType);
-            if (labelManager) {
-                labelManager.toggleLabelsVisibility();
-            }
+            labelManager?.toggleLabelsVisibility();
+        }
+
+        areLabelsVisibleByType(labelType: string) {
+            const labelManager = this.getLabelManagerByType(labelType);
+            return labelManager?.isVisible;
         }
     };

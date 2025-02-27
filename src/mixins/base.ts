@@ -1,11 +1,11 @@
 import * as THREE from "three";
 
 export class BaseTHREEGroupManager {
-    THREEGroupName: string;
+    THREEGroupName = "";
 
     THREEGroup: THREE.Group;
 
-    isVisible: boolean;
+    isVisible = false;
 
     config: any;
 
@@ -21,5 +21,10 @@ export class BaseTHREEGroupManager {
         this.waveStructureGroup = waveStructureGroup;
         this.waveStructureGroup.add(this.THREEGroup);
         this.waveCamera = waveCamera;
+    }
+
+    toggleVisibility() {
+        this.isVisible = !this.isVisible;
+        this.THREEGroup.visible = this.isVisible;
     }
 }

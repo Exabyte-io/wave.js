@@ -7,7 +7,6 @@ import {
 } from "../base_listener";
 
 export class BaseMeasurementManager extends BaseDOMListenreeManagerWtihThreeGroupAndRaycaster {
-
     selectedAtoms: THREE.Object3D[] = [];
 
     highlightedAtom: THREE.Object3D | null = null;
@@ -16,7 +15,7 @@ export class BaseMeasurementManager extends BaseDOMListenreeManagerWtihThreeGrou
 
     pointer: THREE.Vector2 = new THREE.Vector2();
 
-    isActive: boolean;
+    // isActive: boolean;
 
     handleAtomClick() {
         // Placeholder for atom click handler
@@ -38,10 +37,8 @@ export class BaseMeasurementManager extends BaseDOMListenreeManagerWtihThreeGrou
             handleClick: handleAtomClick.bind(this),
         });
         // TODO: add to structure group instead
-        this.scene.add(this.THREEGroup);
         this.waveStructureGroup.add(this.THREEGroup);
     }
-
 
     setAtomAsSelected(atomObject: THREE.Object3D) {
         atomObject.userData.selected = true;
@@ -56,13 +53,12 @@ export class BaseMeasurementManager extends BaseDOMListenreeManagerWtihThreeGrou
     // TODO: Remove
     setHexForAtom(intersectItem: THREE.Object3D) {
         if (this.highlightedAtom !== intersectItem) {
-            this.setDefaultHexForAtom()
+            this.setDefaultHexForAtom();
             this.highlightedAtom = intersectItem;
             (this.highlightedAtom as any).currentHex = (
                 this.highlightedAtom as any
             ).material.emissive.getHex();
             (this.highlightedAtom as any).material.emissive.setHex(COLORS.RED);
-            this.render();
         }
     }
 
@@ -113,7 +109,7 @@ export class BaseMeasurementManager extends BaseDOMListenreeManagerWtihThreeGrou
         label.visible = true;
         this.THREEGroup.add(label);
         // TODO: add to structure group instead
-        this.scene.add(this.THREEGroup);
+        this.waveStructureGroup.add(this.THREEGroup);
         // Remove
         this.render();
         return label;
@@ -193,7 +189,4 @@ export class BaseMeasurementManager extends BaseDOMListenreeManagerWtihThreeGrou
         // TODO: remove to wave.js level
         this.render();
     }
-
-
-
-};
+}
