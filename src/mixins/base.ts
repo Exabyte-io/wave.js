@@ -15,7 +15,6 @@ export class BaseTHREEGroupManager {
     waveCamera: THREE.Camera;
 
     constructor(waveStructureGroup: THREE.Group, waveCamera: THREE.Camera) {
-
         this.THREEGroup = new THREE.Group();
         this.THREEGroup.name = this.THREEGroupName;
         this.THREEGroup.visible = this.isVisible;
@@ -23,6 +22,4 @@ export class BaseTHREEGroupManager {
         this.waveStructureGroup.add(this.THREEGroup);
         this.waveCamera = waveCamera;
     }
-
-
 }

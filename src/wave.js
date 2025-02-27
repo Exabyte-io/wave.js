@@ -258,6 +258,7 @@ export class Wave extends mix(WaveBase).with(
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
+        this.initializeLabelManagers();
     }
 
     clearView() {

@@ -8,11 +8,6 @@ export const AllLabelsMixin = (superclass) =>
     class extends superclass {
         labelManagers = [];
 
-        constructor(config) {
-            super(config);
-            this.initializeLabelManagers();
-        }
-
         initializeLabelManagers() {
             const elementLabelsManager = new ElementLabelsManager(this.structureGroup, this.camera);
             const coordinateLabelsManager = new CoordinateLabelsManager(
