@@ -1,7 +1,6 @@
 import * as THREE from "three";
 
 import settings from "../../settings";
-
 import { BaseLabelsManager } from "./base";
 
 export class CoordinateLabelsManager extends BaseLabelsManager {
@@ -11,7 +10,7 @@ export class CoordinateLabelsManager extends BaseLabelsManager {
 
     isVisible = false;
 
-    config: settings.coordinateLabelsConfig;
+    config = settings.coordinateLabelsConfig;
 
     textProcessor(atom: THREE.Object3D, position: THREE.Vector3) {
         const separator = " ";
@@ -23,7 +22,7 @@ export class CoordinateLabelsManager extends BaseLabelsManager {
 
     getOffsetVector(position: THREE.Vector3, camera: THREE.Camera, offsetLength = 0) {
         // TODO: figure out how to pass element here
-        const newOffsetLength = this.waveStructureGroup.getAtomRadiusByElement();
+        const newOffsetLength = 2.0;
         return super.getOffsetVector(position, camera, newOffsetLength);
     }
 }

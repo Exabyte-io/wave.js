@@ -11,11 +11,8 @@ import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
 import { ImageMixin } from "./mixins/image";
-import { CoordinateLabelsMixin } from "./mixins/labels/coordinateLabels";
-import { ElementLabelsMixin } from "./mixins/labels/elementLabels";
-import { AngleMeasurementMixin } from "./mixins/measurements/angleMeasurement";
-import { CoordinateMeasurementMixin } from "./mixins/measurements/coordinateMeasurement";
-import { DistanceMeasurementMixin } from "./mixins/measurements/distanceMeasurement";
+import { AllLabelsMixin } from "./mixins/labels/all";
+import { AllMeasurementsMixin } from "./mixins/measurements/all";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
@@ -246,11 +243,8 @@ export class Wave extends mix(WaveBase).with(
     RepetitionMixin,
     ControlsMixin,
     BoundaryMixin,
-    ElementLabelsMixin,
-    CoordinateLabelsMixin,
-    CoordinateMeasurementMixin,
-    DistanceMeasurementMixin,
-    AngleMeasurementMixin,
+    AllLabelsMixin,
+    AllMeasurementsMixin,
     ImageMixin,
 ) {
     /**
@@ -301,6 +295,7 @@ export class Wave extends mix(WaveBase).with(
         const currentAtoms = this.collectAllAtoms();
         const newSelectedAtoms = [];
 
+        if (!this.selectedAtoms || !this.selectedAtoms.length) return;
         this.selectedAtoms.forEach((atom) => {
             const newAtom = currentAtoms.find((currentAtom) => {
                 const firstAtomPoint = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);

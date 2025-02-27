@@ -1,6 +1,7 @@
-import { BaseTHREEGroupManager } from "./base";
 import * as THREE from "three";
+
 import { ATOM_GROUP_NAME } from "../enums";
+import { BaseTHREEGroupManager } from "./base";
 
 // This should be mixed into Wave
 export class BaseDOMListenerManagerWithThreeGroup extends BaseTHREEGroupManager {
@@ -21,12 +22,10 @@ export class BaseDOMListenerManagerWithThreeGroup extends BaseTHREEGroupManager 
         this.canvas.addEventListener("click", this.onClick);
         this.canvas.addEventListener("mousemove", this.onPointerMove);
     }
-
 }
 
 // This should be mixed into Wave
 export class BaseDOMListenreeManagerWtihThreeGroupAndRaycaster extends BaseDOMListenerManagerWithThreeGroup {
-
     raycaster: THREE.Raycaster;
 
     pointer: THREE.Vector2;

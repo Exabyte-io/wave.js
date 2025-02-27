@@ -229,12 +229,13 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleToggleElementLabels() {
-        this.WaveComponent.wave.toggleElementLabels();
+        console.log(this.WaveComponent.wave);
+        this.WaveComponent.wave.toggleLabelsVisibilityByType("element");
         this._resetStateWaveComponent();
     }
 
     handleToggleCoordinateLabels() {
-        this.WaveComponent.wave.toggleCoordinateLabels();
+        this.WaveComponent.wave.toggleLabelsVisibilityByType("coordinate");
         this._resetStateWaveComponent();
     }
 

@@ -1,20 +1,24 @@
-import * as THREE from "three";
-
-import { ATOM_GROUP_NAME } from "../../enums";
-import { CoordinateLabelsManager, ElementLabelsManager } from "./labelManagers";
-
+import { CoordinateLabelsManager } from "./coordinate";
+import { ElementLabelsManager } from "./element";
 /*
  * Base mixin containing generic logic for dealing with labels.
  * Provides core functionality for creating and managing text labels in 3D space.
  */
 export const AllLabelsMixin = (superclass) =>
     class extends superclass {
-
         labelManagers = [];
 
+        constructor(config) {
+            super(config);
+            this.initializeLabelManagers();
+        }
+
         initializeLabelManagers() {
-            const elementLabelsManager = new ElementLabelsManager(this.structureGroup);
-            const coordinateLabelsManager = new CoordinateLabelsManager(this.structureGroup);
+            const elementLabelsManager = new ElementLabelsManager(this.structureGroup, this.camera);
+            const coordinateLabelsManager = new CoordinateLabelsManager(
+                this.structureGroup,
+                this.camera,
+            );
             this.labelManagers.push(elementLabelsManager, coordinateLabelsManager);
         }
 
@@ -23,19 +27,17 @@ export const AllLabelsMixin = (superclass) =>
         }
 
         createAllLabels(sourceGroup = this.structureGroup) {
-            this.labelManagers.forEach((holder) =>
-                this.createLabels(holder.labelType, sourceGroup),
-            );
+            this.labelManagers.forEach((holder) => holder.createLabels());
         }
 
         adjustAllLabelsToCameraPosition() {
-            this.labelManagers.forEach((holder) =>
-                this.adjustLabelsToCameraPosition(holder.labelType),
-            );
+            this.labelManagers.forEach((holder) => holder.adjustLabelsToCameraPosition());
         }
 
         toggleLabelsVisibilityByType(labelType) {
             const labelManager = this.getLabelManagerByType(labelType);
-            labelManager.toggleLabelsVisibility();
+            if (labelManager) {
+                labelManager.toggleLabelsVisibility();
+            }
         }
     };

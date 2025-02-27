@@ -1,32 +1,20 @@
 import * as THREE from "three";
 
-import settings from "../../settings";
 import { ATOM_GROUP_NAME } from "../../enums";
+import settings from "../../settings";
 import { BaseTHREEGroupManager } from "../base";
 
 export class BaseLabelsManager extends BaseTHREEGroupManager {
-    labelType: string;
+    labelType = "";
 
-    #THREETexturesCache = {};
+    #THREETexturesCache: { [key: string]: THREE.Texture } = {};
 
     textProcessor(atom: THREE.Mesh, position: THREE.Vector3) {
-        return atom.name + " " + atom.position.x;
+        return Error("textProcessor method must be implemented in a subclass");
     }
 
     getOffsetVector(position: THREE.Vector3, camera: THREE.Camera, offsetLength = 0) {
-        const vectorToCamera = new THREE.Vector3().subVectors(
-            camera.position,
-            position,
-        );
-        const zOffset =
-            settings.coordinateLabelsConfig.offsetVector[2] +
-            offsetLength * settings.atomRadiiScale;
-
-        vectorToCamera.normalize();
-        vectorToCamera.multiplyScalar(offsetLength);
-        vectorToCamera.z += zOffset;
-
-        return vectorToCamera;
+        return Error("getOffsetVector method must be implemented in a subclass");
     }
 
     getUserData(text: string, position: THREE.Vector3) {
@@ -44,19 +32,16 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
 
     /**
      * Creates a hash map representing the positions for labels.
-     * @param {THREE.Group} [sourceGroup=this.structureGroup] - The group to extract atoms from
      * @returns {Object.<string, Array.<number>>} HashMap with label text as keys and an array of vertices as values.
      */
     createVerticesHashMap() {
-        const verticesHashMap = {};
+        const verticesHashMap: { [key: string]: number[] } = {};
         this.waveStructureGroup.children.forEach((group) => {
             if (group.name !== ATOM_GROUP_NAME) return;
 
             group.children.forEach((atom) => {
                 if (atom instanceof THREE.Mesh) {
-                    const position = new THREE.Vector3().setFromMatrixPosition(
-                        atom.matrixWorld,
-                    );
+                    const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
                     const { x, y, z } = position;
 
                     const text = this.textProcessor(atom, position);
@@ -79,7 +64,7 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
      * @param {Object} config - additional options for the texture (scaleWidth, scaleHeight, etc.)
      * @return {THREE.Texture}
      */
-    createLabelTextTexture(text) {
+    createLabelTextTexture(text: string) {
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
 
@@ -107,10 +92,9 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
 
     /**
      * Returns cached or newly created texture with label text
-     * @param {String} text - the text to be placed on the texture;
      * @return {THREE.Texture}
      */
-    getLabelTextTexture(text) {
+    getLabelTextTexture(text: string) {
         if (this.#THREETexturesCache[text]) return this.#THREETexturesCache[text];
 
         const texture = this.createLabelTextTexture(text);
@@ -125,7 +109,7 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
      * @param {Object} config - additional options for the sprite (scale, etc.)
      * @return {THREE.Sprite}
      */
-    createLabelSprite(text, name) {
+    createLabelSprite(text: string, name: string) {
         const spriteMaterial = new THREE.SpriteMaterial({
             map: this.getLabelTextTexture(text),
             ...settings.labelSpriteConfig,
@@ -134,8 +118,8 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         sprite.name = name;
 
         // TODO: remove - scale this inside  createLabelTextTexture
-        const scaleX = config.scaleWidth || config.scale || 1;
-        const scaleY = config.scaleHeight || config.scale || 1;
+        const scaleX = this.config.scaleWidth || this.config.scale || 1;
+        const scaleY = this.config.scaleHeight || this.config.scale || 1;
         sprite.scale.set(scaleX, scaleY, 1);
 
         return sprite;
@@ -174,8 +158,6 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         if (!this.waveStructureGroup.children.includes(this.THREEGroup)) {
             this.waveStructureGroup.add(this.THREEGroup);
         }
-        // TODO: manage this at the wave level
-        this.render();
     }
 
     /**
@@ -183,8 +165,7 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
      * @param {string} labelType - Type of label to adjust
      */
     adjustLabelsToCameraPosition() {
-        if (!this.isVisible || !this.config.areSpritesUsed)
-            return;
+        if (!this.isVisible || !this.config.areSpritesUsed) return;
 
         this.THREEGroup.children.forEach((label) => {
             const { atomPosition, atomName } = label.userData;
@@ -193,5 +174,4 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
             label.lookAt(this.waveCamera.position);
         });
     }
-
 }
