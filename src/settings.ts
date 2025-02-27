@@ -85,7 +85,7 @@ export default {
         scale: 1.5,
         scaleWidth: 2.5,
         scaleHeight: 0.25,
-        offsetVector: [0, 0, 0.25],
+        offsetVector: [0, 0, 0.5],
         textParameters: {
             fillStyle: "#CCCCCC",
             strokeStyle: "#454545",

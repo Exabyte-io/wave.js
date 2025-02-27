@@ -13,10 +13,12 @@ export class ElementLabelsManager extends BaseLabelsManager {
     config = settings.elementLabelsConfig;
 
     textProcessor(atom: THREE.Object3D, position: THREE.Vector3) {
-        return atom.name;
+        return atom.name.split("-")[0];
     }
 
     getOffsetVector(position: THREE.Vector3, camera: THREE.Camera, offsetLength = 0) {
-        return super.getOffsetVector(position, camera, offsetLength);
+        // TODO: figure out how to pass element here
+        const newOffsetLength = settings.sphereRadius;
+        return super.getOffsetVector(position, camera, newOffsetLength);
     }
 }

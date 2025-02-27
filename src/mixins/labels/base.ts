@@ -13,13 +13,17 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         return "";
     }
 
-    getOffsetVector(position: THREE.Vector3, camera: THREE.Camera, offsetLength = 0) {
+    getOffsetVector(
+        position: THREE.Vector3,
+        camera: THREE.Camera,
+        offsetLength = 0,
+        offsetVector: number[] = [0, 0, 0],
+    ) {
         const vectorToCamera = new THREE.Vector3().subVectors(camera.position, position);
-        const zOffset = offsetLength * settings.atomRadiiScale;
-
         vectorToCamera.normalize();
         vectorToCamera.multiplyScalar(offsetLength);
-        vectorToCamera.z += zOffset;
+
+        vectorToCamera.add(new THREE.Vector3(...offsetVector));
 
         return vectorToCamera;
     }

@@ -22,7 +22,9 @@ export class CoordinateLabelsManager extends BaseLabelsManager {
 
     getOffsetVector(position: THREE.Vector3, camera: THREE.Camera, offsetLength = 0) {
         // TODO: figure out how to pass element here
-        const newOffsetLength = 2.0;
-        return super.getOffsetVector(position, camera, newOffsetLength);
+        const newOffsetLength = settings.sphereRadius;
+        const additionalOffsetVector = this.config.offsetVector;
+
+        return super.getOffsetVector(position, camera, newOffsetLength, additionalOffsetVector);
     }
 }
