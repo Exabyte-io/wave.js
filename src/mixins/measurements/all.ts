@@ -11,15 +11,25 @@ export const AllMeasurementsMixin = (superclass) =>
     class extends superclass {
         measurementManagers = [];
 
+        constructor(config) {
+            super(config);
+
+            this.initializeMeasurementManagers();
+        }
+
         initializeMeasurementManagers() {
-            const anglesMeasurementManager = new AnglesMeasurementManager(this.structureGroup);
-            const distancesMeasurementManager = new DistancesMeasurementManager(
-                this.structureGroup,
-            );
+            // const anglesMeasurementManager = new AnglesMeasurementManager(this.structureGroup);
+            // const distancesMeasurementManager = new DistancesMeasurementManager(
+            //     this.structureGroup,
+            // );
             const coordinatesMeasurementManager = new CoordinatesMeasurementManager(
                 this.structureGroup,
             );
-            this.measurementManagers.push(anglesMeasurementManager, distancesMeasurementManager);
+            this.measurementManagers.push(
+                coordinatesMeasurementManager,
+                // anglesMeasurementManager,
+                // distancesMeasurementManager,
+            );
         }
 
         getMeasurementManagerByType(measurementType) {
@@ -30,7 +40,13 @@ export const AllMeasurementsMixin = (superclass) =>
             return this.measurementManagers.find((m) => m.isActive === true);
         }
 
-        createMeasurmentLabels() {
+        toggleMeasurementByType(measurementType) {
+            const measurementManager = this.getMeasurementManagerByType(measurementType);
+            if (!measurementManager) return;
+            measurementManager.isActive = !measurementManager.isActive;
+        }
+
+        createMeasurementLabels() {
             const activeMeasurementManager = this.getActiveMeasurementManager();
             activeMeasurementManager.createLabels();
         }
@@ -39,8 +55,8 @@ export const AllMeasurementsMixin = (superclass) =>
             // TODO: call this render
         }
 
-        onClick(event) {
-            this.updateMeasurements();
-            this.rebuildScene();
-        }
+        // onClick(event) {
+        //     this.updateMeasurements();
+        //     this.rebuildScene();
+        // }
     };
