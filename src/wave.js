@@ -12,6 +12,7 @@ import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
 import { ImageMixin } from "./mixins/image";
 import { AllLabelsMixin } from "./mixins/labels/all";
+import { ListenersMixin, RaycasterMixin } from "./mixins/listeners/mixins";
 import { AllMeasurementsMixin } from "./mixins/measurements/all";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
@@ -243,6 +244,8 @@ export class Wave extends mix(WaveBase).with(
     RepetitionMixin,
     ControlsMixin,
     BoundaryMixin,
+    ListenersMixin,
+    RaycasterMixin,
     AllLabelsMixin,
     AllMeasurementsMixin,
     ImageMixin,
@@ -322,6 +325,7 @@ export class Wave extends mix(WaveBase).with(
         if (this.isDrawBondsEnabled) this.drawBonds();
         this.render();
         this.createAllLabels();
+        this.render();
         this.refillSelectedAtoms();
     }
 

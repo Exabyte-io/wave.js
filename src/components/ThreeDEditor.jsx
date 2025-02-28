@@ -356,9 +356,10 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleToggleMeasurement(measurementMode) {
+        console.log(this.WaveComponent.wave);
         this.WaveComponent.wave.destroyListeners();
         this.handleResetMeasurements();
-        this.WaveComponent.wave.setMeasurementMode(measurementMode);
+        this.WaveComponent.wave.toggleMeasurementByType(measurementMode);
 
         this.setState(
             (prevState) => {
