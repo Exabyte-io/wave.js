@@ -114,10 +114,6 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
 
     /**
      * Creates a sprite with a label text
-     * @param {String} text - the text to be displayed on the label
-     * @param {String} name - the name of the created sprite
-     * @param {Object} config - additional options for the sprite (scale, etc.)
-     * @return {THREE.Sprite}
      */
     createLabelSprite(text: string, name: string) {
         const spriteMaterial = new THREE.SpriteMaterial({
