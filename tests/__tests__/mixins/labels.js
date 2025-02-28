@@ -2,6 +2,7 @@ import expect from "expect";
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME, ELEMENT_LABELS_GROUP_NAME } from "../../../src/enums";
+import { getObjectCoordinate } from "../../../src/mixins/measurements/threeJsUtils";
 import { getWaveInstance } from "../../enums";
 
 describe("Atom labels", () => {
@@ -20,7 +21,7 @@ describe("Atom labels", () => {
 
         atoms.forEach((atom) => {
             const atomName = atom.userData.symbolWithLabel;
-            const atomPosition = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
+            const atomPosition = getObjectCoordinate(atom);
 
             const offsetVector = wave.getLabelOffsetVector(atomPosition, atomName);
             const expectedLabelPosition = atomPosition.clone().add(offsetVector);
@@ -56,7 +57,7 @@ describe("Atom labels", () => {
             if (!labelPointsByAtomName) return false;
             const positions = labelPointsByAtomName.geometry.getAttribute("position")?.array;
             let hasLabel = false;
-            const atomPosition = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
+            const atomPosition = getObjectCoordinate(atom);
             for (let i = 0; i < positions.length; i += 3) {
                 const x = positions[i];
                 const y = positions[i + 1];

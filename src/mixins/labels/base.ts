@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { ATOM_GROUP_NAME } from "../../enums";
 import settings from "../../settings";
 import { BaseTHREEGroupManager } from "../base";
+import { getObjectCoordinate } from "../measurements/threeJsUtils";
 
 export class BaseLabelsManager extends BaseTHREEGroupManager {
     labelType = "";
@@ -51,7 +52,7 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
 
             group.children.forEach((atom) => {
                 if (atom instanceof THREE.Mesh) {
-                    const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
+                    const position = getObjectCoordinate(atom);
                     const { x, y, z } = position;
 
                     const text = this.textProcessor(atom, position);

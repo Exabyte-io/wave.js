@@ -42,4 +42,3 @@ export const raycasterImplementation = {
         return atomGroup;
     },
 };
-

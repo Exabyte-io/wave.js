@@ -14,6 +14,7 @@ import { ImageMixin } from "./mixins/image";
 import { AllLabelsMixin } from "./mixins/labels/all";
 import { ListenersMixin, RaycasterMixin } from "./mixins/listeners/mixins";
 import { AllMeasurementsMixin } from "./mixins/measurements/all";
+import { getObjectCoordinate } from "./mixins/measurements/threeJsUtils";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
@@ -301,10 +302,8 @@ export class Wave extends mix(WaveBase).with(
         if (!this.selectedAtoms || !this.selectedAtoms.length) return;
         this.selectedAtoms.forEach((atom) => {
             const newAtom = currentAtoms.find((currentAtom) => {
-                const firstAtomPoint = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-                const secondAtomPoint = new THREE.Vector3().setFromMatrixPosition(
-                    currentAtom.matrixWorld,
-                );
+                const firstAtomPoint = getObjectCoordinate(atom);
+                const secondAtomPoint = getObjectCoordinate(currentAtom.matrixWorld);
                 if (!firstAtomPoint.distanceTo(secondAtomPoint)) {
                     return currentAtom;
                 }

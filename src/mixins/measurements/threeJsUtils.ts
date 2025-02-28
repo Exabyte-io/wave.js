@@ -13,7 +13,7 @@ export function radiansToDegrees(radians: number): number {
 /**
  * Gets the world position of an object
  */
-export function getWorldPosition(object: THREE.Object3D): THREE.Vector3 {
+export function getObjectCoordinate(object: THREE.Object3D): THREE.Vector3 {
     return new THREE.Vector3().setFromMatrixPosition(object.matrixWorld);
 }
 
@@ -38,9 +38,9 @@ export function calculateAngleBetweenPoints(
 export function calculateAngleBetweenAtoms(atoms: THREE.Object3D[]): number {
     const [firstAtom, centerAtom, lastAtom] = atoms;
 
-    const firstPos = getWorldPosition(firstAtom);
-    const centerPos = getWorldPosition(centerAtom);
-    const lastPos = getWorldPosition(lastAtom);
+    const firstPos = getObjectCoordinate(firstAtom);
+    const centerPos = getObjectCoordinate(centerAtom);
+    const lastPos = getObjectCoordinate(lastAtom);
 
     return parseFloat(calculateAngleBetweenPoints(firstPos, centerPos, lastPos).toFixed(2));
 }
@@ -59,8 +59,8 @@ export function calculateDistanceBetweenAtoms(
     atomA: THREE.Object3D,
     atomB: THREE.Object3D,
 ): number {
-    const pointA = getWorldPosition(atomA);
-    const pointB = getWorldPosition(atomB);
+    const pointA = getObjectCoordinate(atomA);
+    const pointB = getObjectCoordinate(atomB);
     return calculateDistance(pointA, pointB);
 }
 
@@ -109,8 +109,8 @@ export function getPointsFromMatrixWorld(
 export function drawLineBetweenAtoms(this: any, selectedAtoms: THREE.Object3D[]): THREE.Line {
     const [firstAtom, secondAtom] = selectedAtoms;
 
-    const firstAtomPoint = getWorldPosition(firstAtom);
-    const secondAtomPoint = getWorldPosition(secondAtom);
+    const firstAtomPoint = getObjectCoordinate(firstAtom);
+    const secondAtomPoint = getObjectCoordinate(secondAtom);
 
     const geometry = new THREE.BufferGeometry().setFromPoints([firstAtomPoint, secondAtomPoint]);
     const material = new THREE.LineBasicMaterial({ color: this.settings.colors.amber });

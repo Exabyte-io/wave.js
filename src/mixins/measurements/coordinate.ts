@@ -2,6 +2,7 @@ import * as THREE from "three";
 
 import { MEASUREMENT_MODES } from "../../enums";
 import { BaseMeasurementManager } from "./base";
+import { getObjectCoordinate } from "./threeJsUtils";
 
 export class CoordinatesMeasurementManager extends BaseMeasurementManager {
     currentSelectedCoordinate: THREE.Sprite | null = null;
@@ -23,7 +24,7 @@ export class CoordinatesMeasurementManager extends BaseMeasurementManager {
      */
     copyCoordinatesToClipboard() {
         const coordinatesArray = this.selectedAtoms.map((atom) => {
-            const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
+            const position = getObjectCoordinate(atom);
             return [position.x, position.y, position.z];
         });
 
@@ -43,7 +44,7 @@ export class CoordinatesMeasurementManager extends BaseMeasurementManager {
         this.selectedAtoms.forEach((atom) => {
             if (!atom) return;
 
-            const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
+            const position = getObjectCoordinate(atom);
             const coordText = `(${position.x.toFixed(2)}, ${position.y.toFixed(
                 2,
             )}, ${position.z.toFixed(2)})`;
@@ -90,7 +91,7 @@ export class CoordinatesMeasurementManager extends BaseMeasurementManager {
 
         if (this.selectedAtoms.length > 0) {
             // Update state with coordinates of the last selected atom
-            const position = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
+            const position = getObjectCoordinate(atom);
             const coordText = `(${position.x.toFixed(2)}, ${position.y.toFixed(
                 2,
             )}, ${position.z.toFixed(2)})`;

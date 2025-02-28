@@ -10,7 +10,7 @@ import {
     calculateAngleBetweenAtoms,
     calculateAngleLabelPosition,
     drawLineBetweenAtoms,
-    getWorldPosition,
+    getObjectCoordinate,
 } from "./threeJsUtils";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -81,9 +81,9 @@ export class AnglesMeasurementManager extends BaseMeasurementManager {
         const connectionB = this.createConnection(atomB, atomC);
 
         // Get world positions of the atoms
-        const pointA = getWorldPosition(atomA);
-        const pointB = getWorldPosition(atomB);
-        const pointC = getWorldPosition(atomC);
+        const pointA = getObjectCoordinate(atomA);
+        const pointB = getObjectCoordinate(atomB);
+        const pointC = getObjectCoordinate(atomC);
 
         // Create the angle line
         const material = new THREE.LineBasicMaterial({ color: this.settings.colors.amber });
