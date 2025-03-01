@@ -57,14 +57,23 @@ export class ThreeDEditor extends React.Component {
             activeToolbarMenu: null,
             isThreejsEditorModalShown: false,
             // isDistanceAndAnglesShown: false,
-            measurementsSettings: {
-                isDistanceShown: false,
-                areAnglesShown: false,
-                areCoordinatesShown: false,
-                measurementLabelsShown: false,
-                distance: 0,
-                angle: 0,
-            },
+            measurementsSettings: [
+                {
+                    isActive: false,
+                    measurementType: "distance",
+                    values: [],
+                },
+                {
+                    isActive: false,
+                    measurementType: "angle",
+                    values: [],
+                },
+                {
+                    isActive: false,
+                    measurementType: "coordinate",
+                    values: [],
+                },
+            ],
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -356,35 +365,9 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleToggleMeasurement(measurementMode) {
-        console.log(this.WaveComponent.wave);
-        this.WaveComponent.wave.destroyListeners();
-        this.handleResetMeasurements();
         this.WaveComponent.wave.toggleMeasurementByType(measurementMode);
-
-        this.setState(
-            (prevState) => {
-                const { measurementsSettings } = prevState;
-                const newSettings = { ...measurementsSettings };
-                const isActive = newSettings[measurementMode];
-                Object.values(MEASUREMENT_MODES).forEach((key) => {
-                    newSettings[key] = false;
-                });
-                if (!isActive) {
-                    newSettings[measurementMode] = true;
-                }
-
-                return { measurementsSettings: newSettings };
-            },
-            () => {
-                const { measurementsSettings } = this.state;
-                if (measurementsSettings[measurementMode]) {
-                    this.WaveComponent.wave.initListeners(
-                        this.handleSetState,
-                        measurementsSettings,
-                    );
-                }
-            },
-        );
+        const newMeasurementsSettings = this.WaveComponent.wave.getMeasurementsSettings();
+        this.setState({ measurementsSettings: newMeasurementsSettings });
     }
 
     /**
