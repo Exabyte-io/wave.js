@@ -14,10 +14,15 @@ export const AllLabelsMixin = (superclass) =>
         }
 
         initializeLabelManagers() {
-            const elementLabelsManager = new ElementLabelsManager(this.structureGroup, this.camera);
+            const elementLabelsManager = new ElementLabelsManager(
+                this.structureGroup,
+                this.camera,
+                this,
+            );
             const coordinateLabelsManager = new CoordinateLabelsManager(
                 this.structureGroup,
                 this.camera,
+                this,
             );
             this.labelManagers.push(elementLabelsManager, coordinateLabelsManager);
         }

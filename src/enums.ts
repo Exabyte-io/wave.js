@@ -34,7 +34,15 @@ export const COORDINATE_LABELS_GROUP_NAME = "Coordinate_Labels_Group";
 export const COLORS = {
     RED: 0xff0000,
     GREEN: 0x00ff00,
+    ORANGE: 0xffa500,
 };
+
+export enum MEASUREMENT_MODES_ENUM {
+    NONE = "none",
+    DISTANCE = "isDistanceShown",
+    ANGLE = "areAnglesShown",
+    COORDINATE = "areCoordinatesShown",
+}
 
 export const MEASUREMENT_MODES = {
     NONE: "none",

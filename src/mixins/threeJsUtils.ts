@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import { ATOM_CONNECTION_LINE_NAME } from "../../enums";
+import { ATOM_CONNECTION_LINE_NAME } from "../enums";
 
 /**
  * TODO: import from a shared utils file
@@ -10,11 +10,17 @@ export function radiansToDegrees(radians: number): number {
     return radians * (180 / Math.PI);
 }
 
-/**
- * Gets the world position of an object
- */
+export function getArrayFromVector(vector: THREE.Vector3): number[] {
+    return [vector.x, vector.y, vector.z];
+}
+
 export function getObjectCoordinate(object: THREE.Object3D): THREE.Vector3 {
     return new THREE.Vector3().setFromMatrixPosition(object.matrixWorld);
+}
+
+export function getObjectCoordinateAsArray(object: THREE.Object3D): number[] {
+    const position = getObjectCoordinate(object);
+    return getArrayFromVector(position);
 }
 
 /**

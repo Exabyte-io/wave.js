@@ -1,36 +1,39 @@
 import * as THREE from "three";
 
-import { ATOM_GROUP_NAME } from "../../enums";
 import settings from "../../settings";
+import { VerticesHashMap } from "../atoms";
 import { BaseTHREEGroupManager } from "../base";
-import { getObjectCoordinate } from "../measurements/threeJsUtils";
 
 export class BaseLabelsManager extends BaseTHREEGroupManager {
     labelType = "";
 
     #THREETexturesCache: { [key: string]: THREE.Texture } = {};
 
-    textProcessor(atom: THREE.Mesh, position: THREE.Vector3): string {
-        return "";
+    private getLabelTextFromAtomObject: any;
+
+    getConstantOffsetVector() {
+        return this.config.offsetVector || [0, 0, 0];
     }
 
-    getOffsetVector(
-        position: THREE.Vector3,
-        camera: THREE.Camera,
-        offsetLength = 0,
-        offsetVector: number[] = [0, 0, 0],
-    ) {
+    getOffsetVectorMultiplierPerAtom(atom: THREE.Object3D) {
+        return 1;
+    }
+
+    getVectorToCameraNormalized(position: THREE.Vector3, camera: THREE.Camera) {
         const vectorToCamera = new THREE.Vector3().subVectors(camera.position, position);
         vectorToCamera.normalize();
-        vectorToCamera.multiplyScalar(offsetLength);
-
-        vectorToCamera.add(new THREE.Vector3(...offsetVector));
-
         return vectorToCamera;
     }
 
-    getUserData(text: string, position: THREE.Vector3) {
-        return { atomPosition: position, atomName: text };
+    getOffsetVectorPerAtom(atom: THREE.Object3D, camera: THREE.Camera) {
+        const vectorToCamera = this.getVectorToCameraNormalized(atom.position, camera);
+        const offsetVector = this.getConstantOffsetVector();
+        const offsetLength = this.getOffsetVectorMultiplierPerAtom(atom);
+
+        vectorToCamera.multiplyScalar(offsetLength);
+        vectorToCamera.add(new THREE.Vector3(...offsetVector));
+
+        return vectorToCamera;
     }
 
     getNameForLabel(text: string) {
@@ -42,34 +45,6 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
     }
 
     /**
-     * Creates a hash map representing the positions for labels.
-     * @returns {Object.<string, Array.<number>>} HashMap with label text as keys and an array of vertices as values.
-     */
-    createVerticesHashMap() {
-        const verticesHashMap: { [key: string]: number[] } = {};
-        this.waveStructureGroup.children.forEach((group) => {
-            if (group.name !== ATOM_GROUP_NAME) return;
-
-            group.children.forEach((atom) => {
-                if (atom instanceof THREE.Mesh) {
-                    const position = getObjectCoordinate(atom);
-                    const { x, y, z } = position;
-
-                    const text = this.textProcessor(atom, position);
-
-                    if (!verticesHashMap[text]) {
-                        verticesHashMap[text] = [x, y, z];
-                        return;
-                    }
-                    verticesHashMap[text].push(x, y, z);
-                }
-            });
-        });
-
-        return verticesHashMap;
-    }
-
-    /**
      * Creates a new texture based on a 2D canvas with the supplied text
      * @param {String} text - the text to be placed on the texture;
      * @param {Object} config - additional options for the texture (scaleWidth, scaleHeight, etc.)
@@ -77,7 +52,7 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
      */
     createLabelTextTexture(text: string) {
         const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
+        const context = canvas.getContext("2d") || new CanvasRenderingContext2D();
 
         const canvasWidth = 256 * this.config.scaleWidth;
         const canvasHeight = 256 * this.config.scaleHeight;
@@ -136,7 +111,8 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
      * Creates and positions multiple labels as sprites
      * More flexible but less performant than Points for many labels
      */
-    createLabelsAsSprites(verticesHashMap) {
+    // TODO: define verticesHashMap class and handle for loop there
+    createLabelsAsSprites(verticesHashMap: VerticesHashMap) {
         this.THREEGroup.clear();
         Object.entries(verticesHashMap).forEach(([key, vertices]) => {
             for (let i = 0; i < vertices.length; i += 3) {
@@ -145,17 +121,17 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
                 const position = new THREE.Vector3().fromArray(vertices, i);
                 const name = this.getNameForLabel(key);
                 const labelSprite = this.createLabelSprite(key, name);
-                // TODO: figure out how to pass element here
-                const offsetVector = this.getOffsetVector(position, this.waveCamera, key);
-                labelSprite.userData = this.getUserData(key, position);
-                labelSprite.position.addVectors(position, offsetVector);
+                labelSprite.userData = { position };
                 this.THREEGroup.add(labelSprite);
             }
         });
     }
 
-    createLabels() {
-        const verticesHashMap = this.createVerticesHashMap();
+    createLabels(atoms: any) {
+        const verticesHashMap = this.wave.createAtomVerticesHashMap(
+            this.getLabelTextFromAtomObject || null,
+            atoms,
+        );
         if (this.config.areSpritesUsed) {
             this.createLabelsAsSprites(verticesHashMap);
         } else {
@@ -175,9 +151,11 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         if (!this.isVisible || !this.config.areSpritesUsed) return;
 
         this.THREEGroup.children.forEach((label) => {
-            const { atomPosition, atomName } = label.userData;
-            const offsetVector = this.getOffsetVector(atomPosition, this.waveCamera, atomName);
-            label.position.copy(atomPosition).add(offsetVector);
+            const offsetVector = this.getOffsetVectorPerAtom(
+                this.waveStructureGroup,
+                this.waveCamera,
+            );
+            label.position.copy(label.userData.position).add(offsetVector);
             label.lookAt(this.waveCamera.position);
         });
     }
