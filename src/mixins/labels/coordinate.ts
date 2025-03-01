@@ -21,8 +21,4 @@ export class CoordinateLabelsManager extends BaseLabelsManager {
         const vectorAsArray = getArrayFromVector(atom.position);
         return vectorAsArray.map((coord: number) => coord.toFixed(precision)).join(separator);
     }
-
-    getOffsetVectorMultiplierPerAtom(atom: Object3D): number {
-        return this.wave.getAtomRadiusByElement(atom.name.split("-")[0]);
-    }
 }

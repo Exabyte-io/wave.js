@@ -12,8 +12,4 @@ export class ElementLabelsManager extends BaseLabelsManager {
     isVisible = false;
 
     config = settings.elementLabelsConfig;
-
-    getOffsetVectorMultiplierPerAtom(atom: Object3D): number {
-        return this.wave.getAtomRadiusByElement(atom.name.split("-")[0]);
-    }
 }

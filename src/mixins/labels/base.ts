@@ -15,8 +15,9 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         return this.config.offsetVector || [0, 0, 0];
     }
 
-    getOffsetVectorMultiplierPerAtom(atom: THREE.Object3D) {
-        return 1;
+    getOffsetVectorMultiplierPerAtomName(atomName: string) {
+        if (!atomName) return 1;
+        return this.wave.getAtomRadiusByElement(atomName.split("-")[0]);
     }
 
     getVectorToCameraNormalized(position: THREE.Vector3, camera: THREE.Camera) {
@@ -25,13 +26,12 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         return vectorToCamera;
     }
 
-    getOffsetVectorPerAtom(atom: THREE.Object3D, camera: THREE.Camera) {
-        const vectorToCamera = this.getVectorToCameraNormalized(atom.position, camera);
-        const offsetVector = this.getConstantOffsetVector();
-        const offsetLength = this.getOffsetVectorMultiplierPerAtom(atom);
+    getOffsetVector(position: THREE.Vector3, camera: THREE.Camera, offsetLength = 1) {
+        const vectorToCamera = this.getVectorToCameraNormalized(position, camera);
+        const constantOffset = new THREE.Vector3(...this.getConstantOffsetVector());
 
         vectorToCamera.multiplyScalar(offsetLength);
-        vectorToCamera.add(new THREE.Vector3(...offsetVector));
+        vectorToCamera.add(constantOffset);
 
         return vectorToCamera;
     }
@@ -145,17 +145,16 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
 
     /**
      * Adjusts labels to camera position. Applied to labels of a specific type.
-     * @param {string} labelType - Type of label to adjust
      */
     adjustLabelsToCameraPosition() {
         if (!this.isVisible || !this.config.areSpritesUsed) return;
 
         this.THREEGroup.children.forEach((label) => {
-            const offsetVector = this.getOffsetVectorPerAtom(
-                this.waveStructureGroup,
-                this.waveCamera,
-            );
-            label.position.copy(label.userData.position).add(offsetVector);
+            const { position, atomName } = label.userData;
+            const offsetLength = this.getOffsetVectorMultiplierPerAtomName(atomName);
+            const offsetVector = this.getOffsetVector(position, this.waveCamera, offsetLength);
+
+            label.position.copy(position).add(offsetVector);
             label.lookAt(this.waveCamera.position);
         });
     }

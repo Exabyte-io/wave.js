@@ -168,11 +168,9 @@ export const AtomsMixin = (superclass: any) =>
             const getVerticeKeyPerAtomFn =
                 getVerticeKeyPerAtom || this.getVerticeKeyPerAtom.bind(this);
             const atomsToUse = atoms || this.structureGroup.children;
-            console.log(atomsToUse);
             atomsToUse.forEach(
                 (group: { name: string; children: THREE.Object3D<THREE.Object3DEventMap>[] }) => {
                     if (group.name !== ATOM_GROUP_NAME) return;
-
                     group.children.forEach((atom: THREE.Object3D<THREE.Object3DEventMap>) => {
                         if (this.isTHREEObjectAnAtom(atom)) {
                             const [x, y, z] = getArrayFromVector(atom.position);
