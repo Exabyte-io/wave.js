@@ -1,21 +1,9 @@
-import * as THREE from "three";
-
-import { AnglesMeasurementManager } from "./angle";
 import { CoordinatesMeasurementManager } from "./coordinate";
-import { DistancesMeasurementManager } from "./distance";
-/*
- * Base mixin containing generic logic for dealing with labels.
- * Provides core functionality for creating and managing text labels in 3D space.
- */
+import { MEASUREMENT_MODES_ENUM } from "../../enums";
+
 export const AllMeasurementsMixin = (superclass) =>
     class extends superclass {
-        measurementManagers = [];
-
-        constructor(config) {
-            super(config);
-
-            this.initializeMeasurementManagers();
-        }
+        measurementManagers: CoordinatesMeasurementManager[] = [];
 
         initializeMeasurementManagers() {
             // const anglesMeasurementManager = new AnglesMeasurementManager(this.structureGroup);
@@ -24,6 +12,8 @@ export const AllMeasurementsMixin = (superclass) =>
             // );
             const coordinatesMeasurementManager = new CoordinatesMeasurementManager(
                 this.structureGroup,
+                this.camera,
+                this,
             );
             this.measurementManagers.push(
                 coordinatesMeasurementManager,
@@ -32,23 +22,26 @@ export const AllMeasurementsMixin = (superclass) =>
             );
         }
 
-        getMeasurementManagerByType(measurementType) {
-            return this.measurementManagers.find((m) => m.type === measurementType);
+        getMeasurementManagerByType(measurementType: MEASUREMENT_MODES_ENUM) {
+            return this.measurementManagers.find((m) => m.measurementType === measurementType);
         }
 
         getActiveMeasurementManager() {
             return this.measurementManagers.find((m) => m.isActive === true);
         }
 
-        toggleMeasurementByType(measurementType) {
+        getMeasurementsSettings() {
+            return this.measurementManagers.map((m) => m.getSettings());
+        }
+
+        toggleMeasurementByType(measurementType: MEASUREMENT_MODES_ENUM) {
             const measurementManager = this.getMeasurementManagerByType(measurementType);
-            if (!measurementManager) return;
-            measurementManager.isActive = !measurementManager.isActive;
+            measurementManager?.toggleActive();
         }
 
         createMeasurementLabels() {
             const activeMeasurementManager = this.getActiveMeasurementManager();
-            activeMeasurementManager.createLabels();
+            activeMeasurementManager?.createLabels();
         }
 
         updateMeasurements() {

@@ -11,7 +11,7 @@ import {
     calculateAngleLabelPosition,
     drawLineBetweenAtoms,
     getObjectCoordinate,
-} from "./threeJsUtils";
+} from "../threeJsUtils";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 

@@ -6,7 +6,7 @@ import {
     calculateDistanceBetweenAtoms,
     drawLineBetweenAtoms,
     getLineCenterCoordinate,
-} from "./threeJsUtils";
+} from "../threeJsUtils";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
