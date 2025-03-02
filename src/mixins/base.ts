@@ -29,5 +29,6 @@ export class BaseTHREEGroupManager {
     toggleVisibility() {
         this.isVisible = !this.isVisible;
         this.THREEGroup.visible = this.isVisible;
+        console.log("toggleVisibility", this.THREEGroup, this.THREEGroup.visible);
     }
 }

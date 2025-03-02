@@ -1,15 +1,21 @@
 import * as THREE from "three";
 
 import settings from "../../settings";
-import { VerticesHashMap } from "../atoms";
+import { VerticesHashMapHandler } from "../atoms";
 import { BaseTHREEGroupManager } from "../base";
+
+export type LabelsManagerConstructor<T extends BaseLabelsManager> = new (
+    waveStructureGroup: THREE.Group,
+    waveCamera: THREE.Camera,
+    wave: any,
+) => T;
 
 export class BaseLabelsManager extends BaseTHREEGroupManager {
     labelType = "";
 
     #THREETexturesCache: { [key: string]: THREE.Texture } = {};
 
-    private getLabelTextFromAtomObject: any;
+    getLabelTextFromAtomObject: any;
 
     getConstantOffsetVector() {
         return this.config.offsetVector || [0, 0, 0];
@@ -111,35 +117,33 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
      * Creates and positions multiple labels as sprites
      * More flexible but less performant than Points for many labels
      */
-    // TODO: define verticesHashMap class and handle for loop there
-    createLabelsAsSprites(verticesHashMap: VerticesHashMap) {
-        this.THREEGroup.clear();
-        Object.entries(verticesHashMap).forEach(([key, vertices]) => {
-            for (let i = 0; i < vertices.length; i += 3) {
-                // TODO: define verticesHashMap type
-                // @ts-ignore
-                const position = new THREE.Vector3().fromArray(vertices, i);
-                const name = this.getNameForLabel(key);
-                const labelSprite = this.createLabelSprite(key, name);
-                labelSprite.userData = { position };
-                this.THREEGroup.add(labelSprite);
-            }
+    createLabelsAsSprites(verticesHashMap: VerticesHashMapHandler) {
+        // this.THREEGroup.clear();
+        verticesHashMap.iterateCoordinates((key, coordinateAsArray) => {
+            const position = new THREE.Vector3().fromArray(coordinateAsArray);
+            const name = this.getNameForLabel(key);
+            const labelSprite = this.createLabelSprite(key, name);
+            labelSprite.userData = { position };
+            this.THREEGroup.add(labelSprite);
+            console.log("createLabelsAsSprites", this.THREEGroup, this.THREEGroup.visible);
         });
     }
 
-    createLabels(atoms: any) {
+    createLabels(atoms: any, threeGroup = this.THREEGroup) {
         const verticesHashMap = this.wave.createAtomVerticesHashMap(
             this.getLabelTextFromAtomObject || null,
             atoms,
         );
         if (this.config.areSpritesUsed) {
             this.createLabelsAsSprites(verticesHashMap);
+            this.wave.render();
         } else {
             throw new Error("Labels as points are not implemented yet");
         }
         // Only add to structureGroup if not already added
-        if (!this.waveStructureGroup.children.includes(this.THREEGroup)) {
-            this.waveStructureGroup.add(this.THREEGroup);
+        if (!this.waveStructureGroup.children.includes(threeGroup)) {
+            this.waveStructureGroup.add(threeGroup);
+            console.log("createLabels add to Wave", this.THREEGroup, this.THREEGroup.visible);
         }
     }
 

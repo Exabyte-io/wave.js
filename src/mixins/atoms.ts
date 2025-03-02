@@ -13,6 +13,36 @@ import { ApplyGlow } from "./utils";
 export interface VerticesHashMap {
     [key: string]: number[];
 }
+
+export class VerticesHashMapHandler {
+    hashmap: VerticesHashMap;
+
+    constructor() {
+        this.hashmap = {};
+    }
+
+    add(key: string, value: number[]) {
+        if (!this.hashmap[key]) {
+            this.hashmap[key] = [...value];
+        } else {
+            this.hashmap[key].push(...value);
+        }
+    }
+
+    get(key: string) {
+        return this.hashmap[key];
+    }
+
+    iterateCoordinates(callback: (key: string, coordinateAsArray: number[]) => void) {
+        Object.entries(this.hashmap).forEach(([key, vertices]) => {
+            for (let i = 0; i < vertices.length; i += 3) {
+                const coordinateAsArray = vertices.slice(i, i + 3);
+                callback(key, coordinateAsArray);
+            }
+        });
+    }
+}
+
 /*
  * Mixin containing the logic for dealing with atoms.
  * Draws atoms as spheres and handles actions performed on them.
@@ -150,6 +180,16 @@ export const AtomsMixin = (superclass: any) =>
             return (radiimap[element] || this.settings.sphereRadius) * scale;
         }
 
+        getAtomGroups() {
+            const atomGroups: THREE.Object3D<THREE.Object3DEventMap>[] = [];
+            this.structureGroup.children.forEach((group: THREE.Group) => {
+                if (group.name === ATOM_GROUP_NAME) {
+                    atomGroups.push(...group.children);
+                }
+            });
+            return atomGroups;
+        }
+
         isTHREEObjectAnAtom(object: any) {
             return object instanceof THREE.Mesh;
         }
@@ -162,31 +202,18 @@ export const AtomsMixin = (superclass: any) =>
             return this.getAtomNameFromObject(atom);
         }
 
-        // TODO: define verticesHashMap class and handle creation there
         createAtomVerticesHashMap(getVerticeKeyPerAtom = null, atoms = null) {
-            const positionsHashMap: VerticesHashMap = {};
+            const positionsHashMap = new VerticesHashMapHandler();
             const getVerticeKeyPerAtomFn =
                 getVerticeKeyPerAtom || this.getVerticeKeyPerAtom.bind(this);
-            const atomsToUse = atoms || this.structureGroup.children;
-            atomsToUse.forEach(
-                (group: { name: string; children: THREE.Object3D<THREE.Object3DEventMap>[] }) => {
-                    if (group.name !== ATOM_GROUP_NAME) return;
-                    group.children.forEach((atom: THREE.Object3D<THREE.Object3DEventMap>) => {
-                        if (this.isTHREEObjectAnAtom(atom)) {
-                            const [x, y, z] = getArrayFromVector(atom.position);
-
-                            const mapKey = getVerticeKeyPerAtomFn(atom);
-
-                            if (!positionsHashMap[mapKey]) {
-                                positionsHashMap[mapKey] = [x, y, z];
-                                return;
-                            }
-                            positionsHashMap[mapKey].push(x, y, z);
-                        }
-                    });
-                },
-            );
-
+            const atomsToUse = atoms || this.getAtomGroups();
+            atomsToUse.forEach((atom: THREE.Object3D) => {
+                if (this.isTHREEObjectAnAtom(atom)) {
+                    const [x, y, z] = getArrayFromVector(atom.position);
+                    const mapKey = getVerticeKeyPerAtomFn(atom);
+                    positionsHashMap.add(mapKey, [x, y, z]);
+                }
+            });
             return positionsHashMap;
         }
     };

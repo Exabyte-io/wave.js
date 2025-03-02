@@ -1,8 +1,8 @@
 import * as THREE from "three";
 
-import { ATOM_GROUP_NAME, COLORS, MEASUREMENT_MODES } from "../../enums";
+import { ATOM_GROUP_NAME, COLORS, MEASUREMENT_MODES_ENUM } from "../../enums";
 import { RaycasterMixinWithListeners } from "../listeners/mixins";
-import { BaseLabelsManager } from "../labels/base";
+import { BaseLabelsManager, LabelsManagerConstructor } from "../labels/base";
 import { BaseTHREEGroupManager } from "../base";
 import { getObjectCoordinateAsArray } from "../threeJsUtils";
 
@@ -12,23 +12,29 @@ const BaseManager = RaycasterMixinWithListeners(BaseTHREEGroupManager);
  * Base class for managing measurements.
  * Contains generic logic for handling measurements: toggling measurement, selecting atoms, creating labels.
  */
-export class BaseMeasurementManager extends BaseManager {
-    measurementType: MEASUREMENT_MODES = MEASUREMENT_MODES.NONE;
+export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseManager {
+    measurementType: MEASUREMENT_MODES_ENUM = MEASUREMENT_MODES_ENUM.NONE;
 
     selectedAtoms: THREE.Object3D[] = [];
 
     isActive = false;
 
-    values: any[];
+    values!: any[];
 
-    LabelsManager: any = BaseLabelsManager;
+    LabelsManagerCls!: LabelsManagerConstructor<T>;
+
+    labelsManager: any;
 
     constructor(waveStructureGroup: THREE.Group, waveCamera: THREE.Camera, wave: any) {
-        super(waveStructureGroup, waveCamera);
+        super(waveStructureGroup, waveCamera, wave);
         this.initRaycaster();
         this.selectedAtoms = [];
         this.intersectedAtom = null;
         this.canvas = wave.renderer.domElement;
+    }
+
+    getLabelsManagerInstance() {
+        return new this.LabelsManagerCls(this.waveStructureGroup, this.waveCamera, this.wave);
     }
 
     toggleActive = () => {
@@ -42,7 +48,7 @@ export class BaseMeasurementManager extends BaseManager {
         }
     };
 
-    setColorForAtom(atomObject: THREE.Object3D, color?: number) {
+    setColorForAtom(atomObject: THREE.Mesh, color?: number) {
         const newColor = color || atomObject.material.emissive.getHex();
         atomObject.currentHex = atomObject.material.emissive.getHex();
         atomObject.material?.emissive?.setHex(newColor);
@@ -80,18 +86,8 @@ export class BaseMeasurementManager extends BaseManager {
         return intersection.object.type === "Mesh";
     }
 
-    getAtomGroups() {
-        const atomGroups: THREE.Object3D<THREE.Object3DEventMap>[] = [];
-        this.waveStructureGroup.children.forEach((group) => {
-            if (group.name === ATOM_GROUP_NAME) {
-                atomGroups.push(...group.children);
-            }
-        });
-        return atomGroups;
-    }
-
     getIntersections() {
-        return this.raycaster.intersectObjects([...this.getAtomGroups()], true);
+        return this.raycaster.intersectObjects([...this.wave.getAtomGroups()], true);
     }
 
     toggleAtomSelection(atomObject: THREE.Object3D) {
@@ -168,7 +164,7 @@ export class BaseMeasurementManager extends BaseManager {
     }
 
     createMeasurementLabel(text: string, name: string, position: THREE.Vector3) {
-        const managerInstance = new this.LabelsManager(
+        const managerInstance = new this.LabelsManagerCls(
             this.waveStructureGroup,
             this.waveCamera,
             this.wave,
