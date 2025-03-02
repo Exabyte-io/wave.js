@@ -347,9 +347,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleResetMeasurements() {
-        const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measurementsSettings;
-        if (isDistanceShown || isAnglesShown) this.WaveComponent.wave.resetMeasurements();
+        this.WaveComponent.wave.resetMeasurements();
     }
 
     handleToggleMeasurement(measurementKey) {
