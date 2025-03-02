@@ -8,11 +8,6 @@ export const AllLabelsMixin = (superclass) =>
     class extends superclass {
         labelManagers = [];
 
-        constructor(config: any) {
-            super(config);
-            this.initializeLabelManagers();
-        }
-
         initializeLabelManagers() {
             const elementLabelsManager = new ElementLabelsManager(
                 this.structureGroup,
@@ -40,8 +35,13 @@ export const AllLabelsMixin = (superclass) =>
         }
 
         toggleLabelsVisibilityByType(labelType: string) {
+            if (!this.labelManagers.length) {
+                this.initializeLabelManagers();
+            }
             const labelManager = this.getLabelManagerByType(labelType);
             labelManager?.toggleLabelsVisibility();
+            // this.createAllLabels();
+            // this.rebuildScene();
         }
 
         areLabelsVisibleByType(labelType: string) {

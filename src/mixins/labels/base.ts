@@ -118,12 +118,13 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
      * More flexible but less performant than Points for many labels
      */
     createLabelsAsSprites(verticesHashMap: VerticesHashMapHandler) {
-        // this.THREEGroup.clear();
+        this.THREEGroup.clear();
         verticesHashMap.iterateCoordinates((key, coordinateAsArray) => {
             const position = new THREE.Vector3().fromArray(coordinateAsArray);
             const name = this.getNameForLabel(key);
             const labelSprite = this.createLabelSprite(key, name);
             labelSprite.userData = { position };
+            labelSprite.position.copy(this.getLabelPositionWithOffset(position, key));
             this.THREEGroup.add(labelSprite);
             console.log("createLabelsAsSprites", this.THREEGroup, this.THREEGroup.visible);
         });
@@ -136,7 +137,6 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         );
         if (this.config.areSpritesUsed) {
             this.createLabelsAsSprites(verticesHashMap);
-            this.wave.render();
         } else {
             throw new Error("Labels as points are not implemented yet");
         }
@@ -147,18 +147,20 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         }
     }
 
+    getLabelPositionWithOffset(position: THREE.Vector3, atomName: string) {
+        const offsetLength = this.getOffsetVectorMultiplierPerAtomName(atomName);
+        const offsetVector = this.getOffsetVector(position, this.waveCamera, offsetLength);
+        return position.clone().add(offsetVector);
+    }
+
     /**
      * Adjusts labels to camera position. Applied to labels of a specific type.
      */
     adjustLabelsToCameraPosition() {
         if (!this.isVisible || !this.config.areSpritesUsed) return;
-
         this.THREEGroup.children.forEach((label) => {
             const { position, atomName } = label.userData;
-            const offsetLength = this.getOffsetVectorMultiplierPerAtomName(atomName);
-            const offsetVector = this.getOffsetVector(position, this.waveCamera, offsetLength);
-
-            label.position.copy(position).add(offsetVector);
+            label.position.copy(this.getLabelPositionWithOffset(position, atomName));
             label.lookAt(this.waveCamera.position);
         });
     }

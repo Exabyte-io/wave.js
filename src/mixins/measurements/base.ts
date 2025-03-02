@@ -25,12 +25,18 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
 
     labelsManager: any;
 
-    constructor(waveStructureGroup: THREE.Group, waveCamera: THREE.Camera, wave: any) {
+    constructor(
+        waveStructureGroup: THREE.Group,
+        waveCamera: THREE.Camera,
+        wave: any,
+        updateState: any,
+    ) {
         super(waveStructureGroup, waveCamera, wave);
         this.initRaycaster();
         this.selectedAtoms = [];
         this.intersectedAtom = null;
         this.canvas = wave.renderer.domElement;
+        this.updateState = updateState;
     }
 
     getLabelsManagerInstance() {
@@ -38,19 +44,21 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     }
 
     toggleActive = () => {
+        this.toggleVisibility();
         this.isActive = !this.isActive;
-        this.THREEGroup.visible = this.isActive;
         if (!this.isActive) {
             this.resetMeasurements();
             this.destroyListeners();
+            this.wave.setCursorStyle("");
         } else {
-            this.initListeners();
+            this.wave.setCursorStyle("pointer");
+            this.initListeners(this.updateState);
         }
     };
 
     setColorForAtom(atomObject: THREE.Mesh, color?: number) {
-        const newColor = color || atomObject.material.emissive.getHex();
-        atomObject.currentHex = atomObject.material.emissive.getHex();
+        const newColor = color || atomObject.previousColor || COLORS.WHITE;
+        atomObject.previousColor = atomObject.material.color;
         atomObject.material?.emissive?.setHex(newColor);
     }
 
@@ -63,7 +71,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     unsetAtomAsSelected(atomObject: THREE.Object3D) {
         atomObject.userData.selected = false;
         this.setColorForAtom(atomObject);
-        this.selectedAtoms = this.selectedAtoms.filter((atom) => atom !== atomObject);
+        this.selectedAtoms = this.selectedAtoms.filter((atom) => atom.uuid !== atomObject.uuid);
     }
 
     setAtomAsHovered(atomObject: THREE.Object3D) {
@@ -92,12 +100,11 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
 
     toggleAtomSelection(atomObject: THREE.Object3D) {
         if (this.selectedAtoms.includes(atomObject)) {
-            this.selectedAtoms = this.selectedAtoms.filter((atom) => atom !== atomObject);
             this.unsetAtomAsSelected(atomObject);
         } else {
-            this.selectedAtoms.push(atomObject);
             this.setAtomAsSelected(atomObject);
         }
+        this.wave.render();
     }
 
     getSettings() {
@@ -108,6 +115,11 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         };
     }
 
+    getUpdatedMeasurementSettings() {
+        const settings = this.getSettings();
+        const settingsHandler = new MeasurementSettingsHandler();
+    }
+
     // @ts-ignore
     onClick(event: MouseEvent) {
         if (!this.isActive) return;
@@ -116,11 +128,8 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
 
         intersects.forEach((object: THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>) => {
             if (this.isIntersectionObjectAnAtom(object)) {
-                if (this.selectedAtoms.includes(object.object)) {
-                    this.unsetAtomAsSelected(object.object);
-                } else {
-                    this.setAtomAsSelected(object.object);
-                }
+                const atom = object.object;
+                this.toggleAtomSelection(atom);
             }
         });
 
@@ -128,6 +137,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     }
 
     onPointerMove = (event: MouseEvent) => {
+        return;
         if (!this.isActive) return;
         this.checkMouseCoordinates(event, this.waveCamera);
         const intersects = this.getIntersections();
@@ -173,7 +183,23 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         label.position.copy(position);
         this.THREEGroup.add(label);
         this.waveStructureGroup.add(this.THREEGroup);
+        console.log(
+            "createMeasurementLabel",
+            this.waveStructureGroup,
+            this.THREEGroup,
+            this.THREEGroup.children,
+        );
         return label;
+    }
+
+    createMeasurementLabelsForAtoms(atoms = this.selectedAtoms) {
+        this.THREEGroup.clear();
+        atoms.forEach((atom) => {
+            const position = new THREE.Vector3().copy(atom.position);
+            const name = atom.name;
+            const text = atom.name;
+            this.createMeasurementLabel(text, name, position);
+        });
     }
 
     resetMeasurements(): void {

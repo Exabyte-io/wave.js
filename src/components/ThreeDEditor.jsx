@@ -33,43 +33,15 @@ import PropTypes from "prop-types";
 import React from "react";
 
 import { MEASUREMENT_MODES } from "../enums";
+import {
+    defaultMeasurementsSettings,
+    MeasurementSettingsHandler,
+} from "../mixins/measurements/all";
 import settings from "../settings";
 import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
 import { WaveComponent } from "./WaveComponent";
-
-class MeasurementSettingsHandler {
-    constructor(measurementsSettings) {
-        this.measurementsSettings = measurementsSettings;
-        this.isMeasurementActiveByType = this.isMeasurementActiveByType.bind(this);
-    }
-
-    isMeasurementActiveByType(measurementType) {
-        const settingsForType = this.measurementsSettings.find(
-            (setting) => setting.measurementType === measurementType,
-        );
-        return Boolean(settingsForType?.isActive);
-    }
-}
-
-const defaultMeasurementsSettings = [
-    {
-        isActive: false,
-        measurementType: MEASUREMENT_MODES.DISTANCE,
-        values: [],
-    },
-    {
-        isActive: false,
-        measurementType: MEASUREMENT_MODES.ANGLE,
-        values: [],
-    },
-    {
-        isActive: false,
-        measurementType: MEASUREMENT_MODES.COORDINATE,
-        values: [],
-    },
-];
 
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
@@ -85,11 +57,12 @@ export class ThreeDEditor extends React.Component {
         // TODO : overloading a bunch of props and state attributes here..
         this.state = {
             // on/off switch for the component
-            isInteractive: false,
+            isInteractive: true,
             activeToolbarMenu: null,
             isThreejsEditorModalShown: false,
             // isDistanceAndAnglesShown: false,
             measurementsSettings: defaultMeasurementsSettings,
+            THREEGroupsToPersist: [],
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -132,12 +105,13 @@ export class ThreeDEditor extends React.Component {
             this.handleChemicalConnectivityFactorChange.bind(this);
         this.handleToggleMeasurement = this.handleToggleMeasurement.bind(this);
         this.handleSetState = this.handleSetState.bind(this);
+        this.handleSetMeasurementSettingsForTypeInState =
+            this.handleSetMeasurementSettingsForTypeInState.bind(this);
         this.handleDeleteConnection = this.handleDeleteConnection.bind(this);
         this.handleResetMeasurements = this.handleResetMeasurements.bind(this);
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
-        this.doWaveFunc = this.doWaveFunc.bind(this);
     }
 
     componentDidMount() {
@@ -183,28 +157,30 @@ export class ThreeDEditor extends React.Component {
     };
 
     // map of hotkeys to their handlers
-    keyConfig = {
-        [settings.hotKeysConfig.toggleOrbitControls]: this.handleToggleOrbitControls,
-        [settings.hotKeysConfig.toggleInteractive]: this.handleToggleInteractive,
-        [settings.hotKeysConfig.toggleBonds]: this.handleToggleBonds,
-        [settings.hotKeysConfig.toggleElementLabels]: this.handleToggleElementLabels,
-        [settings.hotKeysConfig.toggleCoordinateLabels]: this.handleToggleCoordinateLabels,
-        [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
-        [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
-        [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleMeasurement.bind(
-            this,
-            MEASUREMENT_MODES.DISTANCE,
-        ),
-        [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleMeasurement.bind(
-            this,
-            MEASUREMENT_MODES.ANGLE,
-        ),
-        [settings.hotKeysConfig.toggleCopyCoordinatesShown]: this.handleToggleMeasurement.bind(
-            this,
-            MEASUREMENT_MODES.COORDINATE,
-        ),
-        [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
-    };
+    getKeyConfig() {
+        return {
+            [settings.hotKeysConfig.toggleOrbitControls]: this.handleToggleOrbitControls,
+            [settings.hotKeysConfig.toggleInteractive]: this.handleToggleInteractive,
+            [settings.hotKeysConfig.toggleBonds]: this.handleToggleBonds,
+            [settings.hotKeysConfig.toggleElementLabels]: this.handleToggleElementLabels,
+            [settings.hotKeysConfig.toggleCoordinateLabels]: this.handleToggleCoordinateLabels,
+            [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
+            [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
+            [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleMeasurement.bind(
+                this,
+                MEASUREMENT_MODES.DISTANCE,
+            ),
+            [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleMeasurement.bind(
+                this,
+                MEASUREMENT_MODES.ANGLE,
+            ),
+            [settings.hotKeysConfig.toggleCopyCoordinatesShown]: this.handleToggleMeasurement.bind(
+                this,
+                MEASUREMENT_MODES.COORDINATE,
+            ),
+            [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
+        };
+    }
 
     addHotKeyListener() {
         document.addEventListener("keypress", this.handleKeyPress, true);
@@ -225,7 +201,7 @@ export class ThreeDEditor extends React.Component {
         }
 
         // Removing the toggleThreejsEditorModal key from the keyConfig if the editor is not editable
-        const keyConfigAdjusted = { ...this.keyConfig };
+        const keyConfigAdjusted = { ...this.getKeyConfig() };
         if (!editable) {
             delete keyConfigAdjusted[settings.hotKeysConfig.toggleThreejsEditorModal];
         }
@@ -254,7 +230,6 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleToggleElementLabels() {
-        console.log(this.WaveComponent.wave);
         this.WaveComponent.wave.toggleLabelsVisibilityByType("element");
         this._resetStateWaveComponent();
     }
@@ -370,6 +345,17 @@ export class ThreeDEditor extends React.Component {
         this.setState(newState);
     }
 
+    handleSetMeasurementSettingsForTypeInState(
+        newMeasurementSettingsForType,
+        THREEGroupsToPersist = [],
+    ) {
+        const { measurementsSettings } = this.state;
+        const measurementSettingsHandler = new MeasurementSettingsHandler(measurementsSettings);
+        measurementSettingsHandler.updateMeasurementSettingsByType(newMeasurementSettingsForType);
+        const newMeasurementsSettings = measurementSettingsHandler.measurementsSettings;
+        this.setState({ measurementsSettings: newMeasurementsSettings, THREEGroupsToPersist });
+    }
+
     handleDeleteConnection() {
         this.WaveComponent.wave.deleteConnection();
     }
@@ -379,7 +365,10 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleToggleMeasurement(measurementMode) {
-        this.WaveComponent.wave.toggleMeasurementByType(measurementMode);
+        this.WaveComponent.wave.toggleMeasurementByType(
+            measurementMode,
+            this.handleSetMeasurementSettingsForTypeInState,
+        );
         const newMeasurementsSettings = this.WaveComponent.wave.getMeasurementsSettings();
         this.setState({ measurementsSettings: newMeasurementsSettings });
     }
@@ -405,6 +394,7 @@ export class ThreeDEditor extends React.Component {
             viewerTriggerResize,
             boundaryConditions,
             material,
+            THREEGroupsToPersist,
         } = this.state;
         const materialCopy = this.getPrimitiveOrConventionalMaterial(
             material,
@@ -425,6 +415,7 @@ export class ThreeDEditor extends React.Component {
                 cell={materialCopy.Lattice.unitCell}
                 name={materialCopy.name}
                 settings={viewerSettings}
+                THREEGroupsToPersist={THREEGroupsToPersist}
             />
         );
     }
@@ -775,23 +766,6 @@ export class ThreeDEditor extends React.Component {
                 </ScopedCssBaseline>
             </ThemeProvider>
         );
-    }
-
-    doWaveFunc(funcStr) {
-        if (!this.WaveComponent || !this.WaveComponent.wave) {
-            console.error("Wave component not initialized");
-            return;
-        }
-
-        const { wave } = this.WaveComponent;
-        try {
-            // eslint-disable-next-line no-new-func
-            const func = new Function("wave", `return wave.${funcStr}`);
-            func(wave);
-            this.WaveComponent.wave.rebuildScene();
-        } catch (error) {
-            console.error("Error executing wave function:", error);
-        }
     }
 }
 

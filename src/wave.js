@@ -4,7 +4,7 @@ import "./stylesheets/main.css";
 import { mix } from "mixwith";
 import * as THREE from "three";
 
-import { ATOM_GROUP_NAME } from "./enums";
+import { ATOM_GROUP_NAME, MEASUREMENT_MODES } from "./enums";
 import { AtomsMixin } from "./mixins/atoms";
 import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
@@ -260,13 +260,16 @@ export class Wave extends mix(WaveBase).with(
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
-        this.initializeMeasurementManagers();
     }
 
-    clearView() {
-        while (this.structureGroup.children.length) {
-            this.structureGroup.remove(this.structureGroup.children[0]);
-        }
+    clearView(THREEGroupsToPersist) {
+        const THREEGroupUUIDsToPersist = THREEGroupsToPersist.map((group) => group.uuid);
+        const THREEGroupsToRemove = this.structureGroup.children.filter(
+            (group) => !THREEGroupUUIDsToPersist.includes(group.uuid),
+        );
+        THREEGroupsToRemove.forEach((group) => {
+            this.structureGroup.remove(group);
+        });
     }
 
     adjustCamerasAndOrbitControlsToCell() {
@@ -290,41 +293,17 @@ export class Wave extends mix(WaveBase).with(
         return atoms;
     }
 
-    /**
-     * Function that called when scene is rebuilding.
-     * When scene is rebuilding and all atoms lost color this function is fills current selected atoms by color.
-     */
-    refillSelectedAtoms() {
-        const currentAtoms = this.collectAllAtoms();
-        const newSelectedAtoms = [];
-
-        if (!this.selectedAtoms || !this.selectedAtoms.length) return;
-        this.selectedAtoms.forEach((atom) => {
-            const newAtom = currentAtoms.find((currentAtom) => {
-                const firstAtomPoint = getObjectCoordinate(atom);
-                const secondAtomPoint = getObjectCoordinate(currentAtom.matrixWorld);
-                if (!firstAtomPoint.distanceTo(secondAtomPoint)) {
-                    return currentAtom;
-                }
-                return null;
-            });
-            this.handleSetSelected(newAtom);
-            newAtom.userData = { ...atom.userData };
-            newSelectedAtoms.push(newAtom);
-        });
-        this.selectedAtoms = newSelectedAtoms;
-    }
-
-    rebuildScene() {
-        this.clearView();
+    // Called on each change to the Redux store via reloadViewer.
+    rebuildScene(THREEGroupsToPersist = []) {
+        this.clearView(THREEGroupsToPersist);
         this.drawAtomsAsSpheres();
         this.drawUnitCell();
         this.drawBoundaries();
         if (this.isDrawBondsEnabled) this.drawBonds();
-        this.render();
         this.createAllLabels();
+        this.createMeasurements();
+        // this.refillSelectedAtoms();
         this.render();
-        this.refillSelectedAtoms();
     }
 
     render() {

@@ -35,17 +35,20 @@ export class WaveComponent extends React.Component {
             isConventionalCellShown,
             isViewAdjustable,
             isDrawBondsEnabled,
+            THREEGroupsToPersist,
         } = this.props;
         if (triggerHandleResize) this._handleResizeTransition();
         if (this.wave) {
             // recreate bonds asynchronously if structure is changed.
-            this.reloadViewer(
+            const createBondsAsync =
                 prevStructure.hash !== structure.hash ||
-                    prevSettings.chemicalConnectivityFactor !==
-                        settings.chemicalConnectivityFactor ||
-                    prevIsConventionalCellShown !== isConventionalCellShown ||
-                    prevIsDrawBondsEnabled !== isDrawBondsEnabled,
-            );
+                prevSettings.chemicalConnectivityFactor !== settings.chemicalConnectivityFactor ||
+                prevIsConventionalCellShown !== isConventionalCellShown ||
+                prevIsDrawBondsEnabled !== isDrawBondsEnabled;
+            this.reloadViewer({
+                createBondsAsync,
+                THREEGroupsToPersist,
+            });
         }
 
         if (this.shouldViewerAdjust(prevProps) && isViewAdjustable) {
@@ -92,7 +95,7 @@ export class WaveComponent extends React.Component {
         setTimeout(() => this.wave.handleResize(), 500);
     }
 
-    reloadViewer(createBondsAsync) {
+    reloadViewer({ createBondsAsync, THREEGroupsToPersist }) {
         // When running in headless mode in tests the browser does not support
         // WebGL, so exception will be thrown. It may get in a way with other events => catching it.
         try {
@@ -102,7 +105,7 @@ export class WaveComponent extends React.Component {
             this.wave.boundaryConditions = boundaryConditions;
             this.wave.setCell(cell);
             if (createBondsAsync) this.wave.createBondsAsync();
-            this.wave.rebuildScene();
+            this.wave.rebuildScene(THREEGroupsToPersist);
         } catch (e) {
             console.warn("exception caught when rendering atomic viewer", e);
         }

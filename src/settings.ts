@@ -42,8 +42,6 @@ export default {
 
     // labels
     roundPrecision: 3,
-    areElementLabelsInitiallyShown: false,
-    areCoordinateLabelsInitiallyShown: false,
     isViewAdjustable: true,
     labelsConfig: {
         areSpritesUsed: true,

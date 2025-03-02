@@ -1,11 +1,69 @@
 import { CoordinatesMeasurementManager } from "./coordinate";
-import { MEASUREMENT_MODES_ENUM } from "../../enums";
+import { MEASUREMENT_MODES, MEASUREMENT_MODES_ENUM } from "../../enums";
+
+export type MeasurementSettingsForType = {
+    isActive: boolean;
+    measurementType: MEASUREMENT_MODES_ENUM;
+    values: any[];
+};
+
+export class MeasurementSettingsHandler {
+    measurementsSettings: MeasurementSettingsForType[];
+
+    constructor(measurementsSettings: MeasurementSettingsForType[]) {
+        this.measurementsSettings = measurementsSettings;
+        this.isMeasurementActiveByType = this.isMeasurementActiveByType.bind(this);
+    }
+
+    isMeasurementActiveByType(measurementType: MEASUREMENT_MODES_ENUM) {
+        const settingsForType = this.measurementsSettings.find(
+            (setting) => setting.measurementType === measurementType,
+        );
+        return Boolean(settingsForType?.isActive);
+    }
+
+    updateMeasurementSettingsByType(newSettings: MeasurementSettingsForType) {
+        const settingsForType = this.measurementsSettings.find(
+            (setting) => setting.measurementType === newSettings.measurementType,
+        );
+        if (settingsForType) {
+            Object.assign(settingsForType, newSettings);
+        }
+    }
+
+    getSettingsByType(measurementType: MEASUREMENT_MODES_ENUM) {
+        const settingsForType = this.measurementsSettings.find(
+            (setting) => setting.measurementType === measurementType,
+        );
+        if (!settingsForType) {
+            throw new Error(`No settings found for measurement type ${measurementType}`);
+        }
+    }
+}
+
+export const defaultMeasurementsSettings = [
+    {
+        isActive: false,
+        measurementType: MEASUREMENT_MODES.DISTANCE,
+        values: [],
+    },
+    {
+        isActive: false,
+        measurementType: MEASUREMENT_MODES.ANGLE,
+        values: [],
+    },
+    {
+        isActive: false,
+        measurementType: MEASUREMENT_MODES.COORDINATE,
+        values: [],
+    },
+];
 
 export const AllMeasurementsMixin = (superclass) =>
     class extends superclass {
         measurementManagers: CoordinatesMeasurementManager[] = [];
 
-        initializeMeasurementManagers() {
+        initializeMeasurementManagers(updateState) {
             // const anglesMeasurementManager = new AnglesMeasurementManager(this.structureGroup);
             // const distancesMeasurementManager = new DistancesMeasurementManager(
             //     this.structureGroup,
@@ -14,6 +72,7 @@ export const AllMeasurementsMixin = (superclass) =>
                 this.structureGroup,
                 this.camera,
                 this,
+                updateState,
             );
             this.measurementManagers.push(
                 coordinatesMeasurementManager,
@@ -34,22 +93,20 @@ export const AllMeasurementsMixin = (superclass) =>
             return this.measurementManagers.map((m) => m.getSettings());
         }
 
-        toggleMeasurementByType(measurementType: MEASUREMENT_MODES_ENUM) {
+        getMeasurementsSettingsHandler() {
+            return new MeasurementSettingsHandler(this.getMeasurementsSettings());
+        }
+
+        toggleMeasurementByType(measurementType: MEASUREMENT_MODES_ENUM, updateState: any) {
+            if (!this.measurementManagers.length) {
+                this.initializeMeasurementManagers(updateState);
+            }
             const measurementManager = this.getMeasurementManagerByType(measurementType);
             measurementManager?.toggleActive();
         }
 
-        createMeasurementLabels() {
+        createMeasurements() {
             const activeMeasurementManager = this.getActiveMeasurementManager();
-            activeMeasurementManager?.createLabels();
+            activeMeasurementManager?.createMeasurements();
         }
-
-        updateMeasurements() {
-            // TODO: call this render
-        }
-
-        // onClick(event) {
-        //     this.updateMeasurements();
-        //     this.rebuildScene();
-        // }
     };
