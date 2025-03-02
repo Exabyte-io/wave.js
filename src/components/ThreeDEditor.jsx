@@ -39,6 +39,38 @@ import ParametersMenu from "./ParametersMenu";
 import { ThreejsEditorModal } from "./ThreejsEditorModal";
 import { WaveComponent } from "./WaveComponent";
 
+class MeasurementSettingsHandler {
+    constructor(measurementsSettings) {
+        this.measurementsSettings = measurementsSettings;
+        this.isMeasurementActiveByType = this.isMeasurementActiveByType.bind(this);
+    }
+
+    isMeasurementActiveByType(measurementType) {
+        const settingsForType = this.measurementsSettings.find(
+            (setting) => setting.measurementType === measurementType,
+        );
+        return Boolean(settingsForType?.isActive);
+    }
+}
+
+const defaultMeasurementsSettings = [
+    {
+        isActive: false,
+        measurementType: MEASUREMENT_MODES.DISTANCE,
+        values: [],
+    },
+    {
+        isActive: false,
+        measurementType: MEASUREMENT_MODES.ANGLE,
+        values: [],
+    },
+    {
+        isActive: false,
+        measurementType: MEASUREMENT_MODES.COORDINATE,
+        values: [],
+    },
+];
+
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
  */
@@ -57,23 +89,7 @@ export class ThreeDEditor extends React.Component {
             activeToolbarMenu: null,
             isThreejsEditorModalShown: false,
             // isDistanceAndAnglesShown: false,
-            measurementsSettings: [
-                {
-                    isActive: false,
-                    measurementType: "distance",
-                    values: [],
-                },
-                {
-                    isActive: false,
-                    measurementType: "angle",
-                    values: [],
-                },
-                {
-                    isActive: false,
-                    measurementType: "coordinate",
-                    values: [],
-                },
-            ],
+            measurementsSettings: defaultMeasurementsSettings,
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -314,15 +330,15 @@ export class ThreeDEditor extends React.Component {
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
     handleResetViewer() {
-        const { measurementsSettings } = this.state;
-        this.setState({
-            measurementsSettings: {
-                ...measurementsSettings,
-                isDistanceShown: false,
-                areAnglesShown: false,
-                areCoordinatesShown: false,
-            },
-        });
+        // const { measurementsSettings } = this.state;
+        // this.setState({
+        //     measurementsSettings: {
+        //         ...measurementsSettings,
+        //         isDistanceShown: false,
+        //         areAnglesShown: false,
+        //         areCoordinatesShown: false,
+        //     },
+        // });
         this.WaveComponent.initViewer();
         this._resetStateWaveComponent();
     }
@@ -359,9 +375,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleResetMeasurements() {
-        const { measurementsSettings } = this.state;
-        const { isDistanceShown, areAnglesShown } = measurementsSettings;
-        if (isDistanceShown || areAnglesShown) this.WaveComponent.wave.resetMeasurements();
+        this.WaveComponent.wave.resetMeasurements();
     }
 
     handleToggleMeasurement(measurementMode) {
@@ -533,12 +547,16 @@ export class ThreeDEditor extends React.Component {
 
     getMeasurementsActions = () => {
         const { measurementsSettings } = this.state;
-        const { isDistanceShown, areAnglesShown, areCoordinatesShown } = measurementsSettings;
+        const measurementsSettingsHandler = new MeasurementSettingsHandler(measurementsSettings);
         return [
             {
                 id: "Distances",
                 content: `Distances [${settings.hotKeysConfig.toggleDistanceShown.toUpperCase()}]`,
-                rightIcon: this.getCheckmark(isDistanceShown),
+                rightIcon: this.getCheckmark(
+                    measurementsSettingsHandler.isMeasurementActiveByType(
+                        MEASUREMENT_MODES.DISTANCE,
+                    ),
+                ),
                 leftIcon: <HeightIcon />,
                 onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.DISTANCE),
                 shouldMenuStayOpened: true,
@@ -546,7 +564,9 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "Angles",
                 content: `Angles [${settings.hotKeysConfig.toggleAnglesShown.toUpperCase()}]`,
-                rightIcon: this.getCheckmark(areAnglesShown),
+                rightIcon: this.getCheckmark(
+                    measurementsSettingsHandler.isMeasurementActiveByType(MEASUREMENT_MODES.ANGLE),
+                ),
                 leftIcon: <LooksIcon />,
                 onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.ANGLE),
                 shouldMenuStayOpened: true,
@@ -554,7 +574,11 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "Coordinates",
                 content: `Copy Coordinates [${settings.hotKeysConfig.toggleCopyCoordinatesShown.toUpperCase()}]`,
-                rightIcon: this.getCheckmark(areCoordinatesShown),
+                rightIcon: this.getCheckmark(
+                    measurementsSettingsHandler.isMeasurementActiveByType(
+                        MEASUREMENT_MODES.COORDINATE,
+                    ),
+                ),
                 leftIcon: <GpsFixed />,
                 onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.COORDINATE),
                 shouldMenuStayOpened: true,

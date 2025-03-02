@@ -39,16 +39,16 @@ export const COLORS = {
 
 export enum MEASUREMENT_MODES_ENUM {
     NONE = "none",
-    DISTANCE = "isDistanceShown",
-    ANGLE = "areAnglesShown",
-    COORDINATE = "areCoordinatesShown",
+    DISTANCE = "distance",
+    ANGLE = "angle",
+    COORDINATE = "coordinate",
 }
 
 export const MEASUREMENT_MODES = {
     NONE: "none",
-    DISTANCE: "isDistanceShown",
-    ANGLE: "areAnglesShown",
-    COORDINATE: "areCoordinatesShown",
+    DISTANCE: "distance",
+    ANGLE: "angle",
+    COORDINATE: "coordinate",
 };
 
 export const LABEL_TYPES = {
