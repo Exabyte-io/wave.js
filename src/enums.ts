@@ -55,5 +55,6 @@ export const MEASUREMENT_MODES = {
 export const LABEL_TYPES = {
     COORDINATE: "coordinate",
     ELEMENT: "element",
+    DISTANCE: "distance",
     COORDINATE_MEASUREMENT: "coordinateMeasurement",
 };

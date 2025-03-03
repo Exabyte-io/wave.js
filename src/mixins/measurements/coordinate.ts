@@ -28,17 +28,4 @@ export class CoordinatesMeasurementManager extends BaseMeasurementManager<Coordi
         super.onClick(event);
         updateState(this.getSettings());
     };
-
-    createMeasurements() {
-        if (!this.selectedAtoms.length || !this.isActive) return;
-        this.refillSelectedAtoms();
-        this.labelsManager.createLabels(this.selectedAtoms, this.THREEGroup);
-        this.highlightSelectedAtoms();
-    }
-
-    highlightSelectedAtoms() {
-        this.selectedAtoms.forEach((atom) => {
-            this.highlightAtom(atom);
-        });
-    }
 }

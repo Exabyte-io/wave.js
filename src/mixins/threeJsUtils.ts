@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 import { ATOM_CONNECTION_LINE_NAME } from "../enums";
+import settings from "../settings";
 
 /**
  * TODO: import from a shared utils file
@@ -112,14 +113,14 @@ export function getPointsFromMatrixWorld(
 /**
  * Creates a line between two atoms
  */
-export function drawLineBetweenAtoms(this: any, selectedAtoms: THREE.Object3D[]): THREE.Line {
+export function drawLineBetweenTwoAtoms(selectedAtoms: THREE.Object3D[]): THREE.Line {
     const [firstAtom, secondAtom] = selectedAtoms;
 
     const firstAtomPoint = getObjectCoordinate(firstAtom);
     const secondAtomPoint = getObjectCoordinate(secondAtom);
 
     const geometry = new THREE.BufferGeometry().setFromPoints([firstAtomPoint, secondAtomPoint]);
-    const material = new THREE.LineBasicMaterial({ color: this.settings.colors.amber });
+    const material = new THREE.LineBasicMaterial({ color: settings.colors.amber });
     const line = new THREE.Line(geometry, material);
 
     line.userData.atoms = [firstAtom.uuid, secondAtom.uuid];

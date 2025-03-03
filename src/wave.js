@@ -296,13 +296,13 @@ export class Wave extends mix(WaveBase).with(
         this.drawUnitCell();
         this.drawBoundaries();
         if (this.isDrawBondsEnabled) this.drawBonds();
-        // this.createAllLabels();
+        this.createAllLabels();
         this.createAllMeasurements();
         this.render();
     }
 
     render() {
-        // this.adjustAllLabelsToCameraPosition();
+        this.adjustAllLabelsToCameraPosition();
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2) this.renderer2.render(this.scene2, this.camera2);
     }

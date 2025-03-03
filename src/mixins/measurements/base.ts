@@ -50,7 +50,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         if (!this.isActive) {
             this.resetMeasurements();
             this.destroyListeners();
-            this.wave.setCursorStyle("");
+            this.wave.setCursorStyle();
         } else {
             this.wave.setCursorStyle("pointer");
             this.initListeners(this.updateState);
@@ -156,6 +156,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     }
 
     onPointerMove = (event: MouseEvent) => {
+        // TODO: remove or implement
         return;
         if (!this.isActive) return;
         this.checkMouseCoordinates(event, this.waveCamera);
@@ -211,5 +212,29 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
 
     resetMeasurements(): void {
         // TODO: remove or implement
+    }
+
+    getLabelObjectsFromSelectedAtoms() {
+        return this.selectedAtoms;
+    }
+
+    getAdditionalObjectsFromSelectedAtoms() {
+        return [];
+    }
+
+    createMeasurements() {
+        if (!this.selectedAtoms.length || !this.isActive) return;
+        this.refillSelectedAtoms();
+        this.labelsManager.createLabels(this.getLabelObjectsFromSelectedAtoms(), this.THREEGroup);
+        this.getAdditionalObjectsFromSelectedAtoms().forEach((object) => {
+            this.THREEGroup.add(object);
+        });
+        this.highlightSelectedAtoms();
+    }
+
+    highlightSelectedAtoms() {
+        this.selectedAtoms.forEach((atom) => {
+            this.highlightAtom(atom);
+        });
     }
 }

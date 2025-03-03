@@ -5,13 +5,13 @@ import {
     MEASUREMENT_MODES,
     MIN_ANGLE_POINTS_DISTANCE,
 } from "../../enums";
-import { BaseMeasurementManager } from "./base";
 import {
     calculateAngleBetweenAtoms,
     calculateAngleLabelPosition,
-    drawLineBetweenAtoms,
+    drawLineBetweenTwoAtoms,
     getObjectCoordinate,
 } from "../threeJsUtils";
+import { BaseMeasurementManager } from "./base";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -31,7 +31,7 @@ export class AnglesMeasurementManager extends BaseMeasurementManager {
         this.waveStructureGroup.add(this.angleConnections);
 
         this.currentSelectedAngle = null;
-        this.drawLineBetweenAtoms = drawLineBetweenAtoms.bind(this);
+        this.drawLineBetweenAtoms = drawLineBetweenTwoAtoms.bind(this);
         this.initializeMeasurement(MEASUREMENT_MODES.ANGLE, this.handleAngleAtomClick);
     }
 
