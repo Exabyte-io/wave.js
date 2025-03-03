@@ -62,7 +62,6 @@ export class ThreeDEditor extends React.Component {
             isThreejsEditorModalShown: false,
             // isDistanceAndAnglesShown: false,
             measurementsSettings: defaultMeasurementsSettings,
-            THREEGroupsToPersist: [],
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -345,15 +344,12 @@ export class ThreeDEditor extends React.Component {
         this.setState(newState);
     }
 
-    handleSetMeasurementSettingsForTypeInState(
-        newMeasurementSettingsForType,
-        THREEGroupsToPersist = [],
-    ) {
+    handleSetMeasurementSettingsForTypeInState(newMeasurementSettingsForType) {
         const { measurementsSettings } = this.state;
         const measurementSettingsHandler = new MeasurementSettingsHandler(measurementsSettings);
         measurementSettingsHandler.updateMeasurementSettingsByType(newMeasurementSettingsForType);
         const newMeasurementsSettings = measurementSettingsHandler.measurementsSettings;
-        this.setState({ measurementsSettings: newMeasurementsSettings, THREEGroupsToPersist });
+        this.setState({ measurementsSettings: newMeasurementsSettings });
     }
 
     handleDeleteConnection() {
@@ -394,7 +390,6 @@ export class ThreeDEditor extends React.Component {
             viewerTriggerResize,
             boundaryConditions,
             material,
-            THREEGroupsToPersist,
         } = this.state;
         const materialCopy = this.getPrimitiveOrConventionalMaterial(
             material,
@@ -415,7 +410,6 @@ export class ThreeDEditor extends React.Component {
                 cell={materialCopy.Lattice.unitCell}
                 name={materialCopy.name}
                 settings={viewerSettings}
-                THREEGroupsToPersist={THREEGroupsToPersist}
             />
         );
     }

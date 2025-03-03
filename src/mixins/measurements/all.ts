@@ -1,5 +1,7 @@
-import { CoordinatesMeasurementManager } from "./coordinate";
+import { showWarningAlert } from "@exabyte-io/cove.js/dist/other/alerts";
+
 import { MEASUREMENT_MODES, MEASUREMENT_MODES_ENUM } from "../../enums";
+import { CoordinatesMeasurementManager } from "./coordinate";
 
 export type MeasurementSettingsForType = {
     isActive: boolean;
@@ -63,6 +65,8 @@ export const AllMeasurementsMixin = (superclass) =>
     class extends superclass {
         measurementManagers: CoordinatesMeasurementManager[] = [];
 
+        bypassReloadViewer = false;
+
         initializeMeasurementManagers(updateState) {
             // const anglesMeasurementManager = new AnglesMeasurementManager(this.structureGroup);
             // const distancesMeasurementManager = new DistancesMeasurementManager(
@@ -105,7 +109,7 @@ export const AllMeasurementsMixin = (superclass) =>
             measurementManager?.toggleActive();
         }
 
-        createMeasurements() {
+        createAllMeasurements() {
             const activeMeasurementManager = this.getActiveMeasurementManager();
             activeMeasurementManager?.createMeasurements();
         }

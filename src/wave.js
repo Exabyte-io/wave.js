@@ -262,14 +262,10 @@ export class Wave extends mix(WaveBase).with(
         this.doFunc = this.doFunc.bind(this);
     }
 
-    clearView(THREEGroupsToPersist) {
-        const THREEGroupUUIDsToPersist = THREEGroupsToPersist.map((group) => group.uuid);
-        const THREEGroupsToRemove = this.structureGroup.children.filter(
-            (group) => !THREEGroupUUIDsToPersist.includes(group.uuid),
-        );
-        THREEGroupsToRemove.forEach((group) => {
-            this.structureGroup.remove(group);
-        });
+    clearView() {
+        while (this.structureGroup.children.length) {
+            this.structureGroup.remove(this.structureGroup.children[0]);
+        }
     }
 
     adjustCamerasAndOrbitControlsToCell() {
@@ -294,20 +290,19 @@ export class Wave extends mix(WaveBase).with(
     }
 
     // Called on each change to the Redux store via reloadViewer.
-    rebuildScene(THREEGroupsToPersist = []) {
-        this.clearView(THREEGroupsToPersist);
+    rebuildScene() {
+        this.clearView();
         this.drawAtomsAsSpheres();
         this.drawUnitCell();
         this.drawBoundaries();
         if (this.isDrawBondsEnabled) this.drawBonds();
-        this.createAllLabels();
-        this.createMeasurements();
-        // this.refillSelectedAtoms();
+        // this.createAllLabels();
+        this.createAllMeasurements();
         this.render();
     }
 
     render() {
-        this.adjustAllLabelsToCameraPosition();
+        // this.adjustAllLabelsToCameraPosition();
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2) this.renderer2.render(this.scene2, this.camera2);
     }

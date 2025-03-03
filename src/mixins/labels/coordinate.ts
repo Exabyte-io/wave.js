@@ -1,19 +1,21 @@
 import * as THREE from "three";
-import { Object3D } from "three";
 
+import { LABEL_TYPES } from "../../enums";
 import settings from "../../settings";
 import { getArrayFromVector } from "../threeJsUtils";
 import { BaseLabelsManager } from "./base";
 
 // @ts-ignore
 export class CoordinateLabelsManager extends BaseLabelsManager {
-    labelType = "coordinate";
-
-    THREEGroupName = "coordinates-labels";
+    override labelType = LABEL_TYPES.COORDINATE;
 
     isVisible = false;
 
     config = settings.coordinateLabelsConfig;
+
+    constructor(waveStructureGroup: THREE.Group, waveCamera: THREE.Camera, wave: any) {
+        super(waveStructureGroup, waveCamera, wave, LABEL_TYPES.COORDINATE);
+    }
 
     getLabelTextFromAtomObject(atom: THREE.Object3D) {
         const separator = " ";

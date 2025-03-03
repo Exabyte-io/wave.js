@@ -148,6 +148,7 @@ export const AtomsMixin = (superclass: any) =>
                 sphereMesh.userData = {
                     ...sphereMesh.userData,
                     symbolWithLabel: elementsWithLabelsArray[atomicIndex],
+                    atomicIndex,
                 };
                 const atomColor = this.getAtomColorByElement(element).toLowerCase();
                 const label = parseInt(atomicLabelsArray[atomicIndex], 10) || 0;

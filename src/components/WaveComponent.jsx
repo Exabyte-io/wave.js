@@ -35,20 +35,17 @@ export class WaveComponent extends React.Component {
             isConventionalCellShown,
             isViewAdjustable,
             isDrawBondsEnabled,
-            THREEGroupsToPersist,
         } = this.props;
         if (triggerHandleResize) this._handleResizeTransition();
-        if (this.wave) {
+        if (this.wave && !this.wave.bypassReloadViewer) {
             // recreate bonds asynchronously if structure is changed.
-            const createBondsAsync =
+            this.reloadViewer(
                 prevStructure.hash !== structure.hash ||
-                prevSettings.chemicalConnectivityFactor !== settings.chemicalConnectivityFactor ||
-                prevIsConventionalCellShown !== isConventionalCellShown ||
-                prevIsDrawBondsEnabled !== isDrawBondsEnabled;
-            this.reloadViewer({
-                createBondsAsync,
-                THREEGroupsToPersist,
-            });
+                    prevSettings.chemicalConnectivityFactor !==
+                        settings.chemicalConnectivityFactor ||
+                    prevIsConventionalCellShown !== isConventionalCellShown ||
+                    prevIsDrawBondsEnabled !== isDrawBondsEnabled,
+            );
         }
 
         if (this.shouldViewerAdjust(prevProps) && isViewAdjustable) {
@@ -95,7 +92,7 @@ export class WaveComponent extends React.Component {
         setTimeout(() => this.wave.handleResize(), 500);
     }
 
-    reloadViewer({ createBondsAsync, THREEGroupsToPersist }) {
+    reloadViewer(createBondsAsync) {
         // When running in headless mode in tests the browser does not support
         // WebGL, so exception will be thrown. It may get in a way with other events => catching it.
         try {
@@ -105,7 +102,7 @@ export class WaveComponent extends React.Component {
             this.wave.boundaryConditions = boundaryConditions;
             this.wave.setCell(cell);
             if (createBondsAsync) this.wave.createBondsAsync();
-            this.wave.rebuildScene(THREEGroupsToPersist);
+            this.wave.rebuildScene();
         } catch (e) {
             console.warn("exception caught when rendering atomic viewer", e);
         }

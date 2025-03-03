@@ -1,9 +1,5 @@
 import * as THREE from "three";
 
-import { ATOM_GROUP_NAME } from "../../enums";
-import { listenerImplementation, raycasterImplementation } from "./implementations";
-import { IListenerCapable, IRaycasterCapable } from "./types";
-
 type Constructor<T = {}> = new (...args: any[]) => T;
 
 export const ListenersMixin = <T extends Constructor>(superclass: T) =>

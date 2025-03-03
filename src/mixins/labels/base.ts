@@ -117,16 +117,16 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
      * Creates and positions multiple labels as sprites
      * More flexible but less performant than Points for many labels
      */
-    createLabelsAsSprites(verticesHashMap: VerticesHashMapHandler) {
-        this.THREEGroup.clear();
+    createLabelsAsSprites(verticesHashMap: VerticesHashMapHandler, threeGroup = this.THREEGroup) {
+        threeGroup.clear();
         verticesHashMap.iterateCoordinates((key, coordinateAsArray) => {
             const position = new THREE.Vector3().fromArray(coordinateAsArray);
             const name = this.getNameForLabel(key);
             const labelSprite = this.createLabelSprite(key, name);
             labelSprite.userData = { position };
             labelSprite.position.copy(this.getLabelPositionWithOffset(position, key));
-            this.THREEGroup.add(labelSprite);
-            console.log("createLabelsAsSprites", this.THREEGroup, this.THREEGroup.visible);
+            threeGroup.add(labelSprite);
+            console.log("createLabelsAsSprites", threeGroup, threeGroup.visible);
         });
     }
 
@@ -136,7 +136,7 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
             atoms,
         );
         if (this.config.areSpritesUsed) {
-            this.createLabelsAsSprites(verticesHashMap);
+            this.createLabelsAsSprites(verticesHashMap, threeGroup);
         } else {
             throw new Error("Labels as points are not implemented yet");
         }
