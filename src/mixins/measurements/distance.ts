@@ -1,17 +1,10 @@
 import * as THREE from "three";
 
-import {
-    ATOM_CONNECTIONS_GROUP_NAME,
-    MEASUREMENT_MODES,
-    MEASUREMENT_MODES_ENUM,
-} from "../../enums";
+import { MEASUREMENT_MODES_ENUM } from "../../enums";
 import { LabelsManagerConstructor } from "../labels/base";
 import { DistanceLabelsManager } from "../labels/distance";
-import {
-    calculateDistanceBetweenAtoms,
-    drawLineBetweenTwoAtoms,
-    getLineCenterCoordinate,
-} from "../threeJsUtils";
+import { LinesManager } from "../lines/LinesManager";
+import { calculateDistanceBetweenAtoms } from "../threeJsUtils";
 import { BaseMeasurementManager } from "./base";
 
 export class DistancesMeasurementManager extends BaseMeasurementManager<DistanceLabelsManager> {
@@ -20,9 +13,9 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
     override LabelsManagerCls: LabelsManagerConstructor<DistanceLabelsManager> =
         DistanceLabelsManager;
 
-    atomConnections: THREE.Group;
-
     currentSelectedLine: THREE.Line | null;
+
+    linesManager: LinesManager;
 
     constructor(
         waveStructureGroup: THREE.Group,
@@ -30,31 +23,36 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
         wave: any,
         updateState: any,
     ) {
-        super(waveStructureGroup, waveCamera, wave, MEASUREMENT_MODES.DISTANCE, updateState);
+        super(waveStructureGroup, waveCamera, wave, MEASUREMENT_MODES_ENUM.DISTANCE, updateState);
         this.labelsManager = this.getLabelsManagerInstance();
-    }
-
-    deleteConnection(): void {
-        if (!this.currentSelectedLine) return;
-
-        const {
-            userData: { atoms, label },
-        } = this.currentSelectedLine;
-
-        atoms.forEach((uuid: string) => {
-            const atom = this.scene.getObjectByProperty("uuid", uuid);
-            if (atom) {
-                atom.userData.connections = atom.userData.connections.filter(
-                    (connection: string) => connection !== this.currentSelectedLine!.uuid,
-                );
-            }
-        });
-
-        this.measurementsGroup.remove(label);
-        this.atomConnections.remove(this.currentSelectedLine);
         this.currentSelectedLine = null;
-        this.render();
+        this.linesManager = new LinesManager(waveStructureGroup, waveCamera, wave);
     }
+
+    // deleteConnection(): void {
+    //     if (!this.currentSelectedLine) return;
+    //
+    //     const {
+    //         userData: { atoms, label },
+    //     } = this.currentSelectedLine;
+    //
+    //     atoms.forEach((uuid: string) => {
+    //         const atom = this.waveStructureGroup.getObjectByProperty("uuid", uuid);
+    //         if (atom) {
+    //             atom.userData.connections =
+    //                 atom.userData.connections?.filter(
+    //                     (connection: string) => connection !== this.currentSelectedLine!.uuid,
+    //                 ) || [];
+    //         }
+    //     });
+    //
+    //     this.THREEGroup.remove(this.currentSelectedLine);
+    //     if (label) {
+    //         this.THREEGroup.remove(label);
+    //     }
+    //     this.currentSelectedLine = null;
+    //     this.wave.render();
+    // }
 
     onClick = (updateState: (arg: object) => void, event: MouseEvent) => {
         super.onClick(event);
@@ -62,38 +60,39 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
         // Select Line
     };
 
-    getLabelObjectsFromSelectedAtoms() {
-        const lineCenters = this.getLineCentersFromSelectedAtoms();
-        const lineLenghts = this.getLineLengthsFromSelectedAtoms();
-        const THREEObjects = lineCenters.map((position, index) => {
-            const object = new THREE.Object3D();
-            object.name = lineLenghts[index].toFixed(3);
-            return object.position.copy(position);
-        });
-        return THREEObjects;
+    override extractMeasurementValues(): any[] {
+        return this.getLineLengthsFromSelectedAtoms();
     }
 
-    getAdditionalObjectsFromSelectedAtoms(): any[] {
+    override getLabelObjectsFromSelectedAtoms(): THREE.Vector3[] {
+        const lineCenters = this.getLineCentersFromSelectedAtoms();
+        return lineCenters;
+    }
+
+    override getAdditionalObjectsFromSelectedAtoms(): THREE.Line[] {
         return this.getLinesFromSelectedAtoms();
     }
 
-    getPairsOfSelectedAtoms() {
+    getPairsOfSelectedAtoms(): THREE.Object3D[][] {
         const arr = this.selectedAtoms;
-        return Array.from({ length: arr.length / 2 }, (_, i) => arr.slice(i * 2, i * 2 + 2));
+        return Array.from({ length: Math.floor(arr.length / 2) }, (_, i) =>
+            arr.slice(i * 2, i * 2 + 2),
+        );
     }
 
-    getLinesFromSelectedAtoms() {
+    getLinesFromSelectedAtoms(): THREE.Line[] {
         const pairs = this.getPairsOfSelectedAtoms();
-        return pairs.map((pair) => drawLineBetweenTwoAtoms(pair));
+        return this.linesManager.createLinesFromAtomPairs(pairs);
     }
 
-    getLineLengthsFromSelectedAtoms() {
+    getLineLengthsFromSelectedAtoms(): number[] {
         return this.getPairsOfSelectedAtoms().map((atoms) =>
             calculateDistanceBetweenAtoms(atoms[0], atoms[1]),
         );
     }
 
-    getLineCentersFromSelectedAtoms() {
-        return this.getLinesFromSelectedAtoms().map((line) => getLineCenterCoordinate(line));
+    getLineCentersFromSelectedAtoms(): THREE.Vector3[] {
+        const lines = this.getLinesFromSelectedAtoms();
+        return lines.map((line) => this.linesManager.getLineCenterPosition(line));
     }
 }

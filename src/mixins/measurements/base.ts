@@ -1,6 +1,8 @@
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME, COLORS, MEASUREMENT_MODES_ENUM } from "../../enums";
+import { AtomObject } from "../../types/atoms";
+import { AtomColorManager } from "../atoms/AtomColorManager";
 import { BaseTHREEGroupManager } from "../base";
 import { BaseLabelsManager, LabelsManagerConstructor } from "../labels/base";
 import { RaycasterMixinWithListeners } from "../listeners/mixins";
@@ -59,10 +61,8 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         }
     };
 
-    setColorForAtom(atomObject: THREE.Mesh, color?: number) {
-        const newColor = color || atomObject.previousColor || COLORS.WHITE;
-        atomObject.previousColor = atomObject.material.color;
-        atomObject.material?.emissive?.setHex(newColor);
+    setColorForAtom(atomObject: THREE.Object3D, color?: number) {
+        AtomColorManager.setColorForAtom(atomObject, color);
     }
 
     getSelectedAtomIndices() {
@@ -77,7 +77,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     }
 
     highlightAtom(atomObject: THREE.Object3D) {
-        this.setColorForAtom(atomObject, COLORS.RED);
+        AtomColorManager.highlightAtom(atomObject);
     }
 
     setAtomAsSelected(atomObject: THREE.Object3D) {
@@ -97,13 +97,11 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     }
 
     setAtomAsHovered(atomObject: THREE.Object3D) {
-        atomObject.userData.hovered = true;
-        this.setColorForAtom(atomObject, COLORS.ORANGE);
+        AtomColorManager.setAtomAsHovered(atomObject);
     }
 
     unsetAtomAsHovered(atomObject: THREE.Object3D) {
-        atomObject.userData.hovered = false;
-        this.setColorForAtom(atomObject);
+        AtomColorManager.unsetAtomAsHovered(atomObject);
     }
 
     setIntersectedAtom(intersectItem: THREE.Object3D | null) {
@@ -166,8 +164,6 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     }
 
     onPointerMove = (event: MouseEvent) => {
-        // TODO: remove or implement
-        return;
         if (!this.isActive) return;
         this.checkMouseCoordinates(event, this.waveCamera);
         const intersects = this.getIntersections();
@@ -181,7 +177,9 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         }
 
         if (!intersects.length && this.intersectedAtom) {
-            this.unsetAtomAsHovered(this.intersectedAtom);
+            if (this.intersectedAtom) {
+                this.unsetAtomAsHovered(this.intersectedAtom);
+            }
             this.setIntersectedAtom(null);
         }
     };
@@ -221,14 +219,14 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     }
 
     resetMeasurements(): void {
-        // TODO: remove or implement
+        // To be implemented by derived classes
     }
 
-    getLabelObjectsFromSelectedAtoms() {
+    getLabelObjectsFromSelectedAtoms(): THREE.Object3D[] {
         return this.selectedAtoms;
     }
 
-    getAdditionalObjectsFromSelectedAtoms() {
+    getAdditionalObjectsFromSelectedAtoms(): THREE.Object3D[] {
         return [];
     }
 
@@ -239,6 +237,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         this.getAdditionalObjectsFromSelectedAtoms().forEach((object) => {
             this.THREEGroup.add(object);
         });
+        console.log("this.THREEGroup", this.THREEGroup);
         this.highlightSelectedAtoms();
     }
 
