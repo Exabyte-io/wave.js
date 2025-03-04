@@ -70,6 +70,12 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         return this.selectedAtoms.map((atom) => atom.userData.atomicIndex);
     }
 
+    getAtomObjectByAtomicIndex(atomicIndex: number) {
+        return this.wave
+            .getAtomGroups()
+            .find((atom: THREE.Object3D) => atom.userData.atomicIndex === atomicIndex);
+    }
+
     highlightAtom(atomObject: THREE.Object3D) {
         this.setColorForAtom(atomObject, COLORS.RED);
     }
@@ -126,9 +132,12 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         const selectedAtomIndices = this.getSelectedAtomIndices();
         const newSelectedAtoms = this.wave
             .getAtomGroups()
-            .filter((atom) => selectedAtomIndices.includes(atom.userData.atomicIndex));
-        newSelectedAtoms.forEach((atom, index) => {
-            atom.userData = this.selectedAtoms[index].userData;
+            .filter((atom: THREE.Object3D) =>
+                selectedAtomIndices.includes(atom.userData.atomicIndex),
+            );
+
+        newSelectedAtoms.forEach((atom: THREE.Object3D) => {
+            atom.userData = this.getAtomObjectByAtomicIndex(atom.userData.atomicIndex).userData;
         });
         this.selectedAtoms = newSelectedAtoms;
     }
