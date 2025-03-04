@@ -32,7 +32,7 @@ import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
 
-import { MEASUREMENT_MODES } from "../enums";
+import { LABEL_TYPES, MEASUREMENT_MODES } from "../enums";
 import {
     defaultMeasurementsSettings,
     MeasurementSettingsHandler,
@@ -229,12 +229,12 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleToggleElementLabels() {
-        this.WaveComponent.wave.toggleLabelsVisibilityByType("element");
+        this.WaveComponent.wave.toggleLabelsVisibilityByType(LABEL_TYPES.ELEMENT);
         this._resetStateWaveComponent();
     }
 
     handleToggleCoordinateLabels() {
-        this.WaveComponent.wave.toggleLabelsVisibilityByType("coordinate");
+        this.WaveComponent.wave.toggleLabelsVisibilityByType(LABEL_TYPES.COORDINATE);
         this._resetStateWaveComponent();
     }
 

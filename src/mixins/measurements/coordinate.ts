@@ -20,11 +20,11 @@ export class CoordinatesMeasurementManager extends BaseMeasurementManager<Coordi
         wave: any,
         updateState: any,
     ) {
-        super(waveStructureGroup, waveCamera, wave, updateState);
+        super(waveStructureGroup, waveCamera, wave, MEASUREMENT_MODES_ENUM.COORDINATE, updateState);
         this.labelsManager = this.getLabelsManagerInstance();
     }
 
-    onClick = (updateState, event: MouseEvent) => {
+    onClick = (updateState: (arg: object) => void, event: MouseEvent) => {
         super.onClick(event);
         updateState(this.getSettings());
     };

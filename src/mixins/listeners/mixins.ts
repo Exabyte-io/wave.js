@@ -19,7 +19,7 @@ export const ListenersMixin = <T extends Constructor>(superclass: T) =>
             this.canvas.removeEventListener("mousemove", this.onPointerMove);
         }
 
-        initListeners(updateState) {
+        initListeners(updateState: (arg: object) => void) {
             const clickFunction = this.onClick.bind(this, updateState);
             this.canvas.addEventListener("click", clickFunction);
             this.canvas.addEventListener("mousemove", this.onPointerMove);

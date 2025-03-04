@@ -20,10 +20,10 @@ export class BaseTHREEGroupManager {
         waveStructureGroup: THREE.Group,
         waveCamera: THREE.Camera,
         wave: any,
-        THREEGroupName = "base-group-name",
+        groupName = "base-group-name",
     ) {
         this.THREEGroup = new THREE.Group();
-        this.THREEGroup.name = THREEGroupName;
+        this.THREEGroup.name = groupName;
         this.THREEGroup.visible = this.isVisible;
         this.waveStructureGroup = waveStructureGroup;
         this.waveCamera = waveCamera;
@@ -37,6 +37,5 @@ export class BaseTHREEGroupManager {
     toggleVisibility() {
         this.isVisible = !this.isVisible;
         this.THREEGroup.visible = this.isVisible;
-        console.log("toggleVisibility", this.THREEGroup, this.THREEGroup.visible);
     }
 }

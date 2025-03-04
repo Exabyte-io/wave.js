@@ -25,14 +25,16 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
 
     labelsManager: any;
 
+    updateState: any;
+
     constructor(
         waveStructureGroup: THREE.Group,
         waveCamera: THREE.Camera,
         wave: any,
+        groupName: string,
         updateState: any,
     ) {
-        // TODO: pass the correct group name
-        super(waveStructureGroup, waveCamera, wave, `coordinate-measurement-group`);
+        super(waveStructureGroup, waveCamera, wave, groupName + "-measurement-group");
         this.initRaycaster();
         this.selectedAtoms = [];
         this.intersectedAtom = null;
@@ -139,7 +141,6 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         };
     }
 
-    // @ts-ignore
     onClick(event: MouseEvent) {
         if (!this.isActive) return;
         this.checkMouseCoordinates(event, this.waveCamera);

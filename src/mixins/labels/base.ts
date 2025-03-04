@@ -126,7 +126,6 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
             labelSprite.userData = { position };
             labelSprite.position.copy(this.getLabelPositionWithOffset(position, key));
             threeGroup.add(labelSprite);
-            console.log("createLabelsAsSprites", threeGroup, threeGroup.visible);
         });
     }
 
@@ -143,7 +142,6 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         // Only add to structureGroup if not already added
         if (!this.waveStructureGroup.children.includes(threeGroup)) {
             this.waveStructureGroup.add(threeGroup);
-            console.log("createLabels add to Wave", this.THREEGroup, this.THREEGroup.visible);
         }
     }
 

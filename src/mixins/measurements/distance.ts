@@ -6,7 +6,6 @@ import {
     MEASUREMENT_MODES_ENUM,
 } from "../../enums";
 import { LabelsManagerConstructor } from "../labels/base";
-import { CoordinateLabelsManager } from "../labels/coordinate";
 import { DistanceLabelsManager } from "../labels/distance";
 import {
     calculateDistanceBetweenAtoms,
@@ -14,8 +13,6 @@ import {
     getLineCenterCoordinate,
 } from "../threeJsUtils";
 import { BaseMeasurementManager } from "./base";
-
-type Constructor<T = {}> = new (...args: any[]) => T;
 
 export class DistancesMeasurementManager extends BaseMeasurementManager<DistanceLabelsManager> {
     measurementType = MEASUREMENT_MODES_ENUM.DISTANCE;
@@ -27,26 +24,13 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
 
     currentSelectedLine: THREE.Line | null;
 
-    // constructor(config: any) {
-    //     super(config);
-    //     this.atomConnections = new THREE.Group();
-    //     this.atomConnections.name = ATOM_CONNECTIONS_GROUP_NAME;
-    //
-    //     this.measurementsGroup.add(this.atomConnections);
-    //     this.scene.add(this.atomConnections);
-    //
-    //     this.currentSelectedLine = null;
-    //     this.initializeMeasurement(MEASUREMENT_MODES.DISTANCE, this.handleDistanceAtomClick);
-    // }
-    //
-    //
     constructor(
         waveStructureGroup: THREE.Group,
         waveCamera: THREE.Camera,
         wave: any,
         updateState: any,
     ) {
-        super(waveStructureGroup, waveCamera, wave, updateState);
+        super(waveStructureGroup, waveCamera, wave, MEASUREMENT_MODES.DISTANCE, updateState);
         this.labelsManager = this.getLabelsManagerInstance();
     }
 
@@ -72,7 +56,7 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
         this.render();
     }
 
-    onClick = (updateState, event: MouseEvent) => {
+    onClick = (updateState: (arg: object) => void, event: MouseEvent) => {
         super.onClick(event);
         updateState(this.getSettings());
         // Select Line

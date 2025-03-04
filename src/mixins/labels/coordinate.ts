@@ -13,8 +13,13 @@ export class CoordinateLabelsManager extends BaseLabelsManager {
 
     config = settings.coordinateLabelsConfig;
 
-    constructor(waveStructureGroup: THREE.Group, waveCamera: THREE.Camera, wave: any) {
-        super(waveStructureGroup, waveCamera, wave, LABEL_TYPES.COORDINATE);
+    constructor(
+        waveStructureGroup: THREE.Group,
+        waveCamera: THREE.Camera,
+        wave: any,
+        groupName = LABEL_TYPES.COORDINATE,
+    ) {
+        super(waveStructureGroup, waveCamera, wave, groupName);
     }
 
     getLabelTextFromAtomObject(atom: THREE.Object3D) {
