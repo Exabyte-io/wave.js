@@ -1,8 +1,8 @@
 import * as THREE from "three";
 
 import { COLORS } from "../../enums";
-import { AtomMesh, AtomObject } from "../../types/atoms";
 import { BaseTHREEGroupManager } from "../base";
+import { AtomMesh, AtomObject } from "../types/atoms";
 
 export class AtomColorManager extends BaseTHREEGroupManager {
     /**
