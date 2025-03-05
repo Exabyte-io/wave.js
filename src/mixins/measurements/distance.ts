@@ -13,7 +13,7 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
     override LabelsManagerCls: LabelsManagerConstructor<DistanceLabelsManager> =
         DistanceLabelsManager;
 
-    currentSelectedLine: THREE.Line | null;
+    currentSelectedLine: THREE.Line | null = null;
 
     linesManager: LinesManager;
 
@@ -21,21 +21,28 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
         waveStructureGroup: THREE.Group,
         waveCamera: THREE.Camera,
         wave: any,
-        updateState: any,
+        updateState: (arg: object) => void,
     ) {
-        super(waveStructureGroup, waveCamera, wave, MEASUREMENT_MODES_ENUM.DISTANCE, updateState);
-        this.labelsManager = this.getLabelsManagerInstance();
+        const groupName = MEASUREMENT_MODES_ENUM.DISTANCE;
+        super(waveStructureGroup, waveCamera, wave, groupName, updateState);
+        this.labelsManager = new DistanceLabelsManager(
+            waveStructureGroup,
+            waveCamera,
+            wave,
+            groupName,
+        );
         this.currentSelectedLine = null;
-        this.linesManager = new LinesManager(waveStructureGroup, waveCamera, wave);
+        this.linesManager = new LinesManager(waveStructureGroup, waveCamera, wave, groupName);
     }
 
     override onClick(updateState: (arg: object) => void, event: MouseEvent) {
         super.onClick(event);
         updateState(this.getSettings());
+        this.createMeasurements();
         // Select Line
     }
 
-    override toggleAtomSelection(atom: THREE.Object3D) {
+    override toggleAtomSelection(atom: THREE.Object3D): void {
         // The same atom can be selected multiple times for different pairs
         this.setAtomAsSelected(atom);
     }
@@ -45,13 +52,20 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
         this.selectedAtoms.push(atom);
     }
 
-    override extractMeasurementValues(): any[] {
+    override extractMeasurementValues(): number[] {
         return this.getLineLengthsFromSelectedAtoms();
     }
 
-    override getLabelObjectsFromSelectedAtoms(): THREE.Vector3[] {
+    override getLabelObjectsFromSelectedObjects(): THREE.Object3D[] {
         const lineCenters = this.getLineCentersFromSelectedAtoms();
-        return lineCenters;
+        const distances = this.getLineLengthsFromSelectedAtoms();
+
+        return lineCenters.map((position, index) => {
+            const object = new THREE.Object3D();
+            object.position.copy(position);
+            object.userData.distance = distances[index];
+            return object;
+        });
     }
 
     override getAdditionalObjectsFromSelectedAtoms(): THREE.Line[] {

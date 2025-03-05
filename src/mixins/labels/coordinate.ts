@@ -22,7 +22,7 @@ export class CoordinateLabelsManager extends BaseLabelsManager {
         super(waveStructureGroup, waveCamera, wave, groupName);
     }
 
-    getLabelTextFromAtomObject(atom: THREE.Object3D) {
+    getLabelTextFromLabeledObject(atom: THREE.Object3D) {
         const separator = " ";
         const precision = settings.roundPrecision;
         const vectorAsArray = getArrayFromVector(atom.position);

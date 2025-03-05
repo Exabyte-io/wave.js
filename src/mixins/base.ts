@@ -1,7 +1,5 @@
 import * as THREE from "three";
 
-import { LABEL_TYPES } from "../enums";
-
 export class BaseTHREEGroupManager {
     THREEGroup: THREE.Group;
 

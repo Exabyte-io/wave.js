@@ -44,7 +44,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         this.updateState = updateState;
     }
 
-    getLabelsManagerInstance() {
+    protected getLabelsManagerInstance() {
         return new this.LabelsManagerCls(this.waveStructureGroup, this.waveCamera, this.wave);
     }
 
@@ -167,13 +167,12 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         this.checkMouseCoordinates(event, this.waveCamera);
         const intersects = this.getIntersections();
 
-        for (const object of intersects) {
+        intersects.forEach((object: THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>) => {
             if (this.isIntersectionObjectAnAtom(object)) {
                 this.setIntersectedAtom(object.object);
                 this.setAtomAsHovered(object.object);
-                break;
             }
-        }
+        });
 
         if (!intersects.length && this.intersectedAtom) {
             if (this.intersectedAtom) {
@@ -221,7 +220,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         // To be implemented by derived classes
     }
 
-    getLabelObjectsFromSelectedAtoms(): THREE.Object3D[] {
+    getLabelObjectsFromSelectedObjects(): THREE.Object3D[] {
         return this.selectedAtoms;
     }
 
@@ -232,7 +231,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     createMeasurements() {
         if (!this.selectedAtoms.length || !this.isActive) return;
         this.refillSelectedAtoms();
-        this.labelsManager.createLabels(this.getLabelObjectsFromSelectedAtoms(), this.THREEGroup);
+        this.labelsManager.createLabels(this.getLabelObjectsFromSelectedObjects(), this.THREEGroup);
         this.getAdditionalObjectsFromSelectedAtoms().forEach((object) => {
             this.THREEGroup.add(object);
         });

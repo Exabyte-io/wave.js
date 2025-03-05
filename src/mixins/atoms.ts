@@ -3,45 +3,13 @@ import * as THREE from "three";
 import { Object3D, Object3DEventMap } from "three";
 
 import { ATOM_GROUP_NAME } from "../enums";
+import { createObjectVerticesHashMap } from "./Hashmap";
 import {
     getArrayFromVector,
     getObjectCoordinate,
     getObjectCoordinateAsArray,
 } from "./threeJsUtils";
 import { ApplyGlow } from "./utils";
-
-export interface VerticesHashMap {
-    [key: string]: number[];
-}
-
-export class VerticesHashMapHandler {
-    hashmap: VerticesHashMap;
-
-    constructor() {
-        this.hashmap = {};
-    }
-
-    add(key: string, value: number[]) {
-        if (!this.hashmap[key]) {
-            this.hashmap[key] = [...value];
-        } else {
-            this.hashmap[key].push(...value);
-        }
-    }
-
-    get(key: string) {
-        return this.hashmap[key];
-    }
-
-    iterateCoordinates(callback: (key: string, coordinateAsArray: number[]) => void) {
-        Object.entries(this.hashmap).forEach(([key, vertices]) => {
-            for (let i = 0; i < vertices.length; i += 3) {
-                const coordinateAsArray = vertices.slice(i, i + 3);
-                callback(key, coordinateAsArray);
-            }
-        });
-    }
-}
 
 /*
  * Mixin containing the logic for dealing with atoms.
@@ -203,18 +171,10 @@ export const AtomsMixin = (superclass: any) =>
             return this.getAtomNameFromObject(atom);
         }
 
-        createAtomVerticesHashMap(getVerticeKeyPerAtom = null, atoms = null) {
-            const positionsHashMap = new VerticesHashMapHandler();
-            const getVerticeKeyPerAtomFn =
-                getVerticeKeyPerAtom || this.getVerticeKeyPerAtom.bind(this);
-            const atomsToUse = atoms || this.getAtomGroups();
-            atomsToUse.forEach((atom: THREE.Object3D) => {
-                if (this.isTHREEObjectAnAtom(atom)) {
-                    const [x, y, z] = getArrayFromVector(atom.position);
-                    const mapKey = getVerticeKeyPerAtomFn(atom);
-                    positionsHashMap.add(mapKey, [x, y, z]);
-                }
-            });
-            return positionsHashMap;
+        createAtomVerticesHashMap(
+            getVerticeKeyPerAtom = this.getVerticeKeyPerAtom.bind(this),
+            atoms = this.getAtomGroups(),
+        ) {
+            return createObjectVerticesHashMap(getVerticeKeyPerAtom, atoms);
         }
     };

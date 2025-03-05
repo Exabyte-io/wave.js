@@ -39,7 +39,7 @@ export const AllLabelsMixin = (superclass) =>
                 this.initializeLabelManagers();
             }
             const labelManager = this.getLabelManagerByType(labelType);
-            labelManager?.toggleLabelsVisibility();
+            labelManager?.toggleVisibility();
             // this.createAllLabels();
             // this.rebuildScene();
         }

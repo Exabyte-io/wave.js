@@ -1,7 +1,8 @@
 import * as THREE from "three";
 
-import { ATOM_CONNECTION_LINE_NAME } from "../enums";
+import { ATOM_CONNECTION_LINE_NAME, COLORS } from "../enums";
 import settings from "../settings";
+import { AtomMesh, AtomObject } from "./types/atoms";
 
 /**
  * TODO: import from a shared utils file
@@ -140,4 +141,46 @@ export function getLineCenterCoordinate(line: THREE.Line): THREE.Vector3 {
     const end = new THREE.Vector3(positions[3], positions[4], positions[5]);
 
     return calculateMidpoint(start, end);
+}
+
+/**
+ * Sets the color for an atom by modifying its material properties
+ */
+export function setColorForAtom(atom: THREE.Object3D, color?: number): void {
+    if (!(atom instanceof THREE.Mesh)) return;
+
+    const atomMesh = atom as AtomMesh;
+    const material = atomMesh.material as THREE.MeshStandardMaterial;
+
+    if (!material || !material.emissive) return;
+
+    const newColor =
+        color || (atomMesh.previousColor ? atomMesh.previousColor.getHex() : COLORS.WHITE);
+    atomMesh.previousColor = material.color.clone();
+    material.emissive.setHex(newColor);
+}
+
+/**
+ * Highlights an atom with the specified color
+ */
+export function highlightAtom(atom: THREE.Object3D, color: number = COLORS.RED): void {
+    setColorForAtom(atom, color);
+}
+
+/**
+ * Sets atom as hovered with orange color
+ */
+export function setAtomAsHovered(atom: THREE.Object3D): void {
+    const atomObject = atom as AtomObject;
+    atomObject.userData.hovered = true;
+    setColorForAtom(atom, COLORS.ORANGE);
+}
+
+/**
+ * Unsets atom as hovered and restores previous color
+ */
+export function unsetAtomAsHovered(atom: THREE.Object3D): void {
+    const atomObject = atom as AtomObject;
+    atomObject.userData.hovered = false;
+    setColorForAtom(atom);
 }

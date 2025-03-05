@@ -4,6 +4,7 @@ import { COLORS } from "../../enums";
 import { BaseTHREEGroupManager } from "../base";
 import { AtomMesh, AtomObject } from "../types/atoms";
 
+// TODO: move to utils
 export class AtomColorManager extends BaseTHREEGroupManager {
     /**
      * Sets the color for an atom by modifying its material properties

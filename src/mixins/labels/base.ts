@@ -1,8 +1,8 @@
 import * as THREE from "three";
 
 import settings from "../../settings";
-import { VerticesHashMapHandler } from "../atoms";
 import { BaseTHREEGroupManager } from "../base";
+import { VerticesHashMapHandler } from "../Hashmap";
 
 export type LabelsManagerConstructor<T extends BaseLabelsManager> = new (
     waveStructureGroup: THREE.Group,
@@ -10,16 +10,12 @@ export type LabelsManagerConstructor<T extends BaseLabelsManager> = new (
     wave: any,
 ) => T;
 
-export class BaseLabelsManager extends BaseTHREEGroupManager {
+export abstract class BaseLabelsManager extends BaseTHREEGroupManager {
     labelType = "";
 
     #THREETexturesCache: { [key: string]: THREE.Texture } = {};
 
-    getLabelTextFromAtomObject: any;
-
-    getConstantOffsetVector() {
-        return this.config.offsetVector || [0, 0, 0];
-    }
+    abstract getLabelTextFromLabeledObject(object: THREE.Object3D): string;
 
     getOffsetVectorMultiplierPerAtomName(atomName: string) {
         if (!atomName) return 1;
@@ -34,7 +30,7 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
 
     getOffsetVector(position: THREE.Vector3, camera: THREE.Camera, offsetLength = 1) {
         const vectorToCamera = this.getVectorToCameraNormalized(position, camera);
-        const constantOffset = new THREE.Vector3(...this.getConstantOffsetVector());
+        const constantOffset = new THREE.Vector3(...(this.config.offsetVector || [0, 0, 0]));
 
         vectorToCamera.multiplyScalar(offsetLength);
         vectorToCamera.add(constantOffset);
@@ -46,16 +42,6 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         return `${this.labelType}-label-for-${text}`;
     }
 
-    toggleLabelsVisibility() {
-        this.toggleVisibility();
-    }
-
-    /**
-     * Creates a new texture based on a 2D canvas with the supplied text
-     * @param {String} text - the text to be placed on the texture;
-     * @param {Object} config - additional options for the texture (scaleWidth, scaleHeight, etc.)
-     * @return {THREE.Texture}
-     */
     createLabelTextTexture(text: string) {
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d") || new CanvasRenderingContext2D();
@@ -82,10 +68,6 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         return texture;
     }
 
-    /**
-     * Returns cached or newly created texture with label text
-     * @return {THREE.Texture}
-     */
     getLabelTextTexture(text: string) {
         if (this.#THREETexturesCache[text]) return this.#THREETexturesCache[text];
 
@@ -131,7 +113,7 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
 
     createLabels(atoms: any, threeGroup = this.THREEGroup) {
         const verticesHashMap = this.wave.createAtomVerticesHashMap(
-            this.getLabelTextFromAtomObject || null,
+            this.getLabelTextFromLabeledObject,
             atoms,
         );
         if (this.config.areSpritesUsed) {
