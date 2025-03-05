@@ -1,12 +1,12 @@
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME, COLORS, MEASUREMENT_MODES_ENUM } from "../../enums";
-import { AtomObject } from "../../types/atoms";
 import { AtomColorManager } from "../atoms/AtomColorManager";
 import { BaseTHREEGroupManager } from "../base";
 import { BaseLabelsManager, LabelsManagerConstructor } from "../labels/base";
 import { RaycasterMixinWithListeners } from "../listeners/mixins";
 import { getObjectCoordinateAsArray } from "../threeJsUtils";
+import { AtomObject } from "../types/atoms";
 
 const BaseManager = RaycasterMixinWithListeners(BaseTHREEGroupManager);
 
@@ -126,18 +126,18 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         }
     }
 
-    refillSelectedAtoms() {
-        const selectedAtomIndices = this.getSelectedAtomIndices();
-        const newSelectedAtoms = this.wave
-            .getAtomGroups()
-            .filter((atom: THREE.Object3D) =>
-                selectedAtomIndices.includes(atom.userData.atomicIndex),
-            );
+    refillSelectedAtoms(): void {
+        const validAtoms: THREE.Object3D[] = [];
 
-        newSelectedAtoms.forEach((atom: THREE.Object3D) => {
-            atom.userData = this.getAtomObjectByAtomicIndex(atom.userData.atomicIndex).userData;
+        this.selectedAtoms.forEach((atom) => {
+            const { atomicIndex } = atom.userData;
+            const validAtom = this.getAtomObjectByAtomicIndex(atomicIndex);
+            if (validAtom) {
+                validAtoms.push(validAtom);
+            }
         });
-        this.selectedAtoms = newSelectedAtoms;
+
+        this.selectedAtoms = validAtoms;
     }
 
     getSettings() {
@@ -159,7 +159,6 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
                 this.toggleAtomSelection(atom);
             }
         });
-
         this.copyValuesToClipboard();
     }
 

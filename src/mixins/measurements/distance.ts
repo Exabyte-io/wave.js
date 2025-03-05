@@ -29,36 +29,21 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
         this.linesManager = new LinesManager(waveStructureGroup, waveCamera, wave);
     }
 
-    // deleteConnection(): void {
-    //     if (!this.currentSelectedLine) return;
-    //
-    //     const {
-    //         userData: { atoms, label },
-    //     } = this.currentSelectedLine;
-    //
-    //     atoms.forEach((uuid: string) => {
-    //         const atom = this.waveStructureGroup.getObjectByProperty("uuid", uuid);
-    //         if (atom) {
-    //             atom.userData.connections =
-    //                 atom.userData.connections?.filter(
-    //                     (connection: string) => connection !== this.currentSelectedLine!.uuid,
-    //                 ) || [];
-    //         }
-    //     });
-    //
-    //     this.THREEGroup.remove(this.currentSelectedLine);
-    //     if (label) {
-    //         this.THREEGroup.remove(label);
-    //     }
-    //     this.currentSelectedLine = null;
-    //     this.wave.render();
-    // }
-
-    onClick = (updateState: (arg: object) => void, event: MouseEvent) => {
+    override onClick(updateState: (arg: object) => void, event: MouseEvent) {
         super.onClick(event);
         updateState(this.getSettings());
         // Select Line
-    };
+    }
+
+    override toggleAtomSelection(atom: THREE.Object3D) {
+        // The same atom can be selected multiple times for different pairs
+        this.setAtomAsSelected(atom);
+    }
+
+    override setAtomAsSelected(atom: THREE.Object3D): void {
+        atom.userData.selected = true;
+        this.selectedAtoms.push(atom);
+    }
 
     override extractMeasurementValues(): any[] {
         return this.getLineLengthsFromSelectedAtoms();
