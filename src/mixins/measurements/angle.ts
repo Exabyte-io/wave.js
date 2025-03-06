@@ -4,7 +4,7 @@ import { MEASUREMENT_MODES_ENUM } from "../../enums";
 import { AngleLabelsManager } from "../labels/angle";
 import { LabelsManagerConstructor } from "../labels/base";
 import { LinesManager } from "../lines/LinesManager";
-import { calculateAngleBetweenAtoms } from "../threeJsUtils";
+import { calculateAngleBetweenAtoms, calculateAngleLabelPosition } from "../threeJsUtils";
 import { BaseMeasurementManager } from "./base";
 
 export class AnglesMeasurementManager extends BaseMeasurementManager<AngleLabelsManager> {
@@ -26,6 +26,7 @@ export class AnglesMeasurementManager extends BaseMeasurementManager<AngleLabels
         this.linesManager = new LinesManager(waveStructureGroup, waveCamera, wave, groupName);
     }
 
+    // @ts-ignore
     override onClick(updateState: (arg: object) => void, event: MouseEvent) {
         super.onClick(event);
         updateState(this.getSettings());
@@ -52,7 +53,8 @@ export class AnglesMeasurementManager extends BaseMeasurementManager<AngleLabels
 
         return triplets.map((triplet, index) => {
             const object = new THREE.Object3D();
-            object.position.copy(triplet[1].position);
+            const middleCoordinate = calculateAngleLabelPosition(triplet);
+            object.position.copy(middleCoordinate);
             object.userData.angle = angles[index];
             return object;
         });

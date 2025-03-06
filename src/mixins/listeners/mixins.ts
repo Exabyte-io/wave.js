@@ -1,10 +1,10 @@
 import * as THREE from "three";
 
-type Constructor<T = {}> = new (...args: any[]) => T;
+type Constructor<T = object> = new (...args: any[]) => T;
 
 export const ListenersMixin = <T extends Constructor>(superclass: T) =>
     class extends superclass {
-        canvas: HTMLCanvasElement;
+        canvas: HTMLCanvasElement = document.createElement("canvas");
 
         onClick(event: MouseEvent) {
             console.log("clicked");
@@ -20,6 +20,7 @@ export const ListenersMixin = <T extends Constructor>(superclass: T) =>
         }
 
         initListeners(updateState: (arg: object) => void) {
+            // @ts-ignore
             const clickFunction = this.onClick.bind(this, updateState);
             this.canvas.addEventListener("click", clickFunction);
             this.canvas.addEventListener("mousemove", this.onPointerMove);

@@ -57,12 +57,12 @@ export class ThreejsEditorModal extends ModalDialog {
      * The editor does not start without it. The ESLint line is a way to turn off the warning shown in the console.
      */
     setNumberFormat(): void;
-    initializeCamera: () => any;
+    initializeCamera: () => THREE.PerspectiveCamera;
     initializeLights(): void;
     initializeControlsInEditor(): void;
     initializeRaycaster(): void;
-    raycaster: any;
-    mouse: any;
+    raycaster: THREE.Raycaster | undefined;
+    mouse: THREE.Vector2 | undefined;
     /**
      * Initialize threejs editor and add it to the DOM.
      */
@@ -93,4 +93,5 @@ export namespace ThreejsEditorModal {
     }
 }
 import { ModalDialog } from "./ModalDialog";
+import * as THREE from "three";
 import PropTypes from "prop-types";

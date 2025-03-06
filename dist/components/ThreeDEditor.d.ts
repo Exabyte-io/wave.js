@@ -12,13 +12,10 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         activeToolbarMenu: null;
         isThreejsEditorModalShown: boolean;
         measurementsSettings: {
-            isDistanceShown: boolean;
-            areAnglesShown: boolean;
-            areCoordinatesShown: boolean;
-            measurementLabelsShown: boolean;
-            distance: number;
-            angle: number;
-        };
+            isActive: boolean;
+            measurementType: string;
+            values: never[];
+        }[];
         viewerTriggerResize: boolean;
         viewerSettings: {
             isViewAdjustable: boolean;
@@ -52,20 +49,20 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleToggleAxes(): void;
     onThreejsEditorModalHide(material: any): void;
     handleChemicalConnectivityFactorChange(e: any): void;
-    handleToggleMeasurement(measurementKey: any): void;
+    handleToggleMeasurement(measurementMode: any): void;
     handleSetState(newState: any): void;
+    handleSetMeasurementSettingsForTypeInState(newMeasurementSettingsForType: any): void;
     handleDeleteConnection(): void;
     handleResetMeasurements(): void;
     addHotKeyListener(): void;
     removeHotKeyListener(): void;
     handleStartGifRecording(downloadPath: any, rotationSpeed?: number, frameDuration?: number): Promise<void>;
-    doWaveFunc(funcStr: any): void;
     componentDidMount(): void;
     componentWillUnmount(): void;
     UNSAFE_componentWillReceiveProps(nextProps: any, nextContext: any): void;
     _resetStateWaveComponent(): void;
     handleSetSetting: (setting: any) => void;
-    keyConfig: {
+    getKeyConfig(): {
         [x: string]: () => void;
         [x: number]: () => void;
     };

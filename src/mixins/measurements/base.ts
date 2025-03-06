@@ -1,17 +1,17 @@
 import * as THREE from "three";
 
-import { ATOM_GROUP_NAME, COLORS, MEASUREMENT_MODES_ENUM } from "../../enums";
+import { MEASUREMENT_MODES_ENUM } from "../../enums";
 import { BaseTHREEGroupManager } from "../base";
 import { BaseLabelsManager, LabelsManagerConstructor } from "../labels/base";
 import { RaycasterMixinWithListeners } from "../listeners/mixins";
 import {
     getObjectCoordinateAsArray,
     highlightAtom,
+    isIntersectionObjectAnAtom,
     setAtomAsHovered,
     setColorForAtom,
     unsetAtomAsHovered,
 } from "../threeJsUtils";
-import { AtomObject } from "../types/atoms";
 
 const BaseManager = RaycasterMixinWithListeners(BaseTHREEGroupManager);
 
@@ -100,16 +100,10 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         }
     }
 
-    isIntersectionObjectAnAtom(intersection: THREE.Intersection) {
-        return intersection.object.type === "Mesh";
-    }
-
     isIntersectedAtomSelected() {
-        return (
-            this.intersectedAtom &&
-            this.selectedAtoms.some(
-                (atom) => atom.userData.atomicIndex === this.intersectedAtom.userData.atomicIndex,
-            )
+        if (!this.intersectedAtom) return false;
+        return this.selectedAtoms.some(
+            (atom) => atom.userData.atomicIndex === this.intersectedAtom?.userData.atomicIndex,
         );
     }
 
@@ -153,7 +147,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         const intersects = this.getIntersections();
 
         intersects.forEach((object: THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>) => {
-            if (this.isIntersectionObjectAnAtom(object)) {
+            if (isIntersectionObjectAnAtom(object)) {
                 const atom = object.object;
                 this.toggleAtomSelection(atom);
             }
@@ -167,7 +161,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         const intersects = this.getIntersections();
 
         intersects.forEach((object: THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>) => {
-            if (this.isIntersectionObjectAnAtom(object)) {
+            if (isIntersectionObjectAnAtom(object)) {
                 this.setIntersectedAtom(object.object);
                 setAtomAsHovered(object.object);
             }
@@ -194,7 +188,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         navigator.clipboard.writeText(valuesText).catch(console.error);
     }
 
-    extractMeasurementValues() {
+    extractMeasurementValues(): number[] | number[][] {
         const values = this.selectedAtoms.map((atom) => getObjectCoordinateAsArray(atom));
         this.values = values;
         return values;
@@ -215,10 +209,6 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         label.position.copy(position);
         threeGroup.add(label);
         this.waveStructureGroup.add(threeGroup);
-    }
-
-    resetMeasurements(): void {
-        // To be implemented by derived classes
     }
 
     getLabelObjectsFromSelectedObjects(): THREE.Object3D[] {
@@ -243,5 +233,14 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         this.selectedAtoms.forEach((atom) => {
             highlightAtom(atom);
         });
+    }
+
+    resetMeasurements() {
+        this.selectedAtoms.forEach((atom) => {
+            setColorForAtom(atom);
+        });
+        this.selectedAtoms = [];
+        this.THREEGroup.clear();
+        this.labelsManager.THREEGroup.clear();
     }
 }

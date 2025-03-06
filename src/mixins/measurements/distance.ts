@@ -35,6 +35,7 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
         this.linesManager = new LinesManager(waveStructureGroup, waveCamera, wave, groupName);
     }
 
+    // @ts-ignore
     override onClick(updateState: (arg: object) => void, event: MouseEvent) {
         super.onClick(event);
         updateState(this.getSettings());

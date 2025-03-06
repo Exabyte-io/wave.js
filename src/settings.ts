@@ -1,6 +1,8 @@
+// @ts-ignore // Types for this library are needed
 import { ELEMENT_COLORS, PERIODIC_TABLE } from "@mat3ra/periodic-table";
 import * as THREE from "three";
 
+// @ts-ignore
 declare module "@mat3ra/periodic-table" {
     interface Element {
         van_der_Waals_radius_pm: number;

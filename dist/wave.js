@@ -2,17 +2,18 @@
 import "./stylesheets/main.css";
 import { mix } from "mixwith";
 import * as THREE from "three";
-import { ATOM_GROUP_NAME } from "./enums";
+import { ATOM_GROUP_NAME, MEASUREMENT_MODES } from "./enums";
 import { AtomsMixin } from "./mixins/atoms";
 import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
 import { ImageMixin } from "./mixins/image";
-import { AtomLabelsMixin } from "./mixins/labels/atomLabels";
-import { CoordinateMeasurementMixin } from "./mixins/labels/coordinateMeasurement";
-import { MeasurementMixin } from "./mixins/measurement";
+import { AllLabelsMixin } from "./mixins/labels/all";
+import { RaycasterMixinWithListeners } from "./mixins/listeners/mixins";
+import { AllMeasurementsMixin } from "./mixins/measurements/all";
 import { RepetitionMixin } from "./mixins/repetition";
+import { getObjectCoordinate } from "./mixins/threeJsUtils";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
 const TV3 = THREE.Vector3;
@@ -194,7 +195,7 @@ class WaveBase {
 /**
  * Wave draws atoms as spheres according to the material geometry passed.
  */
-export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, AtomLabelsMixin, CoordinateMeasurementMixin, MeasurementMixin, ImageMixin) {
+export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, AllLabelsMixin, AllMeasurementsMixin, ImageMixin) {
     /**
      *
      * @param {Object} config
@@ -206,7 +207,6 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
-        this.initializeAllLabelsHolders();
     }
     clearView() {
         while (this.structureGroup.children.length) {
@@ -231,28 +231,7 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         });
         return atoms;
     }
-    /**
-     * Function that called when scene is rebuilding.
-     * When scene is rebuilding and all atoms lost color this function is fills current selected atoms by color.
-     */
-    refillSelectedAtoms() {
-        const currentAtoms = this.collectAllAtoms();
-        const newSelectedAtoms = [];
-        this.selectedAtoms.forEach((atom) => {
-            const newAtom = currentAtoms.find((currentAtom) => {
-                const firstAtomPoint = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-                const secondAtomPoint = new THREE.Vector3().setFromMatrixPosition(currentAtom.matrixWorld);
-                if (!firstAtomPoint.distanceTo(secondAtomPoint)) {
-                    return currentAtom;
-                }
-                return null;
-            });
-            this.handleSetSelected(newAtom);
-            newAtom.userData = { ...atom.userData };
-            newSelectedAtoms.push(newAtom);
-        });
-        this.selectedAtoms = newSelectedAtoms;
-    }
+    // Called on each change to the Redux store via reloadViewer.
     rebuildScene() {
         this.clearView();
         this.drawAtomsAsSpheres();
@@ -260,9 +239,9 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         this.drawBoundaries();
         if (this.isDrawBondsEnabled)
             this.drawBonds();
-        this.render();
         this.createAllLabels();
-        this.refillSelectedAtoms();
+        this.createAllMeasurements();
+        this.render();
     }
     render() {
         this.adjustAllLabelsToCameraPosition();

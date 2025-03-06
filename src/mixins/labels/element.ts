@@ -14,4 +14,8 @@ export class ElementLabelsManager extends BaseLabelsManager {
     constructor(waveStructureGroup: THREE.Group, waveCamera: THREE.Camera, wave: any) {
         super(waveStructureGroup, waveCamera, wave, LABEL_TYPES.ELEMENT);
     }
+
+    getLabelTextFromLabeledObject(object: THREE.Object3D) {
+        return object.userData.symbolWithLabel;
+    }
 }

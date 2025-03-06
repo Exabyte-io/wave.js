@@ -18,7 +18,7 @@ export function BoundaryMixin(superclass: any): {
          * @param coordinates4 {Array} fourth point.
          * @param zOffset {Number} offset to add to the z coordinate of points forming the object.
          */
-        getBoundaryMeshObject(color: number, coordinates1: any[], coordinates2: any[], coordinates3: any[], coordinates4: any[], zOffset?: number): any;
+        getBoundaryMeshObject(color: number, coordinates1: any[], coordinates2: any[], coordinates3: any[], coordinates4: any[], zOffset?: number): THREE.Mesh<THREE.BufferGeometry<THREE.NormalBufferAttributes>, THREE.MeshBasicMaterial, THREE.Object3DEventMap>;
         /**
          * Returns the z offset to add to the boundary planes. Note that the c axis of the cell and z axis of coordinate system
          * are always aligned by convention, hence this.cVectorLength / 2.
@@ -35,4 +35,5 @@ export function BoundaryMixin(superclass: any): {
     };
     [x: string]: any;
 };
+import * as THREE from "three";
 import { Made } from "@mat3ra/made";

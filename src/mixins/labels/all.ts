@@ -4,9 +4,9 @@ import { ElementLabelsManager } from "./element";
  * Base mixin containing generic logic for dealing with labels.
  * Provides core functionality for creating and managing text labels in 3D space.
  */
-export const AllLabelsMixin = (superclass) =>
+export const AllLabelsMixin = (superclass: any) =>
     class extends superclass {
-        labelManagers = [];
+        labelManagers: (ElementLabelsManager | CoordinateLabelsManager)[] = [];
 
         initializeLabelManagers() {
             const elementLabelsManager = new ElementLabelsManager(

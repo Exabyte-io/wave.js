@@ -2,16 +2,15 @@ import * as THREE from "three";
 
 import { BaseLabelsManager } from "./base";
 
-export class BaseLabelsAsPointsManager extends BaseLabelsManager {
+export abstract class BaseLabelsAsPointsManager extends BaseLabelsManager {
     /**
      * Creates a label as points for efficient rendering of many labels
      * @param {String} text - the text to be displayed
      * @param {Array<number>} positions - array of positions [x1,y1,z1,x2,y2,z2,...]
      * @param {String} name - name for the points object
-     * @param {Object} config - additional options for the points (size, etc.)
      * @returns {THREE.Points}
      */
-    createLabelPoints(text: string, positions, name) {
+    createLabelPoints(text: string, positions: number[], name: string) {
         const geometry = new THREE.BufferGeometry();
         geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
         const material = new THREE.PointsMaterial(this.config);
@@ -26,9 +25,12 @@ export class BaseLabelsAsPointsManager extends BaseLabelsManager {
      * @param {Object} verticesHashMap - Object with label names as keys and arrays of positions as values
      * @param {Function} getNameForLabel - Function to get the name for a label
      * @param {THREE.Group} targetGroup - Group to add the labels to
-     * @param {Object} config - Additional options for the points (size, etc.)
      */
-    createLabelsAsPoints(verticesHashMap, getNameForLabel, targetGroup) {
+    createLabelsAsPoints(
+        verticesHashMap: { [key: string]: number[] },
+        getNameForLabel: (text: string) => string,
+        targetGroup: THREE.Group,
+    ) {
         if (!targetGroup) {
             console.warn("No target group provided for labels");
             return;

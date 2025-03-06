@@ -111,7 +111,7 @@ export abstract class BaseLabelsManager extends BaseTHREEGroupManager {
         });
     }
 
-    createLabels(atoms: any, threeGroup = this.THREEGroup) {
+    createLabels(atoms?: THREE.Object3D, threeGroup = this.THREEGroup) {
         const verticesHashMap = this.wave.createAtomVerticesHashMap(
             this.getLabelTextFromLabeledObject,
             atoms,

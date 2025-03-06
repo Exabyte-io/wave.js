@@ -24,6 +24,7 @@ export class CoordinatesMeasurementManager extends BaseMeasurementManager<Coordi
         this.labelsManager = this.getLabelsManagerInstance();
     }
 
+    // @ts-ignore
     onClick = (updateState: (arg: object) => void, event: MouseEvent) => {
         super.onClick(event);
         updateState(this.getSettings());

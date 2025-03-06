@@ -1,29 +1,39 @@
-export const BOUNDARY_CONDITIONS: {
+export declare const BOUNDARY_CONDITIONS: {
     type: string;
     name: string;
     isNonPeriodic: boolean;
 }[];
-export const ATOM_GROUP_NAME: "Atoms";
-export const ATOM_CONNECTIONS_GROUP_NAME: "Atom_Connections";
-export const ATOM_CONNECTION_LINE_NAME: "Atom_Connection";
-export const MIN_ANGLE_POINTS_DISTANCE: 0.7;
-export const MEASUREMENT_LABELS_GROUP_NAME: "Measure_Labels";
-export const ANGLE: "ANGLE";
-export const LABELS_GROUP_NAME: "Labels_Group";
-export const ELEMENT_LABELS_GROUP_NAME: "Element_Labels_Group";
-export const COORDINATE_LABELS_GROUP_NAME: "Coordinate_Labels_Group";
-export namespace COLORS {
-    let RED: number;
-    let GREEN: number;
+export declare const ATOM_GROUP_NAME = "Atoms";
+export declare const ATOM_CONNECTIONS_GROUP_NAME = "Atom_Connections";
+export declare const ATOM_CONNECTION_LINE_NAME = "Atom_Connection";
+export declare const MIN_ANGLE_POINTS_DISTANCE = 0.7;
+export declare const MEASUREMENT_LABELS_GROUP_NAME = "Measure_Labels";
+export declare const ANGLE = "ANGLE";
+export declare const LABELS_GROUP_NAME = "Labels_Group";
+export declare const ELEMENT_LABELS_GROUP_NAME = "Element_Labels_Group";
+export declare const COORDINATE_LABELS_GROUP_NAME = "Coordinate_Labels_Group";
+export declare const COLORS: {
+    RED: number;
+    GREEN: number;
+    ORANGE: number;
+    WHITE: number;
+    BLACK: number;
+};
+export declare enum MEASUREMENT_MODES_ENUM {
+    NONE = "none",
+    DISTANCE = "distance",
+    ANGLE = "angle",
+    COORDINATE = "coordinate"
 }
-export namespace MEASUREMENT_KEYS {
-    let DISTANCE: string;
-    let ANGLE: string;
-    let COORDINATE: string;
-}
-export namespace LABEL_TYPES {
-    let COORDINATE_1: string;
-    export { COORDINATE_1 as COORDINATE };
-    export let ELEMENT: string;
-    export let COORDINATE_MEASUREMENT: string;
-}
+export declare const MEASUREMENT_MODES: {
+    NONE: string;
+    DISTANCE: string;
+    ANGLE: string;
+    COORDINATE: string;
+};
+export declare const LABEL_TYPES: {
+    COORDINATE: string;
+    ELEMENT: string;
+    DISTANCE: string;
+    COORDINATE_MEASUREMENT: string;
+};

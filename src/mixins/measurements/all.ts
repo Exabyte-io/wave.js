@@ -61,7 +61,7 @@ export const defaultMeasurementsSettings = [
     },
 ];
 
-export const AllMeasurementsMixin = (superclass) =>
+export const AllMeasurementsMixin = (superclass: any) =>
     class extends superclass {
         measurementManagers: (
             | CoordinatesMeasurementManager
@@ -127,5 +127,9 @@ export const AllMeasurementsMixin = (superclass) =>
         createAllMeasurements() {
             const activeMeasurementManager = this.getActiveMeasurementManager();
             activeMeasurementManager?.createMeasurements();
+        }
+
+        resetAllMeasurements() {
+            this.measurementManagers.forEach((manager) => manager.resetMeasurements());
         }
     };

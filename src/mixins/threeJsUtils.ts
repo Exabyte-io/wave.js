@@ -1,7 +1,6 @@
 import * as THREE from "three";
 
-import { ATOM_CONNECTION_LINE_NAME, COLORS } from "../enums";
-import settings from "../settings";
+import { COLORS } from "../enums";
 import { AtomMesh, AtomObject } from "./types/atoms";
 
 /**
@@ -83,68 +82,26 @@ export function calculateMidpoint(pointA: THREE.Vector3, pointB: THREE.Vector3):
  * Creates a position for a label at an angle between three points
  */
 export function calculateAngleLabelPosition(
-    centerAtom: THREE.Object3D,
-    firstAtom: THREE.Object3D,
-    thirdAtom: THREE.Object3D,
-    offsetDistance: number = 1.2
+    [firstAtom, centerAtom, thirdAtom]: THREE.Object3D[],
+    offsetDistance = 0.75,
 ): THREE.Vector3 {
     const centerPos = getObjectCoordinate(centerAtom);
     const firstPos = getObjectCoordinate(firstAtom);
     const thirdPos = getObjectCoordinate(thirdAtom);
-    
+
     // Create vectors from center to first and third points
     const vecFirst = new THREE.Vector3().subVectors(firstPos, centerPos).normalize();
     const vecThird = new THREE.Vector3().subVectors(thirdPos, centerPos).normalize();
-    
+
     // Calculate the bisector
     const bisector = new THREE.Vector3().addVectors(vecFirst, vecThird).normalize();
-    
+
     // Position on the bisector at the given distance
     return centerPos.clone().add(bisector.multiplyScalar(offsetDistance));
 }
 
-/**
- * Gets positions from matrix world for two atoms
- */
-export function getPointsFromMatrixWorld(
-    firstMatrix: THREE.Matrix4,
-    secondMatrix: THREE.Matrix4,
-): [THREE.Vector3, THREE.Vector3] {
-    const firstPoint = new THREE.Vector3().setFromMatrixPosition(firstMatrix);
-    const secondPoint = new THREE.Vector3().setFromMatrixPosition(secondMatrix);
-    return [firstPoint, secondPoint];
-}
-
-/**
- * Creates a line between two atoms
- */
-export function drawLineBetweenTwoAtoms(selectedAtoms: THREE.Object3D[]): THREE.Line {
-    const [firstAtom, secondAtom] = selectedAtoms;
-
-    const firstAtomPoint = getObjectCoordinate(firstAtom);
-    const secondAtomPoint = getObjectCoordinate(secondAtom);
-
-    const geometry = new THREE.BufferGeometry().setFromPoints([firstAtomPoint, secondAtomPoint]);
-    const material = new THREE.LineBasicMaterial({ color: settings.colors.amber });
-    const line = new THREE.Line(geometry, material);
-
-    line.userData.atoms = [firstAtom.uuid, secondAtom.uuid];
-    line.name = ATOM_CONNECTION_LINE_NAME;
-
-    return line;
-}
-
-/**
- * Gets the position of the center of a THREE.Line
- */
-export function getLineCenterCoordinate(line: THREE.Line): THREE.Vector3 {
-    const geometry = line.geometry as THREE.BufferGeometry;
-    const positions = geometry.attributes.position.array;
-
-    const start = new THREE.Vector3(positions[0], positions[1], positions[2]);
-    const end = new THREE.Vector3(positions[3], positions[4], positions[5]);
-
-    return calculateMidpoint(start, end);
+export function isIntersectionObjectAnAtom(intersection: THREE.Intersection) {
+    return intersection.object.type === "Mesh";
 }
 
 /**
