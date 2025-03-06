@@ -144,7 +144,8 @@ export function getLineCenterCoordinate(line: THREE.Line): THREE.Vector3 {
 }
 
 /**
- * Sets the color for an atom by modifying its material properties
+ * Sets or resets the color for an atom by modifying its material properties.
+ * If no color is provided, it restores the previous color and removes emissive effects.
  */
 export function setColorForAtom(atom: THREE.Object3D, color?: number): void {
     if (!(atom instanceof THREE.Mesh)) return;
@@ -152,32 +153,34 @@ export function setColorForAtom(atom: THREE.Object3D, color?: number): void {
     const atomMesh = atom as AtomMesh;
     const material = atomMesh.material as THREE.MeshStandardMaterial;
 
-    if (!material || !material.emissive) return;
+    if (!material) return;
 
-    const newColor =
-        color || (atomMesh.previousColor ? atomMesh.previousColor.getHex() : COLORS.WHITE);
-    atomMesh.previousColor = material.color.clone();
-    material.emissive.setHex(newColor);
+    material.emissive.setHex(color ?? COLORS.BLACK);
+    if (!color && atomMesh.previousColor) {
+        material.color.copy(atomMesh.previousColor);
+    } else if (color && !atomMesh.previousColor) {
+        atomMesh.previousColor = material.color.clone();
+    }
 }
 
 /**
- * Highlights an atom with the specified color
+ * Highlights an atom with the specified color.
  */
 export function highlightAtom(atom: THREE.Object3D, color: number = COLORS.RED): void {
     setColorForAtom(atom, color);
 }
 
 /**
- * Sets atom as hovered with orange color
+ * Sets an atom as hovered with a color.
  */
 export function setAtomAsHovered(atom: THREE.Object3D): void {
     const atomObject = atom as AtomObject;
     atomObject.userData.hovered = true;
-    setColorForAtom(atom, COLORS.ORANGE);
+    setColorForAtom(atom, COLORS.RED);
 }
 
 /**
- * Unsets atom as hovered and restores previous color
+ * Unsets an atom as hovered, restoring its previous color and removing the emissive effect.
  */
 export function unsetAtomAsHovered(atom: THREE.Object3D): void {
     const atomObject = atom as AtomObject;

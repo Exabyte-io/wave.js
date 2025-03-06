@@ -39,7 +39,6 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
         super.onClick(event);
         updateState(this.getSettings());
         this.createMeasurements();
-        // Select Line
     }
 
     override toggleAtomSelection(atom: THREE.Object3D): void {
@@ -68,7 +67,7 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
         });
     }
 
-    override getAdditionalObjectsFromSelectedAtoms(): THREE.Line[] {
+    override getAdditionalObjectsFromSelectedObjects(): THREE.Line[] {
         return this.getLinesFromSelectedAtoms();
     }
 

@@ -1,11 +1,16 @@
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME, COLORS, MEASUREMENT_MODES_ENUM } from "../../enums";
-import { AtomColorManager } from "../atoms/AtomColorManager";
 import { BaseTHREEGroupManager } from "../base";
 import { BaseLabelsManager, LabelsManagerConstructor } from "../labels/base";
 import { RaycasterMixinWithListeners } from "../listeners/mixins";
-import { getObjectCoordinateAsArray } from "../threeJsUtils";
+import {
+    getObjectCoordinateAsArray,
+    highlightAtom,
+    setAtomAsHovered,
+    setColorForAtom,
+    unsetAtomAsHovered,
+} from "../threeJsUtils";
 import { AtomObject } from "../types/atoms";
 
 const BaseManager = RaycasterMixinWithListeners(BaseTHREEGroupManager);
@@ -61,10 +66,6 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         }
     };
 
-    setColorForAtom(atomObject: THREE.Object3D, color?: number) {
-        AtomColorManager.setColorForAtom(atomObject, color);
-    }
-
     getSelectedAtomIndices() {
         // TODO: refactor to use atom names getter from createAtomGroups
         return this.selectedAtoms.map((atom) => atom.userData.atomicIndex);
@@ -76,32 +77,21 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
             .find((atom: THREE.Object3D) => atom.userData.atomicIndex === atomicIndex);
     }
 
-    highlightAtom(atomObject: THREE.Object3D) {
-        AtomColorManager.highlightAtom(atomObject);
-    }
-
     setAtomAsSelected(atomObject: THREE.Object3D) {
         atomObject.userData.selected = true;
         const selectedAtomIndices = this.getSelectedAtomIndices();
         if (!selectedAtomIndices.includes(atomObject.userData.atomicIndex)) {
             this.selectedAtoms.push(atomObject);
         }
+        highlightAtom(atomObject);
     }
 
     unsetAtomAsSelected(atomObject: THREE.Object3D) {
         atomObject.userData.selected = false;
-        this.setColorForAtom(atomObject);
+        setColorForAtom(atomObject);
         this.selectedAtoms = this.selectedAtoms.filter(
             (atom) => atom.userData.atomicIndex !== atomObject.userData.atomicIndex,
         );
-    }
-
-    setAtomAsHovered(atomObject: THREE.Object3D) {
-        AtomColorManager.setAtomAsHovered(atomObject);
-    }
-
-    unsetAtomAsHovered(atomObject: THREE.Object3D) {
-        AtomColorManager.unsetAtomAsHovered(atomObject);
     }
 
     setIntersectedAtom(intersectItem: THREE.Object3D | null) {
@@ -112,6 +102,12 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
 
     isIntersectionObjectAnAtom(intersection: THREE.Intersection) {
         return intersection.object.type === "Mesh";
+    }
+
+    isIntersectedAtomSelected() {
+        return this.selectedAtoms.some(
+            (atom) => atom.userData.atomicIndex === this.intersectedAtom.userData.atomicIndex,
+        );
     }
 
     getIntersections() {
@@ -170,16 +166,18 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         intersects.forEach((object: THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>) => {
             if (this.isIntersectionObjectAnAtom(object)) {
                 this.setIntersectedAtom(object.object);
-                this.setAtomAsHovered(object.object);
+                setAtomAsHovered(object.object);
             }
         });
 
         if (!intersects.length && this.intersectedAtom) {
-            if (this.intersectedAtom) {
-                this.unsetAtomAsHovered(this.intersectedAtom);
+            const isSelected = this.isIntersectedAtomSelected();
+            if (this.intersectedAtom && !isSelected) {
+                unsetAtomAsHovered(this.intersectedAtom);
             }
             this.setIntersectedAtom(null);
         }
+        this.wave.render();
     };
 
     copyValuesToClipboard() {
@@ -224,7 +222,7 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         return this.selectedAtoms;
     }
 
-    getAdditionalObjectsFromSelectedAtoms(): THREE.Object3D[] {
+    getAdditionalObjectsFromSelectedObjects(): THREE.Object3D[] {
         return [];
     }
 
@@ -232,16 +230,15 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         if (!this.selectedAtoms.length || !this.isActive) return;
         this.refillSelectedAtoms();
         this.labelsManager.createLabels(this.getLabelObjectsFromSelectedObjects(), this.THREEGroup);
-        this.getAdditionalObjectsFromSelectedAtoms().forEach((object) => {
+        this.getAdditionalObjectsFromSelectedObjects().forEach((object) => {
             this.THREEGroup.add(object);
         });
-        console.log("this.THREEGroup", this.THREEGroup);
         this.highlightSelectedAtoms();
     }
 
     highlightSelectedAtoms() {
         this.selectedAtoms.forEach((atom) => {
-            this.highlightAtom(atom);
+            highlightAtom(atom);
         });
     }
 }

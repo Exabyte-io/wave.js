@@ -94,7 +94,7 @@ export const AllMeasurementsMixin = (superclass) =>
         }
 
         getActiveMeasurementManager() {
-            return this.measurementManagers.find((m) => m.isActive === true);
+            return this.measurementManagers.find((m) => m.isActive);
         }
 
         getMeasurementsSettings() {

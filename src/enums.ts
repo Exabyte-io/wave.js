@@ -36,6 +36,7 @@ export const COLORS = {
     GREEN: 0x00ff00,
     ORANGE: 0xffa500,
     WHITE: 0xffffff,
+    BLACK: 0x000000,
 };
 
 export enum MEASUREMENT_MODES_ENUM {
