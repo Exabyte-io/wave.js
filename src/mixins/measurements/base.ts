@@ -105,8 +105,11 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     }
 
     isIntersectedAtomSelected() {
-        return this.selectedAtoms.some(
-            (atom) => atom.userData.atomicIndex === this.intersectedAtom.userData.atomicIndex,
+        return (
+            this.intersectedAtom &&
+            this.selectedAtoms.some(
+                (atom) => atom.userData.atomicIndex === this.intersectedAtom.userData.atomicIndex,
+            )
         );
     }
 

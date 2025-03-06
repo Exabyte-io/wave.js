@@ -109,6 +109,23 @@ export default {
             textBaseline: "middle",
         },
     },
+    angleLabelsConfig: {
+        areSpritesUsed: true,
+        fontFace: "Arial",
+        fontSize: 72,
+        fontWeight: "Normal",
+        scale: 1.5,
+        scaleWidth: 2.5,
+        scaleHeight: 0.25,
+        offsetVector: [0, 0, 0],
+        textParameters: {
+            fillStyle: "#CCCCCC",
+            strokeStyle: "#454545",
+            lineWidth: 1,
+            textAlign: "center",
+            textBaseline: "middle",
+        },
+    },
     labelPointsConfig: {
         size: 1.5,
         depthTest: true,

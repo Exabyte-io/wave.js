@@ -1,158 +1,92 @@
 import * as THREE from "three";
 
-import {
-    ATOM_CONNECTIONS_GROUP_NAME,
-    MEASUREMENT_MODES,
-    MIN_ANGLE_POINTS_DISTANCE,
-} from "../../enums";
-import {
-    calculateAngleBetweenAtoms,
-    calculateAngleLabelPosition,
-    drawLineBetweenTwoAtoms,
-    getObjectCoordinate,
-} from "../threeJsUtils";
+import { MEASUREMENT_MODES_ENUM } from "../../enums";
+import { AngleLabelsManager } from "../labels/angle";
+import { LabelsManagerConstructor } from "../labels/base";
+import { LinesManager } from "../lines/LinesManager";
+import { calculateAngleBetweenAtoms } from "../threeJsUtils";
 import { BaseMeasurementManager } from "./base";
 
-type Constructor<T = {}> = new (...args: any[]) => T;
+export class AnglesMeasurementManager extends BaseMeasurementManager<AngleLabelsManager> {
+    measurementType = MEASUREMENT_MODES_ENUM.ANGLE;
 
-export class AnglesMeasurementManager extends BaseMeasurementManager {
-    angleConnections: THREE.Group;
+    override LabelsManagerCls: LabelsManagerConstructor<AngleLabelsManager> = AngleLabelsManager;
 
-    currentSelectedAngle: THREE.Line | null = null;
+    linesManager: LinesManager;
 
-    drawLineBetweenAtoms: (selectedAtoms: THREE.Object3D[]) => THREE.Line;
-
-    constructor(config: any) {
-        super(config);
-        this.angleConnections = new THREE.Group();
-        this.angleConnections.name = ATOM_CONNECTIONS_GROUP_NAME;
-        this.measurementsGroup.add(this.angleConnections);
-        // TODO: add to structure group instead
-        this.waveStructureGroup.add(this.angleConnections);
-
-        this.currentSelectedAngle = null;
-        this.drawLineBetweenAtoms = drawLineBetweenTwoAtoms.bind(this);
-        this.initializeMeasurement(MEASUREMENT_MODES.ANGLE, this.handleAngleAtomClick);
+    constructor(
+        waveStructureGroup: THREE.Group,
+        waveCamera: THREE.Camera,
+        wave: any,
+        updateState: (arg: object) => void,
+    ) {
+        const groupName = MEASUREMENT_MODES_ENUM.ANGLE;
+        super(waveStructureGroup, waveCamera, wave, groupName, updateState);
+        this.labelsManager = this.getLabelsManagerInstance();
+        this.linesManager = new LinesManager(waveStructureGroup, waveCamera, wave, groupName);
     }
 
-    /**
-     * Creates and adds a label for the angle measurement
-     */
-    drawAngleText(angle: number, line: THREE.Line): void {
-        const labelPosition = calculateAngleLabelPosition(line, MIN_ANGLE_POINTS_DISTANCE);
+    override onClick(updateState: (arg: object) => void, event: MouseEvent) {
+        super.onClick(event);
+        updateState(this.getSettings());
+        this.createMeasurements();
+    }
 
-        const label = this.createMeasurementLabel(
-            `${angle}°`,
-            `angle-label-${angle}`,
-            labelPosition,
+    override toggleAtomSelection(atom: THREE.Object3D): void {
+        this.setAtomAsSelected(atom);
+    }
+
+    override setAtomAsSelected(atom: THREE.Object3D): void {
+        atom.userData.selected = true;
+        this.selectedAtoms.push(atom);
+    }
+
+    override extractMeasurementValues(): number[][] {
+        // Return as number[][] to match the interface in BaseMeasurementManager
+        return this.getAnglesFromSelectedAtoms().map((angle) => [angle]);
+    }
+
+    override getLabelObjectsFromSelectedObjects(): THREE.Object3D[] {
+        const triplets = this.getTripletsOfSelectedAtoms();
+        const angles = this.getAnglesFromSelectedAtoms();
+
+        return triplets.map((triplet, index) => {
+            const object = new THREE.Object3D();
+            object.position.copy(triplet[1].position);
+            object.userData.angle = angles[index];
+            return object;
+        });
+    }
+
+    override getAdditionalObjectsFromSelectedObjects(): THREE.Line[] {
+        return this.getLinesFromSelectedAtoms();
+    }
+
+    getTripletsOfSelectedAtoms(): THREE.Object3D[][] {
+        const arr = this.selectedAtoms;
+        return Array.from({ length: Math.floor(arr.length / 3) }, (_, i) =>
+            arr.slice(i * 3, i * 3 + 3),
         );
-
-        line.userData.label = label;
     }
 
-    /**
-     * Creates a connection between two atoms
-     */
-    createConnection(atomA: THREE.Object3D, atomB: THREE.Object3D): THREE.Line {
-        const line = this.drawLineBetweenAtoms([atomA, atomB]);
-        this.addConnectionDataToAtom(atomA, line.uuid);
-        this.addConnectionDataToAtom(atomB, line.uuid);
-        this.angleConnections.add(line);
-        return line;
-    }
+    getLinesFromSelectedAtoms(): THREE.Line[] {
+        const triplets = this.getTripletsOfSelectedAtoms();
+        const lines: THREE.Line[] = [];
 
-    /**
-     * Adds connection ID to atom userData
-     */
-    addConnectionDataToAtom(atom: THREE.Object3D, connectionId: string): void {
-        if (!atom.userData.connections) {
-            atom.userData.connections = [];
-        }
-        atom.userData.connections.push(connectionId);
-    }
-
-    /**
-     * Creates an angle visualization between three atoms
-     */
-    drawAngle(atomA: THREE.Object3D, atomB: THREE.Object3D, atomC: THREE.Object3D): void {
-        const angleValue = calculateAngleBetweenAtoms([atomA, atomB, atomC]);
-
-        const connectionA = this.createConnection(atomA, atomB);
-        const connectionB = this.createConnection(atomB, atomC);
-
-        // Get world positions of the atoms
-        const pointA = getObjectCoordinate(atomA);
-        const pointB = getObjectCoordinate(atomB);
-        const pointC = getObjectCoordinate(atomC);
-
-        // Create the angle line
-        const material = new THREE.LineBasicMaterial({ color: this.settings.colors.amber });
-        const geometry = new THREE.BufferGeometry().setFromPoints([pointA, pointB, pointC]);
-
-        const angleLine = new THREE.Line(geometry, material);
-        angleLine.userData.connections = [connectionA.uuid, connectionB.uuid];
-        angleLine.userData.atoms = [atomA.uuid, atomB.uuid, atomC.uuid];
-
-        this.angleConnections.add(angleLine);
-        this.drawAngleText(angleValue, angleLine);
-        this.render();
-    }
-
-    /**
-     * Deletes the selected angle connection
-     */
-    deleteConnection(): void {
-        if (!this.currentSelectedAngle) return;
-
-        const {
-            userData: { atoms, connections, label },
-        } = this.currentSelectedAngle;
-
-        // Remove connection references from atoms
-        atoms.forEach((uuid: string) => {
-            const atom = this.waveStructureGroup.getObjectByProperty("uuid", uuid);
-            if (atom) {
-                atom.userData.connections = atom.userData.connections.filter(
-                    (conn: string) => !connections.includes(conn),
-                );
+        triplets.forEach((triplet) => {
+            if (triplet.length === 3) {
+                const line1 = this.linesManager.createLineBetweenAtoms(triplet[0], triplet[1]);
+                const line2 = this.linesManager.createLineBetweenAtoms(triplet[1], triplet[2]);
+                lines.push(line1, line2);
             }
         });
 
-        // Remove connections and label
-        connections.forEach((uuid: string) => {
-            const connection = this.waveStructureGroup.getObjectByProperty("uuid", uuid);
-            if (connection) this.angleConnections.remove(connection);
-        });
-
-        this.measurementsGroup.remove(label);
-        this.angleConnections.remove(this.currentSelectedAngle);
-        this.currentSelectedAngle = null;
-
-        this.render();
+        return lines;
     }
 
-    /**
-     * Handles atom selection for angle measurement
-     */
-    handleAngleAtomClick(
-        atom: THREE.Object3D,
-        updateState: (state: { angle: number }) => void,
-    ): void {
-        if (!this.isMeasurementModeActive(MEASUREMENT_MODES.ANGLE)) return;
-
-        if (this.selectedAtoms.length < 3) {
-            this.selectedAtoms.push(atom);
-            this.handleSetSelected(atom);
-
-            if (this.selectedAtoms.length === 3) {
-                const [atomA, atomB, atomC] = this.selectedAtoms;
-                const angle = calculateAngleBetweenAtoms([atomA, atomB, atomC]);
-
-                this.drawAngle(atomA, atomB, atomC);
-                updateState({ angle });
-
-                this.selectedAtoms = [];
-            }
-        }
+    getAnglesFromSelectedAtoms(): number[] {
+        return this.getTripletsOfSelectedAtoms().map((triplet) =>
+            calculateAngleBetweenAtoms(triplet),
+        );
     }
 }

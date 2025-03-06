@@ -82,21 +82,25 @@ export function calculateMidpoint(pointA: THREE.Vector3, pointB: THREE.Vector3):
 /**
  * Creates a position for a label at an angle between three points
  */
-export function calculateAngleLabelPosition(line: THREE.Line, offset: number): THREE.Vector3 {
-    const positions = line.geometry.attributes.position.array;
-
-    const pointA = new THREE.Vector3(positions[0], positions[1], positions[2]);
-    const pointB = new THREE.Vector3(positions[3], positions[4], positions[5]);
-    const pointC = new THREE.Vector3(positions[6], positions[7], positions[8]);
-
-    const vecA = new THREE.Vector3().subVectors(pointA, pointB).normalize();
-    const vecC = new THREE.Vector3().subVectors(pointC, pointB).normalize();
-
+export function calculateAngleLabelPosition(
+    centerAtom: THREE.Object3D,
+    firstAtom: THREE.Object3D,
+    thirdAtom: THREE.Object3D,
+    offsetDistance: number = 1.2
+): THREE.Vector3 {
+    const centerPos = getObjectCoordinate(centerAtom);
+    const firstPos = getObjectCoordinate(firstAtom);
+    const thirdPos = getObjectCoordinate(thirdAtom);
+    
+    // Create vectors from center to first and third points
+    const vecFirst = new THREE.Vector3().subVectors(firstPos, centerPos).normalize();
+    const vecThird = new THREE.Vector3().subVectors(thirdPos, centerPos).normalize();
+    
     // Calculate the bisector
-    const bisector = new THREE.Vector3().addVectors(vecA, vecC).normalize();
-
-    // Create the offset position
-    return pointB.clone().add(bisector.multiplyScalar(offset));
+    const bisector = new THREE.Vector3().addVectors(vecFirst, vecThird).normalize();
+    
+    // Position on the bisector at the given distance
+    return centerPos.clone().add(bisector.multiplyScalar(offsetDistance));
 }
 
 /**

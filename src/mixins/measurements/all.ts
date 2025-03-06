@@ -1,6 +1,5 @@
-import { showWarningAlert } from "@exabyte-io/cove.js/dist/other/alerts";
-
 import { MEASUREMENT_MODES, MEASUREMENT_MODES_ENUM } from "../../enums";
+import { AnglesMeasurementManager } from "./angle";
 import { CoordinatesMeasurementManager } from "./coordinate";
 import { DistancesMeasurementManager } from "./distance";
 
@@ -64,28 +63,40 @@ export const defaultMeasurementsSettings = [
 
 export const AllMeasurementsMixin = (superclass) =>
     class extends superclass {
-        measurementManagers: (CoordinatesMeasurementManager | DistancesMeasurementManager)[] = [];
+        measurementManagers: (
+            | CoordinatesMeasurementManager
+            | DistancesMeasurementManager
+            | AnglesMeasurementManager
+        )[] = [];
 
         bypassReloadViewer = false;
 
         initializeMeasurementManagers(updateState: any) {
-            // const anglesMeasurementManager = new AnglesMeasurementManager(this.structureGroup);
             const distancesMeasurementManager = new DistancesMeasurementManager(
                 this.structureGroup,
                 this.camera,
                 this,
                 updateState,
             );
+
             const coordinatesMeasurementManager = new CoordinatesMeasurementManager(
                 this.structureGroup,
                 this.camera,
                 this,
                 updateState,
             );
+
+            const anglesMeasurementManager = new AnglesMeasurementManager(
+                this.structureGroup,
+                this.camera,
+                this,
+                updateState,
+            );
+
             this.measurementManagers.push(
                 coordinatesMeasurementManager,
-                // anglesMeasurementManager,
                 distancesMeasurementManager,
+                anglesMeasurementManager,
             );
         }
 
