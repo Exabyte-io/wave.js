@@ -54,16 +54,15 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     }
 
     toggleActive = () => {
-        this.toggleVisibility();
         this.isActive = !this.isActive;
-        if (!this.isActive) {
-            this.resetMeasurements();
-            this.destroyListeners();
-            this.wave.setCursorStyle();
-        } else {
+        if (this.isActive) {
             this.wave.setCursorStyle("pointer");
             this.initListeners(this.updateState);
+        } else {
+            this.destroyListeners();
+            this.wave.setCursorStyle();
         }
+        this.toggleVisibility();
     };
 
     getSelectedAtomIndices() {
@@ -237,9 +236,10 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
 
     resetMeasurements() {
         this.selectedAtoms.forEach((atom) => {
-            setColorForAtom(atom);
+            this.unsetAtomAsSelected(atom);
         });
         this.selectedAtoms = [];
+        this.values = [];
         this.THREEGroup.clear();
         this.labelsManager.THREEGroup.clear();
     }

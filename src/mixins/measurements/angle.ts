@@ -42,9 +42,8 @@ export class AnglesMeasurementManager extends BaseMeasurementManager<AngleLabels
         this.selectedAtoms.push(atom);
     }
 
-    override extractMeasurementValues(): number[][] {
-        // Return as number[][] to match the interface in BaseMeasurementManager
-        return this.getAnglesFromSelectedAtoms().map((angle) => [angle]);
+    override extractMeasurementValues(): number[] {
+        return this.getAnglesFromSelectedAtoms().map((angle) => angle);
     }
 
     override getLabelObjectsFromSelectedObjects(): THREE.Object3D[] {

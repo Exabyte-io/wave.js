@@ -1,5 +1,6 @@
 import { MEASUREMENT_MODES, MEASUREMENT_MODES_ENUM } from "../../enums";
 import { AnglesMeasurementManager } from "./angle";
+import { BaseMeasurementManager } from "./base";
 import { CoordinatesMeasurementManager } from "./coordinate";
 import { DistancesMeasurementManager } from "./distance";
 
@@ -121,6 +122,10 @@ export const AllMeasurementsMixin = (superclass: any) =>
                 this.initializeMeasurementManagers(updateState);
             }
             const measurementManager = this.getMeasurementManagerByType(measurementType);
+            const activeManager = this.getActiveMeasurementManager();
+            if (activeManager && activeManager.measurementType !== measurementType) {
+                activeManager.toggleActive();
+            }
             measurementManager?.toggleActive();
         }
 
