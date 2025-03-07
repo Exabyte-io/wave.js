@@ -2,7 +2,7 @@ import expect from "expect";
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME } from "../../../src/enums";
-import { getObjectCoordinate } from "../../../src/mixins/threeJsUtils";
+import { getAtomWorldPosition, getObjectCoordinate } from "../../../src/mixins/threeJsUtils";
 import { getWaveInstance } from "../../enums";
 
 describe("Atom labels", () => {
@@ -27,16 +27,14 @@ describe("Atom labels", () => {
         const basisAtomsNumber = wave.structure.basis.elements.length;
 
         expect(labelGroup.children.length).toEqual(atoms.length);
-
         atoms.forEach((atom, index) => {
             const atomName = atom.userData.symbolWithLabel;
             const atomPosition = getObjectCoordinate(atom);
 
-            const offsetVector = elementLabelManager.getLabelPositionWithOffset(
+            const expectedLabelPosition = elementLabelManager.getLabelPositionWithOffset(
                 atomPosition,
                 atomName,
             );
-            const expectedLabelPosition = atomPosition.clone().add(offsetVector);
 
             const label = labelGroup.children[index];
             const positionDistance = label.position.distanceTo(expectedLabelPosition);
@@ -74,7 +72,7 @@ describe("Atom labels", () => {
             if (!labelPointsByAtomName) return false;
             const positions = labelPointsByAtomName.geometry.getAttribute("position")?.array;
             let hasLabel = false;
-            const atomPosition = getObjectCoordinate(atom);
+            const atomPosition = getAtomWorldPosition(atom);
             for (let i = 0; i < positions.length; i += 3) {
                 const x = positions[i];
                 const y = positions[i + 1];
