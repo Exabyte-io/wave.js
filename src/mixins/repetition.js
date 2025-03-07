@@ -78,43 +78,34 @@ export const RepetitionMixin = (superclass) =>
         }
 
         /**
-         * Gets repetition information including coordinates and dimensions
-         * Used by both object and atom repetition functions
+         * Gets repetition information including coordinates and dimensions.
+         * Used by both object and atom repetition functions.
          */
         getRepetitionInfo() {
-            const {
-                settings: {
-                    repetitionsAlongLatticeVectorA,
-                    repetitionsAlongLatticeVectorB,
-                    repetitionsAlongLatticeVectorC,
-                },
-            } = this;
+            const { settings } = this;
 
-            const maxRepetitions = Math.max(
-                repetitionsAlongLatticeVectorA,
-                repetitionsAlongLatticeVectorB,
-                repetitionsAlongLatticeVectorC,
-            );
+            const repetitions = {
+                repetitionsAlongLatticeVectorA: settings.repetitionsAlongLatticeVectorA,
+                repetitionsAlongLatticeVectorB: settings.repetitionsAlongLatticeVectorB,
+                repetitionsAlongLatticeVectorC: settings.repetitionsAlongLatticeVectorC,
+            };
+
+            const maxRepetitions = Math.max(...Object.values(repetitions));
 
             const allCoordinates = this.repetitionCoordinates(maxRepetitions);
 
-            const addedObjectsCoordinates = this.coordinatesByAxes(allCoordinates, {
-                repetitionsAlongLatticeVectorA,
-                repetitionsAlongLatticeVectorB,
-                repetitionsAlongLatticeVectorC,
-            }).slice(1); // Skip the first point (original position)
+            const addedObjectsCoordinates = this.coordinatesByAxes(
+                allCoordinates,
+                repetitions,
+            ).slice(1); // Skip original position
 
             return {
                 coordinates: addedObjectsCoordinates,
-                originalRepetitions: {
-                    repetitionsAlongLatticeVectorA,
-                    repetitionsAlongLatticeVectorB,
-                    repetitionsAlongLatticeVectorC,
-                },
+                originalRepetitions: { ...repetitions },
                 dimensions: {
-                    dimA: repetitionsAlongLatticeVectorA || 1,
-                    dimB: repetitionsAlongLatticeVectorB || 1,
-                    dimC: repetitionsAlongLatticeVectorC || 1,
+                    dimA: repetitions.repetitionsAlongLatticeVectorA || 1,
+                    dimB: repetitions.repetitionsAlongLatticeVectorB || 1,
+                    dimC: repetitions.repetitionsAlongLatticeVectorC || 1,
                 },
             };
         }
