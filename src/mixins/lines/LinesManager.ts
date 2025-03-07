@@ -3,36 +3,36 @@ import * as THREE from "three";
 import { ATOM_CONNECTION_LINE_NAME } from "../../enums";
 import settings from "../../settings";
 import { BaseTHREEGroupManager } from "../base";
-import { calculateMidpoint, getObjectCoordinate } from "../threeJsUtils";
+import { calculateMidpoint, getAtomWorldPosition } from "../threeJsUtils";
 
 export class LinesManager extends BaseTHREEGroupManager {
     /**
      * Creates a line between two atoms
      */
     createLineBetweenAtoms(firstAtom: THREE.Object3D, secondAtom: THREE.Object3D): THREE.Line {
-        const firstAtomPoint = firstAtom.position.clone();
-        const secondAtomPoint = secondAtom.position.clone();
+        const firstAtomPoint = getAtomWorldPosition(firstAtom);
+        const secondAtomPoint = getAtomWorldPosition(secondAtom);
 
-        const geometry = new THREE.BufferGeometry().setFromPoints([
-            firstAtomPoint,
-            secondAtomPoint,
-        ]);
-        const material = new THREE.LineBasicMaterial({ color: settings.colors.amber });
-        const line = new THREE.Line(geometry, material);
+        const line = this.createLineBetweenPoints(firstAtomPoint, secondAtomPoint);
 
         line.userData.atomicIndices = [
             firstAtom.userData.atomicIndex,
             secondAtom.userData.atomicIndex,
         ];
-        line.name = ATOM_CONNECTION_LINE_NAME;
 
         this.THREEGroup.add(line);
         return line;
     }
 
-    /**
-     * Creates lines between pairs of atoms
-     */
+    private createLineBetweenPoints(start: THREE.Vector3, end: THREE.Vector3): THREE.Line {
+        const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
+        const material = new THREE.LineBasicMaterial({ color: settings.colors.amber });
+        const line = new THREE.Line(geometry, material);
+        line.name = ATOM_CONNECTION_LINE_NAME;
+
+        return line;
+    }
+
     createLinesFromAtomPairs(atomPairs: THREE.Object3D[][]): THREE.Line[] {
         return atomPairs.map((pair) => {
             const line = this.createLineBetweenAtoms(pair[0], pair[1]);

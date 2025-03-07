@@ -25,6 +25,22 @@ export function getObjectCoordinateAsArray(object: THREE.Object3D): number[] {
 }
 
 /**
+ * Gets the world position of an atom, accounting for repetition
+ */
+export function getAtomWorldPosition(atom: THREE.Object3D): THREE.Vector3 {
+    const position = new THREE.Vector3();
+
+    // If we have a cached world position (for repeated atoms), use it
+    if (atom.userData && atom.userData.worldPosition) {
+        position.copy(atom.userData.worldPosition);
+    } else {
+        atom.getWorldPosition(position);
+    }
+
+    return position;
+}
+
+/**
  * Calculates the angle between three points in 3D space
  */
 export function calculateAngleBetweenPoints(
