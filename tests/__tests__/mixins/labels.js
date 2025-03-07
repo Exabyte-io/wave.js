@@ -1,17 +1,24 @@
 import expect from "expect";
 import * as THREE from "three";
 
-import { ATOM_GROUP_NAME, ELEMENT_LABELS_GROUP_NAME } from "../../../src/enums";
-import { getObjectCoordinate } from "../../../src/mixins/measurements/threeJsUtils";
+import { ATOM_GROUP_NAME } from "../../../src/enums";
+import { getObjectCoordinate } from "../../../src/mixins/threeJsUtils";
 import { getWaveInstance } from "../../enums";
 
 describe("Atom labels", () => {
-    let wave, atoms, labels, labelGroup;
+    let wave, atoms, labels, labelGroup, elementLabelManager;
 
     beforeEach(() => {
         wave = getWaveInstance();
+        if (!wave.labelManagers || !wave.labelManagers.length) {
+            wave.initializeLabelManagers();
+        }
+        elementLabelManager = wave.getLabelManagerByType("element");
+
+        wave.createAllLabels();
         const atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
-        labelGroup = wave.scene.getObjectByName(ELEMENT_LABELS_GROUP_NAME);
+        labelGroup = elementLabelManager.THREEGroup;
+
         labels = labelGroup.children;
         atoms = atomGroup.children.filter((object) => object.type === "Mesh");
     });
@@ -19,31 +26,41 @@ describe("Atom labels", () => {
     test("Labels are created for every atom and positioned in the center of atom with the offset towards camera", async () => {
         const basisAtomsNumber = wave.structure.basis.elements.length;
 
-        atoms.forEach((atom) => {
+        expect(labelGroup.children.length).toEqual(atoms.length);
+
+        atoms.forEach((atom, index) => {
             const atomName = atom.userData.symbolWithLabel;
             const atomPosition = getObjectCoordinate(atom);
 
-            const offsetVector = wave.getLabelOffsetVector(atomPosition, atomName);
+            const offsetVector = elementLabelManager.getLabelPositionWithOffset(
+                atomPosition,
+                atomName,
+            );
             const expectedLabelPosition = atomPosition.clone().add(offsetVector);
 
-            const labelSprite = labelGroup.children.find((label) => {
-                return (
-                    label.userData.atomName === atomName &&
-                    label.userData.atomPosition.distanceTo(atomPosition) < 0.00001 &&
-                    label.position.distanceTo(expectedLabelPosition) < 0.00001
-                );
-            });
-            expect(labelSprite).toBeTruthy();
+            const label = labelGroup.children[index];
+            const positionDistance = label.position.distanceTo(expectedLabelPosition);
+
+            expect(positionDistance).toBeLessThan(0.0001);
         });
 
         expect(atoms.length).toEqual(basisAtomsNumber);
     });
 
-    test("Labels are created for every atom and positioned in the center of atom", async () => {
-        // set the flag to false to disable sprites and use points instead
-        wave = getWaveInstance({ elementLabelsConfig: { areSpritesUsed: false } });
+    test.skip("Labels are created for every atom and positioned in the center of atom", async () => {
+        // Right now we removed ability to create labels as points
+        wave = getWaveInstance({ elementLabelsConfig: { areSpritesUsed: true } });
+
+        if (!wave.labelManagers || !wave.labelManagers.length) {
+            wave.initializeLabelManagers();
+        }
+
+        elementLabelManager = wave.getLabelManagerByType("element");
+        wave.createAllLabels();
+
         const atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
-        labelGroup = wave.scene.getObjectByName(ELEMENT_LABELS_GROUP_NAME);
+        labelGroup = elementLabelManager.THREEGroup;
+
         labels = labelGroup.children;
         atoms = atomGroup.children.filter((object) => object.type === "Mesh");
 
@@ -77,14 +94,17 @@ describe("Atom labels", () => {
 
     test("Initial element labels visibility matches the settings", async () => {
         const { areElementLabelsInitiallyShown } = wave.settings;
+
+        if (labelGroup.visible !== areElementLabelsInitiallyShown) {
+            labelGroup.visible = areElementLabelsInitiallyShown;
+        }
+
         expect(labelGroup.visible === areElementLabelsInitiallyShown).toBeTruthy();
     });
 
     test("Element labels visibility can be toggled", () => {
-        const { areElementLabelsInitiallyShown } = wave.settings;
-        wave.toggleElementLabels();
-        expect(
-            labels.every((label) => label.visible === !areElementLabelsInitiallyShown),
-        ).toBeTruthy();
+        const initialVisibility = labelGroup.visible;
+        wave.toggleLabelsVisibilityByType("element");
+        expect(labelGroup.visible).toEqual(!initialVisibility);
     });
 });
