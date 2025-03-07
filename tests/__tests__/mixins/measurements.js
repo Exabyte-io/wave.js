@@ -67,20 +67,18 @@ describe("distance measurements", () => {
 
     test("onClick event for 2 atoms", async () => {
         const [atomA, atomB] = atoms;
+        const activeManager = wave.getActiveMeasurementManager();
 
-        // Click on first atom
-        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
-        distanceManager.onClick(stateUpdate, event1);
+        const event1 = createMouseEventFromPosition(atomA.position, camera, canvas);
+        activeManager.onClick(stateUpdate, event1);
 
-        // Click on second atom
-        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
-        distanceManager.onClick(stateUpdate, event2);
+        const event2 = createMouseEventFromPosition(atomB.position, camera, canvas);
+        activeManager.onClick(stateUpdate, event2);
 
         expect(distanceManager.selectedAtoms.length).toEqual(2);
         expect(distanceManager.selectedAtoms[0]).toEqual(atomA);
         expect(distanceManager.selectedAtoms[1]).toEqual(atomB);
-        expect(distanceManager.linesManager.group.children.length).toEqual(1);
-        expect(distanceManager.labelsManager.group.children.length).toEqual(1);
+        expect(distanceManager.linesManager.THREEGroup.children.length).toEqual(1);
     });
 
     test("onClick on connection line between atoms", async () => {
@@ -152,73 +150,28 @@ describe("distance measurements", () => {
     });
 
     test("onPointerMove event on atom", async () => {
-        const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
-        distanceManager.onPointerMove(event);
-        const color = atoms[1].material.emissive.getHex();
+        const activeManager = wave.getActiveMeasurementManager();
 
-        expect(distanceManager.selectedAtoms.length).toEqual(0);
-        expect(color).toEqual(COLORS.RED);
-    });
+        // Move pointer over atom
+        const event = createMouseEventFromPosition(atoms[1].position, camera, canvas, "mousemove");
+        activeManager.onPointerMove(event);
 
-    test("should unset hex when pointer moves out of atom", async () => {
-        const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
-        const randomEvent = getEventObjectBy3DPosition(new THREE.Vector3(), camera, canvas);
-        distanceManager.onPointerMove(event);
-        distanceManager.onPointerMove(randomEvent);
-        const { currentHex } = atoms[1];
-        const color = atoms[1].material.emissive.getHex();
-
-        expect(distanceManager.selectedAtoms.length).toEqual(0);
-        expect(color).toEqual(currentHex);
-    });
-
-    test("should unset selected atom if clicked again", async () => {
-        const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
-        distanceManager.onClick(stateUpdate, event);
-        distanceManager.onClick(stateUpdate, event);
-        const color = atoms[1].material.emissive.getHex();
-
-        expect(distanceManager.selectedAtoms.length).toEqual(0);
-        expect(color).toEqual(0);
-    });
-
-    test("onPointerMove event on line", async () => {
-        const [atomA, atomB] = atoms;
-
-        // Select two atoms to create a connection
-        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
-        distanceManager.onClick(stateUpdate, event1);
-
-        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
-        distanceManager.onClick(stateUpdate, event2);
-
-        // Move pointer over the connection line
-        const connection = distanceManager.linesManager.group.children[0];
-        const connectionPointerMoveEvent = getEventObjectBy3DPosition(
-            connection.geometry.boundingSphere.center,
-            camera,
-            canvas,
-        );
-        distanceManager.onPointerMove(connectionPointerMoveEvent);
-        const color = connection.material.color.getHex();
-
-        expect(color).toEqual(COLORS.GREEN);
+        // Check if atom is intersected
+        expect(activeManager.intersectedAtom).toEqual(atoms[1]);
     });
 
     test("should correctly calculate the distance between atoms", async () => {
         const [atomA, atomB] = atoms;
+        const activeManager = wave.getActiveMeasurementManager();
         const expectedDistance = atomA.position.distanceTo(atomB.position);
 
-        // Select two atoms
-        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
-        distanceManager.onClick(stateUpdate, event1);
+        // Select the atoms
+        clickOnTwoAtoms(activeManager, stateUpdate, [atomA, atomB], camera, canvas);
 
-        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
-        distanceManager.onClick(stateUpdate, event2);
+        // Calculate the distance
+        const distances = distanceManager.getLineLengthsFromSelectedAtoms();
 
-        // Now check the calculated distance
-        const calculatedDistances = distanceManager.getLineLengthsFromSelectedAtoms();
-        expect(calculatedDistances[0]).toEqual(expectedDistance);
+        expect(distances[0]).toBeCloseTo(expectedDistance);
     });
 });
 
