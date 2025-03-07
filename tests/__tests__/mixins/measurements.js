@@ -1,24 +1,43 @@
 import expect from "expect";
-import * as THREE from "three";
 
-import { ATOM_GROUP_NAME, COLORS } from "../../../src/enums";
+import { ATOM_GROUP_NAME, MEASUREMENT_MODES } from "../../../src/enums";
 import { getWaveInstance } from "../../enums";
-import { getEventObjectBy3DPosition, makeClickOn3Atoms, makeClickOnTwoAtoms } from "../../utils";
+import { createMouseEventFromPosition } from "../../utils";
+
+// Mock clipboard API for tests
+const mockClipboard = {
+    writeText: jest.fn(() => Promise.resolve()),
+};
+
+// Store original clipboard if it exists
+const originalClipboard = global.navigator?.clipboard;
+
+// Helper to click on two atoms using our new approach
+function clickOnTwoAtoms(manager, stateUpdate, atoms, camera, canvas) {
+    const [atomA, atomB] = atoms;
+    const event1 = createMouseEventFromPosition(atomA.position, camera, canvas);
+    const event2 = createMouseEventFromPosition(atomB.position, camera, canvas);
+
+    manager.onClick(stateUpdate, event1);
+    manager.onClick(stateUpdate, event2);
+}
 
 describe("distance measurements", () => {
-    let wave, atoms, camera, canvas;
+    let wave, atoms, camera, canvas, distanceManager;
     const stateUpdate = jest.fn();
-    const measurementSettings = {
-        isDistanceShown: true,
-        areAnglesShown: false,
-        measurementLabelsShown: false,
-        distance: 0,
-        angle: 0,
-    };
 
     beforeEach(() => {
+        if (!global.navigator) {
+            global.navigator = {};
+        }
+        global.navigator.clipboard = mockClipboard;
+
         wave = getWaveInstance();
-        wave.initListeners(stateUpdate, measurementSettings);
+        wave.initializeMeasurementManagers(stateUpdate);
+
+        wave.toggleMeasurementByType(MEASUREMENT_MODES.DISTANCE, stateUpdate);
+        distanceManager = wave.getMeasurementManagerByType(MEASUREMENT_MODES.DISTANCE);
+
         const atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
         camera = wave.camera;
         canvas = wave.renderer.domElement;
@@ -26,120 +45,162 @@ describe("distance measurements", () => {
     });
 
     afterEach(() => {
-        wave.destroyListeners();
-        wave.resetMeasurements();
+        wave.resetAllMeasurements();
+
+        if (originalClipboard) {
+            global.navigator.clipboard = originalClipboard;
+        } else {
+            delete global.navigator.clipboard;
+        }
+
+        mockClipboard.writeText.mockClear();
     });
 
     test("onClick event for single atom", async () => {
-        const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
-        wave.onClick(stateUpdate, event);
-        expect(wave.selectedAtoms.length).toEqual(1);
-        expect(wave.selectedAtoms[0]).toEqual(atoms[1]);
+        const event = createMouseEventFromPosition(atoms[1].position, camera, canvas);
+        const activeManager = wave.getActiveMeasurementManager();
+        activeManager.onClick(stateUpdate, event);
+
+        expect(distanceManager.selectedAtoms.length).toEqual(1);
+        expect(distanceManager.selectedAtoms[0]).toEqual(atoms[1]);
     });
 
     test("onClick event for 2 atoms", async () => {
         const [atomA, atomB] = atoms;
-        makeClickOnTwoAtoms(wave, atoms, stateUpdate);
-        const { selectedAtoms, atomConnections, measurementLabelsGroup } = wave;
 
-        expect(selectedAtoms.length).toEqual(2);
-        expect(selectedAtoms[0]).toEqual(atomA);
-        expect(selectedAtoms[1]).toEqual(atomB);
-        expect(atomConnections.children.length).toEqual(1);
-        expect(measurementLabelsGroup.children.length).toEqual(1);
+        // Click on first atom
+        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event1);
+
+        // Click on second atom
+        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event2);
+
+        expect(distanceManager.selectedAtoms.length).toEqual(2);
+        expect(distanceManager.selectedAtoms[0]).toEqual(atomA);
+        expect(distanceManager.selectedAtoms[1]).toEqual(atomB);
+        expect(distanceManager.linesManager.group.children.length).toEqual(1);
+        expect(distanceManager.labelsManager.group.children.length).toEqual(1);
     });
 
     test("onClick on connection line between atoms", async () => {
-        makeClickOnTwoAtoms(wave, atoms, stateUpdate);
-        const { atomConnections } = wave;
-        const connection = atomConnections.children[0];
+        const [atomA, atomB] = atoms;
+
+        // Select two atoms to create a connection
+        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event1);
+
+        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event2);
+
+        // Get the created connection line
+        const connection = distanceManager.linesManager.group.children[0];
         const connectionClickEvent = getEventObjectBy3DPosition(
             connection.geometry.boundingSphere.center,
             camera,
             canvas,
         );
-        wave.onClick(stateUpdate, connectionClickEvent);
+        distanceManager.onClick(stateUpdate, connectionClickEvent);
 
         expect(connection.userData.selected).toBeTruthy();
-        expect(wave.currentSelectedLine).toEqual(connection);
+        expect(distanceManager.currentSelectedLine).toEqual(connection);
     });
 
     test("delete connection between 2 atoms", async () => {
-        makeClickOnTwoAtoms(wave, atoms, stateUpdate);
-        const { atomConnections } = wave;
-        const connection = atomConnections.children[0];
+        const [atomA, atomB] = atoms;
+
+        // Select two atoms to create a connection
+        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event1);
+
+        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event2);
+
+        // Get the created connection line and click on it
+        const connection = distanceManager.linesManager.group.children[0];
         const connectionClickEvent = getEventObjectBy3DPosition(
             connection.geometry.boundingSphere.center,
             camera,
             canvas,
         );
-        wave.onClick(stateUpdate, connectionClickEvent);
-        wave.deleteConnection();
+        distanceManager.onClick(stateUpdate, connectionClickEvent);
 
-        expect(wave.selectedAtoms.length).toEqual(0);
-        expect(wave.currentSelectedLine).toEqual(null);
-        expect(atomConnections.children.length).toEqual(0);
+        // Delete the connection
+        distanceManager.deleteConnection();
+
+        expect(distanceManager.selectedAtoms.length).toEqual(0);
+        expect(distanceManager.currentSelectedLine).toEqual(null);
+        expect(distanceManager.linesManager.group.children.length).toEqual(0);
     });
 
     test("full reset of measurements", async () => {
-        makeClickOnTwoAtoms(wave, atoms, stateUpdate);
-        const { atomConnections } = wave;
-        const connection = atomConnections.children[0];
-        const connectionClickEvent = getEventObjectBy3DPosition(
-            connection.geometry.boundingSphere.center,
-            camera,
-            canvas,
-        );
-        wave.onClick(stateUpdate, connectionClickEvent);
-        wave.resetMeasurements();
+        const [atomA, atomB] = atoms;
 
-        expect(wave.selectedAtoms.length).toEqual(0);
-        expect(wave.currentSelectedLine).toEqual(null);
-        expect(atomConnections.children.length).toEqual(0);
+        // Select two atoms to create a connection
+        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event1);
+
+        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event2);
+
+        // Reset measurements
+        distanceManager.resetMeasurements();
+
+        expect(distanceManager.selectedAtoms.length).toEqual(0);
+        expect(distanceManager.currentSelectedLine).toEqual(null);
+        expect(distanceManager.linesManager.group.children.length).toEqual(0);
     });
 
     test("onPointerMove event on atom", async () => {
         const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
-        wave.onPointerMove(event);
+        distanceManager.onPointerMove(event);
         const color = atoms[1].material.emissive.getHex();
 
-        expect(wave.selectedAtoms.length).toEqual(0);
+        expect(distanceManager.selectedAtoms.length).toEqual(0);
         expect(color).toEqual(COLORS.RED);
     });
 
     test("should unset hex when pointer moves out of atom", async () => {
         const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
         const randomEvent = getEventObjectBy3DPosition(new THREE.Vector3(), camera, canvas);
-        wave.onPointerMove(event);
-        wave.onPointerMove(randomEvent);
+        distanceManager.onPointerMove(event);
+        distanceManager.onPointerMove(randomEvent);
         const { currentHex } = atoms[1];
         const color = atoms[1].material.emissive.getHex();
 
-        expect(wave.selectedAtoms.length).toEqual(0);
+        expect(distanceManager.selectedAtoms.length).toEqual(0);
         expect(color).toEqual(currentHex);
     });
 
     test("should unset selected atom if clicked again", async () => {
         const event = getEventObjectBy3DPosition(atoms[1].position, camera, canvas);
-        wave.onClick(stateUpdate, event);
-        wave.onClick(stateUpdate, event);
+        distanceManager.onClick(stateUpdate, event);
+        distanceManager.onClick(stateUpdate, event);
         const color = atoms[1].material.emissive.getHex();
 
-        expect(wave.selectedAtoms.length).toEqual(0);
+        expect(distanceManager.selectedAtoms.length).toEqual(0);
         expect(color).toEqual(0);
     });
 
     test("onPointerMove event on line", async () => {
-        makeClickOnTwoAtoms(wave, atoms, stateUpdate);
-        const { atomConnections } = wave;
-        const connection = atomConnections.children[0];
+        const [atomA, atomB] = atoms;
+
+        // Select two atoms to create a connection
+        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event1);
+
+        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event2);
+
+        // Move pointer over the connection line
+        const connection = distanceManager.linesManager.group.children[0];
         const connectionPointerMoveEvent = getEventObjectBy3DPosition(
             connection.geometry.boundingSphere.center,
             camera,
             canvas,
         );
-        wave.onPointerMove(connectionPointerMoveEvent);
-        const color = wave.atomConnections.children[0].material.color.getHex();
+        distanceManager.onPointerMove(connectionPointerMoveEvent);
+        const color = connection.material.color.getHex();
 
         expect(color).toEqual(COLORS.GREEN);
     });
@@ -148,26 +209,22 @@ describe("distance measurements", () => {
         const [atomA, atomB] = atoms;
         const expectedDistance = atomA.position.distanceTo(atomB.position);
 
-        const receivedDistance = wave.calculateDistanceBetweenAtoms(atoms);
-        expect(receivedDistance).toEqual(expectedDistance);
+        // Select two atoms
+        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event1);
+
+        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
+        distanceManager.onClick(stateUpdate, event2);
+
+        // Now check the calculated distance
+        const calculatedDistances = distanceManager.getLineLengthsFromSelectedAtoms();
+        expect(calculatedDistances[0]).toEqual(expectedDistance);
     });
 });
 
 describe("angles measurements", () => {
-    let wave,
-        atoms,
-        camera,
-        // eslint-disable-next-line no-unused-vars
-        atomGroup,
-        canvas;
+    let wave, atoms, camera, canvas, angleManager;
     const stateUpdate = jest.fn();
-    const measurementSettings = {
-        isDistanceShown: false,
-        areAnglesShown: true,
-        measurementLabelsShown: false,
-        distance: 0,
-        angle: 0,
-    };
 
     const repetitionSettings = {
         atomRadiiScale: 0.2,
@@ -178,76 +235,86 @@ describe("angles measurements", () => {
 
     beforeEach(() => {
         wave = getWaveInstance({ ...repetitionSettings });
-        wave.initListeners(stateUpdate, measurementSettings);
-        atomGroup = wave.scene.getObjectByName(ATOM_GROUP_NAME);
+        wave.initializeMeasurementManagers(stateUpdate);
+
+        // Get and activate the angle measurement manager
+        angleManager = wave.getMeasurementManagerByType(MEASUREMENT_MODES.ANGLE);
+        wave.toggleMeasurementByType(MEASUREMENT_MODES.ANGLE, stateUpdate);
+
         camera = wave.camera;
         canvas = wave.renderer.domElement;
         atoms = wave.collectAllAtoms().slice(-3);
     });
 
     afterEach(() => {
-        wave.destroyListeners();
-        wave.resetMeasurements();
+        wave.resetAllMeasurements();
     });
 
     test("onClick event for 3 atoms", async () => {
-        makeClickOn3Atoms(wave, atoms, stateUpdate);
-        const { selectedAtoms, atomConnections, angles } = wave;
+        // Click on each of the 3 atoms
+        for (let i = 0; i < 3; i++) {
+            const event = getEventObjectBy3DPosition(atoms[i].position, camera, canvas);
+            angleManager.onClick(stateUpdate, event);
+        }
 
-        expect(selectedAtoms.length).toEqual(3);
-        expect(selectedAtoms).toEqual(atoms);
-        expect(atomConnections.children.length).toEqual(2);
-        expect(angles.children.length).toEqual(1);
+        expect(angleManager.selectedAtoms.length).toEqual(3);
+        expect(angleManager.selectedAtoms).toEqual(atoms);
+        expect(angleManager.linesManager.group.children.length).toEqual(2);
+        expect(angleManager.angleArcObjects.length).toEqual(1);
     });
 
-    test("onClick on angle line between atoms", async () => {
-        makeClickOn3Atoms(wave, atoms, stateUpdate);
-        const { angles } = wave;
-        const angle = angles.children[0];
-        const angleClickEvent = getEventObjectBy3DPosition(
-            angle.geometry.boundingSphere.center,
-            camera,
-            canvas,
-        );
-        wave.onClick(stateUpdate, angleClickEvent);
+    test("onClick on angle arc between atoms", async () => {
+        // Click on each of the 3 atoms to create an angle
+        for (let i = 0; i < 3; i++) {
+            const event = getEventObjectBy3DPosition(atoms[i].position, camera, canvas);
+            angleManager.onClick(stateUpdate, event);
+        }
 
-        expect(angle.userData.selected).toBeTruthy();
-        expect(wave.currentSelectedLine).toEqual(angle);
+        // Get the angle arc and click on it
+        const angleArc = angleManager.angleArcObjects[0];
+        const angleClickEvent = getEventObjectBy3DPosition(angleArc.position, camera, canvas);
+        angleManager.onClick(stateUpdate, angleClickEvent);
+
+        expect(angleArc.userData.selected).toBeTruthy();
+        expect(angleManager.currentSelectedLine).toEqual(angleArc);
     });
 
-    test("onPointerMove event on angle line", async () => {
-        makeClickOn3Atoms(wave, atoms, stateUpdate);
-        const { angles } = wave;
-        const angle = angles.children[0];
-        const anglePointerMoveEvent = getEventObjectBy3DPosition(
-            angle.geometry.boundingSphere.center,
-            camera,
-            canvas,
-        );
-        wave.onPointerMove(anglePointerMoveEvent);
-        const color = wave.angles.children[0].material.color.getHex();
+    test("onPointerMove event on angle arc", async () => {
+        // Click on each of the 3 atoms to create an angle
+        for (let i = 0; i < 3; i++) {
+            const event = getEventObjectBy3DPosition(atoms[i].position, camera, canvas);
+            angleManager.onClick(stateUpdate, event);
+        }
 
+        // Move pointer over the angle arc
+        const angleArc = angleManager.angleArcObjects[0];
+        const anglePointerMoveEvent = getEventObjectBy3DPosition(angleArc.position, camera, canvas);
+        angleManager.onPointerMove(anglePointerMoveEvent);
+
+        const color = angleArc.material.color.getHex();
         expect(color).toEqual(COLORS.GREEN);
     });
 
-    test("should unset color when pointer moves out of line", async () => {
-        makeClickOn3Atoms(wave, atoms, stateUpdate);
-        const { angles } = wave;
-        const angle = angles.children[0];
-        const anglePointerMoveEvent = getEventObjectBy3DPosition(
-            angle.geometry.boundingSphere.center,
-            camera,
-            canvas,
-        );
+    test("should unset color when pointer moves out of angle arc", async () => {
+        // Click on each of the 3 atoms to create an angle
+        for (let i = 0; i < 3; i++) {
+            const event = getEventObjectBy3DPosition(atoms[i].position, camera, canvas);
+            angleManager.onClick(stateUpdate, event);
+        }
+
+        // Move pointer over and then away from the angle arc
+        const angleArc = angleManager.angleArcObjects[0];
+        const anglePointerMoveEvent = getEventObjectBy3DPosition(angleArc.position, camera, canvas);
         const randomPointerMoveEvent = getEventObjectBy3DPosition(
             new THREE.Vector3(),
             camera,
             canvas,
         );
-        wave.onPointerMove(anglePointerMoveEvent);
-        wave.onPointerMove(randomPointerMoveEvent);
-        const { currentHex } = wave.angles.children[0];
-        const color = wave.angles.children[0].material.color.getHex();
+        angleManager.onPointerMove(anglePointerMoveEvent);
+        angleManager.onPointerMove(randomPointerMoveEvent);
+
+        const { currentHex } = angleArc;
+        const color = angleArc.material.color.getHex();
 
         expect(color).toEqual(currentHex);
     });
