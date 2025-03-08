@@ -129,9 +129,6 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
     }
 
     toggleLineSelection(line: THREE.Line) {
-        console.log("toggleLineSelection", line);
-        console.log("selected line", this.currentSelectedLine);
-
         if (line.userData.selected) {
             this.handleLineDeselection(line);
         } else {
@@ -165,15 +162,12 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         if (!this.isActive) return;
         this.checkMouseCoordinates(event, this.waveCamera);
         const intersects = this.getIntersections();
-        console.log("INTERSECTS", intersects);
-
         intersects.forEach((object: THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>) => {
             if (isIntersectionObjectAnAtom(object)) {
                 const atom = object.object;
                 this.toggleAtomSelection(atom);
             }
             if (object.object.type === "Line") {
-                console.log("LINE", object.object);
                 this.toggleLineSelection(object.object);
             }
         });

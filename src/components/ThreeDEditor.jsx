@@ -304,15 +304,6 @@ export class ThreeDEditor extends React.Component {
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
     handleResetViewer() {
-        // const { measurementsSettings } = this.state;
-        // this.setState({
-        //     measurementsSettings: {
-        //         ...measurementsSettings,
-        //         isDistanceShown: false,
-        //         areAnglesShown: false,
-        //         areCoordinatesShown: false,
-        //     },
-        // });
         this.WaveComponent.initViewer();
         this._resetStateWaveComponent();
     }
