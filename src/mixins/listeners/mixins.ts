@@ -33,7 +33,7 @@ export const RaycasterMixinWithListeners = <T extends Constructor>(superclass: T
 
         pointer: THREE.Vector2 = new THREE.Vector2();
 
-        intersectedAtom: THREE.Object3D | null = null;
+        intersectedObject: THREE.Object3D | null = null;
 
         initRaycaster() {
             this.raycaster = new THREE.Raycaster();

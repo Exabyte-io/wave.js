@@ -137,4 +137,18 @@ export const AllMeasurementsMixin = (superclass: any) =>
         resetAllMeasurements() {
             this.measurementManagers.forEach((manager) => manager.resetMeasurements());
         }
+
+
+deleteConnection() {
+    const activeManager = this.getActiveMeasurementManager();
+    if (activeManager && activeManager.currentSelectedLine) {
+        activeManager.deleteSelectedLine();
+        this.render();
+        
+        // Update state if needed
+        if (activeManager.updateState) {
+            activeManager.updateState(activeManager.getSettings());
+        }
+    }
+}
     };

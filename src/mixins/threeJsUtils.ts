@@ -164,3 +164,7 @@ export function unsetAtomAsHovered(atom: THREE.Object3D): void {
     atomObject.userData.hovered = false;
     setColorForAtom(atom);
 }
+
+export function isObjectAnAtom(object: THREE.Object3D): object is AtomObject {
+    return object instanceof THREE.Mesh;
+}

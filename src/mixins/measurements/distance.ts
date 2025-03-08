@@ -13,10 +13,6 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
     override LabelsManagerCls: LabelsManagerConstructor<DistanceLabelsManager> =
         DistanceLabelsManager;
 
-    currentSelectedLine: THREE.Line | null = null;
-
-    linesManager: LinesManager;
-
     constructor(
         waveStructureGroup: THREE.Group,
         waveCamera: THREE.Camera,
@@ -32,7 +28,6 @@ export class DistancesMeasurementManager extends BaseMeasurementManager<Distance
             groupName,
         );
         this.currentSelectedLine = null;
-        this.linesManager = new LinesManager(waveStructureGroup, waveCamera, wave, groupName);
     }
 
     // @ts-ignore

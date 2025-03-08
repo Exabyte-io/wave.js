@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import { ATOM_CONNECTION_LINE_NAME } from "../../enums";
+import { ATOM_CONNECTION_LINE_NAME, COLORS } from "../../enums";
 import settings from "../../settings";
 import { BaseTHREEGroupManager } from "../base";
 import { calculateMidpoint, getAtomWorldPosition } from "../threeJsUtils";
@@ -41,6 +41,41 @@ export class LinesManager extends BaseTHREEGroupManager {
     }
 
     /**
+     * Creates an angle line connecting three atoms
+     */
+    createAngleBetweenAtoms(
+        firstAtom: THREE.Object3D,
+        middleAtom: THREE.Object3D,
+        lastAtom: THREE.Object3D,
+    ): THREE.Line {
+        // Create a line geometry with three points
+        const firstPoint = getAtomWorldPosition(firstAtom);
+        const middlePoint = getAtomWorldPosition(middleAtom);
+        const lastPoint = getAtomWorldPosition(lastAtom);
+
+        const geometry = new THREE.BufferGeometry().setFromPoints([
+            firstPoint,
+            middlePoint,
+            lastPoint,
+        ]);
+
+        const material = new THREE.LineBasicMaterial({ color: settings.colors.amber });
+        const line = new THREE.Line(geometry, material);
+        line.name = ATOM_CONNECTION_LINE_NAME;
+
+        line.userData.atomicIndices = [
+            firstAtom.userData.atomicIndex,
+            middleAtom.userData.atomicIndex,
+            lastAtom.userData.atomicIndex,
+        ];
+
+        line.userData.isAngleLine = true;
+
+        this.THREEGroup.add(line);
+        return line;
+    }
+
+    /**
      * Gets the center position of a line
      */
     getLineCenterPosition(line: THREE.Line): THREE.Vector3 {
@@ -67,5 +102,42 @@ export class LinesManager extends BaseTHREEGroupManager {
         return this.THREEGroup.children.filter(
             (child) => child.type === "Line" && child.name === ATOM_CONNECTION_LINE_NAME,
         ) as THREE.Line[];
+    }
+
+    setLineAsHovered(line: THREE.Line): void {
+        if (!line.userData.selected) {
+            (line.material as THREE.LineBasicMaterial).color.set(COLORS.GREEN);
+        }
+        line.userData.hovered = true;
+    }
+
+    unsetLineAsHovered(line: THREE.Line): void {
+        if (!line.userData.selected) {
+            (line.material as THREE.LineBasicMaterial).color.set(settings.colors.amber);
+        }
+        line.userData.hovered = false;
+    }
+
+    setLineAsSelected(line: THREE.Line): void {
+        this.deselectAllLines();
+
+        line.userData.selected = true;
+        (line.material as THREE.LineBasicMaterial).color.set(COLORS.GREEN);
+    }
+
+    unsetLineAsSelected(line: THREE.Line): void {
+        line.userData.selected = false;
+        (line.material as THREE.LineBasicMaterial).color.set(
+            line.userData.hovered ? COLORS.GREEN : settings.colors.amber,
+        );
+    }
+
+    deselectAllLines(): void {
+        this.getLines().forEach((line) => {
+            line.userData.selected = false;
+            (line.material as THREE.LineBasicMaterial).color.set(
+                line.userData.hovered ? COLORS.GREEN : settings.colors.amber,
+            );
+        });
     }
 }
