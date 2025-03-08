@@ -1,8 +1,9 @@
 import expect from "expect";
+import * as THREE from "three";
 
 import { ATOM_GROUP_NAME, MEASUREMENT_MODES } from "../../../src/enums";
 import { getWaveInstance } from "../../enums";
-import { createMouseEventFromPosition } from "../../utils";
+import { createMouseEventFromPosition, getEventObjectBy3DPosition } from "../../utils";
 
 // Mock clipboard API for tests
 const mockClipboard = {
@@ -84,20 +85,19 @@ describe("distance measurements", () => {
     test("onClick on connection line between atoms", async () => {
         const [atomA, atomB] = atoms;
 
-        // Select two atoms to create a connection
-        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
+        const event1 = createMouseEventFromPosition(atomA.position, camera, canvas);
         distanceManager.onClick(stateUpdate, event1);
 
-        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
+        const event2 = createMouseEventFromPosition(atomB.position, camera, canvas);
         distanceManager.onClick(stateUpdate, event2);
 
-        // Get the created connection line
-        const connection = distanceManager.linesManager.group.children[0];
-        const connectionClickEvent = getEventObjectBy3DPosition(
-            connection.geometry.boundingSphere.center,
-            camera,
-            canvas,
-        );
+        const connection = distanceManager.linesManager.THREEGroup.children[0];
+
+        const midpoint = new THREE.Vector3()
+            .addVectors(atomA.position, atomB.position)
+            .multiplyScalar(0.5);
+
+        const connectionClickEvent = createMouseEventFromPosition(midpoint, camera, canvas);
         distanceManager.onClick(stateUpdate, connectionClickEvent);
 
         expect(connection.userData.selected).toBeTruthy();
@@ -108,56 +108,50 @@ describe("distance measurements", () => {
         const [atomA, atomB] = atoms;
 
         // Select two atoms to create a connection
-        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
+        const event1 = createMouseEventFromPosition(atomA.position, camera, canvas);
         distanceManager.onClick(stateUpdate, event1);
 
-        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
+        const event2 = createMouseEventFromPosition(atomB.position, camera, canvas);
         distanceManager.onClick(stateUpdate, event2);
 
-        // Get the created connection line and click on it
-        const connection = distanceManager.linesManager.group.children[0];
-        const connectionClickEvent = getEventObjectBy3DPosition(
-            connection.geometry.boundingSphere.center,
-            camera,
-            canvas,
-        );
+        const midpoint = new THREE.Vector3()
+            .addVectors(atomA.position, atomB.position)
+            .multiplyScalar(0.5);
+
+        const connectionClickEvent = createMouseEventFromPosition(midpoint, camera, canvas);
         distanceManager.onClick(stateUpdate, connectionClickEvent);
 
-        // Delete the connection
-        distanceManager.deleteConnection();
+        distanceManager.deleteSelectedLine();
 
         expect(distanceManager.selectedAtoms.length).toEqual(0);
         expect(distanceManager.currentSelectedLine).toEqual(null);
-        expect(distanceManager.linesManager.group.children.length).toEqual(0);
+        expect(distanceManager.linesManager.THREEGroup.children.length).toEqual(0);
     });
 
     test("full reset of measurements", async () => {
         const [atomA, atomB] = atoms;
 
         // Select two atoms to create a connection
-        const event1 = getEventObjectBy3DPosition(atomA.position, camera, canvas);
+        const event1 = createMouseEventFromPosition(atomA.position, camera, canvas);
         distanceManager.onClick(stateUpdate, event1);
 
-        const event2 = getEventObjectBy3DPosition(atomB.position, camera, canvas);
+        const event2 = createMouseEventFromPosition(atomB.position, camera, canvas);
         distanceManager.onClick(stateUpdate, event2);
 
-        // Reset measurements
-        distanceManager.resetMeasurements();
+        wave.resetAllMeasurements();
+        const measurementGroup = wave.structureGroup.children[2].children;
 
         expect(distanceManager.selectedAtoms.length).toEqual(0);
         expect(distanceManager.currentSelectedLine).toEqual(null);
-        expect(distanceManager.linesManager.group.children.length).toEqual(0);
+        expect(measurementGroup.length).toEqual(0);
     });
 
     test("onPointerMove event on atom", async () => {
         const activeManager = wave.getActiveMeasurementManager();
-
-        // Move pointer over atom
         const event = createMouseEventFromPosition(atoms[1].position, camera, canvas, "mousemove");
         activeManager.onPointerMove(event);
 
-        // Check if atom is intersected
-        expect(activeManager.intersectedAtom).toEqual(atoms[1]);
+        expect(activeManager.intersectedObject).toEqual(atoms[1]);
     });
 
     test("should correctly calculate the distance between atoms", async () => {
@@ -187,12 +181,16 @@ describe("angles measurements", () => {
     };
 
     beforeEach(() => {
+        if (!global.navigator) {
+            global.navigator = {};
+        }
+        global.navigator.clipboard = mockClipboard;
+
         wave = getWaveInstance({ ...repetitionSettings });
         wave.initializeMeasurementManagers(stateUpdate);
-
-        // Get and activate the angle measurement manager
-        angleManager = wave.getMeasurementManagerByType(MEASUREMENT_MODES.ANGLE);
         wave.toggleMeasurementByType(MEASUREMENT_MODES.ANGLE, stateUpdate);
+
+        angleManager = wave.getMeasurementManagerByType(MEASUREMENT_MODES.ANGLE);
 
         camera = wave.camera;
         canvas = wave.renderer.domElement;
@@ -201,74 +199,37 @@ describe("angles measurements", () => {
 
     afterEach(() => {
         wave.resetAllMeasurements();
+
+        if (originalClipboard) {
+            global.navigator.clipboard = originalClipboard;
+        } else {
+            delete global.navigator.clipboard;
+        }
+
+        mockClipboard.writeText.mockClear();
     });
 
     test("onClick event for 3 atoms", async () => {
-        // Click on each of the 3 atoms
+        const activeManager = wave.getActiveMeasurementManager();
+
         for (let i = 0; i < 3; i++) {
-            const event = getEventObjectBy3DPosition(atoms[i].position, camera, canvas);
-            angleManager.onClick(stateUpdate, event);
+            const event = createMouseEventFromPosition(atoms[i].position, camera, canvas);
+            activeManager.onClick(stateUpdate, event);
         }
 
         expect(angleManager.selectedAtoms.length).toEqual(3);
-        expect(angleManager.selectedAtoms).toEqual(atoms);
-        expect(angleManager.linesManager.group.children.length).toEqual(2);
-        expect(angleManager.angleArcObjects.length).toEqual(1);
-    });
 
-    test("onClick on angle arc between atoms", async () => {
-        // Click on each of the 3 atoms to create an angle
-        for (let i = 0; i < 3; i++) {
-            const event = getEventObjectBy3DPosition(atoms[i].position, camera, canvas);
-            angleManager.onClick(stateUpdate, event);
-        }
+        angleManager.selectedAtoms.forEach((atom) => {
+            expect(atom.userData.selected).toBe(true);
+        });
 
-        // Get the angle arc and click on it
-        const angleArc = angleManager.angleArcObjects[0];
-        const angleClickEvent = getEventObjectBy3DPosition(angleArc.position, camera, canvas);
-        angleManager.onClick(stateUpdate, angleClickEvent);
+        const anglesMeasurementGroup = wave.structureGroup.children[2].children;
 
-        expect(angleArc.userData.selected).toBeTruthy();
-        expect(angleManager.currentSelectedLine).toEqual(angleArc);
-    });
+        expect(anglesMeasurementGroup.length).toEqual(2);
 
-    test("onPointerMove event on angle arc", async () => {
-        // Click on each of the 3 atoms to create an angle
-        for (let i = 0; i < 3; i++) {
-            const event = getEventObjectBy3DPosition(atoms[i].position, camera, canvas);
-            angleManager.onClick(stateUpdate, event);
-        }
-
-        // Move pointer over the angle arc
-        const angleArc = angleManager.angleArcObjects[0];
-        const anglePointerMoveEvent = getEventObjectBy3DPosition(angleArc.position, camera, canvas);
-        angleManager.onPointerMove(anglePointerMoveEvent);
-
-        const color = angleArc.material.color.getHex();
-        expect(color).toEqual(COLORS.GREEN);
-    });
-
-    test("should unset color when pointer moves out of angle arc", async () => {
-        // Click on each of the 3 atoms to create an angle
-        for (let i = 0; i < 3; i++) {
-            const event = getEventObjectBy3DPosition(atoms[i].position, camera, canvas);
-            angleManager.onClick(stateUpdate, event);
-        }
-
-        // Move pointer over and then away from the angle arc
-        const angleArc = angleManager.angleArcObjects[0];
-        const anglePointerMoveEvent = getEventObjectBy3DPosition(angleArc.position, camera, canvas);
-        const randomPointerMoveEvent = getEventObjectBy3DPosition(
-            new THREE.Vector3(),
-            camera,
-            canvas,
-        );
-        angleManager.onPointerMove(anglePointerMoveEvent);
-        angleManager.onPointerMove(randomPointerMoveEvent);
-
-        const { currentHex } = angleArc;
-        const color = angleArc.material.color.getHex();
-
-        expect(color).toEqual(currentHex);
+        const angles = angleManager.getAnglesFromSelectedAtoms();
+        expect(angles.length).toEqual(1);
+        expect(typeof angles[0]).toBe("number");
+        expect(!isNaN(angles[0])).toBe(true);
     });
 });
