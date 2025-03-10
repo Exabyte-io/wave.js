@@ -1,9 +1,3 @@
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-};
-var _BaseLabelsManager_THREETexturesCache;
 import * as THREE from "three";
 import settings from "../../settings";
 import { BaseTHREEGroupManager } from "../base";
@@ -11,7 +5,7 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
     constructor() {
         super(...arguments);
         this.labelType = "";
-        _BaseLabelsManager_THREETexturesCache.set(this, {});
+        this.THREETexturesCache = {};
     }
     getOffsetVectorMultiplierPerAtomName(atomName) {
         if (!atomName)
@@ -53,10 +47,10 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         return texture;
     }
     getLabelTextTexture(text) {
-        if (__classPrivateFieldGet(this, _BaseLabelsManager_THREETexturesCache, "f")[text])
-            return __classPrivateFieldGet(this, _BaseLabelsManager_THREETexturesCache, "f")[text];
+        if (this.THREETexturesCache[text])
+            return this.THREETexturesCache[text];
         const texture = this.createLabelTextTexture(text);
-        __classPrivateFieldGet(this, _BaseLabelsManager_THREETexturesCache, "f")[text] = texture;
+        this.THREETexturesCache[text] = texture;
         return texture;
     }
     /**
@@ -121,4 +115,3 @@ export class BaseLabelsManager extends BaseTHREEGroupManager {
         });
     }
 }
-_BaseLabelsManager_THREETexturesCache = new WeakMap();

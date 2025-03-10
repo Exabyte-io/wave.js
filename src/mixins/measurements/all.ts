@@ -1,66 +1,8 @@
-import { MEASUREMENT_MODES, MEASUREMENT_MODES_ENUM } from "../../enums";
+import { MEASUREMENT_MODES_ENUM } from "../../enums";
 import { AnglesMeasurementManager } from "./angle";
-import { BaseMeasurementManager } from "./base";
 import { CoordinatesMeasurementManager } from "./coordinate";
 import { DistancesMeasurementManager } from "./distance";
-
-export type MeasurementSettingsForType = {
-    isActive: boolean;
-    measurementType: MEASUREMENT_MODES_ENUM;
-    values: any[];
-};
-
-export class MeasurementSettingsHandler {
-    measurementsSettings: MeasurementSettingsForType[];
-
-    constructor(measurementsSettings: MeasurementSettingsForType[]) {
-        this.measurementsSettings = measurementsSettings;
-        this.isMeasurementActiveByType = this.isMeasurementActiveByType.bind(this);
-    }
-
-    isMeasurementActiveByType(measurementType: MEASUREMENT_MODES_ENUM) {
-        const settingsForType = this.measurementsSettings.find(
-            (setting) => setting.measurementType === measurementType,
-        );
-        return Boolean(settingsForType?.isActive);
-    }
-
-    updateMeasurementSettingsByType(newSettings: MeasurementSettingsForType) {
-        const settingsForType = this.measurementsSettings.find(
-            (setting) => setting.measurementType === newSettings.measurementType,
-        );
-        if (settingsForType) {
-            Object.assign(settingsForType, newSettings);
-        }
-    }
-
-    getSettingsByType(measurementType: MEASUREMENT_MODES_ENUM) {
-        const settingsForType = this.measurementsSettings.find(
-            (setting) => setting.measurementType === measurementType,
-        );
-        if (!settingsForType) {
-            throw new Error(`No settings found for measurement type ${measurementType}`);
-        }
-    }
-}
-
-export const defaultMeasurementsSettings = [
-    {
-        isActive: false,
-        measurementType: MEASUREMENT_MODES.DISTANCE,
-        values: [],
-    },
-    {
-        isActive: false,
-        measurementType: MEASUREMENT_MODES.ANGLE,
-        values: [],
-    },
-    {
-        isActive: false,
-        measurementType: MEASUREMENT_MODES.COORDINATE,
-        values: [],
-    },
-];
+import { MeasurementSettingsHandler } from "./MeasurementSettingsHandler";
 
 export const AllMeasurementsMixin = (superclass: any) =>
     class extends superclass {
@@ -138,17 +80,16 @@ export const AllMeasurementsMixin = (superclass: any) =>
             this.measurementManagers.forEach((manager) => manager.resetMeasurements());
         }
 
+        deleteConnection() {
+            const activeManager = this.getActiveMeasurementManager();
+            if (activeManager && activeManager.currentSelectedLine) {
+                activeManager.deleteSelectedLine();
+                this.render();
 
-deleteConnection() {
-    const activeManager = this.getActiveMeasurementManager();
-    if (activeManager && activeManager.currentSelectedLine) {
-        activeManager.deleteSelectedLine();
-        this.render();
-        
-        // Update state if needed
-        if (activeManager.updateState) {
-            activeManager.updateState(activeManager.getSettings());
+                // Update state if needed
+                if (activeManager.updateState) {
+                    activeManager.updateState(activeManager.getSettings());
+                }
+            }
         }
-    }
-}
     };

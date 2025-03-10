@@ -32,7 +32,7 @@ import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
 import { LABEL_TYPES, MEASUREMENT_MODES } from "../enums";
-import { defaultMeasurementsSettings, MeasurementSettingsHandler, } from "../mixins/measurements/all";
+import { defaultMeasurementsSettings, MeasurementSettingsHandler, } from "../mixins/measurements/MeasurementSettingsHandler";
 import settings from "../settings";
 import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";

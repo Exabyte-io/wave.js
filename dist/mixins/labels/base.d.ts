@@ -3,8 +3,8 @@ import { BaseTHREEGroupManager } from "../base";
 import { VerticesHashMapHandler } from "../Hashmap";
 export type LabelsManagerConstructor<T extends BaseLabelsManager> = new (waveStructureGroup: THREE.Group, waveCamera: THREE.Camera, wave: any) => T;
 export declare abstract class BaseLabelsManager extends BaseTHREEGroupManager {
-    #private;
     labelType: string;
+    private THREETexturesCache;
     abstract getLabelTextFromLabeledObject(object: THREE.Object3D): string;
     getOffsetVectorMultiplierPerAtomName(atomName: string): any;
     getVectorToCameraNormalized(position: THREE.Vector3, camera: THREE.Camera): THREE.Vector3;

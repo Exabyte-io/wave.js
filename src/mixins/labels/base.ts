@@ -13,7 +13,7 @@ export type LabelsManagerConstructor<T extends BaseLabelsManager> = new (
 export abstract class BaseLabelsManager extends BaseTHREEGroupManager {
     labelType = "";
 
-    #THREETexturesCache: { [key: string]: THREE.Texture } = {};
+    private THREETexturesCache: { [key: string]: THREE.Texture } = {};
 
     abstract getLabelTextFromLabeledObject(object: THREE.Object3D): string;
 
@@ -69,10 +69,10 @@ export abstract class BaseLabelsManager extends BaseTHREEGroupManager {
     }
 
     getLabelTextTexture(text: string) {
-        if (this.#THREETexturesCache[text]) return this.#THREETexturesCache[text];
+        if (this.THREETexturesCache[text]) return this.THREETexturesCache[text];
 
         const texture = this.createLabelTextTexture(text);
-        this.#THREETexturesCache[text] = texture;
+        this.THREETexturesCache[text] = texture;
         return texture;
     }
 
