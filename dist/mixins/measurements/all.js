@@ -70,6 +70,10 @@ export const AllMeasurementsMixin = (superclass) => class extends superclass {
             this.initializeMeasurementManagers(updateState);
         }
         const measurementManager = this.getMeasurementManagerByType(measurementType);
+        const activeManager = this.getActiveMeasurementManager();
+        if (activeManager && activeManager.measurementType !== measurementType) {
+            activeManager.toggleActive();
+        }
         measurementManager === null || measurementManager === void 0 ? void 0 : measurementManager.toggleActive();
     }
     createAllMeasurements() {
@@ -78,5 +82,16 @@ export const AllMeasurementsMixin = (superclass) => class extends superclass {
     }
     resetAllMeasurements() {
         this.measurementManagers.forEach((manager) => manager.resetMeasurements());
+    }
+    deleteConnection() {
+        const activeManager = this.getActiveMeasurementManager();
+        if (activeManager && activeManager.currentSelectedLine) {
+            activeManager.deleteSelectedLine();
+            this.render();
+            // Update state if needed
+            if (activeManager.updateState) {
+                activeManager.updateState(activeManager.getSettings());
+            }
+        }
     }
 };

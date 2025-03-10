@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { MEASUREMENT_MODES_ENUM } from "../../enums";
 import { AngleLabelsManager } from "../labels/angle";
-import { LinesManager } from "../lines/LinesManager";
 import { calculateAngleBetweenAtoms, calculateAngleLabelPosition } from "../threeJsUtils";
 import { BaseMeasurementManager } from "./base";
 export class AnglesMeasurementManager extends BaseMeasurementManager {
@@ -11,7 +10,6 @@ export class AnglesMeasurementManager extends BaseMeasurementManager {
         this.measurementType = MEASUREMENT_MODES_ENUM.ANGLE;
         this.LabelsManagerCls = AngleLabelsManager;
         this.labelsManager = this.getLabelsManagerInstance();
-        this.linesManager = new LinesManager(waveStructureGroup, waveCamera, wave, groupName);
     }
     // @ts-ignore
     onClick(updateState, event) {
@@ -27,8 +25,7 @@ export class AnglesMeasurementManager extends BaseMeasurementManager {
         this.selectedAtoms.push(atom);
     }
     extractMeasurementValues() {
-        // Return as number[][] to match the interface in BaseMeasurementManager
-        return this.getAnglesFromSelectedAtoms().map((angle) => [angle]);
+        return this.getAnglesFromSelectedAtoms().map((angle) => angle);
     }
     getLabelObjectsFromSelectedObjects() {
         const triplets = this.getTripletsOfSelectedAtoms();
@@ -53,9 +50,8 @@ export class AnglesMeasurementManager extends BaseMeasurementManager {
         const lines = [];
         triplets.forEach((triplet) => {
             if (triplet.length === 3) {
-                const line1 = this.linesManager.createLineBetweenAtoms(triplet[0], triplet[1]);
-                const line2 = this.linesManager.createLineBetweenAtoms(triplet[1], triplet[2]);
-                lines.push(line1, line2);
+                const angleLine = this.linesManager.createAngleBetweenAtoms(triplet[0], triplet[1], triplet[2]);
+                lines.push(angleLine);
             }
         });
         return lines;

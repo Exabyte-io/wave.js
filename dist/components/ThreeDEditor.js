@@ -274,7 +274,7 @@ export class ThreeDEditor extends React.Component {
         // TODO : overloading a bunch of props and state attributes here..
         this.state = {
             // on/off switch for the component
-            isInteractive: true,
+            isInteractive: false,
             activeToolbarMenu: null,
             isThreejsEditorModalShown: false,
             // isDistanceAndAnglesShown: false,
@@ -448,15 +448,6 @@ export class ThreeDEditor extends React.Component {
     }
     // TODO: reset the colors for other buttons in the panel on call to the function below
     handleResetViewer() {
-        // const { measurementsSettings } = this.state;
-        // this.setState({
-        //     measurementsSettings: {
-        //         ...measurementsSettings,
-        //         isDistanceShown: false,
-        //         areAnglesShown: false,
-        //         areCoordinatesShown: false,
-        //     },
-        // });
         this.WaveComponent.initViewer();
         this._resetStateWaveComponent();
     }

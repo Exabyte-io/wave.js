@@ -3,7 +3,7 @@ import * as THREE from "three";
 
 import { ATOM_GROUP_NAME, MEASUREMENT_MODES } from "../../../src/enums";
 import { getWaveInstance } from "../../enums";
-import { createMouseEventFromPosition, getEventObjectBy3DPosition } from "../../utils";
+import { createMouseEventFromPosition } from "../../utils";
 
 // Mock clipboard API for tests
 const mockClipboard = {
@@ -125,7 +125,6 @@ describe("distance measurements", () => {
 
         expect(distanceManager.selectedAtoms.length).toEqual(0);
         expect(distanceManager.currentSelectedLine).toEqual(null);
-        expect(distanceManager.linesManager.THREEGroup.children.length).toEqual(0);
     });
 
     test("full reset of measurements", async () => {
@@ -230,6 +229,6 @@ describe("angles measurements", () => {
         const angles = angleManager.getAnglesFromSelectedAtoms();
         expect(angles.length).toEqual(1);
         expect(typeof angles[0]).toBe("number");
-        expect(!isNaN(angles[0])).toBe(true);
+        expect(!Number.isNaN(angles[0])).toBe(true);
     });
 });

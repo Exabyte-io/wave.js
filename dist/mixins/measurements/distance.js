@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { MEASUREMENT_MODES_ENUM } from "../../enums";
 import { DistanceLabelsManager } from "../labels/distance";
-import { LinesManager } from "../lines/LinesManager";
 import { calculateDistanceBetweenAtoms } from "../threeJsUtils";
 import { BaseMeasurementManager } from "./base";
 export class DistancesMeasurementManager extends BaseMeasurementManager {
@@ -10,10 +9,8 @@ export class DistancesMeasurementManager extends BaseMeasurementManager {
         super(waveStructureGroup, waveCamera, wave, groupName, updateState);
         this.measurementType = MEASUREMENT_MODES_ENUM.DISTANCE;
         this.LabelsManagerCls = DistanceLabelsManager;
-        this.currentSelectedLine = null;
         this.labelsManager = new DistanceLabelsManager(waveStructureGroup, waveCamera, wave, groupName);
         this.currentSelectedLine = null;
-        this.linesManager = new LinesManager(waveStructureGroup, waveCamera, wave, groupName);
     }
     // @ts-ignore
     onClick(updateState, event) {

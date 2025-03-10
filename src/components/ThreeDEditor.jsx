@@ -57,7 +57,7 @@ export class ThreeDEditor extends React.Component {
         // TODO : overloading a bunch of props and state attributes here..
         this.state = {
             // on/off switch for the component
-            isInteractive: true,
+            isInteractive: false,
             activeToolbarMenu: null,
             isThreejsEditorModalShown: false,
             // isDistanceAndAnglesShown: false,

@@ -26,7 +26,7 @@ export const RaycasterMixinWithListeners = (superclass) => class extends Listene
         super(...arguments);
         this.raycaster = new THREE.Raycaster();
         this.pointer = new THREE.Vector2();
-        this.intersectedAtom = null;
+        this.intersectedObject = null;
     }
     initRaycaster() {
         this.raycaster = new THREE.Raycaster();

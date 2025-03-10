@@ -1,7 +1,8 @@
 import { MEASUREMENT_MODES_ENUM } from "../../enums";
 import { BaseTHREEGroupManager } from "../base";
+import { LinesManager } from "../lines/LinesManager";
 import { RaycasterMixinWithListeners } from "../listeners/mixins";
-import { getObjectCoordinateAsArray, highlightAtom, isIntersectionObjectAnAtom, setAtomAsHovered, setColorForAtom, unsetAtomAsHovered, } from "../threeJsUtils";
+import { getObjectCoordinateAsArray, highlightAtom, isIntersectionObjectAnAtom, isObjectAnAtom, setAtomAsHovered, setColorForAtom, unsetAtomAsHovered, } from "../threeJsUtils";
 const BaseManager = RaycasterMixinWithListeners(BaseTHREEGroupManager);
 /**
  * Base class for managing measurements.
@@ -13,18 +14,18 @@ export class BaseMeasurementManager extends BaseManager {
         this.measurementType = MEASUREMENT_MODES_ENUM.NONE;
         this.selectedAtoms = [];
         this.isActive = false;
+        this.currentSelectedLine = null;
         this.toggleActive = () => {
-            this.toggleVisibility();
             this.isActive = !this.isActive;
-            if (!this.isActive) {
-                this.resetMeasurements();
-                this.destroyListeners();
-                this.wave.setCursorStyle();
-            }
-            else {
+            if (this.isActive) {
                 this.wave.setCursorStyle("pointer");
                 this.initListeners(this.updateState);
             }
+            else {
+                this.destroyListeners();
+                this.wave.setCursorStyle();
+            }
+            this.toggleVisibility();
         };
         this.onPointerMove = (event) => {
             if (!this.isActive)
@@ -37,10 +38,10 @@ export class BaseMeasurementManager extends BaseManager {
                     setAtomAsHovered(object.object);
                 }
             });
-            if (!intersects.length && this.intersectedAtom) {
+            if (!intersects.length && this.intersectedObject) {
                 const isSelected = this.isIntersectedAtomSelected();
-                if (this.intersectedAtom && !isSelected) {
-                    unsetAtomAsHovered(this.intersectedAtom);
+                if (this.intersectedObject && !isSelected && isObjectAnAtom(this.intersectedObject)) {
+                    unsetAtomAsHovered(this.intersectedObject);
                 }
                 this.setIntersectedAtom(null);
             }
@@ -48,8 +49,9 @@ export class BaseMeasurementManager extends BaseManager {
         };
         this.initRaycaster();
         this.selectedAtoms = [];
-        this.intersectedAtom = null;
+        this.intersectedObject = null;
         this.canvas = wave.renderer.domElement;
+        this.linesManager = new LinesManager(waveStructureGroup, waveCamera, wave, groupName);
         this.updateState = updateState;
     }
     getLabelsManagerInstance() {
@@ -78,17 +80,21 @@ export class BaseMeasurementManager extends BaseManager {
         this.selectedAtoms = this.selectedAtoms.filter((atom) => atom.userData.atomicIndex !== atomObject.userData.atomicIndex);
     }
     setIntersectedAtom(intersectItem) {
-        if (this.intersectedAtom !== intersectItem) {
-            this.intersectedAtom = intersectItem;
+        if (intersectItem === null) {
+            this.intersectedObject = null;
+            return;
+        }
+        if (this.intersectedObject !== intersectItem && isObjectAnAtom(intersectItem)) {
+            this.intersectedObject = intersectItem;
         }
     }
     isIntersectedAtomSelected() {
-        if (!this.intersectedAtom)
+        if (!this.intersectedObject)
             return false;
-        return this.selectedAtoms.some((atom) => { var _a; return atom.userData.atomicIndex === ((_a = this.intersectedAtom) === null || _a === void 0 ? void 0 : _a.userData.atomicIndex); });
+        return this.selectedAtoms.some((atom) => { var _a; return atom.userData.atomicIndex === ((_a = this.intersectedObject) === null || _a === void 0 ? void 0 : _a.userData.atomicIndex); });
     }
     getIntersections() {
-        return this.raycaster.intersectObjects([...this.wave.getAtomGroups()], true);
+        return this.raycaster.intersectObjects([...this.wave.getAtomGroups(), ...this.linesManager.getLines()], true);
     }
     toggleAtomSelection(atomObject) {
         if (this.getSelectedAtomIndices().includes(atomObject.userData.atomicIndex)) {
@@ -96,6 +102,14 @@ export class BaseMeasurementManager extends BaseManager {
         }
         else {
             this.setAtomAsSelected(atomObject);
+        }
+    }
+    toggleLineSelection(line) {
+        if (line.userData.selected) {
+            this.handleLineDeselection(line);
+        }
+        else {
+            this.handleLineSelection(line);
         }
     }
     refillSelectedAtoms() {
@@ -125,6 +139,10 @@ export class BaseMeasurementManager extends BaseManager {
             if (isIntersectionObjectAnAtom(object)) {
                 const atom = object.object;
                 this.toggleAtomSelection(atom);
+            }
+            if (object.object.type === "Line") {
+                const line = object.object;
+                this.toggleLineSelection(line);
             }
         });
         this.copyValuesToClipboard();
@@ -175,10 +193,38 @@ export class BaseMeasurementManager extends BaseManager {
     }
     resetMeasurements() {
         this.selectedAtoms.forEach((atom) => {
-            setColorForAtom(atom);
+            this.unsetAtomAsSelected(atom);
         });
         this.selectedAtoms = [];
+        this.values = [];
         this.THREEGroup.clear();
         this.labelsManager.THREEGroup.clear();
+    }
+    handleLineSelection(line) {
+        this.linesManager.setLineAsSelected(line);
+        this.currentSelectedLine = line;
+    }
+    handleLineDeselection(line) {
+        this.linesManager.unsetLineAsSelected(line);
+        this.currentSelectedLine = null;
+    }
+    removeAtomsFromSelectionByIndices(atomicIndices) {
+        this.selectedAtoms = this.selectedAtoms.filter((atom) => !atomicIndices.includes(atom.userData.atomicIndex));
+        atomicIndices.forEach((index) => {
+            const atom = this.getAtomObjectByAtomicIndex(index);
+            if (atom) {
+                atom.userData.selected = false;
+                setColorForAtom(atom);
+            }
+        });
+    }
+    deleteSelectedLine() {
+        if (this.currentSelectedLine) {
+            const atomicIndices = this.currentSelectedLine.userData.atomicIndices || [];
+            this.linesManager.removeLine(this.currentSelectedLine);
+            this.removeAtomsFromSelectionByIndices(atomicIndices);
+            this.currentSelectedLine = null;
+            this.createMeasurements();
+        }
     }
 }

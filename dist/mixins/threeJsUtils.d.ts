@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { AtomObject } from "./types/atoms";
 /**
  * TODO: import from a shared utils file
  * Converts radians to degrees
@@ -7,6 +8,10 @@ export declare function radiansToDegrees(radians: number): number;
 export declare function getArrayFromVector(vector: THREE.Vector3): number[];
 export declare function getObjectCoordinate(object: THREE.Object3D): THREE.Vector3;
 export declare function getObjectCoordinateAsArray(object: THREE.Object3D): number[];
+/**
+ * Gets the world position of an atom, accounting for repetition
+ */
+export declare function getAtomWorldPosition(atom: THREE.Object3D): THREE.Vector3;
 /**
  * Calculates the angle between three points in 3D space
  */
@@ -49,3 +54,4 @@ export declare function setAtomAsHovered(atom: THREE.Object3D): void;
  * Unsets an atom as hovered, restoring its previous color and removing the emissive effect.
  */
 export declare function unsetAtomAsHovered(atom: THREE.Object3D): void;
+export declare function isObjectAnAtom(object: THREE.Object3D): object is AtomObject;

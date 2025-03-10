@@ -13,7 +13,7 @@ export declare const RaycasterMixinWithListeners: <T extends Constructor>(superc
     new (...args: any[]): {
         raycaster: THREE.Raycaster;
         pointer: THREE.Vector2;
-        intersectedAtom: THREE.Object3D | null;
+        intersectedObject: THREE.Object3D | null;
         initRaycaster(): void;
         checkMouseCoordinates(event: MouseEvent, camera: THREE.Camera): void;
         canvas: HTMLCanvasElement;

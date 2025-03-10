@@ -18,6 +18,20 @@ export function getObjectCoordinateAsArray(object) {
     return getArrayFromVector(position);
 }
 /**
+ * Gets the world position of an atom, accounting for repetition
+ */
+export function getAtomWorldPosition(atom) {
+    const position = new THREE.Vector3();
+    // If we have a cached world position (for repeated atoms), use it
+    if (atom.userData && atom.userData.worldPosition) {
+        position.copy(atom.userData.worldPosition);
+    }
+    else {
+        atom.getWorldPosition(position);
+    }
+    return position;
+}
+/**
  * Calculates the angle between three points in 3D space
  */
 export function calculateAngleBetweenPoints(pointA, pointB, pointC) {
@@ -114,4 +128,7 @@ export function unsetAtomAsHovered(atom) {
     const atomObject = atom;
     atomObject.userData.hovered = false;
     setColorForAtom(atom);
+}
+export function isObjectAnAtom(object) {
+    return object instanceof THREE.Mesh;
 }

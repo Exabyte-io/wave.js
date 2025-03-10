@@ -36,6 +36,7 @@ export declare const AllMeasurementsMixin: (superclass: any) => {
         toggleMeasurementByType(measurementType: MEASUREMENT_MODES_ENUM, updateState: any): void;
         createAllMeasurements(): void;
         resetAllMeasurements(): void;
+        deleteConnection(): void;
     };
     [x: string]: any;
 };

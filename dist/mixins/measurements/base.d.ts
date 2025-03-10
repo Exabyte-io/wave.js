@@ -2,11 +2,12 @@ import * as THREE from "three";
 import { MEASUREMENT_MODES_ENUM } from "../../enums";
 import { BaseTHREEGroupManager } from "../base";
 import { BaseLabelsManager, LabelsManagerConstructor } from "../labels/base";
+import { LinesManager } from "../lines/LinesManager";
 declare const BaseManager: {
     new (...args: any[]): {
         raycaster: THREE.Raycaster;
         pointer: THREE.Vector2;
-        intersectedAtom: THREE.Object3D | null;
+        intersectedObject: THREE.Object3D | null;
         initRaycaster(): void;
         checkMouseCoordinates(event: MouseEvent, camera: THREE.Camera): void;
         canvas: HTMLCanvasElement;
@@ -27,7 +28,9 @@ export declare class BaseMeasurementManager<T extends BaseLabelsManager> extends
     values: any[];
     LabelsManagerCls: LabelsManagerConstructor<T>;
     labelsManager: any;
+    linesManager: LinesManager;
     updateState: any;
+    currentSelectedLine: THREE.Line | null;
     constructor(waveStructureGroup: THREE.Group, waveCamera: THREE.Camera, wave: any, groupName: string, updateState: any);
     protected getLabelsManagerInstance(): T;
     toggleActive: () => void;
@@ -39,6 +42,7 @@ export declare class BaseMeasurementManager<T extends BaseLabelsManager> extends
     isIntersectedAtomSelected(): boolean;
     getIntersections(): THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>[];
     toggleAtomSelection(atomObject: THREE.Object3D): void;
+    toggleLineSelection(line: THREE.Line): void;
     refillSelectedAtoms(): void;
     getSettings(): {
         isActive: boolean;
@@ -55,5 +59,9 @@ export declare class BaseMeasurementManager<T extends BaseLabelsManager> extends
     createMeasurements(): void;
     highlightSelectedAtoms(): void;
     resetMeasurements(): void;
+    handleLineSelection(line: THREE.Line): void;
+    handleLineDeselection(line: THREE.Line): void;
+    removeAtomsFromSelectionByIndices(atomicIndices: number[]): void;
+    deleteSelectedLine(): void;
 }
 export {};

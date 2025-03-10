@@ -100,7 +100,11 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         );
     }
 
-    setIntersectedAtom(intersectItem: THREE.Object3D) {
+    setIntersectedAtom(intersectItem: THREE.Object3D | null) {
+        if (intersectItem === null) {
+            this.intersectedObject = null;
+            return;
+        }
         if (this.intersectedObject !== intersectItem && isObjectAnAtom(intersectItem)) {
             this.intersectedObject = intersectItem;
         }
@@ -162,13 +166,14 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
         if (!this.isActive) return;
         this.checkMouseCoordinates(event, this.waveCamera);
         const intersects = this.getIntersections();
-        intersects.forEach((object: THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>) => {
+        intersects.forEach((object: THREE.Intersection<THREE.Object3D | THREE.Line>) => {
             if (isIntersectionObjectAnAtom(object)) {
                 const atom = object.object;
                 this.toggleAtomSelection(atom);
             }
             if (object.object.type === "Line") {
-                this.toggleLineSelection(object.object);
+                const line = object.object as THREE.Line;
+                this.toggleLineSelection(line);
             }
         });
         this.copyValuesToClipboard();
