@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import { getArrayFromVector } from "./threeJsUtils";
+import { getArrayFromVector } from "./utils_three";
 
 export interface VerticesHashMap {
     [key: string]: number[];

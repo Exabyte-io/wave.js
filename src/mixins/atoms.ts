@@ -4,12 +4,8 @@ import { Object3D, Object3DEventMap } from "three";
 
 import { ATOM_GROUP_NAME } from "../enums";
 import { createObjectVerticesHashMap } from "./Hashmap";
-import {
-    getArrayFromVector,
-    getObjectCoordinate,
-    getObjectCoordinateAsArray,
-} from "./threeJsUtils";
 import { ApplyGlow } from "./utils";
+import { getArrayFromVector, getObjectCoordinate, getObjectCoordinateAsArray } from "./utils_three";
 
 /*
  * Mixin containing the logic for dealing with atoms.

@@ -2,7 +2,7 @@ import expect from "expect";
 import * as THREE from "three";
 
 import { ATOM_GROUP_NAME } from "../../../src/enums";
-import { getAtomWorldPosition, getObjectCoordinate } from "../../../src/mixins/threeJsUtils";
+import { getAtomWorldPosition, getObjectCoordinate } from "../../../src/mixins/utils_three";
 import { getWaveInstance } from "../../enums";
 
 describe("Atom labels", () => {

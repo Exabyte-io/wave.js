@@ -4,7 +4,7 @@ import { MEASUREMENT_MODES_ENUM } from "../../enums";
 import { LabelsManagerConstructor } from "../labels/base";
 import { DistanceLabelsManager } from "../labels/distance";
 import { LinesManager } from "../lines/LinesManager";
-import { calculateDistanceBetweenAtoms } from "../threeJsUtils";
+import { calculateDistanceBetweenAtoms } from "../utils_three";
 import { BaseMeasurementManager } from "./base";
 
 export class DistancesMeasurementManager extends BaseMeasurementManager<DistanceLabelsManager> {

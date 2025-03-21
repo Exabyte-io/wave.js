@@ -13,7 +13,7 @@ import {
     setAtomAsHovered,
     setColorForAtom,
     unsetAtomAsHovered,
-} from "../threeJsUtils";
+} from "../utils_three";
 
 const BaseManager = RaycasterMixinWithListeners(BaseTHREEGroupManager);
 

@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { ATOM_CONNECTION_LINE_NAME, COLORS } from "../../enums";
 import settings from "../../settings";
 import { BaseTHREEGroupManager } from "../base";
-import { calculateMidpoint, getAtomWorldPosition } from "../threeJsUtils";
+import { calculateMidpoint, getAtomWorldPosition } from "../utils_three";
 
 export class LinesManager extends BaseTHREEGroupManager {
     /**
