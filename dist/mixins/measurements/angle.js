@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { MEASUREMENT_MODES_ENUM } from "../../enums";
 import { AngleLabelsManager } from "../labels/angle";
-import { calculateAngleBetweenAtoms, calculateAngleLabelPosition } from "../threeJsUtils";
+import { calculateAngleBetweenAtoms, calculateAngleLabelPosition } from "../utils_three";
 import { BaseMeasurementManager } from "./base";
 export class AnglesMeasurementManager extends BaseMeasurementManager {
     constructor(waveStructureGroup, waveCamera, wave, updateState) {

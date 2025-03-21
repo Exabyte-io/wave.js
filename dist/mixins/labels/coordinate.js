@@ -1,6 +1,6 @@
 import { LABEL_TYPES } from "../../enums";
 import settings from "../../settings";
-import { getArrayFromVector } from "../threeJsUtils";
+import { getArrayFromVector } from "../utils_three";
 import { BaseLabelsManager } from "./base";
 // @ts-ignore
 export class CoordinateLabelsManager extends BaseLabelsManager {

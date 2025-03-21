@@ -2,7 +2,7 @@ import { MEASUREMENT_MODES_ENUM } from "../../enums";
 import { BaseTHREEGroupManager } from "../base";
 import { LinesManager } from "../lines/LinesManager";
 import { RaycasterMixinWithListeners } from "../listeners/mixins";
-import { getObjectCoordinateAsArray, highlightAtom, isIntersectionObjectAnAtom, isObjectAnAtom, setAtomAsHovered, setColorForAtom, unsetAtomAsHovered, } from "../threeJsUtils";
+import { getObjectCoordinateAsArray, highlightAtom, isIntersectionObjectAnAtom, isObjectAnAtom, setAtomAsHovered, setColorForAtom, unsetAtomAsHovered, } from "../utils_three";
 const BaseManager = RaycasterMixinWithListeners(BaseTHREEGroupManager);
 /**
  * Base class for managing measurements.

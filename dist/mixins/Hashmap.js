@@ -1,4 +1,4 @@
-import { getArrayFromVector } from "./threeJsUtils";
+import { getArrayFromVector } from "./utils_three";
 export class VerticesHashMapHandler {
     constructor() {
         this.hashmap = {};

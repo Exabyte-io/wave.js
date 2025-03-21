@@ -4,7 +4,7 @@ import "./stylesheets/main.css";
 import { mix } from "mixwith";
 import * as THREE from "three";
 
-import { ATOM_GROUP_NAME, MEASUREMENT_MODES } from "./enums";
+import { ATOM_GROUP_NAME } from "./enums";
 import { AtomsMixin } from "./mixins/atoms";
 import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
@@ -12,10 +12,8 @@ import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
 import { ImageMixin } from "./mixins/image";
 import { AllLabelsMixin } from "./mixins/labels/all";
-import { RaycasterMixinWithListeners } from "./mixins/listeners/mixins";
 import { AllMeasurementsMixin } from "./mixins/measurements/all";
 import { RepetitionMixin } from "./mixins/repetition";
-import { getObjectCoordinate } from "./mixins/threeJsUtils";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
 
