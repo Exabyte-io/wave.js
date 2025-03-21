@@ -37,7 +37,7 @@ export class WaveComponent extends React.Component {
             isDrawBondsEnabled,
         } = this.props;
         if (triggerHandleResize) this._handleResizeTransition();
-        if (this.wave) {
+        if (this.wave && !this.wave.bypassReloadViewer) {
             // recreate bonds asynchronously if structure is changed.
             this.reloadViewer(
                 prevStructure.hash !== structure.hash ||

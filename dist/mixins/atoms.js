@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { ATOM_GROUP_NAME } from "../enums";
+import { createObjectVerticesHashMap } from "./Hashmap";
 import { ApplyGlow } from "./utils";
 /*
  * Mixin containing the logic for dealing with atoms.
@@ -19,13 +20,14 @@ export const AtomsMixin = (superclass) => class extends superclass {
     }
     /**
      * Helper function to set the structural information.
-     * @param {Made.Material} s - Structural information as Made.Material.
+     * @param {Made.Material} material - Structural information as Made.Material.
      */
-    setStructure(s) {
-        this._structure = s.clone(); // clone original structure to assert that any updates are propagated to parents
-        this._basis = s.Basis;
+    setStructure(material) {
+        this._structure = material.clone(); // clone original structure to assert that any updates are propagated to parents
+        this._basis = material.Basis;
         this._basis.originalUnits = this._basis.units;
         this._basis.toCartesian();
+        this.verticesHashMap = this.createAtomVerticesHashMap();
     }
     get basis() {
         return this._basis;
@@ -66,9 +68,10 @@ export const AtomsMixin = (superclass) => class extends superclass {
         const { atomicLabelsArray, elementsWithLabelsArray } = basis;
         basis.coordinates.forEach((atomicCoordinate, atomicIndex) => {
             const element = basis.getElementByIndex(atomicIndex);
+            const coordinate = atomicCoordinate.value;
             const sphereMesh = this.getSphereMeshObject({
                 ...this._getDefaultSettingsForElement(element, atomRadiiScale),
-                coordinate: atomicCoordinate.value,
+                coordinate,
             });
             sphereMesh.name = `${element}-${atomicIndex}`;
             // store any additional data in userData
@@ -76,6 +79,7 @@ export const AtomsMixin = (superclass) => class extends superclass {
             sphereMesh.userData = {
                 ...sphereMesh.userData,
                 symbolWithLabel: elementsWithLabelsArray[atomicIndex],
+                atomicIndex,
             };
             const atomColor = this.getAtomColorByElement(element).toLowerCase();
             const label = parseInt(atomicLabelsArray[atomicIndex], 10) || 0;
@@ -99,5 +103,26 @@ export const AtomsMixin = (superclass) => class extends superclass {
     }
     getAtomRadiusByElement(element, scale = 1.0, radiimap = this.settings.vdwRadii) {
         return (radiimap[element] || this.settings.sphereRadius) * scale;
+    }
+    getAtomGroups() {
+        const atomGroups = [];
+        this.structureGroup.children.forEach((group) => {
+            if (group.name === ATOM_GROUP_NAME) {
+                atomGroups.push(...group.children);
+            }
+        });
+        return atomGroups;
+    }
+    isTHREEObjectAnAtom(object) {
+        return object instanceof THREE.Mesh;
+    }
+    getAtomNameFromObject(object) {
+        return object.name.split("-")[0];
+    }
+    getVerticeKeyPerAtom(atom) {
+        return this.getAtomNameFromObject(atom);
+    }
+    createAtomVerticesHashMap(getVerticeKeyPerAtom = this.getVerticeKeyPerAtom.bind(this), atoms = this.getAtomGroups()) {
+        return createObjectVerticesHashMap(getVerticeKeyPerAtom, atoms);
     }
 };

@@ -56,19 +56,36 @@ export const RepetitionMixin = (superclass) => class extends superclass {
         }, []);
     }
     /**
+     * Gets repetition information including coordinates and dimensions.
+     * Used by both object and atom repetition functions.
+     */
+    getRepetitionInfo() {
+        const { settings } = this;
+        const repetitions = {
+            repetitionsAlongLatticeVectorA: settings.repetitionsAlongLatticeVectorA,
+            repetitionsAlongLatticeVectorB: settings.repetitionsAlongLatticeVectorB,
+            repetitionsAlongLatticeVectorC: settings.repetitionsAlongLatticeVectorC,
+        };
+        const maxRepetitions = Math.max(...Object.values(repetitions));
+        const allCoordinates = this.repetitionCoordinates(maxRepetitions);
+        const addedObjectsCoordinates = this.coordinatesByAxes(allCoordinates, repetitions).slice(1); // Skip original position
+        return {
+            coordinates: addedObjectsCoordinates,
+            originalRepetitions: { ...repetitions },
+            dimensions: {
+                dimA: repetitions.repetitionsAlongLatticeVectorA || 1,
+                dimB: repetitions.repetitionsAlongLatticeVectorB || 1,
+                dimC: repetitions.repetitionsAlongLatticeVectorC || 1,
+            },
+        };
+    }
+    /**
      * Repeats a given 3D object at the lattice points given by repetitionCoordinates function.
      */
     repeatObject3DAtRepetitionCoordinates(object3D) {
-        const { settings: { repetitionsAlongLatticeVectorA, repetitionsAlongLatticeVectorB, repetitionsAlongLatticeVectorC, }, } = this;
-        const coordinates = this.repetitionCoordinates(Math.max(repetitionsAlongLatticeVectorA, repetitionsAlongLatticeVectorB, repetitionsAlongLatticeVectorC));
         this.structureGroup.add(object3D);
-        this.coordinatesByAxes(coordinates, {
-            repetitionsAlongLatticeVectorA,
-            repetitionsAlongLatticeVectorB,
-            repetitionsAlongLatticeVectorC,
-        })
-            .slice(1)
-            .forEach((point) => {
+        const { coordinates } = this.getRepetitionInfo();
+        coordinates.forEach((point) => {
             const object3DClone = object3D.clone();
             object3DClone.position.add(new THREE.Vector3(...point));
             this.structureGroup.add(object3DClone);
@@ -80,25 +97,39 @@ export const RepetitionMixin = (superclass) => class extends superclass {
      * with measurement functionality.
      */
     repeatAtomsAtRepetitionCoordinates(object3D) {
-        const { settings: { repetitionsAlongLatticeVectorA, repetitionsAlongLatticeVectorB, repetitionsAlongLatticeVectorC, }, } = this;
-        const coordinates = this.repetitionCoordinates(Math.max(repetitionsAlongLatticeVectorA, repetitionsAlongLatticeVectorB, repetitionsAlongLatticeVectorC));
         this.structureGroup.add(object3D);
-        this.coordinatesByAxes(coordinates, {
-            repetitionsAlongLatticeVectorA,
-            repetitionsAlongLatticeVectorB,
-            repetitionsAlongLatticeVectorC,
-        })
-            .slice(1)
-            .forEach((point) => {
+        const { coordinates, dimensions } = this.getRepetitionInfo();
+        const { dimB, dimC } = dimensions;
+        const originalAtomCount = object3D.children.length;
+        coordinates.forEach((point, pointIndex) => {
             const object3DClone = new THREE.Group();
             object3DClone.name = ATOM_GROUP_NAME;
+            const indexC = pointIndex % dimC;
+            const indexB = Math.floor(pointIndex / dimC) % dimB;
+            const indexA = Math.floor(pointIndex / (dimC * dimB));
             object3D.children.forEach((child) => {
-                const newChild = child.clone(true);
-                newChild.material = child.material.clone(true);
+                const newChild = this.createClonedAtomWithUniqueIndex(child, { indexA, indexB, indexC }, dimensions, originalAtomCount, point);
                 object3DClone.add(newChild);
             });
             object3DClone.position.add(new THREE.Vector3(...point));
             this.structureGroup.add(object3DClone);
         });
+    }
+    /**
+     * Creates a cloned atom with a unique atomic index based on its position in the repetition grid
+     */
+    // eslint-disable-next-line class-methods-use-this
+    createClonedAtomWithUniqueIndex(originalAtom, gridPosition, dimensions, originalAtomCount, point) {
+        const { indexA, indexB, indexC } = gridPosition;
+        const { dimB, dimC } = dimensions;
+        const clonedAtom = originalAtom.clone(true);
+        clonedAtom.material = originalAtom.material.clone(true);
+        if (clonedAtom.userData && clonedAtom.userData.atomicIndex !== undefined) {
+            // clonedAtom.userData.originalAtomicIndex = clonedAtom.userData.atomicIndex;
+            const uniqueIndexOffset = (indexA * dimB * dimC + indexB * dimC + indexC + 1) * originalAtomCount;
+            clonedAtom.userData.atomicIndex += uniqueIndexOffset;
+            clonedAtom.userData.worldPosition = new THREE.Vector3(...point).add(clonedAtom.position);
+        }
+        return clonedAtom;
     }
 };

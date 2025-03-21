@@ -28,8 +28,34 @@ export const MIN_ANGLE_POINTS_DISTANCE = 0.7;
 export const MEASUREMENT_LABELS_GROUP_NAME = "Measure_Labels";
 export const ANGLE = "ANGLE";
 export const LABELS_GROUP_NAME = "Labels_Group";
+export const ELEMENT_LABELS_GROUP_NAME = "Element_Labels_Group";
+export const COORDINATE_LABELS_GROUP_NAME = "Coordinate_Labels_Group";
 
 export const COLORS = {
     RED: 0xff0000,
     GREEN: 0x00ff00,
+    ORANGE: 0xffa500,
+    WHITE: 0xffffff,
+    BLACK: 0x000000,
+};
+
+export enum MEASUREMENT_MODES_ENUM {
+    NONE = "none",
+    DISTANCE = "distance",
+    ANGLE = "angle",
+    COORDINATE = "coordinate",
+}
+
+export const MEASUREMENT_MODES = {
+    NONE: "none",
+    DISTANCE: "distance",
+    ANGLE: "angle",
+    COORDINATE: "coordinate",
+};
+
+export const LABEL_TYPES = {
+    COORDINATE: "coordinate",
+    ELEMENT: "element",
+    DISTANCE: "distance",
+    COORDINATE_MEASUREMENT: "coordinateMeasurement",
 };
