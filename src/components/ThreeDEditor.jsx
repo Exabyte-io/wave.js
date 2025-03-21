@@ -112,7 +112,6 @@ export class ThreeDEditor extends React.Component {
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
-        this.doWaveFunc = this.doWaveFunc.bind(this);
         this.handleMessage = this.handleMessage.bind(this);
     }
 
