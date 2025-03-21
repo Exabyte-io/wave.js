@@ -12,12 +12,10 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         activeToolbarMenu: null;
         isThreejsEditorModalShown: boolean;
         measurementsSettings: {
-            isDistanceShown: boolean;
-            isAnglesShown: boolean;
-            measurementLabelsShown: boolean;
-            distance: number;
-            angle: number;
-        };
+            isActive: boolean;
+            measurementType: string;
+            values: never[];
+        }[];
         viewerTriggerResize: boolean;
         viewerSettings: {
             isViewAdjustable: boolean;
@@ -40,7 +38,8 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleToggleBonds(): void;
     toggleThreejsEditorModal(): void;
     handleToggleOrthographicCamera(): void;
-    handleToggleLabels(): void;
+    handleToggleElementLabels(): void;
+    handleToggleCoordinateLabels(): void;
     handleToggleConventionalCell(): void;
     handleToggleIsViewAdjustable(): void;
     handleResetViewer(): void;
@@ -50,13 +49,11 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleToggleAxes(): void;
     onThreejsEditorModalHide(material: any): void;
     handleChemicalConnectivityFactorChange(e: any): void;
-    handleToggleDistanceShown(): void;
-    handleToggleAnglesShown(): void;
+    handleToggleMeasurement(measurementMode: any): void;
     handleSetState(newState: any): void;
+    handleSetMeasurementSettingsForTypeInState(newMeasurementSettingsForType: any): void;
     handleDeleteConnection(): void;
     handleResetMeasurements(): void;
-    offMeasurementParam(param: any): void;
-    onMeasurementParam(param: any, offParam: any): void;
     addHotKeyListener(): void;
     removeHotKeyListener(): void;
     handleStartGifRecording(downloadPath: any, rotationSpeed?: number, frameDuration?: number): Promise<void>;
@@ -67,8 +64,9 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     UNSAFE_componentWillReceiveProps(nextProps: any, nextContext: any): void;
     _resetStateWaveComponent(): void;
     handleSetSetting: (setting: any) => void;
-    keyConfig: {
+    getKeyConfig(): {
         [x: string]: () => void;
+        [x: number]: () => void;
     };
     handleKeyPress: (e: any) => void;
     getPrimitiveOrConventionalMaterial(material: any, isConventionalCellShown?: boolean): any;

@@ -15,7 +15,7 @@ As below:
 - ESSE Data Convention is employed to organize and store information [[1]](#links) via [Made.js](https://github.com/mat3ra/made)
 - [THREE.js](https://threejs.org/) is used for 3d visualization purposes
 - High-level classes for the representation of the [viewer](src/wave.js) and modular ES6-compatible mixins for the associated functionality, ie:
-    - [Atoms](src/mixins/atoms.js), 
+    - [Atoms](src/mixins/atoms.ts), 
     - [Cell](src/mixins/cell.js),
     - [Controls](src/mixins/controls.js),
     - [Mouse](src/mixins/mouse.js),

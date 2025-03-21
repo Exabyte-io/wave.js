@@ -50,8 +50,8 @@ export function BondsMixin(superclass: any): {
          * k-d tree algorithm is used to optimize the time to find the element's neighbors.
          * See https://en.wikipedia.org/wiki/K-d_tree for more information.
          */
-        createBondsGroup(): any;
-        bondsGroup: any;
+        createBondsGroup(): THREE.Group<THREE.Object3DEventMap>;
+        bondsGroup: THREE.Group<THREE.Object3DEventMap> | undefined;
         /**
          * Returns a bond as cylinder geometry object.
          * @return {THREE.Mesh}
@@ -60,3 +60,4 @@ export function BondsMixin(superclass: any): {
     };
     [x: string]: any;
 };
+import * as THREE from "three";

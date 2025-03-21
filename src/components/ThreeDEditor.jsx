@@ -33,6 +33,11 @@ import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
 
+import { LABEL_TYPES, MEASUREMENT_MODES } from "../enums";
+import {
+    defaultMeasurementsSettings,
+    MeasurementSettingsHandler,
+} from "../mixins/measurements/MeasurementSettingsHandler";
 import settings from "../settings";
 import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";
@@ -57,13 +62,7 @@ export class ThreeDEditor extends React.Component {
             activeToolbarMenu: null,
             isThreejsEditorModalShown: false,
             // isDistanceAndAnglesShown: false,
-            measurementsSettings: {
-                isDistanceShown: false,
-                isAnglesShown: false,
-                measurementLabelsShown: false,
-                distance: 0,
-                angle: 0,
-            },
+            measurementsSettings: defaultMeasurementsSettings,
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -91,7 +90,8 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleBonds = this.handleToggleBonds.bind(this);
         this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
-        this.handleToggleLabels = this.handleToggleLabels.bind(this);
+        this.handleToggleElementLabels = this.handleToggleElementLabels.bind(this);
+        this.handleToggleCoordinateLabels = this.handleToggleCoordinateLabels.bind(this);
         this.handleToggleConventionalCell = this.handleToggleConventionalCell.bind(this);
         this.handleToggleIsViewAdjustable = this.handleToggleIsViewAdjustable.bind(this);
         this.handleResetViewer = this.handleResetViewer.bind(this);
@@ -103,13 +103,12 @@ export class ThreeDEditor extends React.Component {
         this.onThreejsEditorModalHide = this.onThreejsEditorModalHide.bind(this);
         this.handleChemicalConnectivityFactorChange =
             this.handleChemicalConnectivityFactorChange.bind(this);
-        this.handleToggleDistanceShown = this.handleToggleDistanceShown.bind(this);
-        this.handleToggleAnglesShown = this.handleToggleAnglesShown.bind(this);
+        this.handleToggleMeasurement = this.handleToggleMeasurement.bind(this);
         this.handleSetState = this.handleSetState.bind(this);
+        this.handleSetMeasurementSettingsForTypeInState =
+            this.handleSetMeasurementSettingsForTypeInState.bind(this);
         this.handleDeleteConnection = this.handleDeleteConnection.bind(this);
         this.handleResetMeasurements = this.handleResetMeasurements.bind(this);
-        this.offMeasurementParam = this.offMeasurementParam.bind(this);
-        this.onMeasurementParam = this.onMeasurementParam.bind(this);
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
@@ -162,18 +161,30 @@ export class ThreeDEditor extends React.Component {
     };
 
     // map of hotkeys to their handlers
-    keyConfig = {
-        [settings.hotKeysConfig.toggleOrbitControls]: this.handleToggleOrbitControls,
-        [settings.hotKeysConfig.toggleInteractive]: this.handleToggleInteractive,
-        [settings.hotKeysConfig.toggleBonds]: this.handleToggleBonds,
-        [settings.hotKeysConfig.toggleConventionalCell]: this.handleToggleConventionalCell,
-        [settings.hotKeysConfig.toggleLabels]: this.handleToggleLabels,
-        [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
-        [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
-        [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleDistanceShown,
-        [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleAnglesShown,
-        [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
-    };
+    getKeyConfig() {
+        return {
+            [settings.hotKeysConfig.toggleOrbitControls]: this.handleToggleOrbitControls,
+            [settings.hotKeysConfig.toggleInteractive]: this.handleToggleInteractive,
+            [settings.hotKeysConfig.toggleBonds]: this.handleToggleBonds,
+            [settings.hotKeysConfig.toggleElementLabels]: this.handleToggleElementLabels,
+            [settings.hotKeysConfig.toggleCoordinateLabels]: this.handleToggleCoordinateLabels,
+            [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
+            [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
+            [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleMeasurement.bind(
+                this,
+                MEASUREMENT_MODES.DISTANCE,
+            ),
+            [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleMeasurement.bind(
+                this,
+                MEASUREMENT_MODES.ANGLE,
+            ),
+            [settings.hotKeysConfig.toggleCopyCoordinatesShown]: this.handleToggleMeasurement.bind(
+                this,
+                MEASUREMENT_MODES.COORDINATE,
+            ),
+            [settings.hotKeysConfig.deleteConnection]: this.handleDeleteConnection,
+        };
+    }
 
     addHotKeyListener() {
         document.addEventListener("keypress", this.handleKeyPress, true);
@@ -194,7 +205,7 @@ export class ThreeDEditor extends React.Component {
         }
 
         // Removing the toggleThreejsEditorModal key from the keyConfig if the editor is not editable
-        const keyConfigAdjusted = { ...this.keyConfig };
+        const keyConfigAdjusted = { ...this.getKeyConfig() };
         if (!editable) {
             delete keyConfigAdjusted[settings.hotKeysConfig.toggleThreejsEditorModal];
         }
@@ -222,8 +233,13 @@ export class ThreeDEditor extends React.Component {
         this._resetStateWaveComponent();
     }
 
-    handleToggleLabels() {
-        this.WaveComponent.wave.toggleLabels();
+    handleToggleElementLabels() {
+        this.WaveComponent.wave.toggleLabelsVisibilityByType(LABEL_TYPES.ELEMENT);
+        this._resetStateWaveComponent();
+    }
+
+    handleToggleCoordinateLabels() {
+        this.WaveComponent.wave.toggleLabelsVisibilityByType(LABEL_TYPES.COORDINATE);
         this._resetStateWaveComponent();
     }
 
@@ -293,14 +309,6 @@ export class ThreeDEditor extends React.Component {
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
     handleResetViewer() {
-        const { measurementsSettings } = this.state;
-        this.setState({
-            measurementsSettings: {
-                ...measurementsSettings,
-                isDistanceShown: false,
-                isAnglesShown: false,
-            },
-        });
         this.WaveComponent.initViewer();
         this._resetStateWaveComponent();
     }
@@ -332,69 +340,29 @@ export class ThreeDEditor extends React.Component {
         this.setState(newState);
     }
 
+    handleSetMeasurementSettingsForTypeInState(newMeasurementSettingsForType) {
+        const { measurementsSettings } = this.state;
+        const measurementSettingsHandler = new MeasurementSettingsHandler(measurementsSettings);
+        measurementSettingsHandler.updateMeasurementSettingsByType(newMeasurementSettingsForType);
+        const newMeasurementsSettings = measurementSettingsHandler.measurementsSettings;
+        this.setState({ measurementsSettings: newMeasurementsSettings });
+    }
+
     handleDeleteConnection() {
         this.WaveComponent.wave.deleteConnection();
     }
 
-    handleToggleDistanceShown() {
-        const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measurementsSettings;
-        if (isAnglesShown) {
-            this.offMeasurementParam("isAnglesShown");
-        }
-
-        if (!isDistanceShown) {
-            this.onMeasurementParam("isDistanceShown", "isAnglesShown");
-        } else {
-            this.offMeasurementParam("isDistanceShown");
-        }
-    }
-
     handleResetMeasurements() {
-        const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measurementsSettings;
-        if (isDistanceShown || isAnglesShown) this.WaveComponent.wave.resetMeasurements();
+        this.WaveComponent.wave.resetAllMeasurements();
     }
 
-    offMeasurementParam(param) {
-        this.WaveComponent.wave.destroyListeners();
-        this.handleResetMeasurements();
-        this.setState((prevState) => {
-            const { measurementsSettings } = prevState;
-            return {
-                ...prevState,
-                measurementsSettings: { ...measurementsSettings, [param]: false },
-            };
-        });
-    }
-
-    onMeasurementParam(param, offParam) {
-        this.setState((prevState) => {
-            const { measurementsSettings } = prevState;
-            return {
-                ...prevState,
-                measurementsSettings: { ...measurementsSettings, [param]: true },
-            };
-        });
-        const { measurementsSettings } = this.state;
-        this.WaveComponent.wave.initListeners(this.handleSetState, {
-            ...measurementsSettings,
-            [param]: true,
-            [offParam]: false,
-        });
-    }
-
-    handleToggleAnglesShown() {
-        const { measurementsSettings } = this.state;
-        const { isAnglesShown, isDistanceShown } = measurementsSettings;
-        if (isDistanceShown) {
-            this.offMeasurementParam("isDistanceShown");
-        }
-        if (!isAnglesShown) {
-            this.onMeasurementParam("isAnglesShown", "isDistanceShown");
-        } else {
-            this.offMeasurementParam("isAnglesShown");
-        }
+    handleToggleMeasurement(measurementMode) {
+        this.WaveComponent.wave.toggleMeasurementByType(
+            measurementMode,
+            this.handleSetMeasurementSettingsForTypeInState,
+        );
+        const newMeasurementsSettings = this.WaveComponent.wave.getMeasurementsSettings();
+        this.setState({ measurementsSettings: newMeasurementsSettings });
     }
 
     handleMessage = (event) => {
@@ -478,12 +446,13 @@ export class ThreeDEditor extends React.Component {
 
     getViewSettingsActions = () => {
         const { viewerSettings, isConventionalCellShown } = this.state;
-
+        const areLabelsVisibleByType = (type) =>
+            this.WaveComponent?.wave?.areLabelsVisibleByType(type);
         return [
             {
                 id: "rotate-zoom",
                 disabled: false,
-                content: "Rotate/Zoom [O]",
+                content: `Rotate/Zoom [${settings.hotKeysConfig.toggleOrbitControls.toUpperCase()}]`,
                 leftIcon: <ThreeDRotation />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("areOrbitControlsEnabled")),
                 onClick: this.handleToggleOrbitControls,
@@ -521,7 +490,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-bonds",
                 disabled: false,
-                content: "Bonds [B]",
+                content: `Bonds [${settings.hotKeysConfig.toggleBonds.toUpperCase()}]`,
                 leftIcon: <Dehaze />,
                 rightIcon: this.getCheckmark(this._getWaveProperty("isDrawBondsEnabled")),
                 onClick: this.handleToggleBonds,
@@ -530,19 +499,32 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-cell",
                 disabled: false,
-                content: "Conventional Cell [C]",
+                content: "Conventional Cell",
                 leftIcon: <FormatShapes />,
                 rightIcon: this.getCheckmark(isConventionalCellShown),
                 onClick: this.handleToggleConventionalCell,
                 shouldMenuStayOpened: true,
             },
             {
-                id: "toggle-labels",
+                id: "toggle-element-labels",
                 disabled: false,
-                content: "Labels [L]",
+                content: `Elements [${settings.hotKeysConfig.toggleElementLabels.toUpperCase()}]`,
                 leftIcon: <Spellcheck />,
-                rightIcon: this.getCheckmark(this._getWaveProperty("areLabelsShown")),
-                onClick: this.handleToggleLabels,
+                rightIcon: this.getCheckmark(
+                    areLabelsVisibleByType && areLabelsVisibleByType("element"),
+                ),
+                onClick: this.handleToggleElementLabels,
+                shouldMenuStayOpened: true,
+            },
+            {
+                id: "toggle-coordinate-labels",
+                disabled: false,
+                content: `Coordinates [${settings.hotKeysConfig.toggleCoordinateLabels.toUpperCase()}]`,
+                leftIcon: <Spellcheck />,
+                rightIcon: this.getCheckmark(
+                    areLabelsVisibleByType && areLabelsVisibleByType("coordinate"),
+                ),
+                onClick: this.handleToggleCoordinateLabels,
                 shouldMenuStayOpened: true,
             },
             {
@@ -561,7 +543,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "reset-view",
                 disabled: false,
-                content: "Reset View [R]",
+                content: `Reset View [${settings.hotKeysConfig.resetViewer.toUpperCase()}]`,
                 leftIcon: <Replay />,
                 onClick: this.handleResetViewer,
                 shouldMenuStayOpened: true,
@@ -571,27 +553,45 @@ export class ThreeDEditor extends React.Component {
 
     getMeasurementsActions = () => {
         const { measurementsSettings } = this.state;
-        const { isDistanceShown, isAnglesShown } = measurementsSettings;
+        const measurementsSettingsHandler = new MeasurementSettingsHandler(measurementsSettings);
         return [
             {
                 id: "Distances",
-                content: "Distances [D]",
-                rightIcon: this.getCheckmark(isDistanceShown),
+                content: `Distances [${settings.hotKeysConfig.toggleDistanceShown.toUpperCase()}]`,
+                rightIcon: this.getCheckmark(
+                    measurementsSettingsHandler.isMeasurementActiveByType(
+                        MEASUREMENT_MODES.DISTANCE,
+                    ),
+                ),
                 leftIcon: <HeightIcon />,
-                onClick: this.handleToggleDistanceShown,
+                onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.DISTANCE),
                 shouldMenuStayOpened: true,
             },
             {
                 id: "Angles",
-                content: "Angles [A]",
-                rightIcon: this.getCheckmark(isAnglesShown),
+                content: `Angles [${settings.hotKeysConfig.toggleAnglesShown.toUpperCase()}]`,
+                rightIcon: this.getCheckmark(
+                    measurementsSettingsHandler.isMeasurementActiveByType(MEASUREMENT_MODES.ANGLE),
+                ),
                 leftIcon: <LooksIcon />,
-                onClick: this.handleToggleAnglesShown,
+                onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.ANGLE),
+                shouldMenuStayOpened: true,
+            },
+            {
+                id: "Coordinates",
+                content: `Copy Coordinates [${settings.hotKeysConfig.toggleCopyCoordinatesShown.toUpperCase()}]`,
+                rightIcon: this.getCheckmark(
+                    measurementsSettingsHandler.isMeasurementActiveByType(
+                        MEASUREMENT_MODES.COORDINATE,
+                    ),
+                ),
+                leftIcon: <GpsFixed />,
+                onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.COORDINATE),
                 shouldMenuStayOpened: true,
             },
             {
                 id: "Delete",
-                content: "Delete connection [X]",
+                content: `Delete connection [${settings.hotKeysConfig.deleteConnection.toUpperCase()}]`,
                 leftIcon: <DeleteIcon />,
                 onClick: this.handleDeleteConnection,
                 shouldMenuStayOpened: true,
@@ -781,23 +781,6 @@ export class ThreeDEditor extends React.Component {
                 </ScopedCssBaseline>
             </ThemeProvider>
         );
-    }
-
-    doWaveFunc(funcStr) {
-        if (!this.WaveComponent || !this.WaveComponent.wave) {
-            console.error("Wave component not initialized");
-            return;
-        }
-
-        const { wave } = this.WaveComponent;
-        try {
-            // eslint-disable-next-line no-new-func
-            const func = new Function("wave", `return wave.${funcStr}`);
-            func(wave);
-            this.WaveComponent.wave.rebuildScene();
-        } catch (error) {
-            console.error("Error executing wave function:", error);
-        }
     }
 }
 

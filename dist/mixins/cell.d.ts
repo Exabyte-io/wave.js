@@ -43,11 +43,12 @@ export function CellMixin(superclass: any): {
         /**
          * Returns an array of THREE.Plane corresponding to the cell's faces.
          */
-        getCellPlanes(cell: any): any[];
+        getCellPlanes(cell: any): THREE.Plane[];
         /**
          * Return the length of unitCell c vector.
          */
-        readonly cVectorLength: any;
+        readonly cVectorLength: number;
     };
     [x: string]: any;
 };
+import * as THREE from "three";

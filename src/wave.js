@@ -11,9 +11,8 @@ import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
 import { ImageMixin } from "./mixins/image";
-// eslint-disable-next-line import/no-cycle
-import { LabelsMixin } from "./mixins/labels";
-import { MeasurementMixin } from "./mixins/measurement";
+import { AllLabelsMixin } from "./mixins/labels/all";
+import { AllMeasurementsMixin } from "./mixins/measurements/all";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
 // eslint-disable-next-line import/no-cycle
@@ -244,8 +243,8 @@ export class Wave extends mix(WaveBase).with(
     RepetitionMixin,
     ControlsMixin,
     BoundaryMixin,
-    LabelsMixin,
-    MeasurementMixin,
+    AllLabelsMixin,
+    AllMeasurementsMixin,
     ImageMixin,
 ) {
     /**
@@ -288,45 +287,20 @@ export class Wave extends mix(WaveBase).with(
         return atoms;
     }
 
-    /**
-     * Function that called when scene is rebuilding.
-     * When scene is rebuilding and all atoms lost color this function is fills current selected atoms by color.
-     */
-    refillSelectedAtoms() {
-        const currentAtoms = this.collectAllAtoms();
-        const newSelectedAtoms = [];
-
-        this.selectedAtoms.forEach((atom) => {
-            const newAtom = currentAtoms.find((currentAtom) => {
-                const firstAtomPoint = new THREE.Vector3().setFromMatrixPosition(atom.matrixWorld);
-                const secondAtomPoint = new THREE.Vector3().setFromMatrixPosition(
-                    currentAtom.matrixWorld,
-                );
-                if (!firstAtomPoint.distanceTo(secondAtomPoint)) {
-                    return currentAtom;
-                }
-                return null;
-            });
-            this.handleSetSelected(newAtom);
-            newAtom.userData = { ...atom.userData };
-            newSelectedAtoms.push(newAtom);
-        });
-        this.selectedAtoms = newSelectedAtoms;
-    }
-
+    // Called on each change to the Redux store via reloadViewer.
     rebuildScene() {
         this.clearView();
         this.drawAtomsAsSpheres();
         this.drawUnitCell();
         this.drawBoundaries();
         if (this.isDrawBondsEnabled) this.drawBonds();
+        this.createAllLabels();
+        this.createAllMeasurements();
         this.render();
-        this.createLabels();
-        this.refillSelectedAtoms();
     }
 
     render() {
-        this.adjustLabelsToCameraPosition();
+        this.adjustAllLabelsToCameraPosition();
         this.renderer.render(this.scene, this.camera);
         if (this.renderer2) this.renderer2.render(this.scene2, this.camera2);
     }

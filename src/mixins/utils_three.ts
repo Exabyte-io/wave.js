@@ -1,0 +1,170 @@
+import * as THREE from "three";
+
+import { COLORS } from "../enums";
+import { AtomMesh, AtomObject } from "./types/atoms";
+
+/**
+ * TODO: import from a shared utils file
+ * Converts radians to degrees
+ */
+export function radiansToDegrees(radians: number): number {
+    return radians * (180 / Math.PI);
+}
+
+export function getArrayFromVector(vector: THREE.Vector3): number[] {
+    return [vector.x, vector.y, vector.z];
+}
+
+export function getObjectCoordinate(object: THREE.Object3D): THREE.Vector3 {
+    return new THREE.Vector3().setFromMatrixPosition(object.matrixWorld);
+}
+
+export function getObjectCoordinateAsArray(object: THREE.Object3D): number[] {
+    const position = getObjectCoordinate(object);
+    return getArrayFromVector(position);
+}
+
+/**
+ * Gets the world position of an atom, accounting for repetition
+ */
+export function getAtomWorldPosition(atom: THREE.Object3D): THREE.Vector3 {
+    const position = new THREE.Vector3();
+
+    // If we have a cached world position (for repeated atoms), use it
+    if (atom.userData && atom.userData.worldPosition) {
+        position.copy(atom.userData.worldPosition);
+    } else {
+        atom.getWorldPosition(position);
+    }
+
+    return position;
+}
+
+/**
+ * Calculates the angle between three points in 3D space
+ */
+export function calculateAngleBetweenPoints(
+    pointA: THREE.Vector3,
+    pointB: THREE.Vector3,
+    pointC: THREE.Vector3,
+): number {
+    const vecA = new THREE.Vector3().subVectors(pointA, pointB);
+    const vecC = new THREE.Vector3().subVectors(pointC, pointB);
+
+    const angleRadians = vecA.angleTo(vecC);
+    return radiansToDegrees(angleRadians);
+}
+
+/**
+ * Calculates angle between three atoms
+ */
+export function calculateAngleBetweenAtoms(atoms: THREE.Object3D[]): number {
+    const [firstAtom, centerAtom, lastAtom] = atoms;
+
+    const firstPos = getObjectCoordinate(firstAtom);
+    const centerPos = getObjectCoordinate(centerAtom);
+    const lastPos = getObjectCoordinate(lastAtom);
+
+    return parseFloat(calculateAngleBetweenPoints(firstPos, centerPos, lastPos).toFixed(2));
+}
+
+/**
+ * Calculates the distance between two points
+ */
+export function calculateDistance(pointA: THREE.Vector3, pointB: THREE.Vector3): number {
+    return pointA.distanceTo(pointB);
+}
+
+/**
+ * Calculates distance between two atoms
+ */
+export function calculateDistanceBetweenAtoms(
+    atomA: THREE.Object3D,
+    atomB: THREE.Object3D,
+): number {
+    const pointA = getObjectCoordinate(atomA);
+    const pointB = getObjectCoordinate(atomB);
+    return calculateDistance(pointA, pointB);
+}
+
+/**
+ * Calculates the midpoint between two points
+ */
+export function calculateMidpoint(pointA: THREE.Vector3, pointB: THREE.Vector3): THREE.Vector3 {
+    return new THREE.Vector3().addVectors(pointA, pointB).multiplyScalar(0.5);
+}
+
+/**
+ * Creates a position for a label at an angle between three points
+ */
+export function calculateAngleLabelPosition(
+    [firstAtom, centerAtom, thirdAtom]: THREE.Object3D[],
+    offsetDistance = 0.75,
+): THREE.Vector3 {
+    const centerPos = getObjectCoordinate(centerAtom);
+    const firstPos = getObjectCoordinate(firstAtom);
+    const thirdPos = getObjectCoordinate(thirdAtom);
+
+    // Create vectors from center to first and third points
+    const vecFirst = new THREE.Vector3().subVectors(firstPos, centerPos).normalize();
+    const vecThird = new THREE.Vector3().subVectors(thirdPos, centerPos).normalize();
+
+    // Calculate the bisector
+    const bisector = new THREE.Vector3().addVectors(vecFirst, vecThird).normalize();
+
+    // Position on the bisector at the given distance
+    return centerPos.clone().add(bisector.multiplyScalar(offsetDistance));
+}
+
+export function isIntersectionObjectAnAtom(intersection: THREE.Intersection) {
+    return intersection.object.type === "Mesh";
+}
+
+/**
+ * Sets or resets the color for an atom by modifying its material properties.
+ * If no color is provided, it restores the previous color and removes emissive effects.
+ */
+export function setColorForAtom(atom: THREE.Object3D, color?: number): void {
+    if (!(atom instanceof THREE.Mesh)) return;
+
+    const atomMesh = atom as AtomMesh;
+    const material = atomMesh.material as THREE.MeshStandardMaterial;
+
+    if (!material) return;
+
+    material.emissive.setHex(color ?? COLORS.BLACK);
+    if (!color && atomMesh.previousColor) {
+        material.color.copy(atomMesh.previousColor);
+    } else if (color && !atomMesh.previousColor) {
+        atomMesh.previousColor = material.color.clone();
+    }
+}
+
+/**
+ * Highlights an atom with the specified color.
+ */
+export function highlightAtom(atom: THREE.Object3D, color: number = COLORS.RED): void {
+    setColorForAtom(atom, color);
+}
+
+/**
+ * Sets an atom as hovered with a color.
+ */
+export function setAtomAsHovered(atom: THREE.Object3D): void {
+    const atomObject = atom as AtomObject;
+    atomObject.userData.hovered = true;
+    setColorForAtom(atom, COLORS.RED);
+}
+
+/**
+ * Unsets an atom as hovered, restoring its previous color and removing the emissive effect.
+ */
+export function unsetAtomAsHovered(atom: THREE.Object3D): void {
+    const atomObject = atom as AtomObject;
+    atomObject.userData.hovered = false;
+    setColorForAtom(atom);
+}
+
+export function isObjectAnAtom(object: THREE.Object3D): object is AtomObject {
+    return object instanceof THREE.Mesh;
+}

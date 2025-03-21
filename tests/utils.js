@@ -233,3 +233,18 @@ export function makeClickOn3Atoms(wave, atoms, stateUpdate) {
         wave.onClick(stateUpdate, event);
     });
 }
+
+// Create a proper MouseEvent-like object that the measurement manager expects
+export function createMouseEventFromPosition(position, camera, canvas, type = "click") {
+    const baseEvent = getEventObjectBy3DPosition(position, camera, canvas);
+    return {
+        ...baseEvent,
+        offsetX: baseEvent.layerX,
+        offsetY: baseEvent.layerY,
+        clientX: baseEvent.layerX,
+        clientY: baseEvent.layerY,
+        preventDefault: jest.fn(),
+        stopPropagation: jest.fn(),
+        type,
+    };
+}

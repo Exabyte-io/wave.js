@@ -1,19 +1,17 @@
-export function AtomsMixin(superclass: any): {
+import { Made } from "@mat3ra/made";
+import * as THREE from "three";
+import { Object3D } from "three";
+export declare const AtomsMixin: (superclass: any) => {
     new (config: any): {
         [x: string]: any;
-        drawAtomsAsSpheres(atomRadiiScale: any): void;
-        getAtomColorByElement(element: any, pallette?: any): any;
         readonly structure: any;
         /**
          * Helper function to set the structural information.
-         * @param {Made.Material} s - Structural information as Made.Material.
+         * @param {Made.Material} material - Structural information as Made.Material.
          */
-        setStructure(s: Made.Material): void;
-        _structure: any;
-        _basis: any;
+        setStructure(material: Made.Material): void;
         readonly basis: any;
         initSphereParameters(): void;
-        sphereMesh: any;
         /**
          * Prepares a sphere mesh object
          * @param {String} color
@@ -21,13 +19,24 @@ export function AtomsMixin(superclass: any): {
          * @param {Array} coordinate
          * @return {THREE.Object3D}
          */
-        getSphereMeshObject({ color, radius, coordinate, }: string): THREE.Object3D;
+        getSphereMeshObject({ color, radius, coordinate, }: {
+            color?: string;
+            radius?: number;
+            coordinate?: number[];
+        }): any;
         _getDefaultSettingsForElement(element?: any, scale?: any): {
             color: any;
             radius: number;
         };
-        createAtomsGroup(basis: any, atomRadiiScale: any): any;
-        getAtomRadiusByElement(element: any, scale?: number, radiimap?: any): number;
+        createAtomsGroup(basis: Made.Basis, atomRadiiScale: number): THREE.Group<THREE.Object3DEventMap>;
+        drawAtomsAsSpheres(atomRadiiScale: number): void;
+        getAtomColorByElement(element: string, pallette?: any): any;
+        getAtomRadiusByElement(element: string | number, scale?: number, radiimap?: any): number;
+        getAtomGroups(): THREE.Object3D<THREE.Object3DEventMap>[];
+        isTHREEObjectAnAtom(object: any): object is THREE.Mesh<any, any, any>;
+        getAtomNameFromObject(object: any): any;
+        getVerticeKeyPerAtom(atom: Object3D): any;
+        createAtomVerticesHashMap(getVerticeKeyPerAtom?: (atom: Object3D) => any, atoms?: THREE.Object3D<THREE.Object3DEventMap>[]): import("./Hashmap").VerticesHashMapHandler;
     };
     [x: string]: any;
 };

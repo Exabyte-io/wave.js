@@ -27,7 +27,31 @@ export const MIN_ANGLE_POINTS_DISTANCE = 0.7;
 export const MEASUREMENT_LABELS_GROUP_NAME = "Measure_Labels";
 export const ANGLE = "ANGLE";
 export const LABELS_GROUP_NAME = "Labels_Group";
+export const ELEMENT_LABELS_GROUP_NAME = "Element_Labels_Group";
+export const COORDINATE_LABELS_GROUP_NAME = "Coordinate_Labels_Group";
 export const COLORS = {
     RED: 0xff0000,
     GREEN: 0x00ff00,
+    ORANGE: 0xffa500,
+    WHITE: 0xffffff,
+    BLACK: 0x000000,
+};
+export var MEASUREMENT_MODES_ENUM;
+(function (MEASUREMENT_MODES_ENUM) {
+    MEASUREMENT_MODES_ENUM["NONE"] = "none";
+    MEASUREMENT_MODES_ENUM["DISTANCE"] = "distance";
+    MEASUREMENT_MODES_ENUM["ANGLE"] = "angle";
+    MEASUREMENT_MODES_ENUM["COORDINATE"] = "coordinate";
+})(MEASUREMENT_MODES_ENUM || (MEASUREMENT_MODES_ENUM = {}));
+export const MEASUREMENT_MODES = {
+    NONE: "none",
+    DISTANCE: "distance",
+    ANGLE: "angle",
+    COORDINATE: "coordinate",
+};
+export const LABEL_TYPES = {
+    COORDINATE: "coordinate",
+    ELEMENT: "element",
+    DISTANCE: "distance",
+    COORDINATE_MEASUREMENT: "coordinateMeasurement",
 };

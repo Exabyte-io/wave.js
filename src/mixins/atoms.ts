@@ -1,15 +1,19 @@
+import { Made } from "@mat3ra/made";
 import * as THREE from "three";
+import { Object3D, Object3DEventMap } from "three";
 
 import { ATOM_GROUP_NAME } from "../enums";
+import { createObjectVerticesHashMap } from "./Hashmap";
 import { ApplyGlow } from "./utils";
+import { getArrayFromVector, getObjectCoordinate, getObjectCoordinateAsArray } from "./utils_three";
 
 /*
  * Mixin containing the logic for dealing with atoms.
  * Draws atoms as spheres and handles actions performed on them.
  */
-export const AtomsMixin = (superclass) =>
+export const AtomsMixin = (superclass: any) =>
     class extends superclass {
-        constructor(config) {
+        constructor(config: any) {
             super(config);
 
             // to draw atoms as spheres
@@ -27,13 +31,14 @@ export const AtomsMixin = (superclass) =>
 
         /**
          * Helper function to set the structural information.
-         * @param {Made.Material} s - Structural information as Made.Material.
+         * @param {Made.Material} material - Structural information as Made.Material.
          */
-        setStructure(s) {
-            this._structure = s.clone(); // clone original structure to assert that any updates are propagated to parents
-            this._basis = s.Basis;
+        setStructure(material: Made.Material) {
+            this._structure = material.clone(); // clone original structure to assert that any updates are propagated to parents
+            this._basis = material.Basis;
             this._basis.originalUnits = this._basis.units;
             this._basis.toCartesian();
+            this.verticesHashMap = this.createAtomVerticesHashMap();
         }
 
         get basis() {
@@ -62,6 +67,10 @@ export const AtomsMixin = (superclass) =>
             color = this.settings.defaultColor,
             radius = this.settings.sphereRadius,
             coordinate = [],
+        }: {
+            color?: string;
+            radius?: number;
+            coordinate?: number[];
         }) {
             // clone original mesh to optimize the speed
             const sphereMesh = this.sphereMesh.clone();
@@ -86,15 +95,16 @@ export const AtomsMixin = (superclass) =>
             };
         }
 
-        createAtomsGroup(basis, atomRadiiScale) {
+        createAtomsGroup(basis: Made.Basis, atomRadiiScale: number) {
             const atomsGroup = new THREE.Group();
             atomsGroup.name = ATOM_GROUP_NAME;
             const { atomicLabelsArray, elementsWithLabelsArray } = basis;
             basis.coordinates.forEach((atomicCoordinate, atomicIndex) => {
                 const element = basis.getElementByIndex(atomicIndex);
+                const coordinate = atomicCoordinate.value;
                 const sphereMesh = this.getSphereMeshObject({
                     ...this._getDefaultSettingsForElement(element, atomRadiiScale),
-                    coordinate: atomicCoordinate.value,
+                    coordinate,
                 });
                 sphereMesh.name = `${element}-${atomicIndex}`;
                 // store any additional data in userData
@@ -102,6 +112,7 @@ export const AtomsMixin = (superclass) =>
                 sphereMesh.userData = {
                     ...sphereMesh.userData,
                     symbolWithLabel: elementsWithLabelsArray[atomicIndex],
+                    atomicIndex,
                 };
                 const atomColor = this.getAtomColorByElement(element).toLowerCase();
                 const label = parseInt(atomicLabelsArray[atomicIndex], 10) || 0;
@@ -115,18 +126,51 @@ export const AtomsMixin = (superclass) =>
             return atomsGroup;
         }
 
-        drawAtomsAsSpheres(atomRadiiScale) {
+        drawAtomsAsSpheres(atomRadiiScale: number) {
             const basis = this.areNonPeriodicBoundariesPresent
                 ? this.basisWithElementsInsideNonPeriodicBoundaries
                 : this.basis;
             this.repeatAtomsAtRepetitionCoordinates(this.createAtomsGroup(basis, atomRadiiScale));
         }
 
-        getAtomColorByElement(element, pallette = this.settings.elementColors) {
+        getAtomColorByElement(element: string, pallette = this.settings.elementColors) {
             return pallette[element] || this.settings.defaultColor;
         }
 
-        getAtomRadiusByElement(element, scale = 1.0, radiimap = this.settings.vdwRadii) {
+        getAtomRadiusByElement(
+            element: string | number,
+            scale = 1.0,
+            radiimap = this.settings.vdwRadii,
+        ) {
             return (radiimap[element] || this.settings.sphereRadius) * scale;
+        }
+
+        getAtomGroups() {
+            const atomGroups: THREE.Object3D<THREE.Object3DEventMap>[] = [];
+            this.structureGroup.children.forEach((group: THREE.Group) => {
+                if (group.name === ATOM_GROUP_NAME) {
+                    atomGroups.push(...group.children);
+                }
+            });
+            return atomGroups;
+        }
+
+        isTHREEObjectAnAtom(object: any) {
+            return object instanceof THREE.Mesh;
+        }
+
+        getAtomNameFromObject(object: any) {
+            return object.name.split("-")[0];
+        }
+
+        getVerticeKeyPerAtom(atom: Object3D) {
+            return this.getAtomNameFromObject(atom);
+        }
+
+        createAtomVerticesHashMap(
+            getVerticeKeyPerAtom = this.getVerticeKeyPerAtom.bind(this),
+            atoms = this.getAtomGroups(),
+        ) {
+            return createObjectVerticesHashMap(getVerticeKeyPerAtom, atoms);
         }
     };

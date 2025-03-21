@@ -12,6 +12,23 @@ export function RepetitionMixin(superclass: any): {
          */
         coordinatesByAxes(coordinates: any, repetitions: any): any;
         /**
+         * Gets repetition information including coordinates and dimensions.
+         * Used by both object and atom repetition functions.
+         */
+        getRepetitionInfo(): {
+            coordinates: any;
+            originalRepetitions: {
+                repetitionsAlongLatticeVectorA: any;
+                repetitionsAlongLatticeVectorB: any;
+                repetitionsAlongLatticeVectorC: any;
+            };
+            dimensions: {
+                dimA: any;
+                dimB: any;
+                dimC: any;
+            };
+        };
+        /**
          * Repeats a given 3D object at the lattice points given by repetitionCoordinates function.
          */
         repeatObject3DAtRepetitionCoordinates(object3D: any): void;
@@ -21,6 +38,10 @@ export function RepetitionMixin(superclass: any): {
          * with measurement functionality.
          */
         repeatAtomsAtRepetitionCoordinates(object3D: any): void;
+        /**
+         * Creates a cloned atom with a unique atomic index based on its position in the repetition grid
+         */
+        createClonedAtomWithUniqueIndex(originalAtom: any, gridPosition: any, dimensions: any, originalAtomCount: any, point: any): any;
     };
     [x: string]: any;
 };

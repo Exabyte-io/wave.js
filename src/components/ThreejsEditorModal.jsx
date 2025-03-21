@@ -14,7 +14,7 @@ import { Toolbar } from "three/editor/js/Toolbar";
 import { Viewport } from "three/editor/js/Viewport";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-import { LABELS_GROUP_NAME } from "../enums";
+import { COORDINATE_LABELS_GROUP_NAME, ELEMENT_LABELS_GROUP_NAME } from "../enums";
 import settings from "../settings";
 import { materialsToThreeDSceneData, ThreeDSceneDataToMaterial } from "../utils";
 import { AlertDialog } from "./AlertDialog";
@@ -98,10 +98,13 @@ export class ThreejsEditorModal extends ModalDialog {
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
         const cell = this.editor.scene.getObjectByName("Cell");
-        const labels = this.editor.scene.getObjectByName(LABELS_GROUP_NAME).children;
+        const elementLabels =
+            this.editor.scene.getObjectByName(ELEMENT_LABELS_GROUP_NAME)?.children || [];
+        const coordinateLabels =
+            this.editor.scene.getObjectByName(COORDINATE_LABELS_GROUP_NAME)?.children || [];
         // Make the cell and labels transparent for raycaster so they do not block atoms
         cell.raycast = () => {};
-        labels.forEach((label) => {
+        [...elementLabels, ...coordinateLabels].forEach((label) => {
             label.raycast = () => {};
         });
     }

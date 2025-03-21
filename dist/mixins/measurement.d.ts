@@ -5,7 +5,7 @@ export function MeasurementMixin(superclass: any): {
         intersected: any;
         atomConnections: any;
         angles: any;
-        measurementLabels: any;
+        measurementLabelsGroup: any;
         currentSelectedLine: any;
         destroyListeners(): void;
         /**
