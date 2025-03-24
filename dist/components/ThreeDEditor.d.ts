@@ -58,6 +58,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     removeHotKeyListener(): void;
     handleStartGifRecording(downloadPath: any, rotationSpeed?: number, frameDuration?: number): Promise<void>;
     handleMessage: (event: any) => void;
+    handleSetMaterial(newMaterialConfig: any): void;
     componentDidMount(): void;
     componentWillUnmount(): void;
     UNSAFE_componentWillReceiveProps(nextProps: any, nextContext: any): void;

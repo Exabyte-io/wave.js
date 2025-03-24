@@ -4,7 +4,6 @@
 import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
 import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
 import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
-import { showErrorAlert } from "@exabyte-io/cove.js/src/other/alerts";
 import { AlertProvider } from "@exabyte-io/cove.js/src/theme/provider";
 import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
@@ -113,6 +112,7 @@ export class ThreeDEditor extends React.Component {
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
         this.handleMessage = this.handleMessage.bind(this);
+        this.handleSetMaterial = this.handleSetMaterial.bind(this);
     }
 
     componentDidMount() {
@@ -364,26 +364,24 @@ export class ThreeDEditor extends React.Component {
         this.setState({ measurementsSettings: newMeasurementsSettings });
     }
 
+    handleSetMaterial(newMaterialConfig) {
+        const newMaterial = new Made.Material(newMaterialConfig);
+        this.setState(
+            {
+                originalMaterial: newMaterial,
+                material: newMaterial.clone(),
+            },
+            () => {
+                // Force Wave component to update after state change
+                if (this.WaveComponent) {
+                    this.WaveComponent.wave.rebuildScene();
+                }
+            },
+        );
+    }
+
     handleMessage = (event) => {
-        if (event.data && event.data.material) {
-            try {
-                const newMaterial = new Made.Material(event.data.material);
-                this.setState(
-                    {
-                        originalMaterial: newMaterial,
-                        material: newMaterial.clone(),
-                    },
-                    () => {
-                        // Force Wave component to update after state change
-                        if (this.WaveComponent) {
-                            this.WaveComponent.wave.rebuildScene();
-                        }
-                    },
-                );
-            } catch (error) {
-                showErrorAlert("Error creating material: " + error.message);
-            }
-        } else if (event.data && event.data.action && this[event.data.action]) {
+        if (event.data && event.data.action && this[event.data.action]) {
             const { action, parameters } = event.data;
             this[action](...parameters);
         }
