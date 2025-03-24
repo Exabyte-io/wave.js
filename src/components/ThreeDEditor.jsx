@@ -365,11 +365,11 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleSetMaterial(newMaterialConfig) {
-        const { originalMaterial } = this.state;
+        const { material } = this.state;
         const newMaterial = new Made.Material(newMaterialConfig);
         this.setState(
             {
-                originalMaterial,
+                originalMaterial: material,
                 material: newMaterial,
             },
             () => {
