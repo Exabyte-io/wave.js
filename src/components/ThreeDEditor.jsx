@@ -365,11 +365,12 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleSetMaterial(newMaterialConfig) {
+        const { originalMaterial } = this.state;
         const newMaterial = new Made.Material(newMaterialConfig);
         this.setState(
             {
-                originalMaterial: newMaterial,
-                material: newMaterial.clone(),
+                originalMaterial,
+                material: newMaterial,
             },
             () => {
                 // Force Wave component to update after state change
