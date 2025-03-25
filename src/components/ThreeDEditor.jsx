@@ -382,9 +382,15 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleMessage = (event) => {
-        if (event.data && event.data.action && this[event.data.action]) {
-            const { action, parameters } = event.data;
-            this[action](...parameters);
+        try {
+            if (event.data && event.data.action && this[event.data.action]) {
+                const { action, parameters } = event.data;
+                this[action](...parameters);
+            } else {
+                console.warn("Unknown message received", event.data);
+            }
+        } catch (error) {
+            console.error("Error handling message", error);
         }
     };
 
