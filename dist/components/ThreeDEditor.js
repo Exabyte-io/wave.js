@@ -77,6 +77,20 @@ export class ThreeDEditor extends React.Component {
                 handler.call(this);
             }
         };
+        this.handleMessage = (event) => {
+            try {
+                if (event.data && event.data.action && this[event.data.action]) {
+                    const { action, parameters } = event.data;
+                    this[action](...parameters);
+                }
+                else {
+                    console.warn("Unknown message received", event.data);
+                }
+            }
+            catch (error) {
+                console.error("Error handling message", error);
+            }
+        };
         this.getViewSettingsActions = () => {
             const { viewerSettings, isConventionalCellShown } = this.state;
             const areLabelsVisibleByType = (type) => { var _a, _b; return (_b = (_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) === null || _b === void 0 ? void 0 : _b.areLabelsVisibleByType(type); };
@@ -328,14 +342,18 @@ export class ThreeDEditor extends React.Component {
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
+        this.handleMessage = this.handleMessage.bind(this);
+        this.handleSetMaterial = this.handleSetMaterial.bind(this);
     }
     componentDidMount() {
         this.addHotKeyListener();
+        window.addEventListener("message", this.handleMessage);
     }
     componentWillUnmount() {
         this.handleResetMeasurements();
         this.WaveComponent.wave.destroyListeners();
         this.removeHotKeyListener();
+        window.removeEventListener("message", this.handleMessage);
     }
     // TODO: update component to fully controlled or fully uncontrolled with a key?
     // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
@@ -489,6 +507,19 @@ export class ThreeDEditor extends React.Component {
         this.WaveComponent.wave.toggleMeasurementByType(measurementMode, this.handleSetMeasurementSettingsForTypeInState);
         const newMeasurementsSettings = this.WaveComponent.wave.getMeasurementsSettings();
         this.setState({ measurementsSettings: newMeasurementsSettings });
+    }
+    handleSetMaterial(newMaterialConfig) {
+        const { material } = this.state;
+        const newMaterial = new Made.Material(newMaterialConfig);
+        this.setState({
+            originalMaterial: material,
+            material: newMaterial,
+        }, () => {
+            // Force Wave component to update after state change
+            if (this.WaveComponent) {
+                this.WaveComponent.wave.rebuildScene();
+            }
+        });
     }
     /**
      * Returns a cover div to cover the area and prevent user interaction with component

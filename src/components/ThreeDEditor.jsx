@@ -111,16 +111,20 @@ export class ThreeDEditor extends React.Component {
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
+        this.handleMessage = this.handleMessage.bind(this);
+        this.handleSetMaterial = this.handleSetMaterial.bind(this);
     }
 
     componentDidMount() {
         this.addHotKeyListener();
+        window.addEventListener("message", this.handleMessage);
     }
 
     componentWillUnmount() {
         this.handleResetMeasurements();
         this.WaveComponent.wave.destroyListeners();
         this.removeHotKeyListener();
+        window.removeEventListener("message", this.handleMessage);
     }
 
     // TODO: update component to fully controlled or fully uncontrolled with a key?
@@ -359,6 +363,36 @@ export class ThreeDEditor extends React.Component {
         const newMeasurementsSettings = this.WaveComponent.wave.getMeasurementsSettings();
         this.setState({ measurementsSettings: newMeasurementsSettings });
     }
+
+    handleSetMaterial(newMaterialConfig) {
+        const { material } = this.state;
+        const newMaterial = new Made.Material(newMaterialConfig);
+        this.setState(
+            {
+                originalMaterial: material,
+                material: newMaterial,
+            },
+            () => {
+                // Force Wave component to update after state change
+                if (this.WaveComponent) {
+                    this.WaveComponent.wave.rebuildScene();
+                }
+            },
+        );
+    }
+
+    handleMessage = (event) => {
+        try {
+            if (event.data && event.data.action && this[event.data.action]) {
+                const { action, parameters } = event.data;
+                this[action](...parameters);
+            } else {
+                console.warn("Unknown message received", event.data);
+            }
+        } catch (error) {
+            console.error("Error handling message", error);
+        }
+    };
 
     /**
      * Returns a cover div to cover the area and prevent user interaction with component
