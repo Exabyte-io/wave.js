@@ -103,11 +103,10 @@ export const BoundaryMixin = (superclass) =>
          * Returns a basis with elements inside boundary conditions.
          */
         get basisWithElementsInsideNonPeriodicBoundaries() {
-            const newBasis = new Made.Basis({
-                ...this._basis.toJSON(),
-                elements: [],
-                coordinates: [],
-            });
+            const newBasis = this._basis.clone();
+            newBasis.elements = [];
+            newBasis.coordinates = [];
+
             const basisCloneInCrystalCoordinates = this._basis.clone();
 
             newBasis.toCrystal();

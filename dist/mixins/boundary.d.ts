@@ -31,9 +31,8 @@ export function BoundaryMixin(superclass: any): {
         /**
          * Returns a basis with elements inside boundary conditions.
          */
-        readonly basisWithElementsInsideNonPeriodicBoundaries: Made.Basis;
+        readonly basisWithElementsInsideNonPeriodicBoundaries: any;
     };
     [x: string]: any;
 };
 import * as THREE from "three";
-import { Made } from "@mat3ra/made";
