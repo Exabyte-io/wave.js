@@ -122,7 +122,6 @@ export class ThreeDEditor extends React.Component {
 
     componentWillUnmount() {
         this.handleResetMeasurements();
-        this.WaveComponent.wave.destroyListeners();
         this.removeHotKeyListener();
         window.removeEventListener("message", this.handleMessage);
     }
