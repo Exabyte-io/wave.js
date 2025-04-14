@@ -291,23 +291,23 @@ export namespace ThreeDEditor {
             getACopyWithConventionalCell(): any;
             getConsistencyChecks(): import("@mat3ra/esse/dist/js/types").ConsistencyCheck[];
             getBasisConsistencyChecks(): import("@mat3ra/esse/dist/js/types").ConsistencyCheck[];
-            consistencyChecks: object[];
-            addConsistencyChecks(array: object[]): void;
+            consistencyChecks: import("@mat3ra/esse/dist/js/types").ConsistencyCheck[];
+            addConsistencyChecks(array: import("@mat3ra/esse/dist/js/types").ConsistencyCheck[]): void;
             prop: {
                 <T = undefined>(name: string, defaultValue: T): T;
                 <T_1 = undefined>(name: string): T_1 | undefined;
             } & {
                 <T_2 = undefined>(name: string, defaultValue: T_2): T_2;
-                <T_1_1 = undefined>(name: string): T_1_1 | undefined;
-            } & {
-                <T_3 = undefined>(name: string, defaultValue: T_3): T_3;
-                <T_1_2 = undefined>(name: string): T_1_2 | undefined;
+                <T_3 = undefined>(name: string): T_3 | undefined;
             } & {
                 <T_4 = undefined>(name: string, defaultValue: T_4): T_4;
-                <T_1_3 = undefined>(name: string): T_1_3 | undefined;
+                <T_5 = undefined>(name: string): T_5 | undefined;
             } & {
-                <T_5 = undefined>(name: string, defaultValue: T_5): T_5;
-                <T_6 = undefined>(name: string): T_6 | undefined;
+                <T_6 = undefined>(name: string, defaultValue: T_6): T_6;
+                <T_7 = undefined>(name: string): T_7 | undefined;
+            } & {
+                <T_8 = undefined>(name: string, defaultValue: T_8): T_8;
+                <T_9 = undefined>(name: string): T_9 | undefined;
             };
             setProp: ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void) & ((name: string, value: unknown) => void);
             unsetProp: ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void) & ((name: string) => void);
@@ -318,21 +318,49 @@ export namespace ThreeDEditor {
             validate: (() => void) & (() => void) & (() => void) & (() => void) & (() => void);
             clean: ((config: import("@mat3ra/esse/dist/js/esse/types").AnyObject) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((config: import("@mat3ra/esse/dist/js/esse/types").AnyObject) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((config: import("@mat3ra/esse/dist/js/esse/types").AnyObject) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((config: import("@mat3ra/esse/dist/js/esse/types").AnyObject) => import("@mat3ra/esse/dist/js/esse/types").AnyObject) & ((config: import("@mat3ra/esse/dist/js/esse/types").AnyObject) => import("@mat3ra/esse/dist/js/esse/types").AnyObject);
             isValid: (() => boolean) & (() => boolean) & (() => boolean) & (() => boolean) & (() => boolean);
-            id: string;
             readonly cls: string;
             getClsName: (() => string) & (() => string) & (() => string) & (() => string) & (() => string);
+            getAsEntityReference: {
+                (byIdOnly: true): {
+                    _id: string;
+                };
+                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            } & {
+                (byIdOnly: true): {
+                    _id: string;
+                };
+                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            } & {
+                (byIdOnly: true): {
+                    _id: string;
+                };
+                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            } & {
+                (byIdOnly: true): {
+                    _id: string;
+                };
+                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            } & {
+                (byIdOnly: true): {
+                    _id: string;
+                };
+                (byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            };
+            getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity);
+            id: string;
+            _id: string;
+            schemaVersion: string;
+            systemName: string;
             readonly slug: string;
             readonly isSystemEntity: boolean;
-            getAsEntityReference: ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema) & ((byIdOnly?: boolean | undefined) => import("@mat3ra/esse/dist/js/types").EntityReferenceSchema);
-            getEntityByName: ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity) & ((entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string) => import("@mat3ra/code/dist/js/entity").InMemoryEntity);
             metadata: object;
             updateMetadata(object: object): void;
             name: string;
             setName(name: string): void;
             readonly isDefault: boolean;
         } & {
-            consistencyChecks: object[];
-            addConsistencyChecks(array: object[]): void;
+            consistencyChecks: import("@mat3ra/esse/dist/js/types").ConsistencyCheck[];
+            addConsistencyChecks(array: import("@mat3ra/esse/dist/js/types").ConsistencyCheck[]): void;
             _json: import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             prop<T = undefined>(name: string, defaultValue: T): T;
             prop<T_1 = undefined>(name: string): T_1 | undefined;
@@ -346,19 +374,25 @@ export namespace ThreeDEditor {
             validate(): void;
             clean(config: import("@mat3ra/esse/dist/js/esse/types").AnyObject): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             isValid(): boolean;
-            id: string;
             readonly cls: string;
             getClsName(): string;
+            getAsEntityReference(byIdOnly: true): {
+                _id: string;
+            };
+            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
+            id: string;
+            _id: string;
+            schemaVersion: string;
+            systemName: string;
             readonly slug: string;
             readonly isSystemEntity: boolean;
-            getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
-            getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
         } & {
             metadata: object;
             updateMetadata(object: object): void;
             _json: import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             prop<T_2 = undefined>(name: string, defaultValue: T_2): T_2;
-            prop<T_1_1 = undefined>(name: string): T_1_1 | undefined;
+            prop<T_3 = undefined>(name: string): T_3 | undefined;
             setProp(name: string, value: unknown): void;
             unsetProp(name: string): void;
             setProps(json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined): any;
@@ -369,19 +403,25 @@ export namespace ThreeDEditor {
             validate(): void;
             clean(config: import("@mat3ra/esse/dist/js/esse/types").AnyObject): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             isValid(): boolean;
-            id: string;
             readonly cls: string;
             getClsName(): string;
+            getAsEntityReference(byIdOnly: true): {
+                _id: string;
+            };
+            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
+            id: string;
+            _id: string;
+            schemaVersion: string;
+            systemName: string;
             readonly slug: string;
             readonly isSystemEntity: boolean;
-            getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
-            getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
         } & {
             name: string;
             setName(name: string): void;
             _json: import("@mat3ra/esse/dist/js/esse/types").AnyObject;
-            prop<T_3 = undefined>(name: string, defaultValue: T_3): T_3;
-            prop<T_1_2 = undefined>(name: string): T_1_2 | undefined;
+            prop<T_4 = undefined>(name: string, defaultValue: T_4): T_4;
+            prop<T_5 = undefined>(name: string): T_5 | undefined;
             setProp(name: string, value: unknown): void;
             unsetProp(name: string): void;
             setProps(json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined): any;
@@ -392,18 +432,24 @@ export namespace ThreeDEditor {
             validate(): void;
             clean(config: import("@mat3ra/esse/dist/js/esse/types").AnyObject): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             isValid(): boolean;
-            id: string;
             readonly cls: string;
             getClsName(): string;
+            getAsEntityReference(byIdOnly: true): {
+                _id: string;
+            };
+            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
+            id: string;
+            _id: string;
+            schemaVersion: string;
+            systemName: string;
             readonly slug: string;
             readonly isSystemEntity: boolean;
-            getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
-            getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
         } & {
             readonly isDefault: boolean;
             _json: import("@mat3ra/esse/dist/js/esse/types").AnyObject;
-            prop<T_4 = undefined>(name: string, defaultValue: T_4): T_4;
-            prop<T_1_3 = undefined>(name: string): T_1_3 | undefined;
+            prop<T_6 = undefined>(name: string, defaultValue: T_6): T_6;
+            prop<T_7 = undefined>(name: string): T_7 | undefined;
             setProp(name: string, value: unknown): void;
             unsetProp(name: string): void;
             setProps(json?: import("@mat3ra/esse/dist/js/esse/types").AnyObject | undefined): any;
@@ -414,13 +460,19 @@ export namespace ThreeDEditor {
             validate(): void;
             clean(config: import("@mat3ra/esse/dist/js/esse/types").AnyObject): import("@mat3ra/esse/dist/js/esse/types").AnyObject;
             isValid(): boolean;
-            id: string;
             readonly cls: string;
             getClsName(): string;
+            getAsEntityReference(byIdOnly: true): {
+                _id: string;
+            };
+            getAsEntityReference(byIdOnly: false): Required<import("@mat3ra/esse/dist/js/types").EntityReferenceSchema>;
+            getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
+            id: string;
+            _id: string;
+            schemaVersion: string;
+            systemName: string;
             readonly slug: string;
             readonly isSystemEntity: boolean;
-            getAsEntityReference(byIdOnly?: boolean | undefined): import("@mat3ra/esse/dist/js/types").EntityReferenceSchema;
-            getEntityByName(entities: import("@mat3ra/code/dist/js/entity").InMemoryEntity[], entity: string, name: string): import("@mat3ra/code/dist/js/entity").InMemoryEntity;
         } & import("@mat3ra/code/dist/js/entity").InMemoryEntity>>;
         let editable: PropTypes.Requireable<boolean>;
         let isConventionalCellShown: PropTypes.Requireable<boolean>;
