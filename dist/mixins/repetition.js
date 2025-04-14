@@ -7,11 +7,9 @@ export const RepetitionMixin = (superclass) => class extends superclass {
      * The method should get the maximum number of repetitions in one of the vectors (numberOfRepetitions)
      */
     repetitionCoordinates(numberOfRepetitions) {
-        const basis = new Made.Basis({
-            ...this.basis.toJSON(),
-            elements: ["Si"],
-            coordinates: [[0, 0, 0]],
-        });
+        const basis = this.basis.clone();
+        basis.elements = ["Si"];
+        basis.coordinates = [[0, 0, 0]];
         // avoid repeating in z direction if boundaries are enabled.
         const repetitions = [
             numberOfRepetitions,

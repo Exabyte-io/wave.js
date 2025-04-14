@@ -103,12 +103,11 @@ export const BoundaryMixin = (superclass) =>
          * Returns a basis with elements inside boundary conditions.
          */
         get basisWithElementsInsideNonPeriodicBoundaries() {
-            const newBasis = new Made.Basis({
-                ...this._basis.toJSON(),
-                elements: [],
-                coordinates: [],
-            });
-            const basisCloneInCrystalCoordinates = this._basis.clone();
+            const newBasis = this.basis.clone();
+            newBasis.elements = [];
+            newBasis.coordinates = [];
+
+            const basisCloneInCrystalCoordinates = this.basis.clone();
 
             newBasis.toCrystal();
             basisCloneInCrystalCoordinates.toCrystal();
@@ -125,7 +124,7 @@ export const BoundaryMixin = (superclass) =>
                 });
             });
 
-            if (this._basis.isInCartesianUnits) newBasis.toCartesian();
+            if (this.basis.isInCartesianUnits) newBasis.toCartesian();
             return newBasis;
         }
     };
