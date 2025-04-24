@@ -3,12 +3,36 @@ import { filterBondsDataByElementsAndOrder, getElementsBondsData } from "@mat3ra
 import createKDTree from "static-kdtree";
 import * as THREE from "three";
 
+interface BondData {
+    length: {
+        value: number;
+    };
+}
+
+type ElementAndCoordinate = [string, number[]];
+
 /*
  * Mixin containing the logic for dealing with bonds.
  */
-export const BondsMixin = (superclass) =>
+export const BondsMixin = (superclass: any) =>
     class extends superclass {
-        constructor(config) {
+        bondsGroup!: THREE.Group;
+
+        areBondsCreated = false;
+
+        isDrawBondsEnabled = false;
+
+        settings!: {
+            chemicalConnectivityFactor: number;
+        };
+
+        basis: any;
+
+        cell: any;
+
+        structureGroup!: THREE.Group;
+
+        constructor(config: any) {
             super(config);
             this.createBondsAsync();
             this.isDrawBondsEnabled = false;
@@ -19,7 +43,7 @@ export const BondsMixin = (superclass) =>
         /**
          * Creates bond asynchronously as bonds creation takes time for large structures.
          */
-        createBondsAsync() {
+        createBondsAsync(): void {
             // eslint-disable-next-line @typescript-eslint/no-this-alias
             const clsInstance = this;
             clsInstance.areBondsCreated = false;
@@ -39,13 +63,25 @@ export const BondsMixin = (superclass) =>
          * @param bondsData {Array} an array of bond data entries for unique element pairs inside structure.
          * @returns {Boolean}
          */
-        areElementsBonded(element1, coordinate1, element2, coordinate2, bondsData) {
+        areElementsBonded(
+            element1: string,
+            coordinate1: number[],
+            element2: string,
+            coordinate2: number[],
+            bondsData: BondData[],
+        ): boolean {
             const distance = Made.math.vDist(coordinate1, coordinate2);
             const connectivityFactor = this.settings.chemicalConnectivityFactor;
             return Boolean(
-                filterBondsDataByElementsAndOrder(bondsData, element1, element2).find((b) => {
-                    return b.length.value && distance <= b.length.value * connectivityFactor;
-                }),
+                filterBondsDataByElementsAndOrder(bondsData, element1, element2).find(
+                    (b: BondData) => {
+                        return (
+                            b.length.value &&
+                            distance !== undefined &&
+                            distance <= b.length.value * connectivityFactor
+                        );
+                    },
+                ),
             );
         }
 
@@ -54,11 +90,11 @@ export const BondsMixin = (superclass) =>
          * combinations as it is required to repeat the cell in all directions to determine the bonds.
          * @returns {Array} an array of bond data entries for unique element pairs inside structure.
          */
-        getBondsDataForUniqueElementPairs() {
-            const bonds = [];
+        getBondsDataForUniqueElementPairs(): BondData[] {
+            const bonds: BondData[] = [];
             const { uniqueElements } = this.basis;
-            uniqueElements.forEach((element1, index1) => {
-                uniqueElements.forEach((element2, index2) => {
+            uniqueElements.forEach((element1: string, index1: number) => {
+                uniqueElements.forEach((element2: string, index2: number) => {
                     if (element1 && element2 && index2 >= index1) {
                         Array.prototype.push.apply(bonds, getElementsBondsData(element1, element2));
                     }
@@ -72,9 +108,12 @@ export const BondsMixin = (superclass) =>
          * @param bondsData {Array} an array of bond data entries for unique element pairs inside structure.
          * @returns {Number}
          */
-        getMaxBondLength(bondsData) {
+        getMaxBondLength(bondsData: BondData[]): number {
             const connectivityFactor = this.settings.chemicalConnectivityFactor;
-            return connectivityFactor * Made.math.max(bondsData.map((b) => b.length.value || 0));
+            return (
+                connectivityFactor *
+                Made.math.max(bondsData.map((b: BondData) => b.length.value || 0))
+            );
         }
 
         /**
@@ -85,7 +124,9 @@ export const BondsMixin = (superclass) =>
          * @param maxBondLength {Number}
          * @return {Array}
          */
-        getElementsAndCoordinatesArrayWithEdgeNeighbors(maxBondLength) {
+        getElementsAndCoordinatesArrayWithEdgeNeighbors(
+            maxBondLength: number,
+        ): ElementAndCoordinate[] {
             const newBasis = this.basis.clone();
             const basisCloneInCrystalCoordinates = this.basis.clone();
 
@@ -94,11 +135,11 @@ export const BondsMixin = (superclass) =>
 
             const planes = this.getCellPlanes(this.cell);
 
-            basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
-                const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index);
+            basisCloneInCrystalCoordinates.elements.forEach((element: string, index: number) => {
+                const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index).value;
                 if (
                     planes.find(
-                        (plane) =>
+                        (plane: THREE.Plane) =>
                             plane.distanceToPoint(new THREE.Vector3(...coord)) <= maxBondLength,
                     )
                 ) {
@@ -129,7 +170,7 @@ export const BondsMixin = (superclass) =>
          * k-d tree algorithm is used to optimize the time to find the element's neighbors.
          * See https://en.wikipedia.org/wiki/K-d_tree for more information.
          */
-        createBondsGroup() {
+        createBondsGroup(): THREE.Group {
             const bondsGroup = new THREE.Group();
             const bondsData = this.getBondsDataForUniqueElementPairs();
             const maxBondLength = this.getMaxBondLength(bondsData);
@@ -140,35 +181,39 @@ export const BondsMixin = (superclass) =>
 
             const tree = createKDTree(
                 // eslint-disable-next-line no-unused-vars
-                elementsAndCoordinatesArray2.map(([element, coordinate]) => coordinate),
+                elementsAndCoordinatesArray2.map(
+                    ([element, coordinate]: ElementAndCoordinate) => coordinate,
+                ),
             );
 
-            elementsAndCoordinatesArray1.forEach(([element1, coordinate1], index1) => {
-                // iterate over all elements in maxBondLength radius of this element. O(3n^(2/3))
-                tree.rnn(coordinate1, maxBondLength, (index2) => {
-                    const [element2, coordinate2] = elementsAndCoordinatesArray2[index2];
-                    if (
-                        index2 === index1 ||
-                        !this.areElementsBonded(
+            elementsAndCoordinatesArray1.forEach(
+                ([element1, coordinate1]: ElementAndCoordinate, index1: number) => {
+                    // iterate over all elements in maxBondLength radius of this element. O(3n^(2/3))
+                    tree.rnn(coordinate1, maxBondLength, (index2: number) => {
+                        const [element2, coordinate2] = elementsAndCoordinatesArray2[index2];
+                        if (
+                            index2 === index1 ||
+                            !this.areElementsBonded(
+                                element1,
+                                coordinate1,
+                                element2,
+                                coordinate2,
+                                bondsData,
+                            )
+                        )
+                            return;
+                        const bond = this.getBondObject(
                             element1,
+                            index1,
                             coordinate1,
                             element2,
+                            index2,
                             coordinate2,
-                            bondsData,
-                        )
-                    )
-                        return;
-                    const bond = this.getBondObject(
-                        element1,
-                        index1,
-                        coordinate1,
-                        element2,
-                        index2,
-                        coordinate2,
-                    );
-                    bondsGroup.add(bond);
-                });
-            });
+                        );
+                        bondsGroup.add(bond);
+                    });
+                },
+            );
             return bondsGroup;
         }
 
@@ -177,7 +222,7 @@ export const BondsMixin = (superclass) =>
          * in background has not returned yet. This may happen if the structure is large and draw bonds is toggled quickly.
          * We need this to block the UI until the bonds are drawn.
          */
-        drawBonds() {
+        drawBonds(): void {
             this.createBondsAsync();
             if (!this.areBondsCreated) {
                 this.bondsGroup = this.createBondsGroup();
@@ -190,7 +235,14 @@ export const BondsMixin = (superclass) =>
          * Returns a bond as cylinder geometry object.
          * @return {THREE.Mesh}
          */
-        getBondObject(element1, index1, coordinate1, element2, index2, coordinate2) {
+        getBondObject(
+            element1: string,
+            index1: number,
+            coordinate1: number[],
+            element2: string,
+            index2: number,
+            coordinate2: number[],
+        ): THREE.Mesh {
             const vector1 = new THREE.Vector3(...coordinate1);
             const vector2 = new THREE.Vector3(...coordinate2);
             const direction = new THREE.Vector3().subVectors(vector2, vector1);
