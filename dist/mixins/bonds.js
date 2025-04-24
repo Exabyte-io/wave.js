@@ -8,6 +8,8 @@ import * as THREE from "three";
 export const BondsMixin = (superclass) => class extends superclass {
     constructor(config) {
         super(config);
+        this.areBondsCreated = false;
+        this.isDrawBondsEnabled = false;
         this.createBondsAsync();
         this.isDrawBondsEnabled = false;
         this.drawBonds = this.drawBonds.bind(this);
@@ -39,7 +41,9 @@ export const BondsMixin = (superclass) => class extends superclass {
         const distance = Made.math.vDist(coordinate1, coordinate2);
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
         return Boolean(filterBondsDataByElementsAndOrder(bondsData, element1, element2).find((b) => {
-            return b.length.value && distance <= b.length.value * connectivityFactor;
+            return (b.length.value &&
+                distance !== undefined &&
+                distance <= b.length.value * connectivityFactor);
         }));
     }
     /**
@@ -66,7 +70,8 @@ export const BondsMixin = (superclass) => class extends superclass {
      */
     getMaxBondLength(bondsData) {
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
-        return connectivityFactor * Made.math.max(bondsData.map((b) => b.length.value || 0));
+        return (connectivityFactor *
+            Made.math.max(bondsData.map((b) => b.length.value || 0)));
     }
     /**
      * Returns an array of [element, coordinate] for all elements and their neighbors.
@@ -83,7 +88,7 @@ export const BondsMixin = (superclass) => class extends superclass {
         basisCloneInCrystalCoordinates.toCrystal();
         const planes = this.getCellPlanes(this.cell);
         basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
-            const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index);
+            const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index).value;
             if (planes.find((plane) => plane.distanceToPoint(new THREE.Vector3(...coord)) <= maxBondLength)) {
                 [-1, 0, 1].forEach((shiftI) => {
                     [-1, 0, 1].forEach((shiftJ) => {
