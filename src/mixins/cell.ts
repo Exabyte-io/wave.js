@@ -45,6 +45,7 @@ export const CellMixin = (superclass: any) =>
 
         constructor(config: any) {
             super(config);
+            this._cell = config.cell;
             this.drawUnitCell = this.drawUnitCell.bind(this);
         }
 
@@ -89,7 +90,7 @@ export const CellMixin = (superclass: any) =>
          * @param cell {Object} unitCell class instance.
          * @returns {{center:Array<Number>, width:Number, height:Number, maxSize:Number}}
          */
-        getCellViewParams(cell: UnitCell = this.cell): CellViewParams {
+        getCellViewParams(cell: UnitCell = this._cell): CellViewParams {
             let diagonal;
             if (this.areNonPeriodicBoundariesPresent) {
                 const verticesUp = this.getCellVertices(cell, 0.5);
