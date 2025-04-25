@@ -1,18 +1,6 @@
 import { UnitCell } from "@mat3ra/made/dist/js/lattice/unit_cell";
 import * as THREE from "three";
 /**
- * Interface for the expected structure of a config
- */
-interface CellMixinConfig {
-    settings: {
-        defaultColor: number;
-        lineWidth: number;
-        colors: {
-            gray: number;
-        };
-    };
-}
-/**
  * Return type for getCellViewParams method
  */
 interface CellViewParams {
@@ -24,11 +12,6 @@ interface CellViewParams {
 export declare const CellMixin: (superclass: any) => {
     new (config: any): {
         [x: string]: any;
-        _cell: UnitCell;
-        unitCellObject: THREE.LineSegments;
-        settings: CellMixinConfig["settings"];
-        structureGroup: THREE.Group;
-        areNonPeriodicBoundariesPresent: boolean;
         cell: UnitCell;
         setCell(s: UnitCell): void;
         /**
@@ -52,7 +35,7 @@ export declare const CellMixin: (superclass: any) => {
          * @param lineColor {Number} line segment color
          * @returns {LineSegments}
          */
-        getUnitCellObjectByEdges(cell: UnitCell, edges: number[], zMultiplier?: number, lineColor?: number): THREE.LineSegments;
+        getUnitCellObjectByEdges(cell: UnitCell, edges: number[], zMultiplier?: number, lineColor?: any): THREE.LineSegments;
         /**
          * Returns a LineSegments object representing the full unitCell (with all edges).
          */

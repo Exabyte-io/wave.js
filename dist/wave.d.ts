@@ -8,9 +8,9 @@ export class Wave {
      */
     constructor(config: Object);
     rebuildScene(): void;
-    clearView(): void;
     render(): void;
     doFunc(func: any): void;
+    clearView(): void;
     adjustCamerasAndOrbitControlsToCell(): void;
     collectAllAtoms(): any[];
 }

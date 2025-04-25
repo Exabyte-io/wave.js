@@ -8,15 +8,6 @@ type ElementAndCoordinate = [string, number[]];
 export declare const BondsMixin: (superclass: any) => {
     new (config: any): {
         [x: string]: any;
-        bondsGroup: THREE.Group;
-        areBondsCreated: boolean;
-        isDrawBondsEnabled: boolean;
-        settings: {
-            chemicalConnectivityFactor: number;
-        };
-        basis: any;
-        cell: any;
-        structureGroup: THREE.Group;
         /**
          * Creates bond asynchronously as bonds creation takes time for large structures.
          */

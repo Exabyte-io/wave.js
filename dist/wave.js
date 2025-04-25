@@ -42,7 +42,6 @@ class WaveBase {
         this.initRenderer();
         this.initScene();
         this.initCameras();
-        this.initStructureGroup = this.initStructureGroup.bind(this);
         this.initStructureGroup();
         this.setupLights();
         this.handleResize = this.handleResize.bind(this);
@@ -201,12 +200,9 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
      */
     constructor(config) {
         super(config);
-        this.this.adjustCamerasAndOrbitControlsToCell =
-            this.adjustCamerasAndOrbitControlsToCell.bind(this);
         this.adjustCamerasAndOrbitControlsToCell();
-        this.rebuildScene = this.rebuildScene.bind(this);
-        this.clearView = this.clearView.bind(this);
         this.rebuildScene();
+        this.rebuildScene = this.rebuildScene.bind(this);
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
     }

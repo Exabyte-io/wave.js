@@ -17,22 +17,6 @@ type ElementAndCoordinate = [string, number[]];
  */
 export const BondsMixin = (superclass: any) =>
     class extends superclass {
-        bondsGroup!: THREE.Group;
-
-        areBondsCreated = false;
-
-        isDrawBondsEnabled = false;
-
-        settings!: {
-            chemicalConnectivityFactor: number;
-        };
-
-        basis: any;
-
-        cell: any;
-
-        structureGroup!: THREE.Group;
-
         constructor(config: any) {
             super(config);
             this.createBondsAsync();

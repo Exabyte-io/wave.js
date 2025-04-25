@@ -33,16 +33,6 @@ interface CellViewParams {
  */
 export const CellMixin = (superclass: any) =>
     class extends superclass {
-        _cell!: UnitCell;
-
-        unitCellObject!: THREE.LineSegments;
-
-        settings!: CellMixinConfig["settings"];
-
-        structureGroup!: THREE.Group;
-
-        areNonPeriodicBoundariesPresent!: boolean;
-
         constructor(config: any) {
             super(config);
             this._cell = config.cell;

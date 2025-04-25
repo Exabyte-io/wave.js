@@ -8,8 +8,6 @@ import * as THREE from "three";
 export const BondsMixin = (superclass) => class extends superclass {
     constructor(config) {
         super(config);
-        this.areBondsCreated = false;
-        this.isDrawBondsEnabled = false;
         this.createBondsAsync();
         this.isDrawBondsEnabled = false;
         this.drawBonds = this.drawBonds.bind(this);
