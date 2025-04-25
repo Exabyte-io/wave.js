@@ -147,21 +147,12 @@ class WaveBase {
     // eslint-disable-next-line class-methods-use-this
     createStructureGroup(structure) {
         const structureGroup = new THREE.Group();
-        // Set name only if structure exists
-        if (structure) {
-            structureGroup.name = structure.name || structure.formula || "Structure";
-        }
-        else {
-            structureGroup.name = "Structure";
-        }
+        structureGroup.name = structure.name || structure.formula;
         return structureGroup;
     }
     initStructureGroup() {
         this.structureGroup = this.createStructureGroup(this._structure);
-        // Only add to scene if scene exists
-        if (this.scene) {
-            this.scene.add(this.structureGroup);
-        }
+        this.scene.add(this.structureGroup);
     }
     /**
      * Helper method to trigger the reconstruction of the visual on parent node resize
@@ -210,17 +201,15 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
     constructor(config) {
         super(config);
         this.adjustCamerasAndOrbitControlsToCell();
-        this.rebuildScene();
         this.rebuildScene = this.rebuildScene.bind(this);
+        this.clearView = this.clearView.bind(this);
+        this.rebuildScene();
         this.render = this.render.bind(this);
         this.doFunc = this.doFunc.bind(this);
     }
     clearView() {
-        // Check if structureGroup exists and has children property
-        if (this.structureGroup && this.structureGroup.children) {
-            while (this.structureGroup.children.length) {
-                this.structureGroup.remove(this.structureGroup.children[0]);
-            }
+        while (this.structureGroup.children.length) {
+            this.structureGroup.remove(this.structureGroup.children[0]);
         }
     }
     adjustCamerasAndOrbitControlsToCell() {
@@ -230,37 +219,28 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
     }
     collectAllAtoms() {
         const atoms = [];
-        // Check if structureGroup exists and has children property
-        if (this.structureGroup && this.structureGroup.children) {
-            this.structureGroup.children.forEach((group) => {
-                if (group.name !== ATOM_GROUP_NAME)
-                    return;
-                group.children.forEach((atom) => {
-                    if (atom instanceof THREE.Mesh) {
-                        atoms.push(atom);
-                    }
-                });
+        this.structureGroup.children.forEach((group) => {
+            if (group.name !== ATOM_GROUP_NAME)
+                return;
+            group.children.forEach((atom) => {
+                if (atom instanceof THREE.Mesh) {
+                    atoms.push(atom);
+                }
             });
-        }
+        });
         return atoms;
     }
     // Called on each change to the Redux store via reloadViewer.
     rebuildScene() {
-        try {
-            this.clearView();
-            this.drawAtomsAsSpheres();
-            this.drawUnitCell();
-            this.drawBoundaries();
-            if (this.isDrawBondsEnabled)
-                this.drawBonds();
-            this.createAllLabels();
-            this.createAllMeasurements();
-            this.render();
-        }
-        catch (error) {
-            // In test environment, some THREE.js features might not be available
-            console.warn("Error during scene rebuild:", error);
-        }
+        this.clearView();
+        this.drawAtomsAsSpheres();
+        this.drawUnitCell();
+        this.drawBoundaries();
+        if (this.isDrawBondsEnabled)
+            this.drawBonds();
+        this.createAllLabels();
+        this.createAllMeasurements();
+        this.render();
     }
     render() {
         this.adjustAllLabelsToCameraPosition();
