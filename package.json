@@ -53,7 +53,7 @@
     },
     "peerDependencies": {
         "@exabyte-io/cove.js": "*",
-        "@exabyte-io/esse.js": "*",
+        "@mat3ra/esse.js": "*",
         "@mat3ra/code": "*",
         "@mat3ra/made": "*",
         "react": "^17.0.0",
