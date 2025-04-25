@@ -1,28 +1,62 @@
+import { UnitCell } from "@mat3ra/made/dist/js/lattice/unit_cell";
 import * as THREE from "three";
 
 const TV3 = THREE.Vector3;
+
+/**
+ * Interface for the expected structure of a config
+ */
+interface CellMixinConfig {
+    settings: {
+        defaultColor: number;
+        lineWidth: number;
+        colors: {
+            gray: number;
+        };
+    };
+}
+
+/**
+ * Return type for getCellViewParams method
+ */
+interface CellViewParams {
+    center: number[];
+    width: number;
+    height: number;
+    maxSize: number;
+}
 
 /*
  * Mixin containing the logic for dealing with the calculation/unit cell.
  * Draws cell edges as lines.
  * NOTE: `this._cell` is set inside WaveBase.constructor.
  */
-export const CellMixin = (superclass) =>
+export const CellMixin = (superclass: any) =>
     class extends superclass {
-        constructor(config) {
+        _cell!: UnitCell;
+
+        unitCellObject!: THREE.LineSegments;
+
+        settings!: CellMixinConfig["settings"];
+
+        structureGroup!: THREE.Group;
+
+        areNonPeriodicBoundariesPresent!: boolean;
+
+        constructor(config: any) {
             super(config);
             this.drawUnitCell = this.drawUnitCell.bind(this);
         }
 
-        get cell() {
+        get cell(): UnitCell {
             return this._cell;
         }
 
-        set cell(s) {
+        set cell(s: UnitCell) {
             this._cell = s;
         }
 
-        setCell(s) {
+        setCell(s: UnitCell): void {
             this.cell = s;
         }
 
@@ -32,7 +66,7 @@ export const CellMixin = (superclass) =>
          * @param zMultiplier {Number} specifies a multiplier to adjust the z coordinates of the cell vertices with.
          */
         // eslint-disable-next-line class-methods-use-this
-        getCellVertices(cell, zMultiplier = 1) {
+        getCellVertices(cell: UnitCell, zMultiplier = 1) {
             return [
                 [0, 0, 0],
                 [cell.ax, cell.ay, cell.az],
@@ -55,7 +89,7 @@ export const CellMixin = (superclass) =>
          * @param cell {Object} unitCell class instance.
          * @returns {{center:Array<Number>, width:Number, height:Number, maxSize:Number}}
          */
-        getCellViewParams(cell = this.cell) {
+        getCellViewParams(cell: UnitCell = this.cell): CellViewParams {
             let diagonal;
             if (this.areNonPeriodicBoundariesPresent) {
                 const verticesUp = this.getCellVertices(cell, 0.5);
@@ -90,15 +124,15 @@ export const CellMixin = (superclass) =>
          * @returns {LineSegments}
          */
         getUnitCellObjectByEdges(
-            cell,
-            edges,
+            cell: UnitCell,
+            edges: number[],
             zMultiplier = 1,
             lineColor = this.settings.defaultColor,
-        ) {
+        ): THREE.LineSegments {
             const vertices = this.getCellVertices(cell, zMultiplier);
 
             const points = edges.map(
-                (edge) => new TV3(vertices[edge][0], vertices[edge][1], vertices[edge][2]),
+                (edge: number) => new TV3(vertices[edge][0], vertices[edge][1], vertices[edge][2]),
             );
             const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
@@ -113,7 +147,7 @@ export const CellMixin = (superclass) =>
         /**
          * Returns a LineSegments object representing the full unitCell (with all edges).
          */
-        getUnitCellObject(cell) {
+        getUnitCellObject(cell: UnitCell): THREE.LineSegments {
             const edges = [0, 1, 0, 2, 1, 3, 2, 3, 4, 5, 4, 6, 5, 7, 6, 7, 0, 4, 1, 5, 2, 6, 3, 7];
             this.unitCellObject = this.getUnitCellObjectByEdges(cell, edges);
             this.unitCellObject.name = "Cell";
@@ -123,7 +157,7 @@ export const CellMixin = (superclass) =>
         /**
          * Draw unitCell in canvas. 2 half up/down cells (without top edges) are drawn if boundary conditions are present.
          */
-        drawUnitCell(cell = this.cell) {
+        drawUnitCell(cell: UnitCell = this.cell): void {
             if (this.areNonPeriodicBoundariesPresent) {
                 const edges = [0, 1, 0, 2, 1, 3, 2, 3, 0, 4, 1, 5, 2, 6, 3, 7];
                 const cellObjectUp = this.getUnitCellObjectByEdges(cell, edges, 0.5);
@@ -144,7 +178,7 @@ export const CellMixin = (superclass) =>
         /**
          * Returns an array of THREE.Plane corresponding to the cell's faces.
          */
-        getCellPlanes(cell) {
+        getCellPlanes(cell: UnitCell): THREE.Plane[] {
             const vertices = this.getCellVertices(cell).map((a) => new THREE.Vector3(...a));
             return [
                 [0, 1, 2],

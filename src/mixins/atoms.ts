@@ -1,11 +1,11 @@
-import { Made } from "@mat3ra/made";
+import { Basis } from "@mat3ra/made/dist/js/basis/basis";
+import { Material } from "@mat3ra/made/dist/js/material";
 import * as THREE from "three";
-import { Object3D, Object3DEventMap } from "three";
+import { Object3D } from "three";
 
 import { ATOM_GROUP_NAME } from "../enums";
 import { createObjectVerticesHashMap } from "./Hashmap";
 import { ApplyGlow } from "./utils";
-import { getArrayFromVector, getObjectCoordinate, getObjectCoordinateAsArray } from "./utils_three";
 
 /*
  * Mixin containing the logic for dealing with atoms.
@@ -33,7 +33,7 @@ export const AtomsMixin = (superclass: any) =>
          * Helper function to set the structural information.
          * @param {Made.Material} material - Structural information as Made.Material.
          */
-        setStructure(material: Made.Material) {
+        setStructure(material: Material) {
             this._structure = material.clone(); // clone original structure to assert that any updates are propagated to parents
             this._basis = material.Basis;
             this._basis.originalUnits = this._basis.units;
@@ -95,11 +95,11 @@ export const AtomsMixin = (superclass: any) =>
             };
         }
 
-        createAtomsGroup(basis: Made.Basis, atomRadiiScale: number) {
+        createAtomsGroup(basis: Basis, atomRadiiScale: number) {
             const atomsGroup = new THREE.Group();
             atomsGroup.name = ATOM_GROUP_NAME;
             const { atomicLabelsArray, elementsWithLabelsArray } = basis;
-            basis.coordinates.forEach((atomicCoordinate, atomicIndex) => {
+            basis.coordinates.forEach((atomicCoordinate: any, atomicIndex: any) => {
                 const element = basis.getElementByIndex(atomicIndex);
                 const coordinate = atomicCoordinate.value;
                 const sphereMesh = this.getSphereMeshObject({
@@ -155,10 +155,12 @@ export const AtomsMixin = (superclass: any) =>
             return atomGroups;
         }
 
+        // eslint-disable-next-line class-methods-use-this
         isTHREEObjectAnAtom(object: any) {
             return object instanceof THREE.Mesh;
         }
 
+        // eslint-disable-next-line class-methods-use-this
         getAtomNameFromObject(object: any) {
             return object.name.split("-")[0];
         }

@@ -5,7 +5,7 @@ export function RepetitionMixin(superclass: any): {
          * Returns an array of coordinates (lattice points) to repeat the 3D objects bases on the number of repetitions.
          * The method should get the maximum number of repetitions in one of the vectors (numberOfRepetitions)
          */
-        repetitionCoordinates(numberOfRepetitions: any): import("@mat3ra/made/dist/js/basis/types").Coordinate[];
+        repetitionCoordinates(numberOfRepetitions: any): [number, number, number][];
         /**
          * The method receives coordinates in the form of a cube (NxNxN) and repetitions we want to display
          * Returns a new array based on the received data

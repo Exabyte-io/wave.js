@@ -233,7 +233,7 @@ export namespace ThreeDEditor {
     namespace propTypes {
         let material: PropTypes.Validator<NonNullable<{
             _json: import("@mat3ra/made/dist/js/material").MaterialSchemaJSON;
-            toJSON(): import("@mat3ra/made/dist/js/types").MaterialJSON;
+            toJSON(): import("@mat3ra/made/dist/js/types/material").MaterialJSON;
             src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
             updateFormula(): void;
             isNonPeriodic: boolean;
@@ -272,13 +272,13 @@ export namespace ThreeDEditor {
             readonly formula: string;
             readonly unitCellFormula: string;
             unsetFileProps(): void;
-            setBasis(textOrObject: string | import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig, format?: string, unitz?: string): void;
+            setBasis(textOrObject: string | import("@mat3ra/made/dist/js/basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
             setBasisConstraints(constraints: import("@mat3ra/made/dist/js/constraints/constraints").Constraint[]): void;
-            readonly basis: import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig;
+            readonly basis: import("@mat3ra/made/dist/js/material").OptionallyConstrainedBasisConfig;
             readonly Basis: import("@mat3ra/made/dist/js/basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
-            lattice: import("@mat3ra/made/dist/js/lattice/lattice_vectors").BravaisConfigProps | undefined;
-            readonly Lattice: Made.Lattice;
+            lattice: import("@mat3ra/esse/dist/js/types").LatticeSchema;
+            readonly Lattice: import("@mat3ra/made/dist/js/lattice/lattice").Lattice;
             getInchiStringForHash(): string;
             calculateHash(salt?: string, isScaled?: boolean, bypassNonPeriodicCheck?: boolean): string;
             hash: string;
@@ -492,5 +492,4 @@ export namespace ThreeDEditor {
 }
 import React from "react";
 import { WaveComponent } from "./WaveComponent";
-import { Made } from "@mat3ra/made";
 import PropTypes from "prop-types";
