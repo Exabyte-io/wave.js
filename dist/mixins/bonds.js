@@ -96,7 +96,7 @@ export const BondsMixin = (superclass) => class extends superclass {
                             if (shiftI === 0 && shiftJ === 0 && shiftK === 0)
                                 return;
                             newBasis.addAtom({
-                                element,
+                                element: element.value,
                                 coordinate: [
                                     coord[0] + shiftI,
                                     coord[1] + shiftJ,

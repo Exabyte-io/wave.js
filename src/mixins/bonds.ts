@@ -1,3 +1,4 @@
+import { AtomicElementSchema } from "@mat3ra/esse/dist/js/types";
 import { Made } from "@mat3ra/made";
 import { filterBondsDataByElementsAndOrder, getElementsBondsData } from "@mat3ra/periodic-table";
 import createKDTree from "static-kdtree";
@@ -135,31 +136,33 @@ export const BondsMixin = (superclass: any) =>
 
             const planes = this.getCellPlanes(this.cell);
 
-            basisCloneInCrystalCoordinates.elements.forEach((element: string, index: number) => {
-                const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index).value;
-                if (
-                    planes.find(
-                        (plane: THREE.Plane) =>
-                            plane.distanceToPoint(new THREE.Vector3(...coord)) <= maxBondLength,
-                    )
-                ) {
-                    [-1, 0, 1].forEach((shiftI) => {
-                        [-1, 0, 1].forEach((shiftJ) => {
-                            [-1, 0, 1].forEach((shiftK) => {
-                                if (shiftI === 0 && shiftJ === 0 && shiftK === 0) return;
-                                newBasis.addAtom({
-                                    element,
-                                    coordinate: [
-                                        coord[0] + shiftI,
-                                        coord[1] + shiftJ,
-                                        coord[2] + shiftK,
-                                    ],
+            basisCloneInCrystalCoordinates.elements.forEach(
+                (element: AtomicElementSchema, index: number) => {
+                    const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index).value;
+                    if (
+                        planes.find(
+                            (plane: THREE.Plane) =>
+                                plane.distanceToPoint(new THREE.Vector3(...coord)) <= maxBondLength,
+                        )
+                    ) {
+                        [-1, 0, 1].forEach((shiftI) => {
+                            [-1, 0, 1].forEach((shiftJ) => {
+                                [-1, 0, 1].forEach((shiftK) => {
+                                    if (shiftI === 0 && shiftJ === 0 && shiftK === 0) return;
+                                    newBasis.addAtom({
+                                        element: element.value,
+                                        coordinate: [
+                                            coord[0] + shiftI,
+                                            coord[1] + shiftJ,
+                                            coord[2] + shiftK,
+                                        ],
+                                    });
                                 });
                             });
                         });
-                    });
-                }
-            });
+                    }
+                },
+            );
 
             newBasis.toCartesian();
             return newBasis.elementsAndCoordinatesArray;

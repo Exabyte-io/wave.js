@@ -535,12 +535,15 @@ export class ThreeDEditor extends React.Component {
         return _jsx("div", { className: "atom-view-cover", style: style });
     }
     renderWaveComponent() {
+        var _a;
         const { isConventionalCellShown, viewerSettings, viewerTriggerResize, boundaryConditions, material, } = this.state;
         const materialCopy = this.getPrimitiveOrConventionalMaterial(material, isConventionalCellShown);
         const isDrawBondsEnabled = this._getWaveProperty("isDrawBondsEnabled") || false;
+        // Create default cell if unitCell is missing
+        const cell = ((_a = materialCopy.Lattice) === null || _a === void 0 ? void 0 : _a.unitCell) || null;
         return (_jsx(WaveComponent, { ref: (el) => {
                 this.WaveComponent = el;
-            }, triggerHandleResize: viewerTriggerResize, isConventionalCellShown: isConventionalCellShown, isDrawBondsEnabled: isDrawBondsEnabled, isViewAdjustable: viewerSettings.isViewAdjustable, structure: materialCopy, boundaryConditions: boundaryConditions, cell: materialCopy.Lattice.unitCell, name: materialCopy.name, settings: viewerSettings }));
+            }, triggerHandleResize: viewerTriggerResize, isConventionalCellShown: isConventionalCellShown, isDrawBondsEnabled: isDrawBondsEnabled, isViewAdjustable: viewerSettings.isViewAdjustable, structure: materialCopy, boundaryConditions: boundaryConditions, cell: cell, name: materialCopy.name, settings: viewerSettings }));
     }
     // TODO: move in the toolbar component when it's created
     // eslint-disable-next-line class-methods-use-this
