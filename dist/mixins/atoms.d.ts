@@ -30,10 +30,10 @@ export declare const AtomsMixin: (superclass: any) => {
         getAtomColorByElement(element: string, pallette?: any): any;
         getAtomRadiusByElement(element: string | number, scale?: number, radiimap?: any): number;
         getAtomGroups(): THREE.Object3D<THREE.Object3DEventMap>[];
+        isTHREEObjectAnAtom(object: any): object is THREE.Mesh<any, any, any>;
+        getAtomNameFromObject(object: any): any;
         getVerticeKeyPerAtom(atom: Object3D): any;
         createAtomVerticesHashMap(getVerticeKeyPerAtom?: (atom: Object3D) => any, atoms?: THREE.Object3D<THREE.Object3DEventMap>[]): import("./Hashmap").VerticesHashMapHandler;
     };
     [x: string]: any;
-    isTHREEObjectAnAtom(object: any): object is THREE.Mesh<any, any, any>;
-    getAtomNameFromObject(object: any): any;
 };

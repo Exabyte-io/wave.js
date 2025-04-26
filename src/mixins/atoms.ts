@@ -154,11 +154,13 @@ export const AtomsMixin = (superclass: any) =>
             return atomGroups;
         }
 
-        static isTHREEObjectAnAtom(object: any) {
+        // eslint-disable-next-line class-methods-use-this
+        isTHREEObjectAnAtom(object: any) {
             return object instanceof THREE.Mesh;
         }
 
-        static getAtomNameFromObject(object: any) {
+        // eslint-disable-next-line class-methods-use-this
+        getAtomNameFromObject(object: any) {
             return object.name.split("-")[0];
         }
 

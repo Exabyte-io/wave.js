@@ -109,10 +109,12 @@ export const AtomsMixin = (superclass) => class extends superclass {
         });
         return atomGroups;
     }
-    static isTHREEObjectAnAtom(object) {
+    // eslint-disable-next-line class-methods-use-this
+    isTHREEObjectAnAtom(object) {
         return object instanceof THREE.Mesh;
     }
-    static getAtomNameFromObject(object) {
+    // eslint-disable-next-line class-methods-use-this
+    getAtomNameFromObject(object) {
         return object.name.split("-")[0];
     }
     getVerticeKeyPerAtom(atom) {
