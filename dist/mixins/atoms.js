@@ -18,10 +18,6 @@ export const AtomsMixin = (superclass) => class extends superclass {
     get structure() {
         return this._structure;
     }
-    /**
-     * Helper function to set the structural information.
-     * @param {Made.Material} material - Structural information as Made.Material.
-     */
     setStructure(material) {
         this._structure = material.clone(); // clone original structure to assert that any updates are propagated to parents
         this._basis = material.Basis;
@@ -113,12 +109,10 @@ export const AtomsMixin = (superclass) => class extends superclass {
         });
         return atomGroups;
     }
-    // eslint-disable-next-line class-methods-use-this
-    isTHREEObjectAnAtom(object) {
+    static isTHREEObjectAnAtom(object) {
         return object instanceof THREE.Mesh;
     }
-    // eslint-disable-next-line class-methods-use-this
-    getAtomNameFromObject(object) {
+    static getAtomNameFromObject(object) {
         return object.name.split("-")[0];
     }
     getVerticeKeyPerAtom(atom) {

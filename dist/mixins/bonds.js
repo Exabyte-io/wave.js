@@ -1,3 +1,4 @@
+import { math } from "@mat3ra/code/dist/js/math";
 import { Made } from "@mat3ra/made";
 import { filterBondsDataByElementsAndOrder, getElementsBondsData } from "@mat3ra/periodic-table";
 import createKDTree from "static-kdtree";
@@ -69,7 +70,7 @@ export const BondsMixin = (superclass) => class extends superclass {
     getMaxBondLength(bondsData) {
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
         return (connectivityFactor *
-            Made.math.max(bondsData.map((b) => b.length.value || 0)));
+            math.max(bondsData.map((b) => b.length.value || 0)));
     }
     /**
      * Returns an array of [element, coordinate] for all elements and their neighbors.

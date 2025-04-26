@@ -1,3 +1,4 @@
+import { AtomicCoordinateSchema } from "@mat3ra/esse/dist/js/types";
 import { Basis } from "@mat3ra/made/dist/js/basis/basis";
 import { Material } from "@mat3ra/made/dist/js/material";
 import * as THREE from "three";
@@ -29,10 +30,6 @@ export const AtomsMixin = (superclass: any) =>
             return this._structure;
         }
 
-        /**
-         * Helper function to set the structural information.
-         * @param {Made.Material} material - Structural information as Made.Material.
-         */
         setStructure(material: Material) {
             this._structure = material.clone(); // clone original structure to assert that any updates are propagated to parents
             this._basis = material.Basis;
@@ -99,30 +96,32 @@ export const AtomsMixin = (superclass: any) =>
             const atomsGroup = new THREE.Group();
             atomsGroup.name = ATOM_GROUP_NAME;
             const { atomicLabelsArray, elementsWithLabelsArray } = basis;
-            basis.coordinates.forEach((atomicCoordinate: any, atomicIndex: any) => {
-                const element = basis.getElementByIndex(atomicIndex);
-                const coordinate = atomicCoordinate.value;
-                const sphereMesh = this.getSphereMeshObject({
-                    ...this._getDefaultSettingsForElement(element, atomRadiiScale),
-                    coordinate,
-                });
-                sphereMesh.name = `${element}-${atomicIndex}`;
-                // store any additional data in userData
-                // https://threejs.org/docs/#api/en/core/Object3D.userData
-                sphereMesh.userData = {
-                    ...sphereMesh.userData,
-                    symbolWithLabel: elementsWithLabelsArray[atomicIndex],
-                    atomicIndex,
-                };
-                const atomColor = this.getAtomColorByElement(element).toLowerCase();
-                const label = parseInt(atomicLabelsArray[atomicIndex], 10) || 0;
-                // set glow according to the label value as offset, currently
-                // only single digit numeric labels are allowed, in practice we
-                // expect only two different labels: 1 and 2 for up and down
-                // spin representations
-                ApplyGlow(sphereMesh, atomColor, label);
-                atomsGroup.add(sphereMesh);
-            });
+            basis.coordinates.forEach(
+                (atomicCoordinate: AtomicCoordinateSchema, atomicIndex: number) => {
+                    const element = basis.getElementByIndex(atomicIndex);
+                    const coordinate = atomicCoordinate.value;
+                    const sphereMesh = this.getSphereMeshObject({
+                        ...this._getDefaultSettingsForElement(element, atomRadiiScale),
+                        coordinate,
+                    });
+                    sphereMesh.name = `${element}-${atomicIndex}`;
+                    // store any additional data in userData
+                    // https://threejs.org/docs/#api/en/core/Object3D.userData
+                    sphereMesh.userData = {
+                        ...sphereMesh.userData,
+                        symbolWithLabel: elementsWithLabelsArray[atomicIndex],
+                        atomicIndex,
+                    };
+                    const atomColor = this.getAtomColorByElement(element).toLowerCase();
+                    const label = parseInt(atomicLabelsArray[atomicIndex], 10) || 0;
+                    // set glow according to the label value as offset, currently
+                    // only single digit numeric labels are allowed, in practice we
+                    // expect only two different labels: 1 and 2 for up and down
+                    // spin representations
+                    ApplyGlow(sphereMesh, atomColor, label);
+                    atomsGroup.add(sphereMesh);
+                },
+            );
             return atomsGroup;
         }
 
@@ -155,13 +154,11 @@ export const AtomsMixin = (superclass: any) =>
             return atomGroups;
         }
 
-        // eslint-disable-next-line class-methods-use-this
-        isTHREEObjectAnAtom(object: any) {
+        static isTHREEObjectAnAtom(object: any) {
             return object instanceof THREE.Mesh;
         }
 
-        // eslint-disable-next-line class-methods-use-this
-        getAtomNameFromObject(object: any) {
+        static getAtomNameFromObject(object: any) {
             return object.name.split("-")[0];
         }
 

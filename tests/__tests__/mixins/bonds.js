@@ -39,7 +39,7 @@ describe("Bonds functionality tests", () => {
 
         return takeSnapshotAndAssertEqualityAsync(
             wave.renderer.getContext(),
-            "bonds_with_repetition",
+            "bonds_with_repetitions",
         );
     });
 });

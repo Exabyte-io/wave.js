@@ -1,10 +1,10 @@
 import * as THREE from "three";
-interface BondData {
+interface BondDataInterface {
     length: {
         value: number;
     };
 }
-type ElementAndCoordinate = [string, number[]];
+type ElementAndCoordinateAsArray = [string, number[]];
 export declare const BondsMixin: (superclass: any) => {
     new (config: any): {
         [x: string]: any;
@@ -22,19 +22,19 @@ export declare const BondsMixin: (superclass: any) => {
          * @param bondsData {Array} an array of bond data entries for unique element pairs inside structure.
          * @returns {Boolean}
          */
-        areElementsBonded(element1: string, coordinate1: number[], element2: string, coordinate2: number[], bondsData: BondData[]): boolean;
+        areElementsBonded(element1: string, coordinate1: number[], element2: string, coordinate2: number[], bondsData: BondDataInterface[]): boolean;
         /**
          * Returns bonds data for unique element pairs. This is to avoid calling getElementsBondsData for all elements
          * combinations as it is required to repeat the cell in all directions to determine the bonds.
          * @returns {Array} an array of bond data entries for unique element pairs inside structure.
          */
-        getBondsDataForUniqueElementPairs(): BondData[];
+        getBondsDataForUniqueElementPairs(): BondDataInterface[];
         /**
          * Returns the maximum bond length in the structure.
          * @param bondsData {Array} an array of bond data entries for unique element pairs inside structure.
          * @returns {Number}
          */
-        getMaxBondLength(bondsData: BondData[]): number;
+        getMaxBondLength(bondsData: BondDataInterface[]): number;
         /**
          * Returns an array of [element, coordinate] for all elements and their neighbors.
          * The basis is repeated in all directions to find whether the elements at the edges have bonds to neighbors cells
@@ -43,7 +43,7 @@ export declare const BondsMixin: (superclass: any) => {
          * @param maxBondLength {Number}
          * @return {Array}
          */
-        getElementsAndCoordinatesArrayWithEdgeNeighbors(maxBondLength: number): ElementAndCoordinate[];
+        getElementsAndCoordinatesArrayWithEdgeNeighbors(maxBondLength: number): ElementAndCoordinateAsArray[];
         /**
          * Create the half bond objects between elements.
          * k-d tree algorithm is used to optimize the time to find the element's neighbors.

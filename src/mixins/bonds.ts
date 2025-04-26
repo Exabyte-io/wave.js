@@ -1,16 +1,17 @@
+import { math } from "@mat3ra/code/dist/js/math";
 import { AtomicElementSchema } from "@mat3ra/esse/dist/js/types";
 import { Made } from "@mat3ra/made";
 import { filterBondsDataByElementsAndOrder, getElementsBondsData } from "@mat3ra/periodic-table";
 import createKDTree from "static-kdtree";
 import * as THREE from "three";
 
-interface BondData {
+interface BondDataInterface {
     length: {
         value: number;
     };
 }
 
-type ElementAndCoordinate = [string, number[]];
+type ElementAndCoordinateAsArray = [string, number[]];
 
 /*
  * Mixin containing the logic for dealing with bonds.
@@ -53,13 +54,13 @@ export const BondsMixin = (superclass: any) =>
             coordinate1: number[],
             element2: string,
             coordinate2: number[],
-            bondsData: BondData[],
+            bondsData: BondDataInterface[],
         ): boolean {
             const distance = Made.math.vDist(coordinate1, coordinate2);
             const connectivityFactor = this.settings.chemicalConnectivityFactor;
             return Boolean(
                 filterBondsDataByElementsAndOrder(bondsData, element1, element2).find(
-                    (b: BondData) => {
+                    (b: BondDataInterface) => {
                         return (
                             b.length.value &&
                             distance !== undefined &&
@@ -75,8 +76,8 @@ export const BondsMixin = (superclass: any) =>
          * combinations as it is required to repeat the cell in all directions to determine the bonds.
          * @returns {Array} an array of bond data entries for unique element pairs inside structure.
          */
-        getBondsDataForUniqueElementPairs(): BondData[] {
-            const bonds: BondData[] = [];
+        getBondsDataForUniqueElementPairs(): BondDataInterface[] {
+            const bonds: BondDataInterface[] = [];
             const { uniqueElements } = this.basis;
             uniqueElements.forEach((element1: string, index1: number) => {
                 uniqueElements.forEach((element2: string, index2: number) => {
@@ -93,11 +94,11 @@ export const BondsMixin = (superclass: any) =>
          * @param bondsData {Array} an array of bond data entries for unique element pairs inside structure.
          * @returns {Number}
          */
-        getMaxBondLength(bondsData: BondData[]): number {
+        getMaxBondLength(bondsData: BondDataInterface[]): number {
             const connectivityFactor = this.settings.chemicalConnectivityFactor;
             return (
                 connectivityFactor *
-                Made.math.max(bondsData.map((b: BondData) => b.length.value || 0))
+                math.max(bondsData.map((b: BondDataInterface) => b.length.value || 0))
             );
         }
 
@@ -111,7 +112,7 @@ export const BondsMixin = (superclass: any) =>
          */
         getElementsAndCoordinatesArrayWithEdgeNeighbors(
             maxBondLength: number,
-        ): ElementAndCoordinate[] {
+        ): ElementAndCoordinateAsArray[] {
             const newBasis = this.basis.clone();
             const basisCloneInCrystalCoordinates = this.basis.clone();
 
@@ -169,12 +170,12 @@ export const BondsMixin = (superclass: any) =>
             const tree = createKDTree(
                 // eslint-disable-next-line no-unused-vars
                 elementsAndCoordinatesArray2.map(
-                    ([element, coordinate]: ElementAndCoordinate) => coordinate,
+                    ([element, coordinate]: ElementAndCoordinateAsArray) => coordinate,
                 ),
             );
 
             elementsAndCoordinatesArray1.forEach(
-                ([element1, coordinate1]: ElementAndCoordinate, index1: number) => {
+                ([element1, coordinate1]: ElementAndCoordinateAsArray, index1: number) => {
                     // iterate over all elements in maxBondLength radius of this element. O(3n^(2/3))
                     tree.rnn(coordinate1, maxBondLength, (index2: number) => {
                         const [element2, coordinate2] = elementsAndCoordinatesArray2[index2];
