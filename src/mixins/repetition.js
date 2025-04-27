@@ -11,8 +11,8 @@ export const RepetitionMixin = (superclass) =>
          */
         repetitionCoordinates(numberOfRepetitions) {
             const basis = this.basis.clone();
-            basis.elements = ["Si"];
-            basis.coordinates = [[0, 0, 0]];
+            basis.removeAllAtoms();
+            basis.addAtom({ element: "X", coordinate: [0, 0, 0] });
             // avoid repeating in z direction if boundaries are enabled.
             const repetitions = [
                 numberOfRepetitions,

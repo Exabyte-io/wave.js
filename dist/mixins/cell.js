@@ -8,6 +8,7 @@ const TV3 = THREE.Vector3;
 export const CellMixin = (superclass) => class extends superclass {
     constructor(config) {
         super(config);
+        this._cell = config.cell;
         this.drawUnitCell = this.drawUnitCell.bind(this);
     }
     get cell() {
@@ -24,6 +25,7 @@ export const CellMixin = (superclass) => class extends superclass {
      * @param cell {Object} unitCell class instance.
      * @param zMultiplier {Number} specifies a multiplier to adjust the z coordinates of the cell vertices with.
      */
+    // TODO: move to made.unit_cell
     // eslint-disable-next-line class-methods-use-this
     getCellVertices(cell, zMultiplier = 1) {
         return [
@@ -47,7 +49,7 @@ export const CellMixin = (superclass) => class extends superclass {
      * @param cell {Object} unitCell class instance.
      * @returns {{center:Array<Number>, width:Number, height:Number, maxSize:Number}}
      */
-    getCellViewParams(cell = this.cell) {
+    getCellViewParams(cell = this._cell) {
         let diagonal;
         if (this.areNonPeriodicBoundariesPresent) {
             const verticesUp = this.getCellVertices(cell, 0.5);

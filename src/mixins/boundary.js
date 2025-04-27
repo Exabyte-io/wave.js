@@ -113,7 +113,7 @@ export const BoundaryMixin = (superclass) =>
             basisCloneInCrystalCoordinates.toCrystal();
 
             basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
-                const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index);
+                const coord = basisCloneInCrystalCoordinates.getCoordinateValueByIndex(index);
                 newBasis.addAtom({
                     element,
                     coordinate: [

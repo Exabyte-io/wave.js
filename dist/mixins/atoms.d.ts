@@ -1,15 +1,12 @@
-import { Made } from "@mat3ra/made";
+import { Basis } from "@mat3ra/made/dist/js/basis/basis";
+import { Material } from "@mat3ra/made/dist/js/material";
 import * as THREE from "three";
 import { Object3D } from "three";
 export declare const AtomsMixin: (superclass: any) => {
     new (config: any): {
         [x: string]: any;
         readonly structure: any;
-        /**
-         * Helper function to set the structural information.
-         * @param {Made.Material} material - Structural information as Made.Material.
-         */
-        setStructure(material: Made.Material): void;
+        setStructure(material: Material): void;
         readonly basis: any;
         initSphereParameters(): void;
         /**
@@ -28,7 +25,7 @@ export declare const AtomsMixin: (superclass: any) => {
             color: any;
             radius: number;
         };
-        createAtomsGroup(basis: Made.Basis, atomRadiiScale: number): THREE.Group<THREE.Object3DEventMap>;
+        createAtomsGroup(basis: Basis, atomRadiiScale: number): THREE.Group<THREE.Object3DEventMap>;
         drawAtomsAsSpheres(atomRadiiScale: number): void;
         getAtomColorByElement(element: string, pallette?: any): any;
         getAtomRadiusByElement(element: string | number, scale?: number, radiimap?: any): number;

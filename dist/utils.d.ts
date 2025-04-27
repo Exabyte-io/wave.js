@@ -44,13 +44,13 @@ export function ThreeDSceneDataToMaterial(scene: any): {
     readonly formula: string;
     readonly unitCellFormula: string;
     unsetFileProps(): void;
-    setBasis(textOrObject: string | import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig, format?: string, unitz?: string): void;
+    setBasis(textOrObject: string | import("@mat3ra/made/dist/js/basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
     setBasisConstraints(constraints: import("@mat3ra/made/dist/js/constraints/constraints").Constraint[]): void;
-    readonly basis: import("@mat3ra/made/dist/js/parsers/xyz").BasisConfig;
+    readonly basis: import("@mat3ra/made/dist/js/material").OptionallyConstrainedBasisConfig;
     readonly Basis: import("@mat3ra/made/dist/js/basis/constrained_basis").ConstrainedBasis;
     readonly uniqueElements: string[];
-    lattice: import("@mat3ra/made/dist/js/lattice/lattice_vectors").BravaisConfigProps | undefined;
-    readonly Lattice: Made.Lattice;
+    lattice: import("@mat3ra/esse/dist/js/types").LatticeSchema;
+    readonly Lattice: import("@mat3ra/made/dist/js/lattice/lattice").Lattice;
     getInchiStringForHash(): string;
     calculateHash(salt?: string, isScaled?: boolean, bypassNonPeriodicCheck?: boolean): string;
     hash: string;
@@ -253,4 +253,3 @@ export function ThreeDSceneDataToMaterial(scene: any): {
  * Atoms are slightly shifted along X axis if multiple materials are passed.
  */
 export function materialsToThreeDSceneData(materials: any, shift?: number[]): any;
-import { Made } from "@mat3ra/made";
