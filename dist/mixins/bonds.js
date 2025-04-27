@@ -36,6 +36,7 @@ export const BondsMixin = (superclass) => class extends superclass {
      * @param bondsData {Array} an array of bond data entries for unique element pairs inside structure.
      * @returns {Boolean}
      */
+    // TODO: move to made basis bonded
     areElementsBonded(element1, coordinate1, element2, coordinate2, bondsData) {
         const distance = Made.math.vDist(coordinate1, coordinate2);
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
@@ -50,6 +51,7 @@ export const BondsMixin = (superclass) => class extends superclass {
      * combinations as it is required to repeat the cell in all directions to determine the bonds.
      * @returns {Array} an array of bond data entries for unique element pairs inside structure.
      */
+    // TODO: move to made basis bonded
     getBondsDataForUniqueElementPairs() {
         const bonds = [];
         const { uniqueElements } = this.basis;
@@ -67,6 +69,7 @@ export const BondsMixin = (superclass) => class extends superclass {
      * @param bondsData {Array} an array of bond data entries for unique element pairs inside structure.
      * @returns {Number}
      */
+    // TODO: move to made basis bonded
     getMaxBondLength(bondsData) {
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
         return (connectivityFactor *
@@ -80,6 +83,7 @@ export const BondsMixin = (superclass) => class extends superclass {
      * @param maxBondLength {Number}
      * @return {Array}
      */
+    // TODO: move to made basis bonded
     getElementsAndCoordinatesArrayWithEdgeNeighbors(maxBondLength) {
         const newBasis = this.basis.clone();
         const basisCloneInCrystalCoordinates = this.basis.clone();
@@ -87,7 +91,7 @@ export const BondsMixin = (superclass) => class extends superclass {
         basisCloneInCrystalCoordinates.toCrystal();
         const planes = this.getCellPlanes(this.cell);
         basisCloneInCrystalCoordinates.elements.forEach((element, index) => {
-            const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index).value;
+            const coord = basisCloneInCrystalCoordinates.getCoordinateValueByIndex(index);
             if (planes.find((plane) => plane.distanceToPoint(new THREE.Vector3(...coord)) <= maxBondLength)) {
                 [-1, 0, 1].forEach((shiftI) => {
                     [-1, 0, 1].forEach((shiftJ) => {
@@ -115,6 +119,7 @@ export const BondsMixin = (superclass) => class extends superclass {
      * k-d tree algorithm is used to optimize the time to find the element's neighbors.
      * See https://en.wikipedia.org/wiki/K-d_tree for more information.
      */
+    // TODO: move to made basis bonded - refactor to return bonds array and use the array in createBondsGroup
     createBondsGroup() {
         const bondsGroup = new THREE.Group();
         const bondsData = this.getBondsDataForUniqueElementPairs();

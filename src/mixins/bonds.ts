@@ -49,6 +49,7 @@ export const BondsMixin = (superclass: any) =>
          * @param bondsData {Array} an array of bond data entries for unique element pairs inside structure.
          * @returns {Boolean}
          */
+        // TODO: move to made basis bonded
         areElementsBonded(
             element1: string,
             coordinate1: number[],
@@ -76,6 +77,7 @@ export const BondsMixin = (superclass: any) =>
          * combinations as it is required to repeat the cell in all directions to determine the bonds.
          * @returns {Array} an array of bond data entries for unique element pairs inside structure.
          */
+        // TODO: move to made basis bonded
         getBondsDataForUniqueElementPairs(): BondDataInterface[] {
             const bonds: BondDataInterface[] = [];
             const { uniqueElements } = this.basis;
@@ -94,6 +96,7 @@ export const BondsMixin = (superclass: any) =>
          * @param bondsData {Array} an array of bond data entries for unique element pairs inside structure.
          * @returns {Number}
          */
+        // TODO: move to made basis bonded
         getMaxBondLength(bondsData: BondDataInterface[]): number {
             const connectivityFactor = this.settings.chemicalConnectivityFactor;
             return (
@@ -110,6 +113,7 @@ export const BondsMixin = (superclass: any) =>
          * @param maxBondLength {Number}
          * @return {Array}
          */
+        // TODO: move to made basis bonded
         getElementsAndCoordinatesArrayWithEdgeNeighbors(
             maxBondLength: number,
         ): ElementAndCoordinateAsArray[] {
@@ -123,7 +127,7 @@ export const BondsMixin = (superclass: any) =>
 
             basisCloneInCrystalCoordinates.elements.forEach(
                 (element: AtomicElementSchema, index: number) => {
-                    const coord = basisCloneInCrystalCoordinates.getCoordinateByIndex(index).value;
+                    const coord = basisCloneInCrystalCoordinates.getCoordinateValueByIndex(index);
                     if (
                         planes.find(
                             (plane: THREE.Plane) =>
@@ -158,6 +162,7 @@ export const BondsMixin = (superclass: any) =>
          * k-d tree algorithm is used to optimize the time to find the element's neighbors.
          * See https://en.wikipedia.org/wiki/K-d_tree for more information.
          */
+        // TODO: move to made basis bonded - refactor to return bonds array and use the array in createBondsGroup
         createBondsGroup(): THREE.Group {
             const bondsGroup = new THREE.Group();
             const bondsData = this.getBondsDataForUniqueElementPairs();

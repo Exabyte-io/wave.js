@@ -5,7 +5,7 @@
  */
 export function ThreeDSceneDataToMaterial(scene: any): {
     _json: import("@mat3ra/made/dist/js/material").MaterialSchemaJSON;
-    toJSON(): import("@mat3ra/made/dist/js/types/material").MaterialJSON;
+    toJSON(): import("@mat3ra/made/dist/js/types").MaterialJSON;
     src: import("@mat3ra/esse/dist/js/types").FileSourceSchema | undefined;
     updateFormula(): void;
     isNonPeriodic: boolean;
