@@ -777,10 +777,15 @@ export class ThreeDEditor extends React.Component {
     }
 
     render() {
+        const { isStandalone } = this.props;
         return (
             <ThemeProvider theme={DarkMaterialUITheme}>
                 <ScopedCssBaseline enableColorScheme style={{ height: "100%" }}>
-                    <AlertProvider>{this.renderWaveOrThreejsEditorModal()}</AlertProvider>
+                    {isStandalone ? (
+                        <AlertProvider>{this.renderWaveOrThreejsEditorModal()}</AlertProvider>
+                    ) : (
+                        this.renderWaveOrThreejsEditorModal()
+                    )}
                 </ScopedCssBaseline>
             </ThemeProvider>
         );
@@ -793,6 +798,7 @@ ThreeDEditor.propTypes = {
     isConventionalCellShown: PropTypes.bool, // eslint-disable-next-line react/forbid-prop-types
     boundaryConditions: PropTypes.object,
     onUpdate: PropTypes.func,
+    isStandalone: PropTypes.bool,
 };
 
 ThreeDEditor.defaultProps = {
@@ -800,4 +806,5 @@ ThreeDEditor.defaultProps = {
     isConventionalCellShown: false,
     onUpdate: undefined,
     editable: false,
+    isStandalone: false,
 };

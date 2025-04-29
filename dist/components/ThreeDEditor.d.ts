@@ -478,6 +478,7 @@ export namespace ThreeDEditor {
         let isConventionalCellShown: PropTypes.Requireable<boolean>;
         let boundaryConditions: PropTypes.Requireable<object>;
         let onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
+        let isStandalone: PropTypes.Requireable<boolean>;
     }
     namespace defaultProps {
         let boundaryConditions_1: {};
@@ -488,6 +489,8 @@ export namespace ThreeDEditor {
         export { onUpdate_1 as onUpdate };
         let editable_1: boolean;
         export { editable_1 as editable };
+        let isStandalone_1: boolean;
+        export { isStandalone_1 as isStandalone };
     }
 }
 import React from "react";

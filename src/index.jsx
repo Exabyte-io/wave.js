@@ -16,7 +16,7 @@ const renderThreeDEditor = (materialConfig, newDomElement) => {
     }
 
     const currentMaterial = new Made.Material(config);
-    ReactDOM.render(<ThreeDEditor editable material={currentMaterial} />, domElement);
+    ReactDOM.render(<ThreeDEditor editable isStandalone material={currentMaterial} />, domElement);
 };
 
 window.renderThreeDEditor = renderThreeDEditor;
