@@ -274,6 +274,7 @@ export namespace ThreeDEditor {
             unsetFileProps(): void;
             setBasis(textOrObject: string | import("@mat3ra/made/dist/js/basis/basis").BasisConfig, format?: string | undefined, unitz?: string | undefined): void;
             setBasisConstraints(constraints: import("@mat3ra/made/dist/js/constraints/constraints").Constraint[]): void;
+            setBasisConstraintsFromArrayOfObjects(constraints: import("@mat3ra/esse/dist/js/types").AtomicConstraintsSchema): void;
             readonly basis: import("@mat3ra/made/dist/js/material").OptionallyConstrainedBasisConfig;
             readonly Basis: import("@mat3ra/made/dist/js/basis/constrained_basis").ConstrainedBasis;
             readonly uniqueElements: string[];
@@ -478,6 +479,7 @@ export namespace ThreeDEditor {
         let isConventionalCellShown: PropTypes.Requireable<boolean>;
         let boundaryConditions: PropTypes.Requireable<object>;
         let onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
+        let isStandalone: PropTypes.Requireable<boolean>;
     }
     namespace defaultProps {
         let boundaryConditions_1: {};
@@ -488,6 +490,8 @@ export namespace ThreeDEditor {
         export { onUpdate_1 as onUpdate };
         let editable_1: boolean;
         export { editable_1 as editable };
+        let isStandalone_1: boolean;
+        export { isStandalone_1 as isStandalone };
     }
 }
 import React from "react";

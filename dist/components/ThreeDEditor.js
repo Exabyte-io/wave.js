@@ -636,7 +636,8 @@ export class ThreeDEditor extends React.Component {
         return (_jsxs("div", { className: "wave-component-holder", style: { position: "relative", height: "100%" }, children: [this.renderCoverDiv(), _jsx(IconsToolbar, { toolbarConfig: this.getToolbarConfig(), isInteractive: isInteractive, handleToggleInteractive: this.handleToggleInteractive }), this.renderWaveComponent()] }));
     }
     render() {
-        return (_jsx(ThemeProvider, { theme: DarkMaterialUITheme, children: _jsx(ScopedCssBaseline, { enableColorScheme: true, style: { height: "100%" }, children: _jsx(AlertProvider, { children: this.renderWaveOrThreejsEditorModal() }) }) }));
+        const { isStandalone } = this.props;
+        return (_jsx(ThemeProvider, { theme: DarkMaterialUITheme, children: _jsx(ScopedCssBaseline, { enableColorScheme: true, style: { height: "100%" }, children: isStandalone ? (_jsx(AlertProvider, { children: this.renderWaveOrThreejsEditorModal() })) : (this.renderWaveOrThreejsEditorModal()) }) }));
     }
 }
 ThreeDEditor.propTypes = {
@@ -645,10 +646,12 @@ ThreeDEditor.propTypes = {
     isConventionalCellShown: PropTypes.bool, // eslint-disable-next-line react/forbid-prop-types
     boundaryConditions: PropTypes.object,
     onUpdate: PropTypes.func,
+    isStandalone: PropTypes.bool,
 };
 ThreeDEditor.defaultProps = {
     boundaryConditions: {},
     isConventionalCellShown: false,
     onUpdate: undefined,
     editable: false,
+    isStandalone: false,
 };
