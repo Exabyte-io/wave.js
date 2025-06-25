@@ -1,12 +1,11 @@
-import { Basis } from "@mat3ra/made/dist/js/basis/basis";
-import { Material } from "@mat3ra/made/dist/js/material";
+import { Basis, MaterialInMemoryEntity } from "@mat3ra/made";
 import * as THREE from "three";
 import { Object3D } from "three";
 export declare const AtomsMixin: (superclass: any) => {
     new (config: any): {
         [x: string]: any;
         readonly structure: any;
-        setStructure(material: Material): void;
+        setStructure(material: MaterialInMemoryEntity): void;
         readonly basis: any;
         initSphereParameters(): void;
         /**

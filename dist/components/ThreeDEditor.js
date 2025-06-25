@@ -350,7 +350,6 @@ export class ThreeDEditor extends React.Component {
         window.addEventListener("message", this.handleMessage);
     }
     componentWillUnmount() {
-        this.handleResetMeasurements();
         this.removeHotKeyListener();
         window.removeEventListener("message", this.handleMessage);
     }
@@ -503,10 +502,7 @@ export class ThreeDEditor extends React.Component {
         this.WaveComponent.wave.deleteConnection();
     }
     handleResetMeasurements() {
-        var _a;
-        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
-            this.WaveComponent.wave.resetAllMeasurements();
-        }
+        this.WaveComponent.wave.resetAllMeasurements();
     }
     handleToggleMeasurement(measurementMode) {
         this.WaveComponent.wave.toggleMeasurementByType(measurementMode, this.handleSetMeasurementSettingsForTypeInState);

@@ -3,7 +3,7 @@
  * Lattice is constructed from the LineSegments object.
  * Basis is constructed based on all SphereMesh objects.
  */
-export function ThreeDSceneDataToMaterial(scene: any): import("@mat3ra/made/dist/js/material").Material;
+export function ThreeDSceneDataToMaterial(scene: any): import("@mat3ra/made").Material;
 /**
  * Converts given materials to scene data.
  * The first material is used as parent and it's unit cell is used in case multiple materials are passed.

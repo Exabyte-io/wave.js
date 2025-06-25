@@ -1,6 +1,5 @@
 import { AtomicCoordinateSchema } from "@mat3ra/esse/dist/js/types";
-import { Basis } from "@mat3ra/made/dist/js/basis/basis";
-import { MaterialInMemoryEntity } from "@mat3ra/made/types";
+import { Basis, MaterialInMemoryEntity } from "@mat3ra/made";
 import * as THREE from "three";
 import { Object3D } from "three";
 
