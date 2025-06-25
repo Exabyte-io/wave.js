@@ -1,5 +1,4 @@
 import { Made } from "@mat3ra/made";
-import { Cell } from "@mat3ra/made/src/js/cell/cell";
 import * as THREE from "three";
 
 // eslint-disable-next-line import/no-cycle
@@ -51,7 +50,7 @@ function extractBasisFromScene(scene, cellVectorsArray) {
         }
     });
 
-    const newCell = Cell.fromVectorsArray(cellVectorsArray);
+    const newCell = Made.Cell.fromVectorsArray(cellVectorsArray);
     return Made.Basis.fromElementsAndCoordinates({
         elements,
         coordinates,
