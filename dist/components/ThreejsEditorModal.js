@@ -272,20 +272,21 @@ export class ThreejsEditorModal extends ModalDialog {
             const material = ThreeDSceneDataToMaterial(this.editor.scene);
             super.onHide(material);
         }
-        catch (_a) {
-            this.onExtractMaterialError();
+        catch (error) {
+            console.error("Material extraction failed:", error);
+            this.onExtractMaterialError(error.message || "Unknown error occurred during material extraction");
         }
     }
     /**
      * displays error confirm window if we have some errors
      */
-    onExtractMaterialError() {
+    onExtractMaterialError(errorMessage = "Unable to extract a material from the editor!") {
         this.showAlert({
-            content: "Unable to extract a material from the editor!",
-            title: "Error!",
+            content: errorMessage,
+            title: "Material Extraction Error",
             buttons: [
                 { text: "Close", onClick: this.alertRef.close },
-                { text: "Exit", onClick: this.forceExitFromEditor },
+                { text: "Exit Anyway", onClick: this.forceExitFromEditor },
             ],
         });
     }
@@ -302,8 +303,9 @@ export class ThreejsEditorModal extends ModalDialog {
                 this.extractMaterialAndHide();
             }
         }
-        catch (_a) {
-            this.onExtractMaterialError();
+        catch (error) {
+            console.error("Error during editor exit:", error);
+            this.onExtractMaterialError(error.message || "Error occurred while trying to exit the editor");
         }
     }
     renderBody() {
@@ -311,5 +313,5 @@ export class ThreejsEditorModal extends ModalDialog {
     }
 }
 ThreejsEditorModal.propTypes = {
-    materials: PropTypes.arrayOf(Made.Material).isRequired,
+    materials: PropTypes.arrayOf(PropTypes.instanceOf(Made.Material)).isRequired,
 };

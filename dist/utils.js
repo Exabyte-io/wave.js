@@ -1,4 +1,5 @@
 import { Made } from "@mat3ra/made";
+import { Cell } from "@mat3ra/made/src/js/cell/cell";
 import * as THREE from "three";
 // eslint-disable-next-line import/no-cycle
 import { Wave } from "./wave";
@@ -32,7 +33,7 @@ function extractLatticeFromScene(scene) {
  * Extracts basis from all SphereMesh objects.
  * The name of the element is extracted from the name of the corresponding 3D object.
  */
-function extractBasisFromScene(scene, cell) {
+function extractBasisFromScene(scene, cellVectorsArray) {
     const elements = [];
     const coordinates = [];
     scene.traverse((object) => {
@@ -42,11 +43,12 @@ function extractBasisFromScene(scene, cell) {
             coordinates.push(object.getWorldPosition(vector).toArray());
         }
     });
-    return new Made.Basis({
-        cell,
+    const newCell = Cell.fromVectorsArray(cellVectorsArray);
+    return Made.Basis.fromElementsAndCoordinates({
         elements,
         coordinates,
         units: "cartesian",
+        cell: newCell,
     });
 }
 /**
