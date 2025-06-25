@@ -369,12 +369,8 @@ export class ThreeDEditor extends React.Component {
         }
     }
     _resetStateWaveComponent() {
-        var _a;
-        // a workaround to re-render the component and update the buttons on clicks
-        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
-            // eslint-disable-next-line react/no-unused-state
-            this.setState({ wave: this.WaveComponent.wave });
-        }
+        // eslint-disable-next-line react/no-unused-state
+        this.setState({ wave: this.WaveComponent.wave });
     }
     // map of hotkeys to their handlers
     getKeyConfig() {

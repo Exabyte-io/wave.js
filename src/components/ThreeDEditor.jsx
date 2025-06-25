@@ -142,11 +142,8 @@ export class ThreeDEditor extends React.Component {
     }
 
     _resetStateWaveComponent() {
-        // a workaround to re-render the component and update the buttons on clicks
-        if (this.WaveComponent?.wave) {
-            // eslint-disable-next-line react/no-unused-state
-            this.setState({ wave: this.WaveComponent.wave });
-        }
+        // eslint-disable-next-line react/no-unused-state
+        this.setState({ wave: this.WaveComponent.wave });
     }
 
     handleSetSetting = (setting) => {
