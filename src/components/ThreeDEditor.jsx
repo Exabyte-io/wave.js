@@ -121,7 +121,6 @@ export class ThreeDEditor extends React.Component {
     }
 
     componentWillUnmount() {
-        this.handleResetMeasurements();
         this.removeHotKeyListener();
         window.removeEventListener("message", this.handleMessage);
     }
@@ -143,7 +142,6 @@ export class ThreeDEditor extends React.Component {
     }
 
     _resetStateWaveComponent() {
-        // a workaround to re-render the component and update the buttons on clicks
         // eslint-disable-next-line react/no-unused-state
         this.setState({ wave: this.WaveComponent.wave });
     }
@@ -373,7 +371,7 @@ export class ThreeDEditor extends React.Component {
             },
             () => {
                 // Force Wave component to update after state change
-                if (this.WaveComponent) {
+                if (this.WaveComponent?.wave) {
                     this.WaveComponent.wave.rebuildScene();
                 }
             },

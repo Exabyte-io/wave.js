@@ -1,4 +1,4 @@
-import { UnitCell } from "@mat3ra/made/dist/js/lattice/unit_cell";
+import { UnitCell } from "@mat3ra/made";
 import * as THREE from "three";
 
 const TV3 = THREE.Vector3;

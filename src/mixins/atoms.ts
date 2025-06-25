@@ -1,6 +1,5 @@
 import { AtomicCoordinateSchema } from "@mat3ra/esse/dist/js/types";
-import { Basis } from "@mat3ra/made/dist/js/basis/basis";
-import { Material } from "@mat3ra/made/dist/js/material";
+import { Basis, MaterialInMemoryEntity } from "@mat3ra/made";
 import * as THREE from "three";
 import { Object3D } from "three";
 
@@ -30,7 +29,7 @@ export const AtomsMixin = (superclass: any) =>
             return this._structure;
         }
 
-        setStructure(material: Material) {
+        setStructure(material: MaterialInMemoryEntity) {
             this._structure = material.clone(); // clone original structure to assert that any updates are propagated to parents
             this._basis = material.Basis;
             this._basis.originalUnits = this._basis.units;
