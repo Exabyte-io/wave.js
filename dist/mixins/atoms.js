@@ -19,8 +19,9 @@ export const AtomsMixin = (superclass) => class extends superclass {
         return this._structure;
     }
     setStructure(material) {
-        this._structure = material.clone(); // clone original structure to assert that any updates are propagated to parents
-        this._basis = material.Basis;
+        const extendedMaterial = material;
+        this._structure = extendedMaterial.clone(); // clone original structure to assert that any updates are propagated to parents
+        this._basis = extendedMaterial.Basis;
         this._basis.originalUnits = this._basis.units;
         this._basis.toCartesian();
         this.verticesHashMap = this.createAtomVerticesHashMap();

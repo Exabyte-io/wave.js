@@ -370,9 +370,12 @@ export class ThreeDEditor extends React.Component {
         }
     }
     _resetStateWaveComponent() {
+        var _a;
         // a workaround to re-render the component and update the buttons on clicks
-        // eslint-disable-next-line react/no-unused-state
-        this.setState({ wave: this.WaveComponent.wave });
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            // eslint-disable-next-line react/no-unused-state
+            this.setState({ wave: this.WaveComponent.wave });
+        }
     }
     // map of hotkeys to their handlers
     getKeyConfig() {
@@ -403,16 +406,25 @@ export class ThreeDEditor extends React.Component {
         this.handleSetSetting({ atomRadiiScale: parseFloat($(e.target).val()) });
     }
     handleToggleOrthographicCamera() {
-        this.WaveComponent.wave.toggleOrthographicCamera();
-        this._resetStateWaveComponent();
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.toggleOrthographicCamera();
+            this._resetStateWaveComponent();
+        }
     }
     handleToggleElementLabels() {
-        this.WaveComponent.wave.toggleLabelsVisibilityByType(LABEL_TYPES.ELEMENT);
-        this._resetStateWaveComponent();
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.toggleLabelsVisibilityByType(LABEL_TYPES.ELEMENT);
+            this._resetStateWaveComponent();
+        }
     }
     handleToggleCoordinateLabels() {
-        this.WaveComponent.wave.toggleLabelsVisibilityByType(LABEL_TYPES.COORDINATE);
-        this._resetStateWaveComponent();
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.toggleLabelsVisibilityByType(LABEL_TYPES.COORDINATE);
+            this._resetStateWaveComponent();
+        }
     }
     handleChemicalConnectivityFactorChange(e) {
         this.handleSetSetting({ chemicalConnectivityFactor: parseFloat($(e.target).val()) });
@@ -455,9 +467,12 @@ export class ThreeDEditor extends React.Component {
         }));
     }
     handleToggleBonds() {
-        const { wave } = this.WaveComponent;
-        wave.isDrawBondsEnabled = !wave.isDrawBondsEnabled; // toggle value;
-        this._resetStateWaveComponent();
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            const { wave } = this.WaveComponent;
+            wave.isDrawBondsEnabled = !wave.isDrawBondsEnabled; // toggle value;
+            this._resetStateWaveComponent();
+        }
     }
     toggleThreejsEditorModal() {
         const { isThreejsEditorModalShown } = this.state;
@@ -465,23 +480,37 @@ export class ThreeDEditor extends React.Component {
     }
     // TODO: reset the colors for other buttons in the panel on call to the function below
     handleResetViewer() {
-        this.WaveComponent.initViewer();
-        this._resetStateWaveComponent();
+        if (this.WaveComponent) {
+            this.WaveComponent.initViewer();
+            this._resetStateWaveComponent();
+        }
     }
     handleTakeScreenshot() {
-        this.WaveComponent.wave.takeScreenshot();
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.takeScreenshot();
+        }
     }
     handleToggleOrbitControls() {
-        this.WaveComponent.wave.toggleOrbitControls();
-        this._resetStateWaveComponent();
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.toggleOrbitControls();
+            this._resetStateWaveComponent();
+        }
     }
     handleToggleOrbitControlsAnimation() {
-        this.WaveComponent.wave.toggleOrbitControlsAnimation();
-        this._resetStateWaveComponent();
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.toggleOrbitControlsAnimation();
+            this._resetStateWaveComponent();
+        }
     }
     handleToggleAxes() {
-        this.WaveComponent.wave.toggleAxes();
-        this._resetStateWaveComponent();
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.toggleAxes();
+            this._resetStateWaveComponent();
+        }
     }
     _getWaveProperty(name) {
         return this.WaveComponent && this.WaveComponent.wave[name];
@@ -497,15 +526,24 @@ export class ThreeDEditor extends React.Component {
         this.setState({ measurementsSettings: newMeasurementsSettings });
     }
     handleDeleteConnection() {
-        this.WaveComponent.wave.deleteConnection();
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.deleteConnection();
+        }
     }
     handleResetMeasurements() {
-        this.WaveComponent.wave.resetAllMeasurements();
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.resetAllMeasurements();
+        }
     }
     handleToggleMeasurement(measurementMode) {
-        this.WaveComponent.wave.toggleMeasurementByType(measurementMode, this.handleSetMeasurementSettingsForTypeInState);
-        const newMeasurementsSettings = this.WaveComponent.wave.getMeasurementsSettings();
-        this.setState({ measurementsSettings: newMeasurementsSettings });
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.toggleMeasurementByType(measurementMode, this.handleSetMeasurementSettingsForTypeInState);
+            const newMeasurementsSettings = this.WaveComponent.wave.getMeasurementsSettings();
+            this.setState({ measurementsSettings: newMeasurementsSettings });
+        }
     }
     handleSetMaterial(newMaterialConfig) {
         const { material } = this.state;
@@ -514,8 +552,9 @@ export class ThreeDEditor extends React.Component {
             originalMaterial: material,
             material: newMaterial,
         }, () => {
+            var _a;
             // Force Wave component to update after state change
-            if (this.WaveComponent) {
+            if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
                 this.WaveComponent.wave.rebuildScene();
             }
         });
@@ -597,12 +636,15 @@ export class ThreeDEditor extends React.Component {
         return toolbarConfig;
     }
     async handleStartGifRecording(downloadPath, rotationSpeed = 60, frameDuration = 0.05) {
-        await this.WaveComponent.wave.takeGifScreenshot({
-            downloadPath,
-            rotationSpeed,
-            frameDuration,
-        });
-        console.log("Recorded gif");
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            await this.WaveComponent.wave.takeGifScreenshot({
+                downloadPath,
+                rotationSpeed,
+                frameDuration,
+            });
+            console.log("Recorded gif");
+        }
     }
     onThreejsEditorModalHide(material) {
         let { isThreejsEditorModalShown } = this.state;

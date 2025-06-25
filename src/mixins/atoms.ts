@@ -8,6 +8,12 @@ import { ATOM_GROUP_NAME } from "../enums";
 import { createObjectVerticesHashMap } from "./Hashmap";
 import { ApplyGlow } from "./utils";
 
+// Extend the Material interface to include missing methods that exist at runtime
+interface ExtendedMaterial extends Material {
+    clone(): ExtendedMaterial;
+    Basis: Basis;
+}
+
 /*
  * Mixin containing the logic for dealing with atoms.
  * Draws atoms as spheres and handles actions performed on them.
@@ -31,8 +37,9 @@ export const AtomsMixin = (superclass: any) =>
         }
 
         setStructure(material: Material) {
-            this._structure = material.clone(); // clone original structure to assert that any updates are propagated to parents
-            this._basis = material.Basis;
+            const extendedMaterial = material as ExtendedMaterial;
+            this._structure = extendedMaterial.clone(); // clone original structure to assert that any updates are propagated to parents
+            this._basis = extendedMaterial.Basis;
             this._basis.originalUnits = this._basis.units;
             this._basis.toCartesian();
             this.verticesHashMap = this.createAtomVerticesHashMap();
