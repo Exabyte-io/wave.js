@@ -121,7 +121,6 @@ export class ThreeDEditor extends React.Component {
     }
 
     componentWillUnmount() {
-        this.handleResetMeasurements();
         this.removeHotKeyListener();
         window.removeEventListener("message", this.handleMessage);
     }
@@ -353,9 +352,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleResetMeasurements() {
-        if (this.WaveComponent?.wave) {
-            this.WaveComponent.wave.resetAllMeasurements();
-        }
+        this.WaveComponent.wave.resetAllMeasurements();
     }
 
     handleToggleMeasurement(measurementMode) {

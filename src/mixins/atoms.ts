@@ -1,18 +1,12 @@
 import { AtomicCoordinateSchema } from "@mat3ra/esse/dist/js/types";
 import { Basis } from "@mat3ra/made/dist/js/basis/basis";
-import { Material } from "@mat3ra/made/dist/js/material";
+import { MaterialInMemoryEntity } from "@mat3ra/made/types";
 import * as THREE from "three";
 import { Object3D } from "three";
 
 import { ATOM_GROUP_NAME } from "../enums";
 import { createObjectVerticesHashMap } from "./Hashmap";
 import { ApplyGlow } from "./utils";
-
-// Extend the Material interface to include missing methods that exist at runtime
-interface ExtendedMaterial extends Material {
-    clone(): ExtendedMaterial;
-    Basis: Basis;
-}
 
 /*
  * Mixin containing the logic for dealing with atoms.
@@ -36,10 +30,9 @@ export const AtomsMixin = (superclass: any) =>
             return this._structure;
         }
 
-        setStructure(material: Material) {
-            const extendedMaterial = material as ExtendedMaterial;
-            this._structure = extendedMaterial.clone(); // clone original structure to assert that any updates are propagated to parents
-            this._basis = extendedMaterial.Basis;
+        setStructure(material: MaterialInMemoryEntity) {
+            this._structure = material.clone(); // clone original structure to assert that any updates are propagated to parents
+            this._basis = material.Basis;
             this._basis.originalUnits = this._basis.units;
             this._basis.toCartesian();
             this.verticesHashMap = this.createAtomVerticesHashMap();
