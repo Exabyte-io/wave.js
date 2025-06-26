@@ -349,7 +349,9 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleResetMeasurements() {
-        this.WaveComponent.wave.resetAllMeasurements();
+        if (this.WaveComponent?.wave) {
+            this.WaveComponent.wave.resetAllMeasurements();
+        }
     }
 
     handleToggleMeasurement(measurementMode) {

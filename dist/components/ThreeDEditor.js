@@ -498,7 +498,10 @@ export class ThreeDEditor extends React.Component {
         this.WaveComponent.wave.deleteConnection();
     }
     handleResetMeasurements() {
-        this.WaveComponent.wave.resetAllMeasurements();
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.resetAllMeasurements();
+        }
     }
     handleToggleMeasurement(measurementMode) {
         this.WaveComponent.wave.toggleMeasurementByType(measurementMode, this.handleSetMeasurementSettingsForTypeInState);
