@@ -1,5 +1,4 @@
 import { math } from "@mat3ra/code/dist/js/math";
-import { Made } from "@mat3ra/made";
 import { filterBondsDataByElementsAndOrder, getElementsBondsData } from "@mat3ra/periodic-table";
 import createKDTree from "static-kdtree";
 import * as THREE from "three";
@@ -38,7 +37,7 @@ export const BondsMixin = (superclass) => class extends superclass {
      */
     // TODO: move to made basis bonded
     areElementsBonded(element1, coordinate1, element2, coordinate2, bondsData) {
-        const distance = Made.math.vDist(coordinate1, coordinate2);
+        const distance = math.vDist(coordinate1, coordinate2);
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
         return Boolean(filterBondsDataByElementsAndOrder(bondsData, element1, element2).find((b) => {
             return (b.length.value &&
