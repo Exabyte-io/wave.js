@@ -1,4 +1,3 @@
-import { Made } from "@mat3ra/made";
 import * as THREE from "three";
 
 import { BOUNDARY_CONDITIONS } from "../enums";
@@ -119,7 +118,7 @@ export const BoundaryMixin = (superclass) =>
                     coordinate: [
                         coord[0],
                         coord[1],
-                        Made.math.abs(coord[2]) <= 0.5 ? coord[2] : coord[2] - 1,
+                        Math.abs(coord[2]) <= 0.5 ? coord[2] : coord[2] - 1,
                     ],
                 });
             });
