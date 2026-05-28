@@ -54,6 +54,7 @@
     "peerDependencies": {
         "@exabyte-io/cove.js": "*",
         "@mat3ra/code": "*",
+        "@mat3ra/utils": "*",
         "@mat3ra/esse": "*",
         "@mat3ra/made": "*",
         "react": "^17.0.0",
@@ -63,7 +64,7 @@
         "@exabyte-io/cove.js": "2025.2.22-0",
         "@exabyte-io/eslint-config": "^2025.1.15-0",
         "@mat3ra/code": "2025.4.27-0",
-        "@mat3ra/utils": "2026.5.16-0",
+        "@mat3ra/utils": "git+https://github.com/Exabyte-io/utils.git#8a8d83d70bfc0997eecd3126956474bd4e92b72c",
         "@mat3ra/esse": "2025.4.22-0",
         "@mat3ra/made": "2025.6.25-1",
         "@mat3ra/tsconfig": "^2024.6.3-0",

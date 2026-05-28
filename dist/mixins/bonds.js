@@ -37,7 +37,7 @@ export const BondsMixin = (superclass) => class extends superclass {
      */
     // TODO: move to made basis bonded
     areElementsBonded(element1, coordinate1, element2, coordinate2, bondsData) {
-        const distance = Utils.math.default.vDist(coordinate1, coordinate2);
+        const distance = Number(Utils.math.default.vDist(coordinate1, coordinate2));
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
         return Boolean(filterBondsDataByElementsAndOrder(bondsData, element1, element2).find((b) => {
             return (b.length.value &&

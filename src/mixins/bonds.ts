@@ -56,7 +56,7 @@ export const BondsMixin = (superclass: any) =>
             coordinate2: number[],
             bondsData: BondDataInterface[],
         ): boolean {
-            const distance = Utils.math.default.vDist(coordinate1, coordinate2);
+            const distance = Number(Utils.math.default.vDist(coordinate1, coordinate2));
             const connectivityFactor = this.settings.chemicalConnectivityFactor;
             return Boolean(
                 filterBondsDataByElementsAndOrder(bondsData, element1, element2).find(
