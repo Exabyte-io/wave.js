@@ -1,5 +1,5 @@
-import { math } from "@mat3ra/code/dist/js/math";
 import { filterBondsDataByElementsAndOrder, getElementsBondsData } from "@mat3ra/periodic-table";
+import { Utils } from "@mat3ra/utils";
 import createKDTree from "static-kdtree";
 import * as THREE from "three";
 /*
@@ -37,7 +37,7 @@ export const BondsMixin = (superclass) => class extends superclass {
      */
     // TODO: move to made basis bonded
     areElementsBonded(element1, coordinate1, element2, coordinate2, bondsData) {
-        const distance = math.vDist(coordinate1, coordinate2);
+        const distance = Utils.math.default.vDist(coordinate1, coordinate2);
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
         return Boolean(filterBondsDataByElementsAndOrder(bondsData, element1, element2).find((b) => {
             return (b.length.value &&
@@ -70,9 +70,11 @@ export const BondsMixin = (superclass) => class extends superclass {
      */
     // TODO: move to made basis bonded
     getMaxBondLength(bondsData) {
+        var _a;
         const connectivityFactor = this.settings.chemicalConnectivityFactor;
-        return (connectivityFactor *
-            math.max(bondsData.map((b) => b.length.value || 0)));
+        const bondLengths = bondsData.map((b) => b.length.value || 0);
+        const maxLen = Number((_a = Utils.math.default.max(bondLengths)) !== null && _a !== void 0 ? _a : 0);
+        return connectivityFactor * maxLen;
     }
     /**
      * Returns an array of [element, coordinate] for all elements and their neighbors.

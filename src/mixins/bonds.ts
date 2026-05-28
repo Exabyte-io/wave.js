@@ -1,6 +1,6 @@
-import { math } from "@mat3ra/code/dist/js/math";
 import { AtomicElementSchema } from "@mat3ra/esse/dist/js/types";
 import { filterBondsDataByElementsAndOrder, getElementsBondsData } from "@mat3ra/periodic-table";
+import { Utils } from "@mat3ra/utils";
 import createKDTree from "static-kdtree";
 import * as THREE from "three";
 
@@ -56,7 +56,7 @@ export const BondsMixin = (superclass: any) =>
             coordinate2: number[],
             bondsData: BondDataInterface[],
         ): boolean {
-            const distance = math.vDist(coordinate1, coordinate2);
+            const distance = Utils.math.default.vDist(coordinate1, coordinate2);
             const connectivityFactor = this.settings.chemicalConnectivityFactor;
             return Boolean(
                 filterBondsDataByElementsAndOrder(bondsData, element1, element2).find(
@@ -98,10 +98,12 @@ export const BondsMixin = (superclass: any) =>
         // TODO: move to made basis bonded
         getMaxBondLength(bondsData: BondDataInterface[]): number {
             const connectivityFactor = this.settings.chemicalConnectivityFactor;
-            return (
-                connectivityFactor *
-                math.max(bondsData.map((b: BondDataInterface) => b.length.value || 0))
+            const bondLengths: number[] = bondsData.map(
+                (b: BondDataInterface): number => b.length.value || 0,
             );
+
+            const maxLen = Number(Utils.math.default.max(bondLengths) ?? 0);
+            return connectivityFactor * maxLen;
         }
 
         /**
