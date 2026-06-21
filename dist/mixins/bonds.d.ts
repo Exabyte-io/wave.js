@@ -51,6 +51,10 @@ export declare const BondsMixin: (superclass: any) => {
          */
         createBondsGroup(): THREE.InstancedMesh | THREE.Group;
         /**
+         * Creates an InstancedMesh containing all bonds, accounting for repetitions.
+         */
+        createInstancedMeshForBonds(baseBondsData: any[]): THREE.InstancedMesh | THREE.Group;
+        /**
          * Draw bonds. Bonds are created synchronously if the asynchronous callback (createBondsAsync) to draw bonds
          * in background has not returned yet. This may happen if the structure is large and draw bonds is toggled quickly.
          * We need this to block the UI until the bonds are drawn.

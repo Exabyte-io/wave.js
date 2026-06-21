@@ -147,6 +147,12 @@ export const BondsMixin = (superclass) => class extends superclass {
                 baseBondsData.push(bondData);
             });
         });
+        return this.createInstancedMeshForBonds(baseBondsData);
+    }
+    /**
+     * Creates an InstancedMesh containing all bonds, accounting for repetitions.
+     */
+    createInstancedMeshForBonds(baseBondsData) {
         const { coordinates: repetitionCoords } = this.getRepetitionInfo();
         const totalRepetitions = 1 + repetitionCoords.length;
         const totalInstances = baseBondsData.length * totalRepetitions;

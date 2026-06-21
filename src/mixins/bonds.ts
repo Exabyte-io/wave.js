@@ -213,6 +213,13 @@ export const BondsMixin = (superclass: any) =>
                 },
             );
 
+            return this.createInstancedMeshForBonds(baseBondsData);
+        }
+
+        /**
+         * Creates an InstancedMesh containing all bonds, accounting for repetitions.
+         */
+        createInstancedMeshForBonds(baseBondsData: any[]): THREE.InstancedMesh | THREE.Group {
             const { coordinates: repetitionCoords } = this.getRepetitionInfo();
             const totalRepetitions = 1 + repetitionCoords.length;
             const totalInstances = baseBondsData.length * totalRepetitions;
