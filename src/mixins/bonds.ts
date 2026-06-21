@@ -116,54 +116,58 @@ export const BondsMixin = (superclass: any) =>
         getElementsAndCoordinatesArrayWithEdgeNeighbors(
             maxBondLength: number,
         ): ElementAndCoordinateAsArray[] {
-            const newBasis = this.basis.clone();
-            const basisCloneInCrystalCoordinates = this.basis.clone();
-
-            newBasis.toCrystal();
-            basisCloneInCrystalCoordinates.toCrystal();
-
+            const elementsAndCoordinatesArray1 = this.basis.elementsAndCoordinatesArray;
             const planes = this.getCellPlanes(this.cell);
 
-            basisCloneInCrystalCoordinates.elements.forEach(
-                (element: AtomicElementSchema, index: number) => {
-                    const coord = basisCloneInCrystalCoordinates.getCoordinateValueByIndex(index);
-                    if (
-                        planes.find(
-                            (plane: THREE.Plane) =>
-                                plane.distanceToPoint(new THREE.Vector3(...coord)) <= maxBondLength,
-                        )
-                    ) {
-                        [-1, 0, 1].forEach((shiftI) => {
-                            [-1, 0, 1].forEach((shiftJ) => {
-                                [-1, 0, 1].forEach((shiftK) => {
-                                    if (shiftI === 0 && shiftJ === 0 && shiftK === 0) return;
-                                    newBasis.addAtom({
-                                        element: element.value,
-                                        coordinate: [
-                                            coord[0] + shiftI,
-                                            coord[1] + shiftJ,
-                                            coord[2] + shiftK,
-                                        ],
-                                    });
-                                });
+            const { cell } = this;
+            const vecA = new THREE.Vector3(cell.ax, cell.ay, cell.az);
+            const vecB = new THREE.Vector3(cell.bx, cell.by, cell.bz);
+            const vecC = new THREE.Vector3(cell.cx, cell.cy, cell.cz);
+
+            const result: ElementAndCoordinateAsArray[] = [...elementsAndCoordinatesArray1];
+
+            elementsAndCoordinatesArray1.forEach(([element, coord]: [any, any]) => {
+                const cartesianCoord = new THREE.Vector3(...(coord as [number, number, number]));
+
+                let nearEdge = false;
+                for (let i = 0; i < planes.length; i++) {
+                    if (Math.abs(planes[i].distanceToPoint(cartesianCoord)) <= maxBondLength) {
+                        nearEdge = true;
+                        break;
+                    }
+                }
+
+                if (nearEdge) {
+                    [-1, 0, 1].forEach((shiftI) => {
+                        [-1, 0, 1].forEach((shiftJ) => {
+                            [-1, 0, 1].forEach((shiftK) => {
+                                if (shiftI === 0 && shiftJ === 0 && shiftK === 0) return;
+
+                                const shiftedCoord = cartesianCoord
+                                    .clone()
+                                    .addScaledVector(vecA, shiftI)
+                                    .addScaledVector(vecB, shiftJ)
+                                    .addScaledVector(vecC, shiftK);
+
+                                result.push([
+                                    element,
+                                    [shiftedCoord.x, shiftedCoord.y, shiftedCoord.z],
+                                ]);
                             });
                         });
-                    }
-                },
-            );
+                    });
+                }
+            });
 
-            newBasis.toCartesian();
-            return newBasis.elementsAndCoordinatesArray;
+            return result;
         }
 
         /**
-         * Create the half bond objects between elements.
+         * Create the instanced mesh for all bonds, including repetitions.
          * k-d tree algorithm is used to optimize the time to find the element's neighbors.
          * See https://en.wikipedia.org/wiki/K-d_tree for more information.
          */
-        // TODO: move to made basis bonded - refactor to return bonds array and use the array in createBondsGroup
-        createBondsGroup(): THREE.Group {
-            const bondsGroup = new THREE.Group();
+        createBondsGroup(): THREE.InstancedMesh | THREE.Group {
             const bondsData = this.getBondsDataForUniqueElementPairs();
             const maxBondLength = this.getMaxBondLength(bondsData);
 
@@ -177,6 +181,8 @@ export const BondsMixin = (superclass: any) =>
                     ([element, coordinate]: ElementAndCoordinateAsArray) => coordinate,
                 ),
             );
+
+            const baseBondsData: any[] = [];
 
             elementsAndCoordinatesArray1.forEach(
                 ([element1, coordinate1]: ElementAndCoordinateAsArray, index1: number) => {
@@ -194,7 +200,7 @@ export const BondsMixin = (superclass: any) =>
                             )
                         )
                             return;
-                        const bond = this.getBondObject(
+                        const bondData = this.getBondData(
                             element1,
                             index1,
                             coordinate1,
@@ -202,11 +208,47 @@ export const BondsMixin = (superclass: any) =>
                             index2,
                             coordinate2,
                         );
-                        bondsGroup.add(bond);
+                        baseBondsData.push(bondData);
                     });
                 },
             );
-            return bondsGroup;
+
+            const { coordinates: repetitionCoords } = this.getRepetitionInfo();
+            const totalRepetitions = 1 + repetitionCoords.length;
+            const totalInstances = baseBondsData.length * totalRepetitions;
+
+            if (totalInstances === 0) {
+                return new THREE.Group();
+            }
+
+            const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 8, 1);
+            geometry.translate(0, 0.5, 0); // shift so scaling operates from the base
+
+            const material = new THREE.MeshBasicMaterial();
+            const instancedMesh = new THREE.InstancedMesh(geometry, material, totalInstances);
+
+            const matrix = new THREE.Matrix4();
+            const colorObj = new THREE.Color();
+
+            let instanceIndex = 0;
+            const allShifts = [[0, 0, 0], ...repetitionCoords];
+
+            allShifts.forEach((shiftArr) => {
+                const shiftVec = new THREE.Vector3(...shiftArr);
+
+                baseBondsData.forEach((bond) => {
+                    const finalPos = bond.position.clone().add(shiftVec);
+                    matrix.compose(finalPos, bond.quaternion, new THREE.Vector3(1, bond.height, 1));
+                    instancedMesh.setMatrixAt(instanceIndex, matrix);
+                    instancedMesh.setColorAt(instanceIndex, colorObj.set(bond.color));
+                    instanceIndex += 1;
+                });
+            });
+
+            instancedMesh.instanceMatrix.needsUpdate = true;
+            if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
+
+            return instancedMesh;
         }
 
         /**
@@ -220,21 +262,20 @@ export const BondsMixin = (superclass: any) =>
                 this.bondsGroup = this.createBondsGroup();
                 this.areBondsCreated = true;
             }
-            this.repeatObject3DAtRepetitionCoordinates(this.bondsGroup);
+            this.structureGroup.add(this.bondsGroup);
         }
 
         /**
-         * Returns a bond as cylinder geometry object.
-         * @return {THREE.Mesh}
+         * Returns bond data properties (position, quaternion, height, color).
          */
-        getBondObject(
+        getBondData(
             element1: string,
             index1: number,
             coordinate1: number[],
             element2: string,
             index2: number,
             coordinate2: number[],
-        ): THREE.Mesh {
+        ) {
             const vector1 = new THREE.Vector3(...coordinate1);
             const vector2 = new THREE.Vector3(...coordinate2);
             const direction = new THREE.Vector3().subVectors(vector2, vector1);
@@ -243,17 +284,11 @@ export const BondsMixin = (superclass: any) =>
             // create quaternion to rotate the cylinder
             const quaternion = new THREE.Quaternion();
             quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
-            const geometry = new THREE.CylinderGeometry(0.1, 0.1, height, 8, 1);
-            // Move the cylinder by height / 2 as the cylinder position points to the center.
-            geometry.translate(0, height / 2, 0);
-            const material = new THREE.MeshBasicMaterial({
+            return {
+                position: vector1,
+                quaternion,
+                height,
                 color: this.getAtomColorByElement(element1),
-            });
-            const bond = new THREE.Mesh(geometry, material);
-            // rotate the cylinder
-            bond.applyQuaternion(quaternion);
-            bond.position.set(vector1.x, vector1.y, vector1.z);
-            bond.name = `${element1}-${index1}:${element2}-${index2}`;
-            return bond;
+            };
         }
     };
