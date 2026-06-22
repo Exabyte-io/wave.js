@@ -45,11 +45,15 @@ export declare const BondsMixin: (superclass: any) => {
          */
         getElementsAndCoordinatesArrayWithEdgeNeighbors(maxBondLength: number): ElementAndCoordinateAsArray[];
         /**
-         * Create the half bond objects between elements.
+         * Create the instanced mesh for all bonds, including repetitions.
          * k-d tree algorithm is used to optimize the time to find the element's neighbors.
          * See https://en.wikipedia.org/wiki/K-d_tree for more information.
          */
-        createBondsGroup(): THREE.Group;
+        createBondsGroup(): THREE.InstancedMesh | THREE.Group;
+        /**
+         * Creates an InstancedMesh containing all bonds, accounting for repetitions.
+         */
+        createInstancedMeshForBonds(baseBondsData: any[]): THREE.InstancedMesh | THREE.Group;
         /**
          * Draw bonds. Bonds are created synchronously if the asynchronous callback (createBondsAsync) to draw bonds
          * in background has not returned yet. This may happen if the structure is large and draw bonds is toggled quickly.
@@ -57,10 +61,14 @@ export declare const BondsMixin: (superclass: any) => {
          */
         drawBonds(): void;
         /**
-         * Returns a bond as cylinder geometry object.
-         * @return {THREE.Mesh}
+         * Returns bond data properties (position, quaternion, height, color).
          */
-        getBondObject(element1: string, index1: number, coordinate1: number[], element2: string, index2: number, coordinate2: number[]): THREE.Mesh;
+        getBondData(element1: string, index1: number, coordinate1: number[], element2: string, index2: number, coordinate2: number[]): {
+            position: THREE.Vector3;
+            quaternion: THREE.Quaternion;
+            height: number;
+            color: any;
+        };
     };
     [x: string]: any;
 };

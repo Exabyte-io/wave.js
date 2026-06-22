@@ -131,9 +131,7 @@ export const CellMixin = (superclass) => class extends superclass {
             [0, 2, 4],
             [4, 6, 5],
         ].map((face) => {
-            const slide1 = new THREE.Vector3().subVectors(vertices[face[0]], vertices[face[1]]);
-            const slide2 = new THREE.Vector3().subVectors(vertices[face[0]], vertices[face[2]]);
-            return new THREE.Plane(new THREE.Vector3().crossVectors(slide1, slide2));
+            return new THREE.Plane().setFromCoplanarPoints(vertices[face[0]], vertices[face[1]], vertices[face[2]]);
         });
     }
     /**
