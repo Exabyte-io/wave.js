@@ -542,7 +542,7 @@ export class ThreeDEditor extends React.Component {
         const isDrawBondsEnabled = this._getWaveProperty("isDrawBondsEnabled") || false;
         return (_jsx(WaveComponent, { ref: (el) => {
                 this.WaveComponent = el;
-            }, triggerHandleResize: viewerTriggerResize, isConventionalCellShown: isConventionalCellShown, isDrawBondsEnabled: isDrawBondsEnabled, isViewAdjustable: viewerSettings.isViewAdjustable, structure: materialCopy, boundaryConditions: boundaryConditions, cell: materialCopy.Lattice.unitCell, name: materialCopy.name, settings: viewerSettings }));
+            }, triggerHandleResize: viewerTriggerResize, isConventionalCellShown: isConventionalCellShown, isDrawBondsEnabled: isDrawBondsEnabled, isViewAdjustable: viewerSettings.isViewAdjustable, structure: materialCopy, boundaryConditions: boundaryConditions, cell: materialCopy.getLattice().unitCell, name: materialCopy.name, settings: viewerSettings }));
     }
     // TODO: move in the toolbar component when it's created
     // eslint-disable-next-line class-methods-use-this
@@ -613,10 +613,10 @@ export class ThreeDEditor extends React.Component {
             const { originalMaterial } = this.state;
             const { onUpdate } = this.props;
             // preserve lattice type
-            material.lattice = {
-                ...material.Lattice.toJSON(),
-                type: originalMaterial.Lattice.type,
-            };
+            material.setLattice({
+                ...material.getLattice().toJSON(),
+                type: originalMaterial.getLattice().type,
+            });
             this.setState({
                 originalMaterial: material,
                 material: material.clone(),

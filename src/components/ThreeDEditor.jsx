@@ -431,7 +431,7 @@ export class ThreeDEditor extends React.Component {
                 isViewAdjustable={viewerSettings.isViewAdjustable}
                 structure={materialCopy}
                 boundaryConditions={boundaryConditions}
-                cell={materialCopy.Lattice.unitCell}
+                cell={materialCopy.getLattice().unitCell}
                 name={materialCopy.name}
                 settings={viewerSettings}
             />
@@ -733,10 +733,10 @@ export class ThreeDEditor extends React.Component {
             const { originalMaterial } = this.state;
             const { onUpdate } = this.props;
             // preserve lattice type
-            material.lattice = {
-                ...material.Lattice.toJSON(),
-                type: originalMaterial.Lattice.type,
-            };
+            material.setLattice({
+                ...material.getLattice().toJSON(),
+                type: originalMaterial.getLattice().type,
+            });
             this.setState({
                 originalMaterial: material,
                 material: material.clone(),

@@ -74,7 +74,7 @@ export function ThreeDSceneDataToMaterial(scene) {
 export function materialsToThreeDSceneData(materials, shift = [2, 0, 0]) {
     const wave = new Wave({
         structure: materials[0],
-        cell: materials[0].Lattice.unitCell,
+        cell: materials[0].getLattice().unitCell,
         DOMElement: document.createElement("div"),
     });
     if (materials.length > 1) {
@@ -83,9 +83,9 @@ export function materialsToThreeDSceneData(materials, shift = [2, 0, 0]) {
             material.toCartesian();
             const structureGroup = new THREE.Group();
             structureGroup.name = material.name || material.formula;
-            const atomsGroup = wave.createAtomsGroup(material.Basis);
+            const atomsGroup = wave.createAtomsGroup(material.getBasis());
             structureGroup.add(atomsGroup);
-            const unitCellObject = wave.getUnitCellObject(material.Lattice.unitCell);
+            const unitCellObject = wave.getUnitCellObject(material.getLattice().unitCell);
             unitCellObject.visible = false;
             structureGroup.add(unitCellObject);
             structureGroup.position.set(...shift); // slightly shift along x axis

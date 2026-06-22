@@ -63,9 +63,9 @@
     "devDependencies": {
         "@exabyte-io/cove.js": "2025.2.22-0",
         "@exabyte-io/eslint-config": "^2025.1.15-0",
-        "@mat3ra/code": "2025.4.27-0",
+        "@mat3ra/code": "https://github.com/Exabyte-io/code/archive/62fa688445923bcb412b362e8a41b365bdbbad29.tar.gz",
         "@mat3ra/esse": "2025.4.22-0",
-        "@mat3ra/made": "2025.6.25-1",
+        "@mat3ra/made": "https://github.com/Exabyte-io/made/archive/bd4309ae3ea20cb5026658b6c0a8ab7b965ab076.tar.gz",
         "@mat3ra/tsconfig": "^2024.6.3-0",
         "@mat3ra/utils": "2026.5.28-4",
         "@types/react": "^18.2.8",
