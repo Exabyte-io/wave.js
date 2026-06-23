@@ -6,8 +6,10 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import { ThreeDEditor } from "./components/ThreeDEditor";
+import { parseViewSettingsFromUrlParams } from "./utils/viewSettingsUrl";
+
 // eslint-disable-next-line  react/no-render-return-value
-const renderThreeDEditor = (materialConfig, newDomElement) => {
+const renderThreeDEditor = (materialConfig, newDomElement, options = {}) => {
     const config = materialConfig || Made.defaultMaterialConfig;
     const domElement = newDomElement || document.getElementById("root");
     if (!domElement) {
@@ -15,8 +17,23 @@ const renderThreeDEditor = (materialConfig, newDomElement) => {
         return;
     }
 
+    // Read view settings from URL query params unless explicitly provided
+    const initialViewSettings =
+        options.initialViewSettings ||
+        parseViewSettingsFromUrlParams(
+            Object.fromEntries(new URLSearchParams(window.location.search)),
+        );
+
     const currentMaterial = new Made.Material(config);
-    ReactDOM.render(<ThreeDEditor editable isStandalone material={currentMaterial} />, domElement);
+    ReactDOM.render(
+        <ThreeDEditor
+            editable
+            isStandalone
+            material={currentMaterial}
+            initialViewSettings={initialViewSettings}
+        />,
+        domElement,
+    );
 };
 
 window.renderThreeDEditor = renderThreeDEditor;

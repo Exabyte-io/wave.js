@@ -1,1 +1,1 @@
-export function renderThreeDEditor(materialConfig: any, newDomElement: any): void;
+export function renderThreeDEditor(materialConfig: any, newDomElement: any, options?: {}): void;
