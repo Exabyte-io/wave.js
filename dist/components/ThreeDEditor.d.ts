@@ -18,12 +18,20 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         }[];
         viewerTriggerResize: boolean;
         viewerSettings: {
-            isViewAdjustable: boolean;
-            atomRadiiScale: number;
-            repetitionsAlongLatticeVectorA: number;
-            repetitionsAlongLatticeVectorB: number;
-            repetitionsAlongLatticeVectorC: number;
-            chemicalConnectivityFactor: number;
+            isViewAdjustable: any;
+            atomRadiiScale: any;
+            repetitionsAlongLatticeVectorA: any;
+            repetitionsAlongLatticeVectorB: any;
+            repetitionsAlongLatticeVectorC: any;
+            chemicalConnectivityFactor: any;
+        };
+        _initialToggleSettings: {
+            orthographicCamera: any;
+            bonds: any;
+            axes: any;
+            autoRotate: any;
+            elementLabels: any;
+            coordinateLabels: any;
         };
         boundaryConditions: any;
         isConventionalCellShown: any;
@@ -60,6 +68,12 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleMessage: (event: any) => void;
     handleSetMaterial(newMaterialConfig: any): void;
     componentDidMount(): void;
+    /**
+     * Apply toggle-based view settings from URL params after the Wave instance is mounted.
+     * These settings are imperative (they toggle state on the Wave class instance),
+     * so they must be applied after componentDidMount when WaveComponent.wave exists.
+     */
+    _applyInitialToggleSettings(): void;
     componentWillUnmount(): void;
     UNSAFE_componentWillReceiveProps(nextProps: any, nextContext: any): void;
     _resetStateWaveComponent(): void;
@@ -237,6 +251,7 @@ export namespace ThreeDEditor {
         let boundaryConditions: PropTypes.Requireable<object>;
         let onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
         let isStandalone: PropTypes.Requireable<boolean>;
+        let initialViewSettings: PropTypes.Requireable<object>;
     }
     namespace defaultProps {
         let boundaryConditions_1: {};
@@ -249,6 +264,8 @@ export namespace ThreeDEditor {
         export { editable_1 as editable };
         let isStandalone_1: boolean;
         export { isStandalone_1 as isStandalone };
+        let initialViewSettings_1: {};
+        export { initialViewSettings_1 as initialViewSettings };
     }
 }
 import React from "react";
