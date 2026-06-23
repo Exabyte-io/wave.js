@@ -13,7 +13,17 @@
 <div id="root" style="width:100vw; height:100vh;"></div>
 <script type="module">
     import { renderThreeDEditor } from "./src/index";
-    renderThreeDEditor();
+    
+    // Fetch the custom material
+    fetch("./AsGa_HfO2_interface_4x4x1.json")
+        .then(res => res.json())
+        .then(config => {
+            renderThreeDEditor(config);
+        })
+        .catch(err => {
+            console.error("Failed to load custom material", err);
+            renderThreeDEditor(); // Fallback
+        });
 </script>
 </body>
 </html>

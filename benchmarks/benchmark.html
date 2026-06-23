@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Wave.js Benchmark</title>
+</head>
+<body>
+<div id="root" style="width:100vw; height:100vh;"></div>
+<script type="module">
+    import { Wave } from "../src/wave.js";
+    import { Made } from "@mat3ra/made";
+
+    async function runBenchmark() {
+        try {
+            const response = await fetch("../AsGa_HfO2_interface_4x4x1.json");
+            const config = await response.json();
+            
+            const t0 = performance.now();
+            const material = new Made.Material(config);
+            const t1 = performance.now();
+            console.log(`[Stress-Test] Load and Parse JSON: ${(t1 - t0).toFixed(2)} ms`);
+
+            const t2 = performance.now();
+            const root = document.getElementById("root");
+            const wave = new Wave({
+                DOMElement: root,
+                structure: material,
+                cell: material.Lattice.unitCell,
+                settings: {
+                    atomRadiiScale: 0.2,
+                    repetitions: 1,
+                    isDrawBondsEnabled: true,
+                },
+            });
+            const t3 = performance.now();
+            console.log(`[Stress-Test] Initialize Wave with Bonds: ${(t3 - t2).toFixed(2)} ms`);
+
+            // Force WebGL to render at least once
+            wave.render();
+            
+            const t4 = performance.now();
+            wave.updateSettings({
+                repetitionsAlongLatticeVectorA: 10,
+                repetitionsAlongLatticeVectorB: 10,
+                repetitionsAlongLatticeVectorC: 10,
+            });
+            wave.rebuildScene();
+            // Force WebGL render
+            wave.render();
+            const t5 = performance.now();
+            console.log(`[Stress-Test] Adjust repetitions (10x10x10) with bonds and rebuildScene: ${(t5 - t4).toFixed(2)} ms`);
+
+            const t6 = performance.now();
+            const STEPS = 60;
+            for (let i = 0; i < STEPS; i++) {
+                wave.structureGroup.rotateY(Math.PI / 30);
+                wave.render();
+            }
+            const t7 = performance.now();
+            console.log(`[Stress-Test] Rotate structure 60 frames: ${(t7 - t6).toFixed(2)} ms (${((t7 - t6) / STEPS).toFixed(2)} ms/frame)`);
+            
+            console.log("BENCHMARK_DONE");
+        } catch (e) {
+            console.error(e);
+            console.log("BENCHMARK_ERROR");
+        }
+    }
+    
+    // Give time for layout
+    setTimeout(runBenchmark, 1000);
+</script>
+</body>
+</html>
