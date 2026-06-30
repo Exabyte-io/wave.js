@@ -53,7 +53,12 @@ export class ThreeDEditor extends React.Component {
      */
     constructor(props) {
         super(props);
-        const { boundaryConditions, isConventionalCellShown, material } = this.props;
+        const {
+            boundaryConditions,
+            isConventionalCellShown,
+            material,
+            initialViewSettings = {},
+        } = this.props;
         // TODO : overloading a bunch of props and state attributes here..
         this.state = {
             // on/off switch for the component
@@ -65,17 +70,32 @@ export class ThreeDEditor extends React.Component {
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
-            // Settings of the wave viewer
+            // Settings of the wave viewer, merged with any initial overrides from URL params
             viewerSettings: {
-                isViewAdjustable: settings.isViewAdjustable,
-                atomRadiiScale: settings.atomRadiiScale,
-                repetitionsAlongLatticeVectorA: settings.repetitions,
-                repetitionsAlongLatticeVectorB: settings.repetitions,
-                repetitionsAlongLatticeVectorC: settings.repetitions,
-                chemicalConnectivityFactor: settings.chemicalConnectivityFactor,
+                isViewAdjustable: initialViewSettings.isViewAdjustable ?? settings.isViewAdjustable,
+                atomRadiiScale: initialViewSettings.atomRadiiScale ?? settings.atomRadiiScale,
+                repetitionsAlongLatticeVectorA:
+                    initialViewSettings.repetitionsAlongLatticeVectorA ?? settings.repetitions,
+                repetitionsAlongLatticeVectorB:
+                    initialViewSettings.repetitionsAlongLatticeVectorB ?? settings.repetitions,
+                repetitionsAlongLatticeVectorC:
+                    initialViewSettings.repetitionsAlongLatticeVectorC ?? settings.repetitions,
+                chemicalConnectivityFactor:
+                    initialViewSettings.chemicalConnectivityFactor ??
+                    settings.chemicalConnectivityFactor,
+            },
+            // Toggle settings from URL to apply after Wave instance mounts
+            _initialToggleSettings: {
+                orthographicCamera: initialViewSettings.orthographicCamera,
+                bonds: initialViewSettings.bonds,
+                axes: initialViewSettings.axes,
+                autoRotate: initialViewSettings.autoRotate,
+                elementLabels: initialViewSettings.elementLabels,
+                coordinateLabels: initialViewSettings.coordinateLabels,
             },
             boundaryConditions,
-            isConventionalCellShown,
+            isConventionalCellShown:
+                initialViewSettings.conventionalCell ?? isConventionalCellShown,
             // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
             originalMaterial: material,
             // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
@@ -118,6 +138,36 @@ export class ThreeDEditor extends React.Component {
     componentDidMount() {
         this.addHotKeyListener();
         window.addEventListener("message", this.handleMessage);
+        this._applyInitialToggleSettings();
+    }
+
+    /**
+     * Apply toggle-based view settings from URL params after the Wave instance is mounted.
+     * These settings are imperative (they toggle state on the Wave class instance),
+     * so they must be applied after componentDidMount when WaveComponent.wave exists.
+     */
+    _applyInitialToggleSettings() {
+        const { _initialToggleSettings } = this.state;
+        if (!_initialToggleSettings || !this.WaveComponent?.wave) return;
+
+        if (_initialToggleSettings.orthographicCamera) {
+            this.handleToggleOrthographicCamera();
+        }
+        if (_initialToggleSettings.bonds) {
+            this.handleToggleBonds();
+        }
+        if (_initialToggleSettings.axes) {
+            this.handleToggleAxes();
+        }
+        if (_initialToggleSettings.autoRotate) {
+            this.handleToggleOrbitControlsAnimation();
+        }
+        if (_initialToggleSettings.elementLabels) {
+            this.handleToggleElementLabels();
+        }
+        if (_initialToggleSettings.coordinateLabels) {
+            this.handleToggleCoordinateLabels();
+        }
     }
 
     componentWillUnmount() {
@@ -799,6 +849,8 @@ ThreeDEditor.propTypes = {
     boundaryConditions: PropTypes.object,
     onUpdate: PropTypes.func,
     isStandalone: PropTypes.bool,
+    // eslint-disable-next-line react/forbid-prop-types
+    initialViewSettings: PropTypes.object,
 };
 
 ThreeDEditor.defaultProps = {
@@ -807,4 +859,5 @@ ThreeDEditor.defaultProps = {
     onUpdate: undefined,
     editable: false,
     isStandalone: false,
+    initialViewSettings: {},
 };
