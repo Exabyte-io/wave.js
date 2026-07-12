@@ -16,34 +16,40 @@ interface SquareIconButtonProps extends IconButtonProps {
  * Square icon button with toggle logic
  */
 function SquareIconButton(props: SquareIconButtonProps) {
-    const { title, id, label, onClick, tooltipPlacement = "top" } = props;
+    const { title, id, label, onClick, tooltipPlacement = "top", disabled } = props;
 
     const defaultIconButtonStyle = {
         borderRadius: 0,
     };
 
+    const iconButton = (
+        <IconButton
+            disableFocusRipple
+            disableTouchRipple
+            size="large"
+            key={id}
+            aria-label={label || title.toLowerCase()}
+            onClick={onClick}
+            sx={defaultIconButtonStyle}
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            {..._.omit(
+                props,
+                "title",
+                "tooltipPlacement",
+                "id",
+                "label",
+                "onClick",
+                "isToggleable",
+                "isToggled",
+            )}
+        />
+    );
+
     return (
         <Tooltip id={id} title={title} placement={tooltipPlacement} disableInteractive>
-            <IconButton
-                disableFocusRipple
-                disableTouchRipple
-                size="large"
-                key={id}
-                aria-label={label || title.toLowerCase()}
-                onClick={onClick}
-                sx={defaultIconButtonStyle}
-                // eslint-disable-next-line react/jsx-props-no-spreading
-                {..._.omit(
-                    props,
-                    "title",
-                    "tooltipPlacement",
-                    "id",
-                    "label",
-                    "onClick",
-                    "isToggleable",
-                    "isToggled",
-                )}
-            />
+            {/* Tooltip needs a listenable child: a disabled button doesn't fire events, so
+                give it a wrapping span to hover/focus on instead (MUI's documented fix). */}
+            {disabled ? <span>{iconButton}</span> : iconButton}
         </Tooltip>
     );
 }

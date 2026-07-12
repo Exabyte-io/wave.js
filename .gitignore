@@ -6,3 +6,5 @@ tests/coverage/
 .idea
 .DS_Store
 reference
+agents/
+plan

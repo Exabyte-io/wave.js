@@ -11,6 +11,7 @@ import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
 import { ImageMixin } from "./mixins/image";
+import { InteractiveStructureEditorMixin } from "./mixins/interactive_structure_editor";
 import { AllLabelsMixin } from "./mixins/labels/all";
 import { AllMeasurementsMixin } from "./mixins/measurements/all";
 import { RepetitionMixin } from "./mixins/repetition";
@@ -246,6 +247,7 @@ export class Wave extends mix(WaveBase).with(
     AllLabelsMixin,
     AllMeasurementsMixin,
     ImageMixin,
+    InteractiveStructureEditorMixin,
 ) {
     /**
      *
@@ -289,6 +291,10 @@ export class Wave extends mix(WaveBase).with(
 
     // Called on each change to the Redux store via reloadViewer.
     rebuildScene() {
+        // Rebuilding replaces every atom mesh, so the edit-mode selection (and the gizmo
+        // attached to it) must be re-pointed at the atom's new mesh instance afterwards.
+        const selectedAtomicIndex = this.selectedMesh_?.userData.atomicIndex;
+
         this.clearView();
         this.drawAtomsAsSpheres();
         this.drawUnitCell();
@@ -296,6 +302,7 @@ export class Wave extends mix(WaveBase).with(
         if (this.isDrawBondsEnabled) this.drawBonds();
         this.createAllLabels();
         this.createAllMeasurements();
+        if (this.isEditModeEnabled_) this.reselectAtomByIndex(selectedAtomicIndex);
         this.render();
     }
 

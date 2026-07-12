@@ -6,6 +6,7 @@ import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
 import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
 import { AlertProvider } from "@exabyte-io/cove.js/src/theme/provider";
 import { Made } from "@mat3ra/made";
+import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
 import CheckIcon from "@mui/icons-material/Check";
@@ -19,15 +20,25 @@ import GpsFixed from "@mui/icons-material/GpsFixed";
 import HeightIcon from "@mui/icons-material/Height";
 import ImportExport from "@mui/icons-material/ImportExport";
 import LooksIcon from "@mui/icons-material/Looks";
+import OpenWith from "@mui/icons-material/OpenWith";
 import PictureInPicture from "@mui/icons-material/PictureInPicture";
+import Redo from "@mui/icons-material/Redo";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
+import RotateRight from "@mui/icons-material/RotateRight";
 import Settings from "@mui/icons-material/Settings";
 import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
+import Undo from "@mui/icons-material/Undo";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Divider from "@mui/material/Divider";
+import Paper from "@mui/material/Paper";
 import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
@@ -36,7 +47,7 @@ import { defaultMeasurementsSettings, MeasurementSettingsHandler, } from "../mix
 import settings from "../settings";
 import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";
-import { ThreejsEditorModal } from "./ThreejsEditorModal";
+import SquareIconButton from "./SquareIconButton";
 import { WaveComponent } from "./WaveComponent";
 /**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
@@ -59,13 +70,12 @@ export class ThreeDEditor extends React.Component {
             });
         };
         this.handleKeyPress = (e) => {
-            const { isInteractive, isThreejsEditorModalShown } = this.state;
+            const { isInteractive } = this.state;
             const { editable } = this.props;
             // Check if interactive mode is off, or if the event originated from an input-like element
             if (!isInteractive ||
                 e.target.closest(".cm-editor") ||
-                ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.nodeName) ||
-                isThreejsEditorModalShown) {
+                ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.nodeName)) {
                 return;
             }
             // Removing the toggleThreejsEditorModal key from the keyConfig if the editor is not editable
@@ -291,7 +301,11 @@ export class ThreeDEditor extends React.Component {
             // on/off switch for the component
             isInteractive: false,
             activeToolbarMenu: null,
-            isThreejsEditorModalShown: false,
+            isEditModeActive: false,
+            activeTransformMode: "translate",
+            historyStack: [material],
+            historyPointer: 0,
+            selectedAtomIndex: null,
             // isDistanceAndAnglesShown: false,
             measurementsSettings: defaultMeasurementsSettings,
             // TODO: remove the need for `viewerTriggerResize`
@@ -328,7 +342,7 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleInteractive = this.handleToggleInteractive.bind(this);
         this.handleToggleToolbarMenu = this.handleToggleToolbarMenu.bind(this);
         this.handleToggleBonds = this.handleToggleBonds.bind(this);
-        this.toggleThreejsEditorModal = this.toggleThreejsEditorModal.bind(this);
+        this.handleToggleEditMode = this.handleToggleEditMode.bind(this);
         this.handleToggleOrthographicCamera = this.handleToggleOrthographicCamera.bind(this);
         this.handleToggleElementLabels = this.handleToggleElementLabels.bind(this);
         this.handleToggleCoordinateLabels = this.handleToggleCoordinateLabels.bind(this);
@@ -340,7 +354,14 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleOrbitControlsAnimation =
             this.handleToggleOrbitControlsAnimation.bind(this);
         this.handleToggleAxes = this.handleToggleAxes.bind(this);
-        this.onThreejsEditorModalHide = this.onThreejsEditorModalHide.bind(this);
+        this.handleStructureModified = this.handleStructureModified.bind(this);
+        this.handleUndo = this.handleUndo.bind(this);
+        this.handleRedo = this.handleRedo.bind(this);
+        this.handleCoordinateChange = this.handleCoordinateChange.bind(this);
+        this.handleSetTransformMode = this.handleSetTransformMode.bind(this);
+        this.handleAddAtom = this.handleAddAtom.bind(this);
+        this.handleRemoveSelectedAtom = this.handleRemoveSelectedAtom.bind(this);
+        this.renderEditToolbar = this.renderEditToolbar.bind(this);
         this.handleChemicalConnectivityFactorChange =
             this.handleChemicalConnectivityFactorChange.bind(this);
         this.handleToggleMeasurement = this.handleToggleMeasurement.bind(this);
@@ -399,11 +420,16 @@ export class ThreeDEditor extends React.Component {
     UNSAFE_componentWillReceiveProps(nextProps, nextContext) {
         const { material } = nextProps;
         if (material) {
+            const clonedMaterial = material.clone();
             this.setState({
-                material: material.clone(),
+                material: clonedMaterial,
                 originalMaterial: material,
                 boundaryConditions: nextProps.boundaryConditions || {},
                 isConventionalCellShown: nextProps.isConventionalCellShown || false,
+                // Undo/redo history is scoped to the material currently being edited.
+                historyStack: [clonedMaterial],
+                historyPointer: 0,
+                selectedAtomIndex: null,
             });
             this.handleResetMeasurements();
         }
@@ -421,7 +447,7 @@ export class ThreeDEditor extends React.Component {
             [settings.hotKeysConfig.toggleElementLabels]: this.handleToggleElementLabels,
             [settings.hotKeysConfig.toggleCoordinateLabels]: this.handleToggleCoordinateLabels,
             [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
-            [settings.hotKeysConfig.toggleThreejsEditorModal]: this.toggleThreejsEditorModal,
+            [settings.hotKeysConfig.toggleThreejsEditorModal]: this.handleToggleEditMode,
             [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_MODES.DISTANCE),
             [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_MODES.ANGLE),
             [settings.hotKeysConfig.toggleCopyCoordinatesShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_MODES.COORDINATE),
@@ -497,9 +523,135 @@ export class ThreeDEditor extends React.Component {
         wave.isDrawBondsEnabled = !wave.isDrawBondsEnabled; // toggle value;
         this._resetStateWaveComponent();
     }
-    toggleThreejsEditorModal() {
-        const { isThreejsEditorModalShown } = this.state;
-        this.setState({ isThreejsEditorModalShown: !isThreejsEditorModalShown });
+    handleToggleEditMode() {
+        const { isEditModeActive: wasEditModeActive } = this.state;
+        const isEditModeActive = !wasEditModeActive;
+        this.setState({ isEditModeActive }, () => {
+            if (this.WaveComponent && this.WaveComponent.wave) {
+                this.WaveComponent.wave.enableEditMode(isEditModeActive);
+            }
+        });
+    }
+    /**
+     * Pushes a material to the viewer via the official setStructure()/rebuildScene() path and
+     * notifies the parent. Used as the setState callback for every history-affecting change
+     * (edit, undo, redo) once bypassReloadViewer has already been set so WaveComponent's own
+     * prop-driven reload doesn't race with it.
+     */
+    _applyMaterialToViewer(material) {
+        const { onUpdate } = this.props;
+        if (this.WaveComponent && this.WaveComponent.wave) {
+            this.WaveComponent.wave.bypassReloadViewer = false;
+            this.WaveComponent.wave.setStructure(material);
+            this.WaveComponent.wave.rebuildScene();
+        }
+        if (onUpdate) {
+            onUpdate(material);
+        }
+    }
+    handleStructureModified(newMaterial) {
+        const { material, historyStack, historyPointer } = this.state;
+        if (this.WaveComponent && this.WaveComponent.wave) {
+            this.WaveComponent.wave.bypassReloadViewer = true;
+        }
+        newMaterial.lattice = {
+            ...newMaterial.Lattice.toJSON(),
+            type: material.Lattice.type,
+        };
+        const clonedMaterial = newMaterial.clone();
+        const newStack = historyStack.slice(0, historyPointer + 1);
+        newStack.push(clonedMaterial);
+        this.setState({
+            material: clonedMaterial,
+            historyStack: newStack,
+            historyPointer: newStack.length - 1,
+        }, () => this._applyMaterialToViewer(clonedMaterial));
+    }
+    handleUndo() {
+        const { historyStack, historyPointer } = this.state;
+        if (historyPointer <= 0)
+            return;
+        const previousPointer = historyPointer - 1;
+        const previousMaterial = historyStack[previousPointer];
+        if (this.WaveComponent && this.WaveComponent.wave) {
+            this.WaveComponent.wave.bypassReloadViewer = true;
+        }
+        this.setState({
+            material: previousMaterial,
+            historyPointer: previousPointer,
+        }, () => this._applyMaterialToViewer(previousMaterial));
+    }
+    handleRedo() {
+        const { historyStack, historyPointer } = this.state;
+        if (historyPointer >= historyStack.length - 1)
+            return;
+        const nextPointer = historyPointer + 1;
+        const nextMaterial = historyStack[nextPointer];
+        if (this.WaveComponent && this.WaveComponent.wave) {
+            this.WaveComponent.wave.bypassReloadViewer = true;
+        }
+        this.setState({
+            material: nextMaterial,
+            historyPointer: nextPointer,
+        }, () => this._applyMaterialToViewer(nextMaterial));
+    }
+    handleCoordinateChange(axisIndex, value) {
+        var _a, _b;
+        const { selectedAtomIndex, material } = this.state;
+        if (selectedAtomIndex === null)
+            return;
+        const floatValue = parseFloat(value);
+        if (Number.isNaN(floatValue))
+            return;
+        const elements = material.basis.elements.map((element) => typeof element === "string" ? element : element.value);
+        const coordinateArrays = material.basis.coordinates.map((coordinate) => {
+            if (Array.isArray(coordinate))
+                return [...coordinate];
+            if (coordinate && Array.isArray(coordinate.value))
+                return [...coordinate.value];
+            return coordinate;
+        });
+        if (coordinateArrays[selectedAtomIndex]) {
+            coordinateArrays[selectedAtomIndex][axisIndex] = floatValue;
+        }
+        const newBasis = Made.Basis.fromElementsAndCoordinates({
+            elements,
+            coordinates: coordinateArrays,
+            units: "cartesian",
+            cell: material.Lattice,
+        });
+        const newMaterial = new Made.Material({
+            name: material.name,
+            lattice: material.Lattice.toJSON(),
+            basis: newBasis.toJSON(),
+        });
+        // Fast in-place scene update for immediate visual feedback before state propagates
+        if ((_b = (_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) === null || _b === void 0 ? void 0 : _b.selectedMesh_) {
+            this.WaveComponent.wave.selectedMesh_.position.setComponent(axisIndex, floatValue);
+            this.WaveComponent.wave.render();
+        }
+        this.handleStructureModified(newMaterial);
+    }
+    handleSetTransformMode(mode) {
+        var _a;
+        this.setState({ activeTransformMode: mode });
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.setTransformMode(mode);
+        }
+    }
+    handleAddAtom() {
+        var _a, _b;
+        const { material } = this.state;
+        if (!((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) || !((_b = material === null || material === void 0 ? void 0 : material.Lattice) === null || _b === void 0 ? void 0 : _b.unitCell))
+            return;
+        const { ax = 0, by = 0, cz = 0 } = material.Lattice.unitCell;
+        this.WaveComponent.wave.addAtom("Si", [ax / 2, by / 2, cz / 2]);
+    }
+    handleRemoveSelectedAtom() {
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.removeSelectedAtom();
+        }
     }
     // TODO: reset the colors for other buttons in the panel on call to the function below
     handleResetViewer() {
@@ -582,7 +734,11 @@ export class ThreeDEditor extends React.Component {
         const isDrawBondsEnabled = this._getWaveProperty("isDrawBondsEnabled") || false;
         return (_jsx(WaveComponent, { ref: (el) => {
                 this.WaveComponent = el;
-            }, triggerHandleResize: viewerTriggerResize, isConventionalCellShown: isConventionalCellShown, isDrawBondsEnabled: isDrawBondsEnabled, isViewAdjustable: viewerSettings.isViewAdjustable, structure: materialCopy, boundaryConditions: boundaryConditions, cell: materialCopy.Lattice.unitCell, name: materialCopy.name, settings: viewerSettings }));
+            }, triggerHandleResize: viewerTriggerResize, isConventionalCellShown: isConventionalCellShown, isDrawBondsEnabled: isDrawBondsEnabled, isViewAdjustable: viewerSettings.isViewAdjustable, structure: materialCopy, boundaryConditions: boundaryConditions, cell: materialCopy.Lattice.unitCell, name: materialCopy.name, settings: {
+                ...viewerSettings,
+                onStructureModified: this.handleStructureModified,
+                onSelectionChanged: (index) => this.setState({ selectedAtomIndex: index }),
+            } }));
     }
     // TODO: move in the toolbar component when it's created
     // eslint-disable-next-line class-methods-use-this
@@ -628,12 +784,13 @@ export class ThreeDEditor extends React.Component {
             },
         ];
         const { editable } = this.props;
+        const { isEditModeActive } = this.state;
         if (editable) {
             toolbarConfig.splice(4, 0, {
                 id: "3DEdit",
-                title: "Edit [E]",
-                leftIcon: _jsx(Edit, {}),
-                onClick: this.toggleThreejsEditorModal,
+                title: isEditModeActive ? "Exit Edit" : "Edit [E]",
+                leftIcon: _jsx(Edit, { color: isEditModeActive ? "primary" : "inherit" }),
+                onClick: this.handleToggleEditMode,
             });
         }
         return toolbarConfig;
@@ -646,36 +803,33 @@ export class ThreeDEditor extends React.Component {
         });
         console.log("Recorded gif");
     }
-    onThreejsEditorModalHide(material) {
-        let { isThreejsEditorModalShown } = this.state;
-        isThreejsEditorModalShown = !isThreejsEditorModalShown;
-        if (material) {
-            const { originalMaterial } = this.state;
-            const { onUpdate } = this.props;
-            // preserve lattice type
-            material.lattice = {
-                ...material.Lattice.toJSON(),
-                type: originalMaterial.Lattice.type,
-            };
-            this.setState({
-                originalMaterial: material,
-                material: material.clone(),
-                isThreejsEditorModalShown,
-            });
-            if (onUpdate)
-                onUpdate(material);
+    renderEditToolbar() {
+        var _a;
+        const { activeTransformMode, historyStack, historyPointer, selectedAtomIndex, material } = this.state;
+        const hasUndo = historyPointer > 0;
+        const hasRedo = historyPointer < historyStack.length - 1;
+        let selectedCoordinates = [0, 0, 0];
+        let selectedElement = "";
+        if (selectedAtomIndex !== null && ((_a = material === null || material === void 0 ? void 0 : material.basis) === null || _a === void 0 ? void 0 : _a.coordinates)) {
+            const selectedAtom = material.basis.coordinates[selectedAtomIndex];
+            if (selectedAtom) {
+                selectedCoordinates = Array.isArray(selectedAtom)
+                    ? selectedAtom
+                    : selectedAtom.value || selectedAtom;
+                const elementObj = material.basis.elements[selectedAtomIndex];
+                selectedElement =
+                    typeof elementObj === "string"
+                        ? elementObj
+                        : (elementObj === null || elementObj === void 0 ? void 0 : elementObj.value) || (elementObj === null || elementObj === void 0 ? void 0 : elementObj.element) || "";
+            }
         }
-        else {
-            this.setState({ isThreejsEditorModalShown });
-        }
+        return (_jsx(Paper, { elevation: 2, sx: { position: "absolute", top: "1em", right: "1em", boxShadow: 4 }, children: _jsxs(Stack, { alignItems: "center", spacing: 1, padding: 1, divider: _jsx(Divider, { flexItem: true, sx: { width: "80%", alignSelf: "center" } }), children: [_jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Translate Mode", onClick: () => this.handleSetTransformMode("translate"), children: _jsx(OpenWith, { color: activeTransformMode === "translate" ? "primary" : "inherit" }) }), _jsx(SquareIconButton, { title: "Rotate Mode", onClick: () => this.handleSetTransformMode("rotate"), children: _jsx(RotateRight, { color: activeTransformMode === "rotate" ? "primary" : "inherit" }) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Add Atom (Si)", onClick: this.handleAddAtom, children: _jsx(AddCircleOutline, {}) }), _jsx(SquareIconButton, { title: "Delete Selected Atom", disabled: selectedAtomIndex === null, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndex !== null && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(Typography, { variant: "caption", fontWeight: "bold", children: selectedElement || "Si" }), ["X", "Y", "Z"].map((axisName, idx) => (_jsx(TextField, { label: axisName, size: "small", type: "number", className: "inverse stepper", value: selectedCoordinates[idx] !== undefined
+                                    ? parseFloat(selectedCoordinates[idx].toFixed(3))
+                                    : 0, onChange: (event) => this.handleCoordinateChange(idx, event.target.value), inputProps: { step: 0.01 } }, axisName)))] }))] }) }));
     }
     renderWaveOrThreejsEditorModal() {
-        const { originalMaterial, isThreejsEditorModalShown } = this.state;
-        if (isThreejsEditorModalShown) {
-            return (_jsx(ThreejsEditorModal, { show: isThreejsEditorModalShown, onHide: this.onThreejsEditorModalHide, materials: [originalMaterial], modalId: "threejs-editor" }));
-        }
-        const { isInteractive } = this.state;
-        return (_jsxs("div", { className: "wave-component-holder", style: { position: "relative", height: "100%" }, children: [this.renderCoverDiv(), _jsx(IconsToolbar, { toolbarConfig: this.getToolbarConfig(), isInteractive: isInteractive, handleToggleInteractive: this.handleToggleInteractive }), this.renderWaveComponent()] }));
+        const { isInteractive, isEditModeActive } = this.state;
+        return (_jsxs("div", { className: "wave-component-holder", style: { position: "relative", height: "100%" }, children: [this.renderCoverDiv(), _jsx(IconsToolbar, { toolbarConfig: this.getToolbarConfig(), isInteractive: isInteractive, handleToggleInteractive: this.handleToggleInteractive }), this.renderWaveComponent(), isEditModeActive && this.renderEditToolbar()] }));
     }
     render() {
         const { isStandalone } = this.props;

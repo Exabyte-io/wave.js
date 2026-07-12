@@ -26,6 +26,7 @@ export default defineConfig({
     },
     optimizeDeps: {
         entries: ["index.html"],
+        include: ["@emotion/react", "@emotion/styled"],
     },
     build: {
         outDir: "build",

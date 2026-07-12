@@ -5,7 +5,6 @@ import expect from "expect";
 import React from "react";
 
 import { ThreeDEditor } from "../../../src/components/ThreeDEditor";
-import { ThreejsEditorModal } from "../../../src/components/ThreejsEditorModal";
 import { WaveComponent } from "../../../src/components/WaveComponent";
 import { ELEMENT_PROPERTIES, getWaveInstance, MATERIAL_CONFIG, WAVE_SETTINGS } from "../../enums";
 import { SELECTORS } from "../../selectors";
@@ -14,13 +13,6 @@ import { createElement, takeSnapshotAndAssertEqualityAsync } from "../../utils";
 Enzyme.configure({ adapter: new Adapter() });
 
 const { mount } = Enzyme;
-
-jest.mock("../../../src/components/ThreejsEditorModal", () => ({
-    __esModule: true,
-    ThreejsEditorModal: () => {
-        return <div data-name="threejs-editor-modal-content" />;
-    },
-}));
 
 test("toggleInteractive", () => {
     const container = createElement("div", ELEMENT_PROPERTIES);
@@ -80,6 +72,8 @@ test("preserve three.js editor changes", async () => {
     threeDEditorButton.prop("onClick")();
     wrapper.update();
 
+    expect(wrapper.state("isEditModeActive")).toBe(true);
+
     // Simulate modifying materials in the editor
     const modifiedMaterial = new Made.Material({
         ...MATERIAL_CONFIG,
@@ -91,8 +85,9 @@ test("preserve three.js editor changes", async () => {
             })),
         },
     });
-    const threeJsEditorModal = wrapper.find(ThreejsEditorModal);
-    threeJsEditorModal.prop("onHide")(modifiedMaterial);
+
+    // Directly trigger structure modified handler on ThreeDEditor instance
+    wrapper.instance().handleStructureModified(modifiedMaterial);
     wrapper.update();
 
     // Get updated instance of wave and compare it with snapshot
