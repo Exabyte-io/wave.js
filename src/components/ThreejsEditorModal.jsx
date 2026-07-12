@@ -1,17 +1,19 @@
 import { Made } from "@mat3ra/made";
+import {
+    Editor,
+    Menubar,
+    Player,
+    RemoveMultipleSelectionGroupCommand,
+    Script,
+    SetSceneCommand,
+    Sidebar,
+    SubmitMultipleSelectionCommand,
+    Toolbar,
+    Viewport,
+} from "@mat3ra/threejs-editor";
 import PropTypes from "prop-types";
 import React from "react";
 import * as THREE from "three";
-import { RemoveMultipleSelectionGroupCommand } from "three/editor/js/commands/RemoveMultipleSelectionGroupCommand";
-import { SetSceneCommand } from "three/editor/js/commands/SetSceneCommand";
-import { SubmitMultipleSelectionCommand } from "three/editor/js/commands/SubmitMultipleSelectionCommand";
-import { Editor } from "three/editor/js/Editor";
-import { Menubar } from "three/editor/js/Menubar";
-import { Player } from "three/editor/js/Player";
-import { Script } from "three/editor/js/Script";
-import { Sidebar } from "three/editor/js/Sidebar";
-import { Toolbar } from "three/editor/js/Toolbar";
-import { Viewport } from "three/editor/js/Viewport";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { COORDINATE_LABELS_GROUP_NAME, ELEMENT_LABELS_GROUP_NAME } from "../enums";

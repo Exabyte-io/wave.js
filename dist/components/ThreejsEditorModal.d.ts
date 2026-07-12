@@ -1,5 +1,5 @@
 export class ThreejsEditorModal extends ModalDialog {
-    editor: any;
+    editor: Editor | undefined;
     domElement: any;
     /**
      *  shows alert with specific parameters
@@ -93,5 +93,6 @@ export namespace ThreejsEditorModal {
     }
 }
 import { ModalDialog } from "./ModalDialog";
+import { Editor } from "../editor/js/Editor";
 import * as THREE from "three";
 import PropTypes from "prop-types";

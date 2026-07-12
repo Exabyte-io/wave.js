@@ -20,6 +20,12 @@ export default defineConfig({
     },
     server: {
         port: 3002,
+        watch: {
+            ignored: ["**/threejs_fork/**", "**/agents/**"],
+        },
+    },
+    optimizeDeps: {
+        entries: ["index.html"],
     },
     build: {
         outDir: "build",
