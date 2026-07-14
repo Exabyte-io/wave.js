@@ -54,6 +54,10 @@ export class WaveComponent extends React.Component {
         }
     }
 
+    componentWillUnmount() {
+        this.wave?.dispose();
+    }
+
     shouldViewerAdjust(prevProps) {
         const { cell } = this.props;
         const { cell: prevCell } = prevProps;
@@ -74,6 +78,10 @@ export class WaveComponent extends React.Component {
     }
 
     initViewer() {
+        // A prior Wave instance (e.g. from a "Reset View" re-init) must release its WebGL
+        // context, resize observer, and editor listeners before a new one is constructed for
+        // the same container, otherwise each reset leaks a full renderer.
+        this.wave?.dispose();
         this._cleanViewer();
         const { structure, cell, settings, boundaryConditions } = this.props;
         this.wave = new Wave({

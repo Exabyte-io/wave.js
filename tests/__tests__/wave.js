@@ -1,3 +1,5 @@
+import expect from "expect";
+
 import { getFeOWaveInstance, getWaveInstance } from "../enums";
 import { takeSnapshotAndAssertEqualityAsync } from "../utils";
 
@@ -36,4 +38,16 @@ test("colorsOfAtomsWithLabels", async () => {
         wave.renderer.getContext(),
         "colorsOfAtomsWithLabels",
     );
+});
+
+test("dispose() disconnects the resize observer and releases the renderer (D15)", () => {
+    const wave = getWaveInstance();
+    const disconnectSpy = jest.spyOn(wave._resizeObserver, "disconnect");
+    const rendererDisposeSpy = jest.spyOn(wave.renderer, "dispose");
+
+    wave.dispose();
+
+    expect(disconnectSpy).toHaveBeenCalledTimes(1);
+    expect(rendererDisposeSpy).toHaveBeenCalledTimes(1);
+    expect(wave._resizeObserver).toBeNull();
 });
