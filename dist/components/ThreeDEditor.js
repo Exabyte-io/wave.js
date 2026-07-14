@@ -291,6 +291,10 @@ export class ThreeDEditor extends React.Component {
             historyStack: [material],
             historyPointer: 0,
             selectedAtomIndex: null,
+            // Local draft strings for the X/Y/Z coordinate fields, indexed by axis; null means
+            // "show the committed value". Lets a field be cleared or start with "-" while
+            // focused without committing (and rebuilding the scene) on every keystroke (D18).
+            coordinateDrafts: [null, null, null],
             // isDistanceAndAnglesShown: false,
             measurementsSettings: defaultMeasurementsSettings,
             // TODO: remove the need for `viewerTriggerResize`
@@ -343,9 +347,15 @@ export class ThreeDEditor extends React.Component {
         this.handleUndo = this.handleUndo.bind(this);
         this.handleRedo = this.handleRedo.bind(this);
         this.handleCoordinateChange = this.handleCoordinateChange.bind(this);
+        this.handleCoordinateDraftChange = this.handleCoordinateDraftChange.bind(this);
+        this.handleCoordinateCommit = this.handleCoordinateCommit.bind(this);
         this.handleSetTransformMode = this.handleSetTransformMode.bind(this);
         this.handleAddAtom = this.handleAddAtom.bind(this);
         this.handleRemoveSelectedAtom = this.handleRemoveSelectedAtom.bind(this);
+        this.handleSelectionChanged = this.handleSelectionChanged.bind(this);
+        this.handleEditModeKeyDown = this.handleEditModeKeyDown.bind(this);
+        this.canUndo = this.canUndo.bind(this);
+        this.canRedo = this.canRedo.bind(this);
         this.renderEditToolbar = this.renderEditToolbar.bind(this);
         this.handleChemicalConnectivityFactorChange =
             this.handleChemicalConnectivityFactorChange.bind(this);
@@ -362,6 +372,7 @@ export class ThreeDEditor extends React.Component {
     }
     componentDidMount() {
         this.addHotKeyListener();
+        document.addEventListener("keydown", this.handleEditModeKeyDown);
         this._applyInitialToggleSettings();
     }
     /**
@@ -395,26 +406,73 @@ export class ThreeDEditor extends React.Component {
     }
     componentWillUnmount() {
         this.removeHotKeyListener();
+        document.removeEventListener("keydown", this.handleEditModeKeyDown);
+    }
+    /**
+     * Delete/Backspace/Ctrl(Cmd)+Z/Ctrl(Cmd)+Shift+Z don't fire the "keypress" event the rest of
+     * this component's hotkeys rely on (keypress only fires for character-producing keys), so
+     * they're handled separately here on "keydown". Guarded the same way as handleKeyPress:
+     * only while interactive and not while a form field has focus.
+     */
+    handleEditModeKeyDown(event) {
+        const { isInteractive, isEditModeActive } = this.state;
+        if (!isInteractive ||
+            !isEditModeActive ||
+            event.target.closest(".cm-editor") ||
+            ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.nodeName)) {
+            return;
+        }
+        const isUndoKey = (event.metaKey || event.ctrlKey) && !event.shiftKey && event.key === "z";
+        const isRedoKey = (event.metaKey || event.ctrlKey) && event.shiftKey && event.key === "z";
+        if (isUndoKey) {
+            event.preventDefault();
+            this.handleUndo();
+        }
+        else if (isRedoKey) {
+            event.preventDefault();
+            this.handleRedo();
+        }
+        else if (event.key === "Delete" || event.key === "Backspace") {
+            this.handleRemoveSelectedAtom();
+        }
     }
     // TODO: update component to fully controlled or fully uncontrolled with a key?
     // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
     // eslint-disable-next-line no-unused-vars
     UNSAFE_componentWillReceiveProps(nextProps, nextContext) {
         const { material } = nextProps;
-        if (material) {
-            const clonedMaterial = material.clone();
-            this.setState({
-                material: clonedMaterial,
-                originalMaterial: material,
-                boundaryConditions: nextProps.boundaryConditions || {},
-                isConventionalCellShown: nextProps.isConventionalCellShown || false,
-                // Undo/redo history is scoped to the material currently being edited.
-                historyStack: [clonedMaterial],
-                historyPointer: 0,
-                selectedAtomIndex: null,
-            });
-            this.handleResetMeasurements();
+        if (!material)
+            return;
+        const { material: currentMaterial } = this.state;
+        // A host that stores every onUpdate(material) and passes it straight back down (the
+        // common "lift state up" pattern) must not have its own echo wipe our undo history and
+        // selection - only reset when the incoming material's actual content differs from what
+        // we're already showing (D16). calculateHash() is a real content hash (not a stored,
+        // possibly-absent prop), so this can't false-positive on two materials that both happen
+        // to lack a cached hash.
+        let isSameContent = false;
+        try {
+            isSameContent =
+                !!currentMaterial && material.calculateHash() === currentMaterial.calculateHash();
         }
+        catch (error) {
+            isSameContent = false;
+        }
+        if (isSameContent)
+            return;
+        const clonedMaterial = material.clone();
+        this.setState({
+            material: clonedMaterial,
+            originalMaterial: material,
+            boundaryConditions: nextProps.boundaryConditions || {},
+            isConventionalCellShown: nextProps.isConventionalCellShown || false,
+            // Undo/redo history is scoped to the material currently being edited.
+            historyStack: [clonedMaterial],
+            historyPointer: 0,
+            selectedAtomIndex: null,
+            coordinateDrafts: [null, null, null],
+        });
+        this.handleResetMeasurements();
     }
     _resetStateWaveComponent() {
         // eslint-disable-next-line react/no-unused-state
@@ -480,16 +538,18 @@ export class ThreeDEditor extends React.Component {
         this.handleSetSetting({ isViewAdjustable: !isViewAdjustable });
     }
     handleDownloadClick(format = "poscar") {
-        const { originalMaterial } = this.state;
+        // Exports the current working material, not originalMaterial (the pre-edit snapshot) -
+        // otherwise a download taken after any edit silently returns the old structure (D8).
+        const { material } = this.state;
         let content;
         switch (format) {
             case "poscar":
-                content = originalMaterial.getAsPOSCAR();
+                content = material.getAsPOSCAR();
                 break;
             default:
-                content = JSON.stringify(originalMaterial.toJSON());
+                content = JSON.stringify(material.toJSON());
         }
-        exportToDisk(content, originalMaterial.name, format);
+        exportToDisk(content, material.name, format);
     }
     handleToggleInteractive() {
         const { isInteractive } = this.state;
@@ -507,11 +567,20 @@ export class ThreeDEditor extends React.Component {
     }
     handleToggleEditMode() {
         const { isEditModeActive: wasEditModeActive } = this.state;
+        const { onEditModeChanged } = this.props;
         const isEditModeActive = !wasEditModeActive;
+        // Edit mode and measurement modes interpret the same clicks differently (select-atom vs.
+        // measure); letting both be active at once double-handles every click (D20). Entering
+        // edit mode force-disables any active measurement mode.
+        if (isEditModeActive) {
+            this.handleResetMeasurements();
+        }
         this.setState({ isEditModeActive }, () => {
             if (this.WaveComponent && this.WaveComponent.wave) {
                 this.WaveComponent.wave.enableEditMode(isEditModeActive);
             }
+            if (onEditModeChanged)
+                onEditModeChanged(isEditModeActive);
         });
     }
     /**
@@ -577,6 +646,25 @@ export class ThreeDEditor extends React.Component {
             historyPointer: nextPointer,
         }, () => this._applyMaterialToViewer(nextMaterial));
     }
+    /**
+     * Public, ref-accessible undo-availability check (part of the host embedding API - a host
+     * can drive undo/redo via a ref to this component instead of only through this toolbar).
+     */
+    canUndo() {
+        const { historyPointer } = this.state;
+        return historyPointer > 0;
+    }
+    canRedo() {
+        const { historyStack, historyPointer } = this.state;
+        return historyPointer < historyStack.length - 1;
+    }
+    /**
+     * Commits a single axis of the selected atom's coordinate. Only called once per field edit
+     * (on blur/Enter, via handleCoordinateCommit below) rather than per keystroke, so this is
+     * naturally one history entry per edit (D18). Mutates a clone's basis in place via
+     * Basis/setBasis rather than reconstructing via fromElementsAndCoordinates, so labels and
+     * constraints on every atom (including the one being edited) survive untouched (D7).
+     */
     handleCoordinateChange(axisIndex, value) {
         var _a, _b;
         const { selectedAtomIndex, material } = this.state;
@@ -585,42 +673,75 @@ export class ThreeDEditor extends React.Component {
         const floatValue = parseFloat(value);
         if (Number.isNaN(floatValue))
             return;
-        const elements = material.basis.elements.map((element) => typeof element === "string" ? element : element.value);
-        const coordinateArrays = material.basis.coordinates.map((coordinate) => {
-            if (Array.isArray(coordinate))
-                return [...coordinate];
-            if (coordinate && Array.isArray(coordinate.value))
-                return [...coordinate.value];
-            return coordinate;
-        });
-        if (coordinateArrays[selectedAtomIndex]) {
-            coordinateArrays[selectedAtomIndex][axisIndex] = floatValue;
-        }
-        // Only one axis of an already-existing coordinate is changing here, so the edited
-        // array must stay labeled with whatever units the material already uses (typically
-        // "crystal"/fractional by default) - hardcoding "cartesian" would silently reinterpret
-        // every atom's fractional position as if it were in Angstroms.
-        const { units } = material.basis;
-        const newBasis = Made.Basis.fromElementsAndCoordinates({
-            elements,
-            coordinates: coordinateArrays,
-            units,
-            cell: material.Lattice,
-        });
-        const newMaterial = new Made.Material({
-            name: material.name,
-            lattice: material.Lattice.toJSON(),
-            basis: newBasis.toJSON(),
-        });
+        const newMaterial = material.clone();
+        const basis = newMaterial.Basis;
+        const { coordinates } = basis;
+        if (!coordinates[selectedAtomIndex])
+            return;
+        const currentValue = coordinates[selectedAtomIndex].value;
+        const updatedValue = [...currentValue];
+        updatedValue[axisIndex] = floatValue;
+        coordinates[selectedAtomIndex] = { ...coordinates[selectedAtomIndex], value: updatedValue };
+        basis.coordinates = coordinates;
+        newMaterial.setBasis(basis.toJSON());
         // Fast in-place scene update for immediate visual feedback before state propagates.
         // Three.js mesh positions are always Cartesian, so this only makes sense when the
         // material's own coordinates are too; for crystal-unit materials, skip straight to the
         // full rebuild below rather than briefly snapping the mesh to the wrong (fractional) spot.
-        if (units === "cartesian" && ((_b = (_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) === null || _b === void 0 ? void 0 : _b.selectedMesh_)) {
+        if (basis.units === "cartesian" && ((_b = (_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) === null || _b === void 0 ? void 0 : _b.selectedMesh_)) {
             this.WaveComponent.wave.selectedMesh_.position.setComponent(axisIndex, floatValue);
             this.WaveComponent.wave.render();
         }
         this.handleStructureModified(newMaterial);
+    }
+    /**
+     * Updates only the local draft string for one coordinate field while it's focused - no
+     * commit, no history entry, no scene rebuild. Lets the field be cleared or start with "-"
+     * without the browser's number-input semantics dropping the keystroke (D18).
+     */
+    handleCoordinateDraftChange(axisIndex, value) {
+        this.setState((prevState) => {
+            const coordinateDrafts = [...prevState.coordinateDrafts];
+            coordinateDrafts[axisIndex] = value;
+            return { coordinateDrafts };
+        });
+    }
+    /**
+     * Commits the draft for one coordinate field (on blur/Enter) if it parses to a real number,
+     * then clears the draft so the field reverts to showing the committed value.
+     */
+    handleCoordinateCommit(axisIndex) {
+        const { coordinateDrafts } = this.state;
+        const draftValue = coordinateDrafts[axisIndex];
+        if (draftValue !== null && draftValue !== "" && !Number.isNaN(parseFloat(draftValue))) {
+            this.handleCoordinateChange(axisIndex, draftValue);
+        }
+        this.setState((prevState) => {
+            const nextDrafts = [...prevState.coordinateDrafts];
+            nextDrafts[axisIndex] = null;
+            return { coordinateDrafts: nextDrafts };
+        });
+    }
+    /**
+     * Selection changes are a visual-only, wave-internal concern (highlight + gizmo, already
+     * handled inside the mixin) - the only reason React needs to know the index at all is to
+     * drive the coordinate panel/toolbar. Without the bypass guard, this setState triggers a
+     * WaveComponent re-render with a freshly cloned structure prop, which componentDidUpdate
+     * sees as "changed" and reloads/rebuilds the entire scene on every single click or hover-driven
+     * selection - orphaning an in-progress drag's mesh reference (D3) and making selection
+     * sluggish on larger structures (R17).
+     */
+    handleSelectionChanged(index) {
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.bypassReloadViewer = true;
+        }
+        this.setState({ selectedAtomIndex: index, coordinateDrafts: [null, null, null] }, () => {
+            var _a;
+            if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+                this.WaveComponent.wave.bypassReloadViewer = false;
+            }
+        });
     }
     handleSetTransformMode(mode) {
         var _a;
@@ -629,13 +750,44 @@ export class ThreeDEditor extends React.Component {
             this.WaveComponent.wave.setTransformMode(mode);
         }
     }
+    /**
+     * Places a new atom at the true center of the cell - (a+b+c)/2, the vector sum of the three
+     * lattice vectors halved - not the component-wise (ax/2, by/2, cz/2), which lands off-center
+     * or outside the cell entirely for non-orthogonal lattices (D22). If that position is
+     * already occupied (e.g. a second click with nothing else changed), nudges the candidate
+     * along the diagonal until it clears every existing atom by OCCUPIED_TOLERANCE, so repeated
+     * clicks don't silently stack coincident duplicates.
+     */
     handleAddAtom() {
         var _a, _b;
         const { material } = this.state;
+        const { editSessionOptions } = this.props;
         if (!((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) || !((_b = material === null || material === void 0 ? void 0 : material.Lattice) === null || _b === void 0 ? void 0 : _b.unitCell))
             return;
-        const { ax = 0, by = 0, cz = 0 } = material.Lattice.unitCell;
-        this.WaveComponent.wave.addAtom("Si", [ax / 2, by / 2, cz / 2]);
+        const { ax = 0, ay = 0, az = 0, bx = 0, by = 0, bz = 0, cx = 0, cy = 0, cz = 0, } = material.Lattice.unitCell;
+        const trueCenter = [(ax + bx + cx) / 2, (ay + by + cy) / 2, (az + bz + cz) / 2];
+        const basis = material.Basis;
+        basis.toCartesian();
+        const existingPositions = basis.coordinatesAsArray;
+        const OCCUPIED_TOLERANCE = 0.5; // Å; below any realistic bond length
+        const OFFSET_STEP = [0.3, 0.3, 0.3];
+        const MAX_OFFSET_ATTEMPTS = 10;
+        const isOccupied = (position) => existingPositions.some((existing) => {
+            const dx = existing[0] - position[0];
+            const dy = existing[1] - position[1];
+            const dz = existing[2] - position[2];
+            return Math.sqrt(dx * dx + dy * dy + dz * dz) < OCCUPIED_TOLERANCE;
+        });
+        const candidate = [...trueCenter];
+        let attempts = 0;
+        while (isOccupied(candidate) && attempts < MAX_OFFSET_ATTEMPTS) {
+            attempts += 1;
+            for (let axis = 0; axis < 3; axis += 1) {
+                candidate[axis] = trueCenter[axis] + OFFSET_STEP[axis] * attempts;
+            }
+        }
+        const element = (editSessionOptions === null || editSessionOptions === void 0 ? void 0 : editSessionOptions.defaultElement) || "Si";
+        this.WaveComponent.wave.addAtom(element, candidate);
     }
     handleRemoveSelectedAtom() {
         var _a;
@@ -689,6 +841,18 @@ export class ThreeDEditor extends React.Component {
         this.WaveComponent.wave.toggleMeasurementByType(measurementMode, this.handleSetMeasurementSettingsForTypeInState);
         const newMeasurementsSettings = this.WaveComponent.wave.getMeasurementsSettings();
         this.setState({ measurementsSettings: newMeasurementsSettings });
+        // Mirror of the edit-mode-entry guard in handleToggleEditMode (D20): activating a
+        // measurement mode force-exits edit mode.
+        const { isEditModeActive } = this.state;
+        const measurementsSettingsHandler = new MeasurementSettingsHandler(newMeasurementsSettings);
+        const isAnyMeasurementActive = [
+            MEASUREMENT_MODES.DISTANCE,
+            MEASUREMENT_MODES.ANGLE,
+            MEASUREMENT_MODES.COORDINATE,
+        ].some((mode) => measurementsSettingsHandler.isMeasurementActiveByType(mode));
+        if (isAnyMeasurementActive && isEditModeActive) {
+            this.handleToggleEditMode();
+        }
     }
     handleSetMaterial(newMaterialConfig) {
         const { material } = this.state;
@@ -727,7 +891,7 @@ export class ThreeDEditor extends React.Component {
             }, triggerHandleResize: viewerTriggerResize, isConventionalCellShown: isConventionalCellShown, isDrawBondsEnabled: isDrawBondsEnabled, isViewAdjustable: viewerSettings.isViewAdjustable, structure: materialCopy, boundaryConditions: boundaryConditions, cell: materialCopy.Lattice.unitCell, name: materialCopy.name, settings: {
                 ...viewerSettings,
                 onStructureModified: this.handleStructureModified,
-                onSelectionChanged: (index) => this.setState({ selectedAtomIndex: index }),
+                onSelectionChanged: this.handleSelectionChanged,
             } }));
     }
     // TODO: move in the toolbar component when it's created
@@ -797,9 +961,11 @@ export class ThreeDEditor extends React.Component {
     }
     renderEditToolbar() {
         var _a, _b;
-        const { activeTransformMode, historyStack, historyPointer, selectedAtomIndex, material } = this.state;
-        const hasUndo = historyPointer > 0;
-        const hasRedo = historyPointer < historyStack.length - 1;
+        const { activeTransformMode, selectedAtomIndex, material, coordinateDrafts } = this.state;
+        const { editSessionOptions } = this.props;
+        const hasUndo = this.canUndo();
+        const hasRedo = this.canRedo();
+        const defaultElement = (editSessionOptions === null || editSessionOptions === void 0 ? void 0 : editSessionOptions.defaultElement) || "Si";
         let selectedCoordinates = [0, 0, 0];
         let selectedElement = "";
         if (selectedAtomIndex !== null && ((_a = material === null || material === void 0 ? void 0 : material.basis) === null || _a === void 0 ? void 0 : _a.coordinates)) {
@@ -815,15 +981,28 @@ export class ThreeDEditor extends React.Component {
                         : (elementObj === null || elementObj === void 0 ? void 0 : elementObj.value) || (elementObj === null || elementObj === void 0 ? void 0 : elementObj.element) || "";
             }
         }
-        return (_jsx(Paper, { elevation: 2, sx: { position: "absolute", top: "1em", right: "1em", boxShadow: 4 }, children: _jsxs(Stack, { alignItems: "center", spacing: 1, padding: 1, divider: _jsx(Divider, { flexItem: true, sx: { width: "80%", alignSelf: "center" } }), children: [_jsx(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: _jsx(SquareIconButton, { title: "Translate Mode", onClick: () => this.handleSetTransformMode("translate"), children: _jsx(OpenWith, { color: activeTransformMode === "translate" ? "primary" : "inherit" }) }) }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Add Atom (Si)", onClick: this.handleAddAtom, children: _jsx(AddCircleOutline, {}) }), _jsx(SquareIconButton, { title: "Delete Selected Atom", disabled: selectedAtomIndex === null, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndex !== null && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(Typography, { variant: "caption", fontWeight: "bold", children: selectedElement || "Si" }), _jsx(Typography, { variant: "caption", color: "text.secondary", sx: { mt: -1 }, children: ((_b = material === null || material === void 0 ? void 0 : material.basis) === null || _b === void 0 ? void 0 : _b.units) === "cartesian"
+        return (_jsx(Paper, { elevation: 2, sx: { position: "absolute", top: "1em", right: "1em", boxShadow: 4 }, children: _jsxs(Stack, { alignItems: "center", spacing: 1, padding: 1, divider: _jsx(Divider, { flexItem: true, sx: { width: "80%", alignSelf: "center" } }), children: [_jsx(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: _jsx(SquareIconButton, { title: "Translate Mode", onClick: () => this.handleSetTransformMode("translate"), children: _jsx(OpenWith, { color: activeTransformMode === "translate" ? "primary" : "inherit" }) }) }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: `Add Atom (${defaultElement})`, onClick: this.handleAddAtom, children: _jsx(AddCircleOutline, {}) }), _jsx(SquareIconButton, { title: "Delete Selected Atom", disabled: selectedAtomIndex === null, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndex !== null && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(Typography, { variant: "caption", fontWeight: "bold", children: selectedElement || "Si" }), _jsx(Typography, { variant: "caption", color: "text.secondary", sx: { mt: -1 }, children: ((_b = material === null || material === void 0 ? void 0 : material.basis) === null || _b === void 0 ? void 0 : _b.units) === "cartesian"
                                     ? "cartesian, Å"
-                                    : "crystal" }), ["X", "Y", "Z"].map((axisName, idx) => (_jsx(TextField, { label: axisName, size: "small", type: "number", className: "inverse stepper", value: selectedCoordinates[idx] !== undefined
-                                    ? parseFloat(selectedCoordinates[idx].toFixed(3))
-                                    : 0, onChange: (event) => this.handleCoordinateChange(idx, event.target.value), inputProps: { step: 0.01 } }, axisName)))] }))] }) }));
+                                    : "crystal" }), ["X", "Y", "Z"].map((axisName, idx) => {
+                                const draftValue = coordinateDrafts[idx];
+                                const committedValue = selectedCoordinates[idx] !== undefined
+                                    ? selectedCoordinates[idx].toFixed(3)
+                                    : "0";
+                                return (_jsx(TextField, { label: axisName, size: "small", 
+                                    // type="text" (not "number"): a native number input
+                                    // silently drops a lone "-" or an empty string instead
+                                    // of firing onChange, which makes typing a negative
+                                    // coordinate or clearing the field to retype impossible
+                                    // (D18).
+                                    type: "text", inputMode: "decimal", className: "inverse stepper", value: draftValue !== null ? draftValue : committedValue, onChange: (event) => this.handleCoordinateDraftChange(idx, event.target.value), onBlur: () => this.handleCoordinateCommit(idx), onKeyDown: (event) => {
+                                        if (event.key === "Enter")
+                                            event.target.blur();
+                                    } }, axisName));
+                            })] }))] }) }));
     }
     renderWaveOrThreejsEditorModal() {
         const { isInteractive, isEditModeActive } = this.state;
-        return (_jsxs("div", { className: "wave-component-holder", style: { position: "relative", height: "100%" }, children: [this.renderCoverDiv(), _jsx(IconsToolbar, { toolbarConfig: this.getToolbarConfig(), isInteractive: isInteractive, handleToggleInteractive: this.handleToggleInteractive }), this.renderWaveComponent(), isEditModeActive && this.renderEditToolbar()] }));
+        return (_jsxs("div", { className: "wave-component-holder", style: { position: "relative", height: "100%" }, children: [this.renderCoverDiv(), _jsx(IconsToolbar, { toolbarConfig: this.getToolbarConfig(), isInteractive: isInteractive, handleToggleInteractive: this.handleToggleInteractive }), this.renderWaveComponent(), isInteractive && isEditModeActive && this.renderEditToolbar()] }));
     }
     render() {
         const { isStandalone } = this.props;
@@ -836,15 +1015,22 @@ ThreeDEditor.propTypes = {
     isConventionalCellShown: PropTypes.bool, // eslint-disable-next-line react/forbid-prop-types
     boundaryConditions: PropTypes.object,
     onUpdate: PropTypes.func,
+    // Fires whenever edit mode is toggled on/off, so a host can disable conflicting UI.
+    onEditModeChanged: PropTypes.func,
     isStandalone: PropTypes.bool,
     // eslint-disable-next-line react/forbid-prop-types
     initialViewSettings: PropTypes.object,
+    // Per-session editing defaults, e.g. { defaultElement: "Si" } for the Add Atom button.
+    // eslint-disable-next-line react/forbid-prop-types
+    editSessionOptions: PropTypes.object,
 };
 ThreeDEditor.defaultProps = {
     boundaryConditions: {},
     isConventionalCellShown: false,
     onUpdate: undefined,
+    onEditModeChanged: undefined,
     editable: false,
     isStandalone: false,
     initialViewSettings: {},
+    editSessionOptions: {},
 };

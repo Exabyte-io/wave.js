@@ -72,10 +72,25 @@ class WaveBase {
         this.renderer.domElement.style.height = "100%";
         this.container.appendChild(this.renderer.domElement);
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
-        // TODO: detach listener on exit
-        window.addEventListener("resize", () => {
-            this.handleResize();
-        }, false);
+        // Observes the container itself (not the window) so resizing works correctly when the
+        // container's size changes for reasons other than a window resize (e.g. a layout panel
+        // opening/closing) - disconnected in dispose() to avoid leaking across reset/re-init.
+        this._resizeObserver = new ResizeObserver(() => this.handleResize());
+        this._resizeObserver.observe(this.container);
+    }
+    /**
+     * Releases the renderer/WebGL context and the resize observer. Must be called before
+     * discarding a Wave instance (e.g. on component unmount or before constructing a
+     * replacement instance for the same container), otherwise both leak.
+     */
+    dispose() {
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+            this._resizeObserver = null;
+        }
+        if (this.renderer) {
+            this.renderer.dispose();
+        }
     }
     /**
      * Adds a camera with given type and args to the scene.
