@@ -614,10 +614,15 @@ export class ThreeDEditor extends React.Component {
         if (coordinateArrays[selectedAtomIndex]) {
             coordinateArrays[selectedAtomIndex][axisIndex] = floatValue;
         }
+        // Only one axis of an already-existing coordinate is changing here, so the edited
+        // array must stay labeled with whatever units the material already uses (typically
+        // "crystal"/fractional by default) - hardcoding "cartesian" would silently reinterpret
+        // every atom's fractional position as if it were in Angstroms.
+        const { units } = material.basis;
         const newBasis = Made.Basis.fromElementsAndCoordinates({
             elements,
             coordinates: coordinateArrays,
-            units: "cartesian",
+            units,
             cell: material.Lattice,
         });
         const newMaterial = new Made.Material({
@@ -625,8 +630,11 @@ export class ThreeDEditor extends React.Component {
             lattice: material.Lattice.toJSON(),
             basis: newBasis.toJSON(),
         });
-        // Fast in-place scene update for immediate visual feedback before state propagates
-        if ((_b = (_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) === null || _b === void 0 ? void 0 : _b.selectedMesh_) {
+        // Fast in-place scene update for immediate visual feedback before state propagates.
+        // Three.js mesh positions are always Cartesian, so this only makes sense when the
+        // material's own coordinates are too; for crystal-unit materials, skip straight to the
+        // full rebuild below rather than briefly snapping the mesh to the wrong (fractional) spot.
+        if (units === "cartesian" && ((_b = (_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) === null || _b === void 0 ? void 0 : _b.selectedMesh_)) {
             this.WaveComponent.wave.selectedMesh_.position.setComponent(axisIndex, floatValue);
             this.WaveComponent.wave.render();
         }
@@ -804,7 +812,7 @@ export class ThreeDEditor extends React.Component {
         console.log("Recorded gif");
     }
     renderEditToolbar() {
-        var _a;
+        var _a, _b;
         const { activeTransformMode, historyStack, historyPointer, selectedAtomIndex, material } = this.state;
         const hasUndo = historyPointer > 0;
         const hasRedo = historyPointer < historyStack.length - 1;
@@ -823,7 +831,9 @@ export class ThreeDEditor extends React.Component {
                         : (elementObj === null || elementObj === void 0 ? void 0 : elementObj.value) || (elementObj === null || elementObj === void 0 ? void 0 : elementObj.element) || "";
             }
         }
-        return (_jsx(Paper, { elevation: 2, sx: { position: "absolute", top: "1em", right: "1em", boxShadow: 4 }, children: _jsxs(Stack, { alignItems: "center", spacing: 1, padding: 1, divider: _jsx(Divider, { flexItem: true, sx: { width: "80%", alignSelf: "center" } }), children: [_jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Translate Mode", onClick: () => this.handleSetTransformMode("translate"), children: _jsx(OpenWith, { color: activeTransformMode === "translate" ? "primary" : "inherit" }) }), _jsx(SquareIconButton, { title: "Rotate Mode", onClick: () => this.handleSetTransformMode("rotate"), children: _jsx(RotateRight, { color: activeTransformMode === "rotate" ? "primary" : "inherit" }) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Add Atom (Si)", onClick: this.handleAddAtom, children: _jsx(AddCircleOutline, {}) }), _jsx(SquareIconButton, { title: "Delete Selected Atom", disabled: selectedAtomIndex === null, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndex !== null && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(Typography, { variant: "caption", fontWeight: "bold", children: selectedElement || "Si" }), ["X", "Y", "Z"].map((axisName, idx) => (_jsx(TextField, { label: axisName, size: "small", type: "number", className: "inverse stepper", value: selectedCoordinates[idx] !== undefined
+        return (_jsx(Paper, { elevation: 2, sx: { position: "absolute", top: "1em", right: "1em", boxShadow: 4 }, children: _jsxs(Stack, { alignItems: "center", spacing: 1, padding: 1, divider: _jsx(Divider, { flexItem: true, sx: { width: "80%", alignSelf: "center" } }), children: [_jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Translate Mode", onClick: () => this.handleSetTransformMode("translate"), children: _jsx(OpenWith, { color: activeTransformMode === "translate" ? "primary" : "inherit" }) }), _jsx(SquareIconButton, { title: "Rotate Mode", onClick: () => this.handleSetTransformMode("rotate"), children: _jsx(RotateRight, { color: activeTransformMode === "rotate" ? "primary" : "inherit" }) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Add Atom (Si)", onClick: this.handleAddAtom, children: _jsx(AddCircleOutline, {}) }), _jsx(SquareIconButton, { title: "Delete Selected Atom", disabled: selectedAtomIndex === null, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndex !== null && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(Typography, { variant: "caption", fontWeight: "bold", children: selectedElement || "Si" }), _jsx(Typography, { variant: "caption", color: "text.secondary", sx: { mt: -1 }, children: ((_b = material === null || material === void 0 ? void 0 : material.basis) === null || _b === void 0 ? void 0 : _b.units) === "cartesian"
+                                    ? "cartesian, Å"
+                                    : "crystal" }), ["X", "Y", "Z"].map((axisName, idx) => (_jsx(TextField, { label: axisName, size: "small", type: "number", className: "inverse stepper", value: selectedCoordinates[idx] !== undefined
                                     ? parseFloat(selectedCoordinates[idx].toFixed(3))
                                     : 0, onChange: (event) => this.handleCoordinateChange(idx, event.target.value), inputProps: { step: 0.01 } }, axisName)))] }))] }) }));
     }

@@ -1,6 +1,8 @@
+import { Made } from "@mat3ra/made";
 import expect from "expect";
 
-import { getWaveInstance } from "../../enums";
+import { getWaveInstance, MATERIAL_CONFIG } from "../../enums";
+import { getEventObjectBy3DPosition } from "../../utils";
 
 describe("Interactive structure editor functionality tests", () => {
     test("Default state - edit mode disabled", () => {
@@ -64,6 +66,36 @@ describe("Interactive structure editor functionality tests", () => {
         });
     });
 
+    test("Adding an atom does not corrupt pre-existing atoms' units", () => {
+        // MATERIAL_CONFIG's basis is in crystal (fractional) units; getModifiedMaterial()
+        // normalizes to crystal internally, so building the post-add basis must convert back
+        // to Cartesian rather than relabeling the still-fractional values as "cartesian".
+        const referenceBasis = new Made.Material(MATERIAL_CONFIG).Basis;
+        referenceBasis.toCartesian();
+        const [, expectedCartesian] = referenceBasis.coordinatesAsArray;
+
+        let callbackMaterial = null;
+        const wave = getWaveInstance({
+            onStructureModified: (material) => {
+                callbackMaterial = material;
+            },
+        });
+
+        wave.addAtom("Si", [0, 0, 0]);
+
+        const [, updatedCoordinate] = callbackMaterial.basis.coordinates;
+        const value = Array.isArray(updatedCoordinate)
+            ? updatedCoordinate
+            : updatedCoordinate.value;
+
+        // The pre-existing atom (originally at crystal [0.25, 0.25, 0.25]) must match its real
+        // Cartesian position, not the raw fractional value reinterpreted as Angstroms.
+        value.forEach((component, idx) => {
+            expect(component).toBeCloseTo(expectedCartesian[idx], 3);
+        });
+        expect(value).not.toEqual([0.25, 0.25, 0.25]);
+    });
+
     test("Removing a selected atom mesh from structure group", () => {
         let callbackFired = false;
         let callbackMaterial = null;
@@ -108,6 +140,99 @@ describe("Interactive structure editor functionality tests", () => {
         expect(wave.selectedMesh_).not.toBe(firstAtom);
         expect(wave.selectedMesh_.userData.atomicIndex).toBe(0);
         expect(wave.transformControls_.object).toBe(wave.selectedMesh_);
+    });
+
+    test("Click-and-drag directly on an atom (not the gizmo) moves it and reports the change", () => {
+        let callbackMaterial = null;
+        let selectedIndex = null;
+
+        const wave = getWaveInstance({
+            onStructureModified: (material) => {
+                callbackMaterial = material;
+            },
+            onSelectionChanged: (index) => {
+                selectedIndex = index;
+            },
+        });
+        wave.enableEditMode(true);
+
+        // jsdom performs no layout, so getBoundingClientRect() would report a zero-size rect;
+        // stub it to match the canvas' real drawing-buffer size so the raycasting math behaves
+        // the way it would in a real browser.
+        const canvas = wave.renderer.domElement;
+        canvas.getBoundingClientRect = () => ({
+            left: 0,
+            top: 0,
+            width: canvas.width,
+            height: canvas.height,
+        });
+
+        const [firstAtom] = wave.collectAllAtoms();
+        const startEvent = getEventObjectBy3DPosition(firstAtom.position, wave.camera, canvas);
+        const startPosition = firstAtom.position.clone();
+
+        wave.handlePointerDownCapture_({
+            clientX: startEvent.layerX,
+            clientY: startEvent.layerY,
+        });
+        expect(wave.pendingDragAtom_).toBe(firstAtom);
+        expect(wave.isDraggingAtom_).toBe(false);
+
+        // A few pixels of movement should not yet commit to a drag (matches the click-vs-drag
+        // threshold used elsewhere for plain selection clicks).
+        wave.handlePointerMoveCapture_({
+            clientX: startEvent.layerX + 2,
+            clientY: startEvent.layerY,
+        });
+        expect(wave.isDraggingAtom_).toBe(false);
+
+        // Crossing the threshold commits to the drag: the offset between the cursor and the
+        // atom's position is captured on this event, so the atom doesn't jump yet - it tracks
+        // the cursor smoothly from here on, same as any offset-based drag implementation.
+        wave.handlePointerMoveCapture_({
+            clientX: startEvent.layerX + 40,
+            clientY: startEvent.layerY,
+        });
+        expect(wave.isDraggingAtom_).toBe(true);
+        expect(selectedIndex).toBe(firstAtom.userData.atomicIndex);
+        expect(wave.transformControls_.object).toBe(firstAtom);
+
+        // Further movement should now visibly move the atom.
+        wave.handlePointerMoveCapture_({
+            clientX: startEvent.layerX + 80,
+            clientY: startEvent.layerY,
+        });
+        expect(firstAtom.position.equals(startPosition)).toBe(false);
+
+        wave.handlePointerUpCapture_({
+            clientX: startEvent.layerX + 40,
+            clientY: startEvent.layerY,
+        });
+        expect(wave.isDraggingAtom_).toBe(false);
+        expect(wave.pendingDragAtom_).toBeNull();
+        expect(callbackMaterial).not.toBeNull();
+    });
+
+    test("A plain click on an atom does not trigger a drag", () => {
+        const wave = getWaveInstance({});
+        wave.enableEditMode(true);
+
+        const canvas = wave.renderer.domElement;
+        canvas.getBoundingClientRect = () => ({
+            left: 0,
+            top: 0,
+            width: canvas.width,
+            height: canvas.height,
+        });
+
+        const [firstAtom] = wave.collectAllAtoms();
+        const clickEvent = getEventObjectBy3DPosition(firstAtom.position, wave.camera, canvas);
+
+        wave.handlePointerDownCapture_({ clientX: clickEvent.layerX, clientY: clickEvent.layerY });
+        wave.handlePointerUpCapture_({ clientX: clickEvent.layerX, clientY: clickEvent.layerY });
+
+        expect(wave.isDraggingAtom_).toBe(false);
+        expect(wave.selectedMesh_).toBe(firstAtom);
     });
 
     test("Selection is dropped on rebuild once the atom no longer exists", () => {

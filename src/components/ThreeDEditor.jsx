@@ -485,10 +485,16 @@ export class ThreeDEditor extends React.Component {
             coordinateArrays[selectedAtomIndex][axisIndex] = floatValue;
         }
 
+        // Only one axis of an already-existing coordinate is changing here, so the edited
+        // array must stay labeled with whatever units the material already uses (typically
+        // "crystal"/fractional by default) - hardcoding "cartesian" would silently reinterpret
+        // every atom's fractional position as if it were in Angstroms.
+        const { units } = material.basis;
+
         const newBasis = Made.Basis.fromElementsAndCoordinates({
             elements,
             coordinates: coordinateArrays,
-            units: "cartesian",
+            units,
             cell: material.Lattice,
         });
 
@@ -498,8 +504,11 @@ export class ThreeDEditor extends React.Component {
             basis: newBasis.toJSON(),
         });
 
-        // Fast in-place scene update for immediate visual feedback before state propagates
-        if (this.WaveComponent?.wave?.selectedMesh_) {
+        // Fast in-place scene update for immediate visual feedback before state propagates.
+        // Three.js mesh positions are always Cartesian, so this only makes sense when the
+        // material's own coordinates are too; for crystal-unit materials, skip straight to the
+        // full rebuild below rather than briefly snapping the mesh to the wrong (fractional) spot.
+        if (units === "cartesian" && this.WaveComponent?.wave?.selectedMesh_) {
             this.WaveComponent.wave.selectedMesh_.position.setComponent(axisIndex, floatValue);
             this.WaveComponent.wave.render();
         }
@@ -1042,6 +1051,11 @@ export class ThreeDEditor extends React.Component {
                         <Stack spacing={1} alignItems="center" sx={{ width: "84px" }}>
                             <Typography variant="caption" fontWeight="bold">
                                 {selectedElement || "Si"}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: -1 }}>
+                                {material?.basis?.units === "cartesian"
+                                    ? "cartesian, Å"
+                                    : "crystal"}
                             </Typography>
                             {["X", "Y", "Z"].map((axisName, idx) => (
                                 <TextField
