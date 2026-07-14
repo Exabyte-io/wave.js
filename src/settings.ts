@@ -156,6 +156,7 @@ export default {
         toggleAnglesShown: "a",
         toggleCopyCoordinatesShown: "c",
         deleteConnection: "x",
+        toggleEditMode: "t",
     },
 
     measurementLabelsConfig: {

@@ -15,6 +15,8 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
     class extends superclass {
         transformControls_: TransformControls | null;
 
+        transformDragStartPosition_: THREE.Vector3 | null;
+
         raycaster_: THREE.Raycaster | null;
 
         pointer_: THREE.Vector2 | null;
@@ -43,6 +45,7 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
             super(config);
 
             this.transformControls_ = null;
+            this.transformDragStartPosition_ = null;
             this.raycaster_ = null;
             this.pointer_ = null;
             this.selectedMesh_ = null;
@@ -90,10 +93,29 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
                 if (this.orbitControls) {
                     this.orbitControls.enabled = !event.value;
                 }
+                // Snapshot the object's position when a drag starts so mouseUp can tell whether
+                // the gizmo actually moved anything (a zero-movement click-release must not commit).
+                if (event.value) {
+                    this.transformDragStartPosition_ =
+                        this.transformControls_?.object?.position.clone() ?? null;
+                } else {
+                    this.transformDragStartPosition_ = null;
+                }
             });
 
             // Rerender scene and trigger callbacks when the drag operation completes
             this.transformControls_.addEventListener("mouseUp", () => {
+                const draggedObject = this.transformControls_?.object;
+                const startPosition = this.transformDragStartPosition_;
+                const hasMoved =
+                    !!draggedObject &&
+                    !!startPosition &&
+                    draggedObject.position.distanceTo(startPosition) > 1e-6;
+
+                if (!hasMoved) {
+                    return;
+                }
+
                 // Extract modified material first before notifying parent components
                 const modifiedMaterial = this.getModifiedMaterial();
                 if (this.settings.onStructureModified) {

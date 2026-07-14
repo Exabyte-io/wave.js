@@ -57,10 +57,13 @@ export class WaveComponent extends React.Component {
     shouldViewerAdjust(prevProps) {
         const { cell } = this.props;
         const { cell: prevCell } = prevProps;
+        const EPSILON = 1e-5; // Å; well below any physically meaningful lattice difference
 
-        if (JSON.stringify(cell) !== JSON.stringify(prevCell)) return true;
+        if (cell.units !== prevCell.units) return true;
 
-        return false;
+        return ["ax", "ay", "az", "bx", "by", "bz", "cx", "cy", "cz"].some(
+            (key) => Math.abs((cell[key] ?? 0) - (prevCell[key] ?? 0)) > EPSILON,
+        );
     }
 
     _cleanViewer() {

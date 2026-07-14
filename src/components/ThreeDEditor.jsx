@@ -25,7 +25,6 @@ import PictureInPicture from "@mui/icons-material/PictureInPicture";
 import Redo from "@mui/icons-material/Redo";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
-import RotateRight from "@mui/icons-material/RotateRight";
 import Settings from "@mui/icons-material/Settings";
 import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
@@ -153,13 +152,11 @@ export class ThreeDEditor extends React.Component {
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
-        this.handleMessage = this.handleMessage.bind(this);
         this.handleSetMaterial = this.handleSetMaterial.bind(this);
     }
 
     componentDidMount() {
         this.addHotKeyListener();
-        window.addEventListener("message", this.handleMessage);
         this._applyInitialToggleSettings();
     }
 
@@ -194,7 +191,6 @@ export class ThreeDEditor extends React.Component {
 
     componentWillUnmount() {
         this.removeHotKeyListener();
-        window.removeEventListener("message", this.handleMessage);
     }
 
     // TODO: update component to fully controlled or fully uncontrolled with a key?
@@ -242,7 +238,7 @@ export class ThreeDEditor extends React.Component {
             [settings.hotKeysConfig.toggleElementLabels]: this.handleToggleElementLabels,
             [settings.hotKeysConfig.toggleCoordinateLabels]: this.handleToggleCoordinateLabels,
             [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
-            [settings.hotKeysConfig.toggleThreejsEditorModal]: this.handleToggleEditMode,
+            [settings.hotKeysConfig.toggleEditMode]: this.handleToggleEditMode,
             [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleMeasurement.bind(
                 this,
                 MEASUREMENT_MODES.DISTANCE,
@@ -276,10 +272,10 @@ export class ThreeDEditor extends React.Component {
             return;
         }
 
-        // Removing the toggleThreejsEditorModal key from the keyConfig if the editor is not editable
+        // Removing the toggleEditMode key from the keyConfig if the editor is not editable
         const keyConfigAdjusted = { ...this.getKeyConfig() };
         if (!editable) {
-            delete keyConfigAdjusted[settings.hotKeysConfig.toggleThreejsEditorModal];
+            delete keyConfigAdjusted[settings.hotKeysConfig.toggleEditMode];
         }
 
         const handler = keyConfigAdjusted[e.key.toLowerCase()];
@@ -289,7 +285,7 @@ export class ThreeDEditor extends React.Component {
     };
 
     removeHotKeyListener() {
-        document.removeEventListener("keypress", this.handleKeyPress);
+        document.removeEventListener("keypress", this.handleKeyPress, true);
     }
 
     handleCellRepetitionsChange(e) {
@@ -614,19 +610,6 @@ export class ThreeDEditor extends React.Component {
         );
     }
 
-    handleMessage = (event) => {
-        try {
-            if (event.data && event.data.action && this[event.data.action]) {
-                const { action, parameters } = event.data;
-                this[action](...parameters);
-            } else {
-                console.warn("Unknown message received", event.data);
-            }
-        } catch (error) {
-            console.error("Error handling message", error);
-        }
-    };
-
     /**
      * Returns a cover div to cover the area and prevent user interaction with component
      */
@@ -947,7 +930,9 @@ export class ThreeDEditor extends React.Component {
         if (editable) {
             toolbarConfig.splice(4, 0, {
                 id: "3DEdit",
-                title: isEditModeActive ? "Exit Edit" : "Edit [E]",
+                title: isEditModeActive
+                    ? "Exit Edit"
+                    : `Edit [${settings.hotKeysConfig.toggleEditMode.toUpperCase()}]`,
                 leftIcon: <Edit color={isEditModeActive ? "primary" : "inherit"} />,
                 onClick: this.handleToggleEditMode,
             });
@@ -1005,14 +990,6 @@ export class ThreeDEditor extends React.Component {
                         >
                             <OpenWith
                                 color={activeTransformMode === "translate" ? "primary" : "inherit"}
-                            />
-                        </SquareIconButton>
-                        <SquareIconButton
-                            title="Rotate Mode"
-                            onClick={() => this.handleSetTransformMode("rotate")}
-                        >
-                            <RotateRight
-                                color={activeTransformMode === "rotate" ? "primary" : "inherit"}
                             />
                         </SquareIconButton>
                     </ButtonGroup>

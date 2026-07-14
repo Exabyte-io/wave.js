@@ -6,6 +6,7 @@ import React from "react";
 
 import { ThreeDEditor } from "../../../src/components/ThreeDEditor";
 import { WaveComponent } from "../../../src/components/WaveComponent";
+import settings from "../../../src/settings";
 import { ELEMENT_PROPERTIES, getWaveInstance, MATERIAL_CONFIG, WAVE_SETTINGS } from "../../enums";
 import { SELECTORS } from "../../selectors";
 import { createElement, takeSnapshotAndAssertEqualityAsync } from "../../utils";
@@ -98,4 +99,55 @@ test("preserve three.js editor changes", async () => {
         waveInstance.renderer.getContext(),
         "preserveThreeJsEditorChanges",
     );
+});
+
+test("edit-mode hotkey from settings toggles edit mode", () => {
+    const container = createElement("div", ELEMENT_PROPERTIES);
+    // The document-level, capture-phase hotkey listener only fires for events whose
+    // propagation path passes through `document`, so the container must be attached.
+    document.body.appendChild(container);
+    const wrapper = mount(<ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />, {
+        attachTo: container,
+    });
+
+    try {
+        // Enable interactive mode so hotkeys are processed
+        const interactiveButton = wrapper.find(`${SELECTORS.interactiveIconToolbar} button`);
+        interactiveButton.prop("onClick")();
+        wrapper.update();
+
+        expect(wrapper.state("isEditModeActive")).toBe(false);
+
+        container.dispatchEvent(
+            new KeyboardEvent("keypress", {
+                key: settings.hotKeysConfig.toggleEditMode,
+                bubbles: true,
+            }),
+        );
+        wrapper.update();
+
+        expect(wrapper.state("isEditModeActive")).toBe(true);
+    } finally {
+        document.body.removeChild(container);
+    }
+});
+
+test("ignores window postMessage events", () => {
+    const container = createElement("div", ELEMENT_PROPERTIES);
+    const wrapper = mount(<ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />, {
+        attachTo: container,
+    });
+
+    const handleSetMaterialSpy = jest.spyOn(wrapper.instance(), "handleSetMaterial");
+
+    window.dispatchEvent(
+        new MessageEvent("message", {
+            data: {
+                action: "handleSetMaterial",
+                parameters: [MATERIAL_CONFIG],
+            },
+        }),
+    );
+
+    expect(handleSetMaterialSpy).not.toHaveBeenCalled();
 });

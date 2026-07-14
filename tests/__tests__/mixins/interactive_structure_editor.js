@@ -247,4 +247,42 @@ describe("Interactive structure editor functionality tests", () => {
         expect(wave.selectedMesh_).toBeNull();
         expect(wave.transformControls_.object).toBeUndefined();
     });
+
+    test("no structure-modified event without a transform delta", () => {
+        let callbackFired = false;
+        const wave = getWaveInstance({
+            onStructureModified: () => {
+                callbackFired = true;
+            },
+        });
+        wave.enableEditMode(true);
+
+        const [firstAtom] = wave.collectAllAtoms();
+        wave.setSelectedAtomMesh(firstAtom);
+
+        // Simulate grabbing a gizmo handle and releasing it without any net movement.
+        wave.transformControls_.dispatchEvent({ type: "dragging-changed", value: true });
+        wave.transformControls_.dispatchEvent({ type: "mouseUp" });
+
+        expect(callbackFired).toBe(false);
+    });
+
+    test("structure-modified event still fires when the gizmo actually moved the atom", () => {
+        let callbackFired = false;
+        const wave = getWaveInstance({
+            onStructureModified: () => {
+                callbackFired = true;
+            },
+        });
+        wave.enableEditMode(true);
+
+        const [firstAtom] = wave.collectAllAtoms();
+        wave.setSelectedAtomMesh(firstAtom);
+
+        wave.transformControls_.dispatchEvent({ type: "dragging-changed", value: true });
+        firstAtom.position.x += 1;
+        wave.transformControls_.dispatchEvent({ type: "mouseUp" });
+
+        expect(callbackFired).toBe(true);
+    });
 });

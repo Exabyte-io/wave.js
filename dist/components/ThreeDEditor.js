@@ -25,7 +25,6 @@ import PictureInPicture from "@mui/icons-material/PictureInPicture";
 import Redo from "@mui/icons-material/Redo";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
-import RotateRight from "@mui/icons-material/RotateRight";
 import Settings from "@mui/icons-material/Settings";
 import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
@@ -78,28 +77,14 @@ export class ThreeDEditor extends React.Component {
                 ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.nodeName)) {
                 return;
             }
-            // Removing the toggleThreejsEditorModal key from the keyConfig if the editor is not editable
+            // Removing the toggleEditMode key from the keyConfig if the editor is not editable
             const keyConfigAdjusted = { ...this.getKeyConfig() };
             if (!editable) {
-                delete keyConfigAdjusted[settings.hotKeysConfig.toggleThreejsEditorModal];
+                delete keyConfigAdjusted[settings.hotKeysConfig.toggleEditMode];
             }
             const handler = keyConfigAdjusted[e.key.toLowerCase()];
             if (handler) {
                 handler.call(this);
-            }
-        };
-        this.handleMessage = (event) => {
-            try {
-                if (event.data && event.data.action && this[event.data.action]) {
-                    const { action, parameters } = event.data;
-                    this[action](...parameters);
-                }
-                else {
-                    console.warn("Unknown message received", event.data);
-                }
-            }
-            catch (error) {
-                console.error("Error handling message", error);
             }
         };
         this.getViewSettingsActions = () => {
@@ -373,12 +358,10 @@ export class ThreeDEditor extends React.Component {
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
-        this.handleMessage = this.handleMessage.bind(this);
         this.handleSetMaterial = this.handleSetMaterial.bind(this);
     }
     componentDidMount() {
         this.addHotKeyListener();
-        window.addEventListener("message", this.handleMessage);
         this._applyInitialToggleSettings();
     }
     /**
@@ -412,7 +395,6 @@ export class ThreeDEditor extends React.Component {
     }
     componentWillUnmount() {
         this.removeHotKeyListener();
-        window.removeEventListener("message", this.handleMessage);
     }
     // TODO: update component to fully controlled or fully uncontrolled with a key?
     // https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
@@ -447,7 +429,7 @@ export class ThreeDEditor extends React.Component {
             [settings.hotKeysConfig.toggleElementLabels]: this.handleToggleElementLabels,
             [settings.hotKeysConfig.toggleCoordinateLabels]: this.handleToggleCoordinateLabels,
             [settings.hotKeysConfig.resetViewer]: this.handleResetViewer,
-            [settings.hotKeysConfig.toggleThreejsEditorModal]: this.handleToggleEditMode,
+            [settings.hotKeysConfig.toggleEditMode]: this.handleToggleEditMode,
             [settings.hotKeysConfig.toggleDistanceShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_MODES.DISTANCE),
             [settings.hotKeysConfig.toggleAnglesShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_MODES.ANGLE),
             [settings.hotKeysConfig.toggleCopyCoordinatesShown]: this.handleToggleMeasurement.bind(this, MEASUREMENT_MODES.COORDINATE),
@@ -458,7 +440,7 @@ export class ThreeDEditor extends React.Component {
         document.addEventListener("keypress", this.handleKeyPress, true);
     }
     removeHotKeyListener() {
-        document.removeEventListener("keypress", this.handleKeyPress);
+        document.removeEventListener("keypress", this.handleKeyPress, true);
     }
     handleCellRepetitionsChange(e) {
         this.handleSetSetting({ [e.target.id]: parseFloat($(e.target).val()) });
@@ -796,7 +778,9 @@ export class ThreeDEditor extends React.Component {
         if (editable) {
             toolbarConfig.splice(4, 0, {
                 id: "3DEdit",
-                title: isEditModeActive ? "Exit Edit" : "Edit [E]",
+                title: isEditModeActive
+                    ? "Exit Edit"
+                    : `Edit [${settings.hotKeysConfig.toggleEditMode.toUpperCase()}]`,
                 leftIcon: _jsx(Edit, { color: isEditModeActive ? "primary" : "inherit" }),
                 onClick: this.handleToggleEditMode,
             });
@@ -831,7 +815,7 @@ export class ThreeDEditor extends React.Component {
                         : (elementObj === null || elementObj === void 0 ? void 0 : elementObj.value) || (elementObj === null || elementObj === void 0 ? void 0 : elementObj.element) || "";
             }
         }
-        return (_jsx(Paper, { elevation: 2, sx: { position: "absolute", top: "1em", right: "1em", boxShadow: 4 }, children: _jsxs(Stack, { alignItems: "center", spacing: 1, padding: 1, divider: _jsx(Divider, { flexItem: true, sx: { width: "80%", alignSelf: "center" } }), children: [_jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Translate Mode", onClick: () => this.handleSetTransformMode("translate"), children: _jsx(OpenWith, { color: activeTransformMode === "translate" ? "primary" : "inherit" }) }), _jsx(SquareIconButton, { title: "Rotate Mode", onClick: () => this.handleSetTransformMode("rotate"), children: _jsx(RotateRight, { color: activeTransformMode === "rotate" ? "primary" : "inherit" }) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Add Atom (Si)", onClick: this.handleAddAtom, children: _jsx(AddCircleOutline, {}) }), _jsx(SquareIconButton, { title: "Delete Selected Atom", disabled: selectedAtomIndex === null, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndex !== null && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(Typography, { variant: "caption", fontWeight: "bold", children: selectedElement || "Si" }), _jsx(Typography, { variant: "caption", color: "text.secondary", sx: { mt: -1 }, children: ((_b = material === null || material === void 0 ? void 0 : material.basis) === null || _b === void 0 ? void 0 : _b.units) === "cartesian"
+        return (_jsx(Paper, { elevation: 2, sx: { position: "absolute", top: "1em", right: "1em", boxShadow: 4 }, children: _jsxs(Stack, { alignItems: "center", spacing: 1, padding: 1, divider: _jsx(Divider, { flexItem: true, sx: { width: "80%", alignSelf: "center" } }), children: [_jsx(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: _jsx(SquareIconButton, { title: "Translate Mode", onClick: () => this.handleSetTransformMode("translate"), children: _jsx(OpenWith, { color: activeTransformMode === "translate" ? "primary" : "inherit" }) }) }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Add Atom (Si)", onClick: this.handleAddAtom, children: _jsx(AddCircleOutline, {}) }), _jsx(SquareIconButton, { title: "Delete Selected Atom", disabled: selectedAtomIndex === null, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndex !== null && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(Typography, { variant: "caption", fontWeight: "bold", children: selectedElement || "Si" }), _jsx(Typography, { variant: "caption", color: "text.secondary", sx: { mt: -1 }, children: ((_b = material === null || material === void 0 ? void 0 : material.basis) === null || _b === void 0 ? void 0 : _b.units) === "cartesian"
                                     ? "cartesian, Å"
                                     : "crystal" }), ["X", "Y", "Z"].map((axisName, idx) => (_jsx(TextField, { label: axisName, size: "small", type: "number", className: "inverse stepper", value: selectedCoordinates[idx] !== undefined
                                     ? parseFloat(selectedCoordinates[idx].toFixed(3))
