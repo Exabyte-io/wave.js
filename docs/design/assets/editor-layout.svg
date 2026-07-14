@@ -1,0 +1,112 @@
+<svg viewBox="0 0 980 650" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <radialGradient id="atomGold" cx="0.35" cy="0.3" r="0.9">
+      <stop offset="0%" stop-color="#f9e0b8"/>
+      <stop offset="100%" stop-color="#c98d4b"/>
+    </radialGradient>
+    <marker id="arrowR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#e5534b"/>
+    </marker>
+    <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57ab5a"/>
+    </marker>
+    <marker id="arrowB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#539bf5"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="980" height="650" fill="#ffffff" stroke="#d0d7de" rx="10"/>
+  <text x="30" y="36" font-size="18" font-weight="600" fill="#24292f">In-viewer editor — layout (v1)</text>
+
+  <!-- Canvas -->
+  <rect x="30" y="56" width="920" height="440" rx="8" fill="#202020"/>
+
+  <!-- Left viewer toolbar -->
+  <g>
+    <rect x="46" y="72" width="44" height="272" rx="6" fill="#2b2b2b"/>
+    <rect x="52" y="80" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="68" y="101" font-size="13" fill="#c9d1d9" text-anchor="middle">⟳</text>
+    <rect x="52" y="118" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="68" y="139" font-size="12" fill="#c9d1d9" text-anchor="middle">⚛</text>
+    <rect x="52" y="156" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="68" y="177" font-size="12" fill="#c9d1d9" text-anchor="middle">B</text>
+    <rect x="52" y="194" width="32" height="32" rx="5" fill="#0969da" stroke="#54aeff"/>
+    <text x="68" y="215" font-size="12" fill="#ffffff" text-anchor="middle" font-weight="700">E</text>
+    <rect x="52" y="232" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="68" y="253" font-size="12" fill="#c9d1d9" text-anchor="middle">L</text>
+    <rect x="52" y="270" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="68" y="291" font-size="12" fill="#c9d1d9" text-anchor="middle">📏</text>
+    <rect x="52" y="308" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="68" y="329" font-size="12" fill="#c9d1d9" text-anchor="middle">⚙</text>
+  </g>
+
+  <!-- Unit cell wireframe -->
+  <g stroke="#8b949e" stroke-width="1.2" fill="none" opacity="0.9">
+    <polygon points="330,140 600,170 580,430 310,400"/>
+    <polygon points="390,110 660,140 640,400 370,370" opacity="0.55"/>
+    <line x1="330" y1="140" x2="390" y2="110"/>
+    <line x1="600" y1="170" x2="660" y2="140"/>
+    <line x1="580" y1="430" x2="640" y2="400"/>
+    <line x1="310" y1="400" x2="370" y2="370"/>
+  </g>
+
+  <!-- Atom 1 (unselected) -->
+  <circle cx="410" cy="360" r="26" fill="url(#atomGold)"/>
+
+  <!-- Atom 2 (selected, gizmo) -->
+  <circle cx="520" cy="230" r="26" fill="url(#atomGold)" stroke="#54aeff" stroke-width="3"/>
+  <line x1="520" y1="230" x2="600" y2="230" stroke="#e5534b" stroke-width="2.5" marker-end="url(#arrowR)"/>
+  <line x1="520" y1="230" x2="520" y2="150" stroke="#57ab5a" stroke-width="2.5" marker-end="url(#arrowG)"/>
+  <line x1="520" y1="230" x2="468" y2="278" stroke="#539bf5" stroke-width="2.5" marker-end="url(#arrowB)"/>
+  <rect x="533" y="205" width="14" height="14" fill="#e5534b" opacity="0.5"/>
+
+  <!-- Edit panel -->
+  <g>
+    <rect x="760" y="72" width="176" height="400" rx="8" fill="#ffffff" stroke="#d0d7de"/>
+    <!-- mode group -->
+    <rect x="776" y="86" width="34" height="34" rx="5" fill="#ddf4ff" stroke="#0969da"/>
+    <text x="793" y="108" font-size="13" text-anchor="middle" fill="#0969da">✥</text>
+    <!-- add/remove/undo/redo -->
+    <rect x="776" y="130" width="34" height="34" rx="5" fill="#f6f8fa" stroke="#d0d7de"/>
+    <text x="793" y="152" font-size="14" text-anchor="middle" fill="#57606a">+</text>
+    <rect x="812" y="130" width="34" height="34" rx="5" fill="#f6f8fa" stroke="#d0d7de"/>
+    <text x="829" y="152" font-size="12" text-anchor="middle" fill="#57606a">🗑</text>
+    <rect x="848" y="130" width="34" height="34" rx="5" fill="#f6f8fa" stroke="#d0d7de"/>
+    <text x="865" y="152" font-size="13" text-anchor="middle" fill="#57606a">↺</text>
+    <rect x="884" y="130" width="34" height="34" rx="5" fill="#f6f8fa" stroke="#d0d7de"/>
+    <text x="901" y="152" font-size="13" text-anchor="middle" fill="#57606a">↻</text>
+    <line x1="776" y1="182" x2="920" y2="182" stroke="#d0d7de"/>
+    <text x="776" y="206" font-size="13" font-weight="600" fill="#24292f">Si</text>
+    <text x="776" y="224" font-size="11.5" fill="#57606a">crystal</text>
+    <!-- coordinate fields -->
+    <g>
+      <rect x="776" y="240" width="144" height="38" rx="5" fill="#ffffff" stroke="#d0d7de"/>
+      <text x="784" y="252" font-size="9" fill="#57606a">X</text>
+      <text x="784" y="269" font-size="13" fill="#24292f">0.250</text>
+      <rect x="776" y="286" width="144" height="38" rx="5" fill="#ffffff" stroke="#d0d7de"/>
+      <text x="784" y="298" font-size="9" fill="#57606a">Y</text>
+      <text x="784" y="315" font-size="13" fill="#24292f">0.250</text>
+      <rect x="776" y="332" width="144" height="38" rx="5" fill="#ffffff" stroke="#d0d7de"/>
+      <text x="784" y="344" font-size="9" fill="#57606a">Z</text>
+      <text x="784" y="361" font-size="13" fill="#24292f">0.250</text>
+    </g>
+  </g>
+
+  <!-- Callouts -->
+  <g font-size="13" font-weight="700">
+    <circle cx="110" cy="90" r="12" fill="#0969da"/><text x="110" y="95" fill="#fff" text-anchor="middle">1</text>
+    <circle cx="742" cy="90" r="12" fill="#0969da"/><text x="742" y="95" fill="#fff" text-anchor="middle">2</text>
+    <circle cx="580" cy="180" r="12" fill="#0969da"/><text x="580" y="185" fill="#fff" text-anchor="middle">3</text>
+    <circle cx="742" cy="300" r="12" fill="#0969da"/><text x="742" y="305" fill="#fff" text-anchor="middle">4</text>
+    <circle cx="200" cy="450" r="12" fill="#0969da"/><text x="200" y="455" fill="#fff" text-anchor="middle">5</text>
+  </g>
+
+  <!-- Legend -->
+  <g font-size="12.5" fill="#24292f">
+    <text x="30" y="522"><tspan font-weight="700">1</tspan>  Viewer toolbar — “E” toggles edit mode (hotkey per decision #10); measurement modes are force-disabled while editing.</text>
+    <text x="30" y="546"><tspan font-weight="700">2</tspan>  Edit toolbar — translate mode (Rotate returns with group transforms), add / remove / undo / redo; remove &amp; coordinates disabled without a selection.</text>
+    <text x="30" y="570"><tspan font-weight="700">3</tspan>  Selected atom — visible ring + TransformControls gizmo (axis arrows and plane handles).</text>
+    <text x="30" y="594"><tspan font-weight="700">4</tspan>  Coordinate panel — element symbol, units caption (follows material.basis.units), draft-state fields committed on Enter/blur.</text>
+    <text x="30" y="618"><tspan font-weight="700">5</tspan>  Canvas — click selects, drag on an atom moves it (camera-parallel plane), drag on empty space orbits the camera.</text>
+  </g>
+</svg>
