@@ -1,4 +1,4 @@
-import Dialog from "@mat3ra/cove.js/dist/mui/components/dialog/Dialog";
+import Dialog from "@mat3ra/cove/dist/mui/components/dialog/Dialog";
 import PropTypes from "prop-types";
 import React from "react";
 

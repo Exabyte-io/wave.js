@@ -1,7 +1,7 @@
 import { createElement as _createElement } from "react";
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import IconByName from "@mat3ra/cove.js/dist/mui/components/icon";
-import NestedDropdown from "@mat3ra/cove.js/dist/mui/components/nested-dropdown/NestedDropdown";
+import IconByName from "@mat3ra/cove/dist/mui/components/icon";
+import NestedDropdown from "@mat3ra/cove/dist/mui/components/nested-dropdown/NestedDropdown";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Paper from "@mui/material/Paper";

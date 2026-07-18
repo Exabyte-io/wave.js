@@ -113,7 +113,7 @@ In case you need to link Cove.js into the app for local development you need
 
 1. Add local path of Cove.js to package.json
 ```bash
-    "@mat3ra/cove.js": "file:../../cove.js"
+    "@mat3ra/cove": "file:../../cove.js"
 ```
 2. Run the app
 ```bash
