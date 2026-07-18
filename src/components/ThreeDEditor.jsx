@@ -1,10 +1,10 @@
 /* eslint-disable react/sort-comp */
 // import "../MuiClassNameSetup";
 
-import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
-import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
-import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
-import { AlertProvider } from "@exabyte-io/cove.js/src/theme/provider";
+import { DarkMaterialUITheme } from "@mat3ra/cove.js/dist/theme";
+import ThemeProvider from "@mat3ra/cove.js/dist/theme/provider";
+import { exportToDisk } from "@mat3ra/cove.js/dist/utils/downloader";
+import { AlertProvider } from "@mat3ra/cove.js/src/theme/provider";
 import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";

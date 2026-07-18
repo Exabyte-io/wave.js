@@ -2,8 +2,8 @@ import {
     showInfoAlert,
     showSuccessAlert,
     showWarningAlert,
-} from "@exabyte-io/cove.js/dist/other/alerts";
-import { saveImageDataToFile } from "@exabyte-io/cove.js/dist/utils/downloader";
+} from "@mat3ra/cove.js/dist/other/alerts";
+import { saveImageDataToFile } from "@mat3ra/cove.js/dist/utils/downloader";
 
 import { createGIFAsync } from "./utils";
 
