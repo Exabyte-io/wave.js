@@ -1,5 +1,5 @@
-import { showInfoAlert, showSuccessAlert, showWarningAlert, } from "@exabyte-io/cove.js/dist/other/alerts";
-import { saveImageDataToFile } from "@exabyte-io/cove.js/dist/utils/downloader";
+import { showInfoAlert, showSuccessAlert, showWarningAlert } from "@mat3ra/cove/dist/other/alerts";
+import { saveImageDataToFile } from "@mat3ra/cove/dist/utils/downloader";
 import { createGIFAsync } from "./utils";
 export const ImageMixin = (superclass) => class extends superclass {
     takeScreenshot() {

@@ -1,4 +1,4 @@
-import { NestedDropdownAction, NestedDropdownProps } from "@exabyte-io/cove.js/dist/mui/components/nested-dropdown/NestedDropdown";
+import { NestedDropdownAction, NestedDropdownProps } from "@mat3ra/cove/dist/mui/components/nested-dropdown/NestedDropdown";
 import React from "react";
 interface ToolbarConfig {
     id: string;

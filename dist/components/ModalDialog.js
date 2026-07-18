@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import Dialog from "@exabyte-io/cove.js/dist/mui/components/dialog/Dialog";
+import Dialog from "@mat3ra/cove/dist/mui/components/dialog/Dialog";
 import PropTypes from "prop-types";
 import React from "react";
 export class ModalDialog extends React.Component {
