@@ -1,4 +1,4 @@
-[![npm version](https://badge.fury.io/js/%40exabyte-io%2Fwave.js.svg)](https://badge.fury.io/js/%40exabyte-io%2Fwave.js)
+[![npm version](https://badge.fury.io/js/%40mat3ra%2Fwave.js.svg)](https://badge.fury.io/js/%40mat3ra%2Fwave.js)
 [![License: Apache](https://img.shields.io/badge/License-Apache-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 # Wave.js
@@ -31,14 +31,14 @@ The package is written in a modular way easy to extend. Contributions can be in 
 From NPM for use within a software project:
 
 ```bash
-npm install @exabyte-io/wave.js
+npm install @mat3ra/wave.js
 
 ```
 
 From source to contribute to development:
 
 ```bash
-git clone git@github.com:Exabyte-io/wave.git
+git clone git@github.com:mat3ra/wave.js.git
 ```
 
 ## 3. Contribution.
@@ -113,7 +113,7 @@ In case you need to link Cove.js into the app for local development you need
 
 1. Add local path of Cove.js to package.json
 ```bash
-    "@exabyte-io/cove.js": "file:../../cove.js"
+    "@mat3ra/cove": "file:../../cove.js"
 ```
 2. Run the app
 ```bash

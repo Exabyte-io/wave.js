@@ -1,8 +1,8 @@
-import IconByName from "@exabyte-io/cove.js/dist/mui/components/icon";
+import IconByName from "@mat3ra/cove/dist/mui/components/icon";
 import NestedDropdown, {
     NestedDropdownAction,
     NestedDropdownProps,
-} from "@exabyte-io/cove.js/dist/mui/components/nested-dropdown/NestedDropdown";
+} from "@mat3ra/cove/dist/mui/components/nested-dropdown/NestedDropdown";
 import PowerSettingsNew from "@mui/icons-material/PowerSettingsNew";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Paper from "@mui/material/Paper";
