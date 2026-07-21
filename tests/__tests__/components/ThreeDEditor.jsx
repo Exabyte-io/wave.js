@@ -158,7 +158,7 @@ test("an echoed material prop with identical content does not wipe history or se
         attachTo: container,
     });
 
-    wrapper.instance().handleSelectionChanged(1);
+    wrapper.instance().handleSelectionChanged([1]);
     const modifiedMaterial = new Made.Material({
         ...MATERIAL_CONFIG,
         basis: {
@@ -173,7 +173,7 @@ test("an echoed material prop with identical content does not wipe history or se
     wrapper.update();
 
     expect(wrapper.state("historyStack").length).toBe(2);
-    expect(wrapper.state("selectedAtomIndex")).toBe(1);
+    expect(wrapper.state("selectedAtomIndices")).toEqual([1]);
 
     // A host that stores our own emitted material and passes it straight back as a prop (the
     // common "lift state up" pattern) must not have its own echo wipe what we just built.
@@ -181,14 +181,14 @@ test("an echoed material prop with identical content does not wipe history or se
     wrapper.update();
 
     expect(wrapper.state("historyStack").length).toBe(2);
-    expect(wrapper.state("selectedAtomIndex")).toBe(1);
+    expect(wrapper.state("selectedAtomIndices")).toEqual([1]);
 
     // A genuinely different material DOES reset.
     wrapper.setProps({ material: new Made.Material(MATERIAL_CONFIG) });
     wrapper.update();
 
     expect(wrapper.state("historyStack").length).toBe(1);
-    expect(wrapper.state("selectedAtomIndex")).toBeNull();
+    expect(wrapper.state("selectedAtomIndices")).toEqual([]);
 });
 
 test("coordinate field commits once on blur, not per keystroke (D18)", () => {
@@ -199,7 +199,7 @@ test("coordinate field commits once on blur, not per keystroke (D18)", () => {
     const instance = wrapper.instance();
     const handleStructureModifiedSpy = jest.spyOn(instance, "handleStructureModified");
 
-    instance.handleSelectionChanged(1);
+    instance.handleSelectionChanged([1]);
     instance.handleCoordinateDraftChange(0, "0.");
     instance.handleCoordinateDraftChange(0, "0.4");
     instance.handleCoordinateDraftChange(0, "0.42");
@@ -223,7 +223,7 @@ test("an unparseable coordinate draft is discarded on blur without committing", 
     const instance = wrapper.instance();
     const handleStructureModifiedSpy = jest.spyOn(instance, "handleStructureModified");
 
-    instance.handleSelectionChanged(1);
+    instance.handleSelectionChanged([1]);
     instance.handleCoordinateDraftChange(0, "-");
     instance.handleCoordinateCommit(0);
 
@@ -388,7 +388,7 @@ test("Delete key removes the selected atom while edit mode is active", () => {
     try {
         wrapper.find(`${SELECTORS.interactiveIconToolbar} button`).prop("onClick")();
         wrapper.instance().handleToggleEditMode();
-        wrapper.instance().handleSelectionChanged(1);
+        wrapper.instance().handleSelectionChanged([1]);
         wrapper.update();
 
         const handleRemoveSelectedAtomSpy = jest.spyOn(
@@ -451,7 +451,7 @@ test("selecting an atom does not trigger a full viewer reload (D3/R17)", () => {
     const waveComponentInstance = wrapper.find(WaveComponent).instance();
     const reloadViewerSpy = jest.spyOn(waveComponentInstance, "reloadViewer");
 
-    wrapper.instance().handleSelectionChanged(1);
+    wrapper.instance().handleSelectionChanged([1]);
 
     expect(reloadViewerSpy).not.toHaveBeenCalled();
 });

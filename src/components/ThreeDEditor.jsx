@@ -78,7 +78,9 @@ export class ThreeDEditor extends React.Component {
             activeTransformMode: "translate",
             historyStack: [material],
             historyPointer: 0,
-            selectedAtomIndex: null,
+            // Array of atomicIndex, per the mixin's multi-select onSelectionChanged contract
+            // (D-4); empty = nothing selected, one entry = the common single-atom case.
+            selectedAtomIndices: [],
             // Local draft strings for the X/Y/Z coordinate fields, indexed by axis; null means
             // "show the committed value". Lets a field be cleared or start with "-" while
             // focused without committing (and rebuilding the scene) on every keystroke (D18).
@@ -268,7 +270,7 @@ export class ThreeDEditor extends React.Component {
             // Undo/redo history is scoped to the material currently being edited.
             historyStack: [clonedMaterial],
             historyPointer: 0,
-            selectedAtomIndex: null,
+            selectedAtomIndices: [],
             coordinateDrafts: [null, null, null],
         });
         this.handleResetMeasurements();
@@ -550,11 +552,14 @@ export class ThreeDEditor extends React.Component {
      * (on blur/Enter, via handleCoordinateCommit below) rather than per keystroke, so this is
      * naturally one history entry per edit (D18). Mutates a clone's basis in place via
      * Basis/setBasis rather than reconstructing via fromElementsAndCoordinates, so labels and
-     * constraints on every atom (including the one being edited) survive untouched (D7).
+     * constraints on every atom (including the one being edited) survive untouched (D7). Only
+     * meaningful for exactly one selected atom - the coordinate panel itself is hidden for 0 or
+     * 2+ selected (see renderEditToolbar), so this is a defensive guard, not the primary gate.
      */
     handleCoordinateChange(axisIndex, value) {
-        const { selectedAtomIndex, material } = this.state;
-        if (selectedAtomIndex === null) return;
+        const { selectedAtomIndices, material } = this.state;
+        if (selectedAtomIndices.length !== 1) return;
+        const [selectedAtomIndex] = selectedAtomIndices;
 
         const floatValue = parseFloat(value);
         if (Number.isNaN(floatValue)) return;
@@ -615,22 +620,28 @@ export class ThreeDEditor extends React.Component {
 
     /**
      * Selection changes are a visual-only, wave-internal concern (highlight + gizmo, already
-     * handled inside the mixin) - the only reason React needs to know the index at all is to
+     * handled inside the mixin) - the only reason React needs to know the indices at all is to
      * drive the coordinate panel/toolbar. Without the bypass guard, this setState triggers a
      * WaveComponent re-render with a freshly cloned structure prop, which componentDidUpdate
      * sees as "changed" and reloads/rebuilds the entire scene on every single click or hover-driven
      * selection - orphaning an in-progress drag's mesh reference (D3) and making selection
      * sluggish on larger structures (R17).
+     *
+     * indices is an array of atomicIndex (D-4: multi-select) - empty for none, one entry for a
+     * single atom, 2+ for a group selection.
      */
-    handleSelectionChanged(index) {
+    handleSelectionChanged(indices) {
         if (this.WaveComponent?.wave) {
             this.WaveComponent.wave.bypassReloadViewer = true;
         }
-        this.setState({ selectedAtomIndex: index, coordinateDrafts: [null, null, null] }, () => {
-            if (this.WaveComponent?.wave) {
-                this.WaveComponent.wave.bypassReloadViewer = false;
-            }
-        });
+        this.setState(
+            { selectedAtomIndices: indices, coordinateDrafts: [null, null, null] },
+            () => {
+                if (this.WaveComponent?.wave) {
+                    this.WaveComponent.wave.bypassReloadViewer = false;
+                }
+            },
+        );
     }
 
     handleSetTransformMode(mode) {
@@ -1131,15 +1142,17 @@ export class ThreeDEditor extends React.Component {
     }
 
     renderEditToolbar() {
-        const { activeTransformMode, selectedAtomIndex, material, coordinateDrafts } = this.state;
+        const { activeTransformMode, selectedAtomIndices, material, coordinateDrafts } = this.state;
         const { editSessionOptions } = this.props;
         const hasUndo = this.canUndo();
         const hasRedo = this.canRedo();
         const defaultElement = editSessionOptions?.defaultElement || "Si";
+        const isSingleAtomSelected = selectedAtomIndices.length === 1;
+        const [selectedAtomIndex] = selectedAtomIndices;
 
         let selectedCoordinates = [0, 0, 0];
         let selectedElement = "";
-        if (selectedAtomIndex !== null && material?.basis?.coordinates) {
+        if (isSingleAtomSelected && material?.basis?.coordinates) {
             const selectedAtom = material.basis.coordinates[selectedAtomIndex];
             if (selectedAtom) {
                 selectedCoordinates = Array.isArray(selectedAtom)
@@ -1183,8 +1196,12 @@ export class ThreeDEditor extends React.Component {
                             <AddCircleOutline />
                         </SquareIconButton>
                         <SquareIconButton
-                            title="Delete Selected Atom"
-                            disabled={selectedAtomIndex === null}
+                            title={
+                                selectedAtomIndices.length > 1
+                                    ? `Delete ${selectedAtomIndices.length} Selected Atoms`
+                                    : "Delete Selected Atom"
+                            }
+                            disabled={selectedAtomIndices.length === 0}
                             onClick={this.handleRemoveSelectedAtom}
                         >
                             <DeleteIcon />
@@ -1208,7 +1225,18 @@ export class ThreeDEditor extends React.Component {
                         </SquareIconButton>
                     </ButtonGroup>
 
-                    {selectedAtomIndex !== null && (
+                    {selectedAtomIndices.length > 1 && (
+                        <Stack spacing={0.5} alignItems="center" sx={{ width: "84px" }}>
+                            <Typography variant="caption" fontWeight="bold" textAlign="center">
+                                {selectedAtomIndices.length} atoms selected
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" textAlign="center">
+                                Drag or use the gizmo to move the group together
+                            </Typography>
+                        </Stack>
+                    )}
+
+                    {isSingleAtomSelected && (
                         <Stack spacing={1} alignItems="center" sx={{ width: "84px" }}>
                             <Typography variant="caption" fontWeight="bold">
                                 {selectedElement || "Si"}

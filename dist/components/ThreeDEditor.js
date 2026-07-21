@@ -290,7 +290,9 @@ export class ThreeDEditor extends React.Component {
             activeTransformMode: "translate",
             historyStack: [material],
             historyPointer: 0,
-            selectedAtomIndex: null,
+            // Array of atomicIndex, per the mixin's multi-select onSelectionChanged contract
+            // (D-4); empty = nothing selected, one entry = the common single-atom case.
+            selectedAtomIndices: [],
             // Local draft strings for the X/Y/Z coordinate fields, indexed by axis; null means
             // "show the committed value". Lets a field be cleared or start with "-" while
             // focused without committing (and rebuilding the scene) on every keystroke (D18).
@@ -469,7 +471,7 @@ export class ThreeDEditor extends React.Component {
             // Undo/redo history is scoped to the material currently being edited.
             historyStack: [clonedMaterial],
             historyPointer: 0,
-            selectedAtomIndex: null,
+            selectedAtomIndices: [],
             coordinateDrafts: [null, null, null],
         });
         this.handleResetMeasurements();
@@ -663,13 +665,16 @@ export class ThreeDEditor extends React.Component {
      * (on blur/Enter, via handleCoordinateCommit below) rather than per keystroke, so this is
      * naturally one history entry per edit (D18). Mutates a clone's basis in place via
      * Basis/setBasis rather than reconstructing via fromElementsAndCoordinates, so labels and
-     * constraints on every atom (including the one being edited) survive untouched (D7).
+     * constraints on every atom (including the one being edited) survive untouched (D7). Only
+     * meaningful for exactly one selected atom - the coordinate panel itself is hidden for 0 or
+     * 2+ selected (see renderEditToolbar), so this is a defensive guard, not the primary gate.
      */
     handleCoordinateChange(axisIndex, value) {
         var _a, _b;
-        const { selectedAtomIndex, material } = this.state;
-        if (selectedAtomIndex === null)
+        const { selectedAtomIndices, material } = this.state;
+        if (selectedAtomIndices.length !== 1)
             return;
+        const [selectedAtomIndex] = selectedAtomIndices;
         const floatValue = parseFloat(value);
         if (Number.isNaN(floatValue))
             return;
@@ -724,19 +729,22 @@ export class ThreeDEditor extends React.Component {
     }
     /**
      * Selection changes are a visual-only, wave-internal concern (highlight + gizmo, already
-     * handled inside the mixin) - the only reason React needs to know the index at all is to
+     * handled inside the mixin) - the only reason React needs to know the indices at all is to
      * drive the coordinate panel/toolbar. Without the bypass guard, this setState triggers a
      * WaveComponent re-render with a freshly cloned structure prop, which componentDidUpdate
      * sees as "changed" and reloads/rebuilds the entire scene on every single click or hover-driven
      * selection - orphaning an in-progress drag's mesh reference (D3) and making selection
      * sluggish on larger structures (R17).
+     *
+     * indices is an array of atomicIndex (D-4: multi-select) - empty for none, one entry for a
+     * single atom, 2+ for a group selection.
      */
-    handleSelectionChanged(index) {
+    handleSelectionChanged(indices) {
         var _a;
         if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
             this.WaveComponent.wave.bypassReloadViewer = true;
         }
-        this.setState({ selectedAtomIndex: index, coordinateDrafts: [null, null, null] }, () => {
+        this.setState({ selectedAtomIndices: indices, coordinateDrafts: [null, null, null] }, () => {
             var _a;
             if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
                 this.WaveComponent.wave.bypassReloadViewer = false;
@@ -961,14 +969,16 @@ export class ThreeDEditor extends React.Component {
     }
     renderEditToolbar() {
         var _a, _b;
-        const { activeTransformMode, selectedAtomIndex, material, coordinateDrafts } = this.state;
+        const { activeTransformMode, selectedAtomIndices, material, coordinateDrafts } = this.state;
         const { editSessionOptions } = this.props;
         const hasUndo = this.canUndo();
         const hasRedo = this.canRedo();
         const defaultElement = (editSessionOptions === null || editSessionOptions === void 0 ? void 0 : editSessionOptions.defaultElement) || "Si";
+        const isSingleAtomSelected = selectedAtomIndices.length === 1;
+        const [selectedAtomIndex] = selectedAtomIndices;
         let selectedCoordinates = [0, 0, 0];
         let selectedElement = "";
-        if (selectedAtomIndex !== null && ((_a = material === null || material === void 0 ? void 0 : material.basis) === null || _a === void 0 ? void 0 : _a.coordinates)) {
+        if (isSingleAtomSelected && ((_a = material === null || material === void 0 ? void 0 : material.basis) === null || _a === void 0 ? void 0 : _a.coordinates)) {
             const selectedAtom = material.basis.coordinates[selectedAtomIndex];
             if (selectedAtom) {
                 selectedCoordinates = Array.isArray(selectedAtom)
@@ -981,7 +991,9 @@ export class ThreeDEditor extends React.Component {
                         : (elementObj === null || elementObj === void 0 ? void 0 : elementObj.value) || (elementObj === null || elementObj === void 0 ? void 0 : elementObj.element) || "";
             }
         }
-        return (_jsx(Paper, { elevation: 2, sx: { position: "absolute", top: "1em", right: "1em", boxShadow: 4 }, children: _jsxs(Stack, { alignItems: "center", spacing: 1, padding: 1, divider: _jsx(Divider, { flexItem: true, sx: { width: "80%", alignSelf: "center" } }), children: [_jsx(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: _jsx(SquareIconButton, { title: "Translate Mode", onClick: () => this.handleSetTransformMode("translate"), children: _jsx(OpenWith, { color: activeTransformMode === "translate" ? "primary" : "inherit" }) }) }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: `Add Atom (${defaultElement})`, onClick: this.handleAddAtom, children: _jsx(AddCircleOutline, {}) }), _jsx(SquareIconButton, { title: "Delete Selected Atom", disabled: selectedAtomIndex === null, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndex !== null && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(Typography, { variant: "caption", fontWeight: "bold", children: selectedElement || "Si" }), _jsx(Typography, { variant: "caption", color: "text.secondary", sx: { mt: -1 }, children: ((_b = material === null || material === void 0 ? void 0 : material.basis) === null || _b === void 0 ? void 0 : _b.units) === "cartesian"
+        return (_jsx(Paper, { elevation: 2, sx: { position: "absolute", top: "1em", right: "1em", boxShadow: 4 }, children: _jsxs(Stack, { alignItems: "center", spacing: 1, padding: 1, divider: _jsx(Divider, { flexItem: true, sx: { width: "80%", alignSelf: "center" } }), children: [_jsx(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: _jsx(SquareIconButton, { title: "Translate Mode", onClick: () => this.handleSetTransformMode("translate"), children: _jsx(OpenWith, { color: activeTransformMode === "translate" ? "primary" : "inherit" }) }) }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: `Add Atom (${defaultElement})`, onClick: this.handleAddAtom, children: _jsx(AddCircleOutline, {}) }), _jsx(SquareIconButton, { title: selectedAtomIndices.length > 1
+                                    ? `Delete ${selectedAtomIndices.length} Selected Atoms`
+                                    : "Delete Selected Atom", disabled: selectedAtomIndices.length === 0, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndices.length > 1 && (_jsxs(Stack, { spacing: 0.5, alignItems: "center", sx: { width: "84px" }, children: [_jsxs(Typography, { variant: "caption", fontWeight: "bold", textAlign: "center", children: [selectedAtomIndices.length, " atoms selected"] }), _jsx(Typography, { variant: "caption", color: "text.secondary", textAlign: "center", children: "Drag or use the gizmo to move the group together" })] })), isSingleAtomSelected && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(Typography, { variant: "caption", fontWeight: "bold", children: selectedElement || "Si" }), _jsx(Typography, { variant: "caption", color: "text.secondary", sx: { mt: -1 }, children: ((_b = material === null || material === void 0 ? void 0 : material.basis) === null || _b === void 0 ? void 0 : _b.units) === "cartesian"
                                     ? "cartesian, Å"
                                     : "crystal" }), ["X", "Y", "Z"].map((axisName, idx) => {
                                 const draftValue = coordinateDrafts[idx];

@@ -76,7 +76,7 @@ The in-viewer model is the right shape — no context switch, live preview, per-
 - Selecting must **not** trigger a full viewer reload/bond recompute (performance finding, §7 footnote) and must not move the camera.
 - Repetition-clone meshes are either not selectable or map to their base atom — never a bogus out-of-range `atomicIndex` (D5c, R16).
 
-**Test pathways:** mixin state test (`simulateClick` → `selectedMesh_`, threshold boundary at 4/5 px, button filtering); material/callback test (one `onSelectionChanged(index)`, no `onStructureModified`); visual snapshot (highlight ring visible).
+**Test pathways:** mixin state test (`simulateClick` → `selectedMesh_`, threshold boundary at 4/5 px, button filtering); material/callback test (one `onSelectionChanged([index])`, no `onStructureModified`); visual snapshot (highlight ring visible).
 
 ### 2.3 US-3 — Edit exact coordinates
 
@@ -217,7 +217,7 @@ The full pointer state machine: **[interaction-state-machine.svg](./assets/inter
 
 **(e) Snapping & modifiers.** Convention: **held `Ctrl`/`Cmd` = increment snap** during a transform, `Ctrl/Cmd+Shift` = fine snap (Blender/Unity); three.js's default `Shift`-snap is the outlier and is overridden so `Shift` stays reserved for additive selection (roadmap). Persistent magnet toggle in the toolbar when snapping ships. Domain targets: fractional-grid, lattice sites, snap-to-atom. Default granularity: decision D-5. All snapping is P2.
 
-**(f) Multi-select (roadmap, conventions fixed now).** `Click` replace · `Shift+click` add · `Ctrl/Cmd+click` toggle · drag-on-empty-space = rubber-band (conflict with orbit: decision D-4) · `double-click` = bonded fragment. Group transforms act rigidly about the selection centroid — like the old editor's pivot group, but committing directly with normal undo instead of its two-phase submit/cancel.
+**(f) Multi-select — implemented 2026-07-14 (decision D-4: drag-on-empty-space = marquee; orbit rotate moved to the right mouse button while edit mode is active, restored on exit).** `Click` replace · `Shift+click` add · `Ctrl/Cmd+click` toggle · drag-on-empty-space = rubber-band marquee (screen-space hit-testing, same modifiers apply to the marquee's release) · `double-click` = bonded fragment (**not implemented** - needs bond connectivity data, deferred). Group transforms act rigidly about the selection centroid via a pivot object (`selectionPivot_`) the gizmo attaches to for 2+ selected atoms; dragging any selected atom directly (not just the gizmo) moves the whole group. Committed as a single delta/one history entry, directly (no two-phase submit/cancel, unlike the old editor's pivot group). Group **rotate** stays deferred along with single-atom Rotate mode (§4.1, D4) - only translate exists for now.
 
 **(g) Undo granularity.** One entry per completed drag (snapshot at pointer-down, single commit at pointer-up), per committed field edit, per add, per remove. Confirmed as the firm norm across three.js editor (mergeable commands), Blender, Unity, Unreal.
 
@@ -301,7 +301,7 @@ Diagram: **[data-flow.svg](./assets/data-flow.svg)**. The old modal contract (`m
 |---|---|---|
 | `onUpdate(material′)` | Once per committed edit | Back-compat channel (existing MD wiring) |
 | `onEditCommit(material′, {source})` | Once per committed edit | `source ∈ drag · gizmo · coordinate-input · add · remove · undo · redo` — lets hosts record history without double-counting |
-| `onSelectionChanged(indexOrNull)` | On selection change | Promoted to a public prop (MD's selection footer needs it — gap #6) |
+| `onSelectionChanged(atomicIndices)` | On selection change | Promoted to a public prop (MD's selection footer needs it — gap #6). **Signature updated 2026-07-14 for D-4 (multi-select): reports an array, not a single index-or-null** — `[]` for none, one entry for the common single-atom case, 2+ for a group. This is a breaking change from the single-index contract this section originally specified; no external consumer existed yet (materials-designer is pinned to the pre-P0 export, unaffected) |
 | `onEditModeChanged(isActive)` | On toggle | Hosts disable conflicting UI |
 | `onEditSessionStart(material)` / `onEditSessionEnd(finalOrNull)` | Session bounds | Optional transactional layer (decision D-3): `null` = cancelled; restores the modal's commit-or-discard guarantee |
 
@@ -440,7 +440,7 @@ For resolution during this spec's review. Each: options → **recommendation**.
 | D-1 | Undo/redo ownership | (a) wave owns intra-session, host records commits, ref API · (b) host owns all, wave stateless · (c) both (status quo) | **(a)** — matches the old modal's mental model; fixes MD's history flood with no host changes |
 | D-2 | Multi-material replacement | (a) `materials[]` prop + active index · (b) separate merge-workflow component · (c) drop capability, remove MD menu item | **(b) or explicit (c)** — an array complicates every callback; the decision can't be silent because MD's import breaks either way |
 | D-3 | Transactionality | (a) pure incremental (status quo) · (b) session commit-or-cancel · (c) hybrid: streaming + session-end commit | **(c)** — keeps live preview, restores the cancel guarantee, one host history entry per session |
-| D-4 | Rubber-band vs. orbit on empty-space drag (edit mode) | (a) drag = marquee, orbit needs modifier/RMB · (b) marquee needs `Shift`-drag · (c) explicit select-tool sub-mode (old `M` toggle) | **Decided 2026-07-14: (a)** — drag-on-empty-space is marquee select; orbit moves to a modifier-held drag or right-mouse-drag |
+| D-4 | Rubber-band vs. orbit on empty-space drag (edit mode) | (a) drag = marquee, orbit needs modifier/RMB · (b) marquee needs `Shift`-drag · (c) explicit select-tool sub-mode (old `M` toggle) | **Decided and implemented 2026-07-14: (a)** — drag-on-empty-space is marquee select; orbit rotate moved to the right mouse button (`OrbitControls.mouseButtons` remapped while edit mode is active, restored on exit) |
 | D-5 | Default snap granularity | free (off) · fractional grid · nearest lattice site — all toggleable | **Off by default**, magnet toggle + `Ctrl/Cmd`-held snap; perturbation workflows dominate; the default exposed as a setting |
 | D-6 | Arrow-nudge axis frame | screen-relative · crystal a/b/c-relative | **Screen-relative default, setting to switch** — camera-dependence makes neither universally right |
 | D-7 | Atom dragged outside cell | (a) leave as-is · (b) auto-wrap on commit · (c) leave + visual flag + one-click wrap | **(c)** — auto-wrap silently changes what the user placed; silence surprises |
@@ -479,13 +479,16 @@ Phased; each phase lands with its regression tests. No code changes before this 
 
 ### P2 — roadmap items
 
-Per §11, gated on decisions D-2/D-4/D-5/D-6/D-7/D-9.
+Per §11, gated on decisions D-2/D-5/D-6/D-7/D-9. (D-4 was resolved and implemented 2026-07-14 — see below; it no longer gates anything.)
 
 ## 11. Roadmap (designed, deferred)
 
+**Shipped 2026-07-14 (decision D-4):** rubber-band multi-select + group **translate** about a centroid pivot — `MultipleSelectionControls`-equivalent parity with the old editor's marquee/pivot behavior, committing directly with normal undo instead of its two-phase submit/cancel. `Click`/`Shift+click`/`Ctrl+click` selection modifiers, and dragging any selected atom (not just the gizmo) moves the whole group. **Group rotate is still deferred** (blocked on single-atom Rotate mode returning, D4) and **double-click-selects-bonded-fragment is still deferred** (needs bond connectivity data neither implementation touches yet).
+
 | Item | Design anchor | Old-editor parity? |
 |---|---|---|
-| Rubber-band multi-select + group translate/rotate about centroid | §3f, decision D-4 | Yes — the old `MultipleSelectionControls` (`M`-key marquee, pivot group); v1+ commits directly with normal undo instead of two-phase submit |
+| Group **rotate** about centroid (translate already shipped, see above) | §3f, decision D-4 | Yes — the old pivot group supported rotate too |
+| Double-click selects the bonded fragment | §3f | Beyond old editor |
 | Element picker (add + change-in-place) | Decision D-9; toolbar ghost row in [edit-toolbar-states.svg](./assets/edit-toolbar-states.svg) | Yes — clone/rename workflow |
 | Clone selected atom | US-7 extension | Yes |
 | Camera focus on selection (`F` / double-click) | — | Yes |

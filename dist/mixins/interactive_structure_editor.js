@@ -5,6 +5,8 @@ const SELECTION_HIGHLIGHT_COLOR = 0x0969da;
 const HIGHLIGHT_SCALE_FACTOR = 1.25;
 const DRAG_THRESHOLD_PX = 5;
 const DRAG_COMMIT_EPSILON = 1e-6;
+const MARQUEE_FILL_COLOR = "rgba(84, 174, 255, 0.15)";
+const MARQUEE_BORDER_COLOR = "#54aeff";
 /**
  * Mixin providing interactive structure editing capabilities inside the Wave visualizer.
  * Enforces strict object-oriented design and follows the "6 months x 3 beers" rule for comments.
@@ -17,19 +19,29 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         this.raycaster_ = null;
         this.pointer_ = null;
         this.selectedMesh_ = null;
+        this.selectedMeshes_ = [];
         this.hoveredMesh_ = null;
-        this.selectionHighlightMesh_ = null;
+        this.selectionHighlightPool_ = [];
         this.hoverHighlightMesh_ = null;
+        this.selectionPivot_ = null;
         this.isEditModeEnabled_ = false;
         this.pointerDownPosition_ = null;
         this.pendingDragAtom_ = null;
         this.isDraggingAtom_ = false;
+        this.isDraggingGroup_ = false;
+        this.groupDragStartPositions_ = null;
         this.dragPlane_ = null;
         this.dragOffset_ = null;
         this.dragStartPosition_ = null;
         this.activePointerId_ = null;
         this.orbitControlsEnabledBeforeDrag_ = true;
-        this.lastSelectedAtomicIndex_ = null;
+        this.orbitControlsDefaultMouseButtons_ = null;
+        this.lastSelectedAtomicIndices_ = null;
+        this.marqueeStartScreen_ = null;
+        this.isMarqueeSelecting_ = false;
+        this.marqueeOverlayElement_ = null;
+        this.marqueeModifierAdd_ = false;
+        this.marqueeModifierToggle_ = false;
         this.handlePointerDownCapture_ = null;
         this.handlePointerMoveCapture_ = null;
         this.handlePointerUpCapture_ = null;
@@ -55,17 +67,35 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
     initializeEditor() {
         this.transformControls_ = new TransformControls(this.camera, this.renderer.domElement);
         this.scene.add(this.transformControls_);
-        this.selectionHighlightMesh_ = this.createHighlightMesh_(SELECTION_HIGHLIGHT_COLOR, 0.9);
+        this.selectionPivot_ = new THREE.Object3D();
+        this.scene.add(this.selectionPivot_);
         this.hoverHighlightMesh_ = this.createHighlightMesh_(HOVER_HIGHLIGHT_COLOR, 0.5);
-        this.scene.add(this.selectionHighlightMesh_);
         this.scene.add(this.hoverHighlightMesh_);
-        // Rerender the viewport on every translation/rotation frame update
+        // Rerender the viewport on every translation/rotation frame update; while dragging the
+        // group pivot, also propagate its live delta to every selected atom so they move
+        // rigidly together during the gizmo drag, not just once on commit.
         this.transformControls_.addEventListener("change", () => {
+            var _a;
+            if (((_a = this.transformControls_) === null || _a === void 0 ? void 0 : _a.dragging) &&
+                this.transformControls_.object === this.selectionPivot_ &&
+                this.groupDragStartPositions_ &&
+                this.transformDragStartPosition_) {
+                const delta = this.selectionPivot_.position
+                    .clone()
+                    .sub(this.transformDragStartPosition_);
+                this.selectedMeshes_.forEach((mesh) => {
+                    var _a;
+                    const start = (_a = this.groupDragStartPositions_) === null || _a === void 0 ? void 0 : _a.get(mesh);
+                    if (start)
+                        mesh.position.copy(start.clone().add(delta));
+                });
+                this.syncHighlightPoolTo_(this.selectedMeshes_);
+            }
             this.render();
         });
         // Disables the OrbitControls while dragging an atom to avoid camera movement conflicts
         this.transformControls_.addEventListener("dragging-changed", (event) => {
-            var _a, _b, _c, _d, _e;
+            var _a, _b, _c, _d, _e, _f;
             if (event.value) {
                 this.orbitControlsEnabledBeforeDrag_ = (_b = (_a = this.orbitControls) === null || _a === void 0 ? void 0 : _a.enabled) !== null && _b !== void 0 ? _b : true;
                 if (this.orbitControls)
@@ -75,6 +105,12 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
                 // must not commit), and Esc can revert to it.
                 this.transformDragStartPosition_ =
                     (_e = (_d = (_c = this.transformControls_) === null || _c === void 0 ? void 0 : _c.object) === null || _d === void 0 ? void 0 : _d.position.clone()) !== null && _e !== void 0 ? _e : null;
+                if (((_f = this.transformControls_) === null || _f === void 0 ? void 0 : _f.object) === this.selectionPivot_) {
+                    this.groupDragStartPositions_ = new Map(this.selectedMeshes_.map((mesh) => [
+                        mesh,
+                        mesh.position.clone(),
+                    ]));
+                }
             }
             else {
                 if (this.orbitControls) {
@@ -91,9 +127,18 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
             const hasMoved = !!draggedObject &&
                 !!startPosition &&
                 draggedObject.position.distanceTo(startPosition) > DRAG_COMMIT_EPSILON;
-            if (!hasMoved || !draggedObject)
-                return;
-            this.commitMovedAtom_(draggedObject.userData.atomicIndex, draggedObject.position);
+            if (hasMoved && draggedObject) {
+                if (draggedObject === this.selectionPivot_) {
+                    this.commitMovedAtoms_(this.selectedMeshes_.map((mesh) => ({
+                        atomicIndex: mesh.userData.atomicIndex,
+                        position: mesh.position.clone(),
+                    })));
+                }
+                else {
+                    this.commitMovedAtom_(draggedObject.userData.atomicIndex, draggedObject.position);
+                }
+            }
+            this.groupDragStartPositions_ = null;
         });
     }
     /**
@@ -137,21 +182,41 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         haloMesh.visible = true;
     }
     /**
+     * Keeps exactly one visible halo per selected atom, reusing a pool rather than
+     * creating/disposing geometry on every selection change or drag-frame update.
+     */
+    syncHighlightPoolTo_(meshes) {
+        while (this.selectionHighlightPool_.length < meshes.length) {
+            const halo = this.createHighlightMesh_(SELECTION_HIGHLIGHT_COLOR, 0.9);
+            this.scene.add(halo);
+            this.selectionHighlightPool_.push(halo);
+        }
+        this.selectionHighlightPool_.forEach((halo, index) => {
+            var _a;
+            this.updateHighlightMesh_(halo, (_a = meshes[index]) !== null && _a !== void 0 ? _a : null);
+        });
+    }
+    /**
      * Initializes the pointer vector and Raycaster used both for click-to-select and for
      * direct click-and-drag: pressing down on an atom and moving the pointer drags that atom
      * in the camera-facing plane immediately, without needing to separately grab a gizmo
      * handle first. A plain click (press+release with negligible movement) still only
      * selects, via handlePointerDown() below, matching the original click-to-select behavior;
      * the gizmo remains available afterwards for precise axis-constrained edits.
+     *
+     * Pressing down on empty space starts a marquee-select instead (see
+     * updateMarqueeState_/finishMarqueeSelection_): orbiting the camera moves to a
+     * right-mouse-drag while in edit mode (see enableEditMode) so the two gestures don't
+     * collide on the same button (decision D-4).
      */
     initializeSelectionRaycaster() {
         this.raycaster_ = new THREE.Raycaster();
         this.pointer_ = new THREE.Vector2();
         this.handlePointerDownCapture_ = (event) => {
             var _a;
-            // Only the primary (left) button starts a selection or drag; a PointerEvent
-            // constructed without an explicit button (as synthetic test events often are)
-            // defaults to 0 per spec, so only reject an EXPLICIT non-zero button.
+            // Only the primary (left) button starts a selection, drag, or marquee; a
+            // PointerEvent constructed without an explicit button (as synthetic test events
+            // often are) defaults to 0 per spec, so only reject an EXPLICIT non-zero button.
             if (event.button !== undefined && event.button !== 0)
                 return;
             this.pointerDownPosition_ = { x: event.clientX, y: event.clientY };
@@ -164,8 +229,17 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
             if (this.transformControls_ && this.transformControls_.dragging)
                 return;
             this.pendingDragAtom_ = this.getAtomAtPointer(event);
+            if (!this.pendingDragAtom_) {
+                this.marqueeStartScreen_ = { x: event.clientX, y: event.clientY };
+                this.marqueeModifierAdd_ = event.shiftKey;
+                this.marqueeModifierToggle_ = event.ctrlKey || event.metaKey;
+            }
         };
         this.handlePointerMoveCapture_ = (event) => {
+            if (this.marqueeStartScreen_) {
+                this.updateMarqueeState_(event);
+                return;
+            }
             if (this.isEditModeEnabled_ && !this.pendingDragAtom_ && !this.isDraggingAtom_) {
                 this.updateHoverFromPointer_(event);
             }
@@ -187,11 +261,32 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
             const point = this.getPointerPlaneIntersection(event, this.dragPlane_);
             if (!point)
                 return;
-            this.pendingDragAtom_.position.copy(point.add(this.dragOffset_));
-            this.updateHighlightMesh_(this.selectionHighlightMesh_, this.pendingDragAtom_);
+            const newPosition = point.add(this.dragOffset_);
+            if (this.isDraggingGroup_ &&
+                this.groupDragStartPositions_ &&
+                this.pendingDragAtom_) {
+                const draggedStart = this.groupDragStartPositions_.get(this.pendingDragAtom_);
+                if (draggedStart) {
+                    const delta = newPosition.clone().sub(draggedStart);
+                    this.selectedMeshes_.forEach((mesh) => {
+                        var _a;
+                        const start = (_a = this.groupDragStartPositions_) === null || _a === void 0 ? void 0 : _a.get(mesh);
+                        if (start)
+                            mesh.position.copy(start.clone().add(delta));
+                    });
+                }
+            }
+            else {
+                this.pendingDragAtom_.position.copy(newPosition);
+            }
+            this.syncHighlightPoolTo_(this.selectedMeshes_);
             this.render();
         };
         this.handlePointerUpCapture_ = (event) => {
+            if (this.marqueeStartScreen_) {
+                this.finishMarqueeSelection_(event);
+                return;
+            }
             if (this.isDraggingAtom_ && this.pendingDragAtom_) {
                 this.endAtomDrag_();
                 return;
@@ -211,7 +306,12 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         // A pointercancel (browser/OS interrupts the gesture - e.g. a tab switch mid-drag)
         // must abandon the drag exactly like Esc: revert position, commit nothing.
         this.handlePointerCancelCapture_ = () => {
-            if (this.isDraggingAtom_) {
+            if (this.marqueeStartScreen_) {
+                this.hideMarqueeOverlay_();
+                this.marqueeStartScreen_ = null;
+                this.isMarqueeSelecting_ = false;
+            }
+            else if (this.isDraggingAtom_) {
                 this.cancelAtomDrag_();
             }
             else {
@@ -232,10 +332,10 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
             if (this.isDraggingAtom_ || ((_a = this.transformControls_) === null || _a === void 0 ? void 0 : _a.dragging)) {
                 this.cancelAtomDrag_();
             }
-            else if (this.selectedMesh_) {
-                this.clearSelectedAtom();
+            else if (this.selectedMeshes_.length > 0) {
+                this.clearSelection();
                 if (this.settings.onSelectionChanged) {
-                    this.settings.onSelectionChanged(null);
+                    this.settings.onSelectionChanged([]);
                 }
                 this.render();
             }
@@ -256,9 +356,130 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         this.renderer.domElement.style.cursor = atomUnderPointer ? "move" : "";
         this.render();
     }
+    // ---- Marquee (rubber-band) selection --------------------------------------------
+    /**
+     * Grows the marquee's screen-space rectangle as the pointer moves, activating it (and
+     * showing the overlay) only once the drag exceeds the same click-vs-drag threshold used
+     * for atom dragging, so a plain click on empty space still falls through to
+     * finishMarqueeSelection_'s deselect path instead of drawing a zero-size box.
+     */
+    updateMarqueeState_(event) {
+        if (!this.marqueeStartScreen_)
+            return;
+        const distance = Math.sqrt((event.clientX - this.marqueeStartScreen_.x) ** 2 +
+            (event.clientY - this.marqueeStartScreen_.y) ** 2);
+        if (!this.isMarqueeSelecting_) {
+            if (distance < DRAG_THRESHOLD_PX)
+                return;
+            this.isMarqueeSelecting_ = true;
+            this.showMarqueeOverlay_();
+        }
+        this.updateMarqueeOverlay_(event.clientX, event.clientY);
+    }
+    showMarqueeOverlay_() {
+        if (!this.marqueeOverlayElement_) {
+            const element = document.createElement("div");
+            element.style.position = "absolute";
+            element.style.border = `1px solid ${MARQUEE_BORDER_COLOR}`;
+            element.style.backgroundColor = MARQUEE_FILL_COLOR;
+            element.style.pointerEvents = "none";
+            element.style.zIndex = "10";
+            this.container.appendChild(element);
+            this.marqueeOverlayElement_ = element;
+        }
+        this.marqueeOverlayElement_.style.display = "block";
+        if (this.marqueeStartScreen_) {
+            this.updateMarqueeOverlay_(this.marqueeStartScreen_.x, this.marqueeStartScreen_.y);
+        }
+    }
+    updateMarqueeOverlay_(currentX, currentY) {
+        if (!this.marqueeOverlayElement_ || !this.marqueeStartScreen_)
+            return;
+        const containerRect = this.container.getBoundingClientRect();
+        const left = Math.min(this.marqueeStartScreen_.x, currentX) - containerRect.left;
+        const top = Math.min(this.marqueeStartScreen_.y, currentY) - containerRect.top;
+        const width = Math.abs(currentX - this.marqueeStartScreen_.x);
+        const height = Math.abs(currentY - this.marqueeStartScreen_.y);
+        this.marqueeOverlayElement_.style.left = `${left}px`;
+        this.marqueeOverlayElement_.style.top = `${top}px`;
+        this.marqueeOverlayElement_.style.width = `${width}px`;
+        this.marqueeOverlayElement_.style.height = `${height}px`;
+    }
+    hideMarqueeOverlay_() {
+        if (this.marqueeOverlayElement_)
+            this.marqueeOverlayElement_.style.display = "none";
+    }
+    /**
+     * Returns every atom whose projected screen position falls within the given
+     * (unordered) screen-space rectangle. Atoms behind the camera (or beyond the far
+     * plane) are excluded via the projected z check.
+     */
+    getAtomsInScreenRect_(rect) {
+        const boundingRectangle = this.renderer.domElement.getBoundingClientRect();
+        return this.collectAllAtoms().filter((atom) => {
+            const projected = atom.position.clone().project(this.camera);
+            if (projected.z < -1 || projected.z > 1)
+                return false;
+            const screenX = boundingRectangle.left + ((projected.x + 1) / 2) * boundingRectangle.width;
+            const screenY = boundingRectangle.top + ((1 - projected.y) / 2) * boundingRectangle.height;
+            return (screenX >= rect.left &&
+                screenX <= rect.right &&
+                screenY >= rect.top &&
+                screenY <= rect.bottom);
+        });
+    }
+    /**
+     * Resolves a completed (or abandoned) marquee gesture. A release before crossing the
+     * drag threshold is just a plain click on empty space, so it falls through to the
+     * existing handlePointerDown click-to-deselect/select path rather than selecting an
+     * empty rectangle.
+     */
+    finishMarqueeSelection_(event) {
+        const wasSelecting = this.isMarqueeSelecting_;
+        const startScreen = this.marqueeStartScreen_;
+        const addModifier = this.marqueeModifierAdd_;
+        const toggleModifier = this.marqueeModifierToggle_;
+        this.hideMarqueeOverlay_();
+        this.marqueeStartScreen_ = null;
+        this.isMarqueeSelecting_ = false;
+        if (!wasSelecting || !startScreen) {
+            this.handlePointerDown(event);
+            return;
+        }
+        const rect = {
+            left: Math.min(startScreen.x, event.clientX),
+            right: Math.max(startScreen.x, event.clientX),
+            top: Math.min(startScreen.y, event.clientY),
+            bottom: Math.max(startScreen.y, event.clientY),
+        };
+        const hits = this.getAtomsInScreenRect_(rect);
+        let nextSelection;
+        if (toggleModifier) {
+            const hitSet = new Set(hits);
+            const kept = this.selectedMeshes_.filter((mesh) => !hitSet.has(mesh));
+            const added = hits.filter((mesh) => !this.selectedMeshes_.includes(mesh));
+            nextSelection = [...kept, ...added];
+        }
+        else if (addModifier) {
+            const added = hits.filter((mesh) => !this.selectedMeshes_.includes(mesh));
+            nextSelection = [...this.selectedMeshes_, ...added];
+        }
+        else {
+            nextSelection = hits;
+        }
+        this.setSelectedAtomMeshes(nextSelection);
+        if (this.settings.onSelectionChanged) {
+            this.settings.onSelectionChanged(nextSelection.map((mesh) => mesh.userData.atomicIndex));
+        }
+        this.render();
+    }
+    // ---- Direct atom drag (single or, for a multi-selected atom, the whole group) -----
     /**
      * Selects the pending atom and sets up the camera-facing drag plane through its current
-     * position, offset so the atom doesn't jump to snap its center to the cursor.
+     * position, offset so the atom doesn't jump to snap its center to the cursor. If the
+     * pressed atom is already part of a multi-selection, the whole selection drags together
+     * rigidly (matching standard multi-select conventions) instead of collapsing to just the
+     * pressed atom.
      */
     beginAtomDrag_(event) {
         var _a, _b;
@@ -266,9 +487,18 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
             return;
         this.isDraggingAtom_ = true;
         this.dragStartPosition_ = this.pendingDragAtom_.position.clone();
-        this.setSelectedAtomMesh(this.pendingDragAtom_);
-        if (this.settings.onSelectionChanged) {
-            this.settings.onSelectionChanged(this.pendingDragAtom_.userData.atomicIndex);
+        this.isDraggingGroup_ =
+            this.selectedMeshes_.length > 1 &&
+                this.selectedMeshes_.includes(this.pendingDragAtom_);
+        if (this.isDraggingGroup_) {
+            this.groupDragStartPositions_ = new Map(this.selectedMeshes_.map((mesh) => [mesh, mesh.position.clone()]));
+        }
+        else {
+            this.groupDragStartPositions_ = null;
+            this.setSelectedAtomMesh(this.pendingDragAtom_);
+            if (this.settings.onSelectionChanged) {
+                this.settings.onSelectionChanged([this.pendingDragAtom_.userData.atomicIndex]);
+            }
         }
         this.orbitControlsEnabledBeforeDrag_ = (_b = (_a = this.orbitControls) === null || _a === void 0 ? void 0 : _a.enabled) !== null && _b !== void 0 ? _b : true;
         if (this.orbitControls)
@@ -289,35 +519,60 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
             : new THREE.Vector3();
     }
     /**
-     * Finalizes a direct atom drag: restores camera orbiting and commits the moved atom as
-     * a single delta applied to the current material (see commitMovedAtom_).
+     * Finalizes a direct atom (or group) drag: restores camera orbiting and commits the
+     * moved atom(s) as a single delta applied to the current material (see
+     * commitMovedAtom_/commitMovedAtoms_) - one history entry regardless of how many atoms
+     * moved.
      */
     endAtomDrag_() {
         const atom = this.pendingDragAtom_;
+        const wasGroup = this.isDraggingGroup_;
+        const groupMeshes = wasGroup ? [...this.selectedMeshes_] : null;
         this.releaseActiveDragPointer_();
         this.isDraggingAtom_ = false;
+        this.isDraggingGroup_ = false;
+        this.groupDragStartPositions_ = null;
         this.pendingDragAtom_ = null;
         this.pointerDownPosition_ = null;
         this.dragStartPosition_ = null;
         if (this.orbitControls)
             this.orbitControls.enabled = this.orbitControlsEnabledBeforeDrag_;
         this.renderer.domElement.style.cursor = "";
-        if (atom) {
+        if (wasGroup && groupMeshes) {
+            this.commitMovedAtoms_(groupMeshes.map((mesh) => ({
+                atomicIndex: mesh.userData.atomicIndex,
+                position: mesh.position.clone(),
+            })));
+        }
+        else if (atom) {
             this.commitMovedAtom_(atom.userData.atomicIndex, atom.position);
         }
     }
     /**
-     * Abandons an in-progress direct atom drag (Esc / pointercancel): snaps the atom back to
-     * its pre-drag position and reports nothing - no history entry, no callback.
+     * Abandons an in-progress direct atom (or group) drag (Esc / pointercancel): snaps every
+     * dragged atom back to its pre-drag position and reports nothing - no history entry, no
+     * callback.
      */
     cancelAtomDrag_() {
-        if (this.pendingDragAtom_ && this.dragStartPosition_) {
+        if (this.isDraggingGroup_ && this.groupDragStartPositions_) {
+            this.selectedMeshes_.forEach((mesh) => {
+                var _a;
+                const start = (_a = this.groupDragStartPositions_) === null || _a === void 0 ? void 0 : _a.get(mesh);
+                if (start)
+                    mesh.position.copy(start);
+            });
+            this.syncHighlightPoolTo_(this.selectedMeshes_);
+            this.render();
+        }
+        else if (this.pendingDragAtom_ && this.dragStartPosition_) {
             this.pendingDragAtom_.position.copy(this.dragStartPosition_);
-            this.updateHighlightMesh_(this.selectionHighlightMesh_, this.pendingDragAtom_);
+            this.syncHighlightPoolTo_(this.selectedMeshes_);
             this.render();
         }
         this.releaseActiveDragPointer_();
         this.isDraggingAtom_ = false;
+        this.isDraggingGroup_ = false;
+        this.groupDragStartPositions_ = null;
         this.pendingDragAtom_ = null;
         this.pointerDownPosition_ = null;
         this.dragStartPosition_ = null;
@@ -372,7 +627,10 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
     }
     /**
      * Handles a plain click (no drag) on the canvas to select an atom mesh and attach the
-     * transform gizmo, or to deselect when clicking empty space.
+     * transform gizmo, or to deselect when clicking empty space. Shift+click adds to the
+     * current selection, Ctrl/Cmd+click toggles a single atom in/out of it; Shift/Ctrl+click
+     * on empty space is a no-op (the current selection is left alone rather than being
+     * surprisingly cleared mid-multi-select).
      * @param {PointerEvent} event - Native browser pointer event.
      */
     handlePointerDown(event) {
@@ -383,91 +641,172 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
             return;
         const selectedAtomMesh = this.getAtomAtPointer(event);
         if (selectedAtomMesh) {
-            this.setSelectedAtomMesh(selectedAtomMesh);
+            const isAlreadySelected = this.selectedMeshes_.includes(selectedAtomMesh);
+            let nextSelection;
+            if (event.ctrlKey || event.metaKey) {
+                nextSelection = isAlreadySelected
+                    ? this.selectedMeshes_.filter((mesh) => mesh !== selectedAtomMesh)
+                    : [...this.selectedMeshes_, selectedAtomMesh];
+            }
+            else if (event.shiftKey) {
+                nextSelection = isAlreadySelected
+                    ? this.selectedMeshes_
+                    : [...this.selectedMeshes_, selectedAtomMesh];
+            }
+            else {
+                nextSelection = [selectedAtomMesh];
+            }
+            this.setSelectedAtomMeshes(nextSelection);
             if (this.settings.onSelectionChanged) {
-                this.settings.onSelectionChanged(selectedAtomMesh.userData.atomicIndex);
+                this.settings.onSelectionChanged(nextSelection.map((mesh) => mesh.userData.atomicIndex));
             }
             this.render();
         }
-        else {
-            // Clicking on empty space detaches the transform controls gizmo
-            this.clearSelectedAtom();
+        else if (!event.shiftKey && !event.ctrlKey && !event.metaKey) {
+            // Clicking on empty space (with no modifier) detaches the transform controls gizmo
+            this.clearSelection();
             if (this.settings.onSelectionChanged) {
-                this.settings.onSelectionChanged(null);
+                this.settings.onSelectionChanged([]);
             }
             this.render();
         }
     }
     /**
-     * Highlights the given atom mesh and attaches the transform gizmo to it.
+     * Highlights the given atom mesh and attaches the transform gizmo to it. Thin
+     * single-atom wrapper over setSelectedAtomMeshes, kept for callers/tests that only ever
+     * deal with one atom at a time.
      */
     setSelectedAtomMesh(atomMesh) {
-        var _a;
-        this.selectedMesh_ = atomMesh;
-        this.lastSelectedAtomicIndex_ = (_a = atomMesh.userData.atomicIndex) !== null && _a !== void 0 ? _a : null;
-        this.updateHighlightMesh_(this.selectionHighlightMesh_, atomMesh);
-        if (this.transformControls_)
-            this.transformControls_.attach(atomMesh);
+        this.setSelectedAtomMeshes([atomMesh]);
     }
     /**
-     * Clears the current atom selection, removes its highlight, and detaches the gizmo.
-     * @param {boolean} forgetLastSelection - Also forget the remembered index used to
+     * Sets the full multi-atom selection: highlights every selected atom via the halo pool,
+     * and attaches the gizmo directly to the sole atom (single selection) or to a pivot at
+     * the selection's centroid (2+ atoms), so a group drag moves every selected atom rigidly
+     * (see beginAtomDrag_/the TransformControls "change"/"mouseUp" listeners).
+     */
+    setSelectedAtomMeshes(meshes) {
+        this.selectedMeshes_ = meshes;
+        this.selectedMesh_ = meshes.length > 0 ? meshes[meshes.length - 1] : null;
+        if (meshes.length > 0) {
+            this.lastSelectedAtomicIndices_ = meshes.map((mesh) => mesh.userData.atomicIndex);
+        }
+        this.syncHighlightPoolTo_(meshes);
+        if (meshes.length === 0) {
+            if (this.transformControls_)
+                this.transformControls_.detach();
+        }
+        else if (meshes.length === 1) {
+            if (this.transformControls_)
+                this.transformControls_.attach(meshes[0]);
+        }
+        else {
+            this.attachPivotToSelection_();
+        }
+    }
+    /**
+     * Repositions the group-transform pivot at the current selection's centroid and attaches
+     * the gizmo to it.
+     */
+    attachPivotToSelection_() {
+        if (!this.selectionPivot_ || this.selectedMeshes_.length === 0)
+            return;
+        const centroid = new THREE.Vector3();
+        this.selectedMeshes_.forEach((mesh) => centroid.add(mesh.position));
+        centroid.divideScalar(this.selectedMeshes_.length);
+        this.selectionPivot_.position.copy(centroid);
+        if (this.transformControls_)
+            this.transformControls_.attach(this.selectionPivot_);
+    }
+    /**
+     * Clears the current atom selection, removes its highlight(s), and detaches the gizmo.
+     * @param {boolean} forgetLastSelection - Also forget the remembered indices used to
      * restore selection when edit mode is re-enabled (see enableEditMode). Defaults to true
      * for an explicit user deselect; enableEditMode(false) passes false so toggling edit
      * mode off and back on preserves the selection (R12).
      */
-    clearSelectedAtom(forgetLastSelection = true) {
-        this.selectedMesh_ = null;
-        this.updateHighlightMesh_(this.selectionHighlightMesh_, null);
+    clearSelection(forgetLastSelection = true) {
+        this.setSelectedAtomMeshes([]);
         if (forgetLastSelection)
-            this.lastSelectedAtomicIndex_ = null;
-        if (this.transformControls_)
-            this.transformControls_.detach();
+            this.lastSelectedAtomicIndices_ = null;
     }
     /**
-     * Re-attaches the selection/gizmo to the atom mesh with the given atomicIndex.
+     * Single-atom-named alias for clearSelection, kept for existing callers/tests.
+     */
+    clearSelectedAtom(forgetLastSelection = true) {
+        this.clearSelection(forgetLastSelection);
+    }
+    /**
+     * Re-attaches the selection/gizmo to the atom meshes with the given atomicIndices.
      * Used after a scene rebuild, since rebuilding replaces every atom mesh instance and
-     * would otherwise leave the gizmo attached to a mesh that no longer exists in the scene.
-     * Clears the selection if no atom with a matching index exists any more (e.g. it was deleted).
+     * would otherwise leave the gizmo attached to mesh(es) that no longer exist in the scene.
+     * Clears the selection if none of the given indices match any atom any more (e.g. it was
+     * deleted). Indices with no match are silently dropped rather than clearing everything,
+     * so removing one atom out of a multi-selection keeps the rest selected.
+     */
+    reselectAtomsByIndices(atomicIndices) {
+        if (!atomicIndices || atomicIndices.length === 0)
+            return;
+        const validIndices = atomicIndices.filter((index) => index !== null && index !== undefined);
+        if (validIndices.length === 0)
+            return;
+        const matches = this.collectAllAtoms().filter((atom) => validIndices.includes(atom.userData.atomicIndex));
+        this.setSelectedAtomMeshes(matches);
+    }
+    /**
+     * Single-index-named alias for reselectAtomsByIndices, kept for existing callers/tests.
      */
     reselectAtomByIndex(atomicIndex) {
-        if (atomicIndex === null || atomicIndex === undefined)
-            return;
-        const match = this.collectAllAtoms().find((atom) => atom.userData.atomicIndex === atomicIndex);
-        if (match) {
-            this.setSelectedAtomMesh(match);
-        }
-        else {
-            this.clearSelectedAtom();
-        }
+        this.reselectAtomsByIndices([atomicIndex]);
     }
     /**
      * Enables or disables edit mode interactions and controls visibility. Disabling
-     * preserves the selected atom's index (see clearSelectedAtom) so re-enabling edit mode
-     * restores it (R12) rather than always starting deselected.
+     * preserves the selection's indices (see clearSelection) so re-enabling edit mode
+     * restores it (R12) rather than always starting deselected. While enabled, remaps the
+     * OrbitControls left mouse button off (freeing it for marquee-select on empty space) and
+     * moves camera rotation onto the right mouse button (decision D-4); the defaults are
+     * restored on disable.
      * @param {boolean} enabled - True to enable, false to disable.
      */
     enableEditMode(enabled) {
-        var _a, _b;
         this.isEditModeEnabled_ = enabled;
+        if (this.orbitControls) {
+            if (enabled) {
+                this.orbitControlsDefaultMouseButtons_ = { ...this.orbitControls.mouseButtons };
+                this.orbitControls.mouseButtons = {
+                    ...this.orbitControls.mouseButtons,
+                    LEFT: null,
+                    RIGHT: THREE.MOUSE.ROTATE,
+                };
+            }
+            else if (this.orbitControlsDefaultMouseButtons_) {
+                this.orbitControls.mouseButtons = this.orbitControlsDefaultMouseButtons_;
+                this.orbitControlsDefaultMouseButtons_ = null;
+            }
+        }
         if (!enabled) {
             if (this.isDraggingAtom_)
                 this.cancelAtomDrag_();
+            if (this.isMarqueeSelecting_ || this.marqueeStartScreen_) {
+                this.hideMarqueeOverlay_();
+                this.marqueeStartScreen_ = null;
+                this.isMarqueeSelecting_ = false;
+            }
             this.hoveredMesh_ = null;
             this.updateHighlightMesh_(this.hoverHighlightMesh_, null);
             this.renderer.domElement.style.cursor = "";
             if (this.transformControls_) {
-                this.clearSelectedAtom(false);
+                this.clearSelection(false);
                 if (this.settings.onSelectionChanged) {
-                    this.settings.onSelectionChanged(null);
+                    this.settings.onSelectionChanged([]);
                 }
                 this.render();
             }
         }
-        else if (this.lastSelectedAtomicIndex_ !== null) {
-            this.reselectAtomByIndex(this.lastSelectedAtomicIndex_);
+        else if (this.lastSelectedAtomicIndices_) {
+            this.reselectAtomsByIndices(this.lastSelectedAtomicIndices_);
             if (this.settings.onSelectionChanged) {
-                this.settings.onSelectionChanged((_b = (_a = this.selectedMesh_) === null || _a === void 0 ? void 0 : _a.userData.atomicIndex) !== null && _b !== void 0 ? _b : null);
+                this.settings.onSelectionChanged(this.selectedMeshes_.map((mesh) => mesh.userData.atomicIndex));
             }
         }
     }
@@ -533,16 +872,22 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         this.rebuildScene();
         this.reselectAtomByIndex(newIndex);
         if (this.settings.onSelectionChanged) {
-            this.settings.onSelectionChanged(newIndex);
+            this.settings.onSelectionChanged([newIndex]);
         }
         if (this.settings.onStructureModified) {
             this.settings.onStructureModified(newMaterial);
         }
     }
     /**
-     * Removes the currently selected atom from the structure.
+     * Removes the currently selected atom(s) from the structure - the whole multi-selection
+     * if 2+ atoms are selected (as one commit, one history entry), or the single selected
+     * atom otherwise.
      */
     removeSelectedAtom() {
+        if (this.selectedMeshes_.length > 1) {
+            this.removeSelectedAtoms_();
+            return;
+        }
         if (!this.selectedMesh_)
             return;
         const targetIndex = this.selectedMesh_.userData.atomicIndex;
@@ -558,9 +903,41 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
                 basis.constraints = basis.constraints.filter((constraint) => constraint.id !== removedId);
             }
         });
-        this.clearSelectedAtom();
+        this.clearSelection();
         if (this.settings.onSelectionChanged) {
-            this.settings.onSelectionChanged(null);
+            this.settings.onSelectionChanged([]);
+        }
+        this.setStructure(newMaterial);
+        this.structureGroup.name = newMaterial.name || newMaterial.formula;
+        this.rebuildScene();
+        if (this.settings.onStructureModified) {
+            this.settings.onStructureModified(newMaterial);
+        }
+    }
+    /**
+     * Removes every currently multi-selected atom as a single delta/commit.
+     */
+    removeSelectedAtoms_() {
+        const targetIndices = new Set(this.selectedMeshes_.map((mesh) => mesh.userData.atomicIndex));
+        if (targetIndices.size === 0)
+            return;
+        const newMaterial = this.applyBasisDelta_((basis) => {
+            var _a, _b;
+            const removedIds = new Set([...targetIndices]
+                .map((index) => { var _a; return (_a = basis.elements[index]) === null || _a === void 0 ? void 0 : _a.id; })
+                .filter((id) => id !== undefined));
+            basis.elements = basis.elements.filter((_element, index) => !targetIndices.has(index));
+            basis.coordinates = basis.coordinates.filter((_coordinate, index) => !targetIndices.has(index));
+            if ((_a = basis.labels) === null || _a === void 0 ? void 0 : _a.length) {
+                basis.labels = basis.labels.filter((label) => !removedIds.has(label.id));
+            }
+            if ((_b = basis.constraints) === null || _b === void 0 ? void 0 : _b.length) {
+                basis.constraints = basis.constraints.filter((constraint) => !removedIds.has(constraint.id));
+            }
+        });
+        this.clearSelection();
+        if (this.settings.onSelectionChanged) {
+            this.settings.onSelectionChanged([]);
         }
         this.setStructure(newMaterial);
         this.structureGroup.name = newMaterial.name || newMaterial.formula;
@@ -576,16 +953,27 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
      * wave.js), so no explicit reselect is needed here for the move case.
      */
     commitMovedAtom_(atomicIndex, cartesianPosition) {
+        this.commitMovedAtoms_([{ atomicIndex, position: cartesianPosition }]);
+    }
+    /**
+     * Commits any number of moved atoms as a single delta/commit (one history entry) applied
+     * to the current material, then rebuilds the scene around it.
+     */
+    commitMovedAtoms_(moves) {
+        if (!moves.length)
+            return;
         const newMaterial = this.applyBasisDelta_((basis) => {
             const wasCartesian = basis.isInCartesianUnits;
             basis.toCartesian();
             const { coordinates } = basis;
-            if (!coordinates[atomicIndex])
-                return;
-            coordinates[atomicIndex] = {
-                ...coordinates[atomicIndex],
-                value: cartesianPosition.toArray(),
-            };
+            moves.forEach(({ atomicIndex, position }) => {
+                if (!coordinates[atomicIndex])
+                    return;
+                coordinates[atomicIndex] = {
+                    ...coordinates[atomicIndex],
+                    value: position.toArray(),
+                };
+            });
             basis.coordinates = coordinates;
             if (!wasCartesian)
                 basis.toCrystal();
@@ -620,13 +1008,17 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         if (this.transformControls_) {
             this.transformControls_.dispose();
         }
-        [this.selectionHighlightMesh_, this.hoverHighlightMesh_].forEach((haloMesh) => {
+        [...this.selectionHighlightPool_, this.hoverHighlightMesh_].forEach((haloMesh) => {
             if (!haloMesh)
                 return;
             this.scene.remove(haloMesh);
             haloMesh.geometry.dispose();
             haloMesh.material.dispose();
         });
+        if (this.marqueeOverlayElement_) {
+            this.marqueeOverlayElement_.remove();
+            this.marqueeOverlayElement_ = null;
+        }
         if (super.dispose)
             super.dispose();
     }

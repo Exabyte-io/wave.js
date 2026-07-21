@@ -5,9 +5,10 @@
 - ✅ **Spec written and approved**: [`docs/design/interactive-editor-spec.md`](../docs/design/interactive-editor-spec.md) — drives all further work on this feature.
 - ✅ **P0 implemented, tested, committed** — `97707ba`. Six critical/confirmed defects: camera-reset-on-every-edit (the original user-reported bug), phantom-atom scene extraction, non-periodic-boundary crash, dead edit-mode hotkey, no-op Rotate button, unauthenticated `postMessage` bridge.
 - ✅ **P1 implemented, tested, committed** — `03b1376` (reusable test helpers + manual smoke checklist) and `c2524a8` (architecture + polish). The core change: replaced "re-derive the whole material from the live Three.js scene on every edit" with basis-mutation deltas applied to the wave's own tracked material — the fix the D1/D5/D6/D7/D9 defect cluster hinged on. Also landed: drag pointer-capture/Esc-cancel, a dedicated selection/hover highlight channel, selection-without-reload, coordinate-field draft state, an identity-guarded material-prop reset, edit/measurement mode exclusivity, true-center add-atom placement, `dispose()`/`ResizeObserver` lifecycle cleanup, and keyboard shortcuts (Delete/Ctrl+Z/Ctrl+Shift+Z/Esc).
-- ⬜ **P2 not started** — intentionally. Every P2 item is gated on a product decision from spec §9 that's Timur's to make, not inferable from the spec itself.
+- ✅ **D-4 (multi-select) implemented, tested, committed** — see commit hash below. Rubber-band marquee select, Shift/Ctrl+click modifiers, group translate via gizmo pivot or direct drag on any selected atom, one commit/one history entry per group move, orbit rotate remapped to the right mouse button while editing. `onSelectionChanged` now reports an array of atomicIndices (breaking change from the P1 single-index contract; no external consumer existed yet, so this was safe).
+- ⬜ **Rest of P2 not started** — intentionally. Every remaining P2 item is gated on a product decision from spec §9 that's Timur's to make, not inferable from the spec itself.
 
-All three commits are pushed to `origin/feat/upgrade-2026-07-11-separated`. Full verification each phase: Jest suite green (115 tests passing after P1), `tsc --noEmit` clean, lint unchanged from baseline, live browser-tested.
+All commits are pushed to `origin/feat/upgrade-2026-07-11-separated` except the D-4 commit itself (not yet pushed as of this note). Full verification each phase: Jest suite green (127 tests passing after D-4, up from 115 after P1), `tsc --noEmit` clean, lint unchanged from baseline, live browser-tested (Shift+click, marquee overlay + hit-testing, group drag via gizmo and direct-drag, camera stability, one-commit-per-group-move all confirmed against the running dev server).
 
 ## What's outstanding: P2, gated on open decisions (spec §9)
 
@@ -16,7 +17,7 @@ All three commits are pushed to `origin/feat/upgrade-2026-07-11-separated`. Full
 | D-1 | Undo ownership (wave vs. host vs. both) | Open |
 | D-2 | Multi-material editing replacement (materials-designer's deleted "Multi-Material 3D Editor") | Open — explicitly deferred 2026-07-14, not decided |
 | D-3 | Transactionality (incremental vs. session commit/cancel vs. hybrid) | Open |
-| D-4 | Rubber-band multi-select vs. orbit-on-empty-space-drag | **Decided 2026-07-14: drag-on-empty-space = marquee select; orbit moves to right-mouse-drag.** Not yet implemented — this is the current next task. |
+| D-4 | Rubber-band multi-select vs. orbit-on-empty-space-drag | **Decided and implemented 2026-07-14.** Group translate only - group rotate stays deferred (blocked on single-atom Rotate mode returning, D4 defect fix) and double-click-selects-bonded-fragment stays deferred (needs bond connectivity data). |
 | D-5 | Default snap granularity (free/grid/lattice-site) | Open |
 | D-6 | Arrow-nudge axis frame (screen-relative vs. crystal-axis) | Open |
 | D-7 | Periodic wrapping of atoms dragged outside the cell | Open |

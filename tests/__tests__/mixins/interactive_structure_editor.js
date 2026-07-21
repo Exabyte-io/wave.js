@@ -1,6 +1,15 @@
 import expect from "expect";
+import * as THREE from "three";
 
 import { getWaveInstance } from "../../enums";
+import {
+    getWaveWithRecordedCallbacks,
+    projectMeshToScreen,
+    simulateAtomDrag,
+    simulateClick,
+    simulateMarqueeSelect,
+    stubCanvasRect,
+} from "../../helpers/editor";
 import { getEventObjectBy3DPosition } from "../../utils";
 
 describe("Interactive structure editor functionality tests", () => {
@@ -141,14 +150,16 @@ describe("Interactive structure editor functionality tests", () => {
 
     test("Click-and-drag directly on an atom (not the gizmo) moves it and reports the change", () => {
         let callbackMaterial = null;
-        let selectedIndex = null;
+        let selectedIndices = null;
 
         const wave = getWaveInstance({
             onStructureModified: (material) => {
                 callbackMaterial = material;
             },
-            onSelectionChanged: (index) => {
-                selectedIndex = index;
+            // onSelectionChanged now reports an array of atomicIndices (D-4: multi-select) -
+            // a single click/drag reports a one-element array.
+            onSelectionChanged: (indices) => {
+                selectedIndices = indices;
             },
         });
         wave.enableEditMode(true);
@@ -191,7 +202,7 @@ describe("Interactive structure editor functionality tests", () => {
             clientY: startEvent.layerY,
         });
         expect(wave.isDraggingAtom_).toBe(true);
-        expect(selectedIndex).toBe(firstAtom.userData.atomicIndex);
+        expect(selectedIndices).toEqual([firstAtom.userData.atomicIndex]);
         expect(wave.transformControls_.object).toBe(firstAtom);
 
         // Further movement should now visibly move the atom.
@@ -325,10 +336,10 @@ describe("Interactive structure editor functionality tests", () => {
     });
 
     test("Escape with no drag in progress deselects the current atom", () => {
-        let selectedIndex = "unset";
+        let selectedIndices = "unset";
         const wave = getWaveInstance({
-            onSelectionChanged: (index) => {
-                selectedIndex = index;
+            onSelectionChanged: (indices) => {
+                selectedIndices = indices;
             },
         });
         wave.enableEditMode(true);
@@ -339,7 +350,7 @@ describe("Interactive structure editor functionality tests", () => {
         document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
 
         expect(wave.selectedMesh_).toBeNull();
-        expect(selectedIndex).toBeNull();
+        expect(selectedIndices).toEqual([]);
     });
 
     test("A right-click does not start a pending drag or select an atom", () => {
@@ -455,5 +466,228 @@ describe("Interactive structure editor functionality tests", () => {
         expect(wave.hoveredMesh_).toBeNull();
         expect(wave.hoverHighlightMesh_.visible).toBe(false);
         expect(canvas.style.cursor).toBe("");
+    });
+
+    describe("Multi-select (D-4)", () => {
+        test("Shift+click adds an atom to the selection", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            simulateClick(wave, firstAtom);
+            expect(wave.selectedMeshes_).toEqual([firstAtom]);
+
+            const coords = projectMeshToScreen(wave, secondAtom);
+            wave.handlePointerDownCapture_({
+                clientX: coords.x,
+                clientY: coords.y,
+                shiftKey: true,
+            });
+            wave.handlePointerUpCapture_({ clientX: coords.x, clientY: coords.y, shiftKey: true });
+
+            expect(wave.selectedMeshes_).toEqual([firstAtom, secondAtom]);
+        });
+
+        test("Ctrl/Cmd+click toggles an atom out of the selection", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
+
+            const coords = projectMeshToScreen(wave, secondAtom);
+            wave.handlePointerDownCapture_({ clientX: coords.x, clientY: coords.y, ctrlKey: true });
+            wave.handlePointerUpCapture_({ clientX: coords.x, clientY: coords.y, ctrlKey: true });
+
+            expect(wave.selectedMeshes_).toEqual([firstAtom]);
+        });
+
+        test("Shift/Ctrl+click on empty space leaves the current selection alone", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const [firstAtom] = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes([firstAtom]);
+
+            wave.handlePointerDownCapture_({ clientX: -9999, clientY: -9999, shiftKey: true });
+            wave.handlePointerUpCapture_({ clientX: -9999, clientY: -9999, shiftKey: true });
+
+            expect(wave.selectedMeshes_).toEqual([firstAtom]);
+        });
+
+        test("Marquee-select on empty space selects every atom within the rectangle", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const atoms = wave.collectAllAtoms();
+            const screenPoints = atoms.map((atom) => projectMeshToScreen(wave, atom));
+            const margin = 60;
+            const rectStart = {
+                x: Math.min(...screenPoints.map((p) => p.x)) - margin,
+                y: Math.min(...screenPoints.map((p) => p.y)) - margin,
+            };
+            const rectEnd = {
+                x: Math.max(...screenPoints.map((p) => p.x)) + margin,
+                y: Math.max(...screenPoints.map((p) => p.y)) + margin,
+            };
+
+            simulateMarqueeSelect(wave, rectStart, rectEnd);
+
+            expect(wave.selectedMeshes_).toEqual(expect.arrayContaining(atoms));
+            expect(wave.selectedMeshes_.length).toBe(atoms.length);
+        });
+
+        test("Marquee-select with Shift adds to the existing selection instead of replacing it", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            // Select an atom that is NOT inside the upcoming marquee rectangle.
+            wave.setSelectedAtomMeshes([firstAtom]);
+
+            const secondScreen = projectMeshToScreen(wave, secondAtom);
+            simulateMarqueeSelect(
+                wave,
+                { x: secondScreen.x - 40, y: secondScreen.y - 40 },
+                { x: secondScreen.x + 40, y: secondScreen.y + 40 },
+                { shiftKey: true },
+            );
+
+            expect(wave.selectedMeshes_).toEqual(expect.arrayContaining([firstAtom, secondAtom]));
+            expect(wave.selectedMeshes_.length).toBe(2);
+        });
+
+        test("A marquee drag that never crosses the threshold behaves as a plain click on empty space", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const [firstAtom] = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes([firstAtom]);
+
+            simulateMarqueeSelect(wave, { x: -9999, y: -9999 }, { x: -9998, y: -9999 });
+
+            expect(wave.selectedMeshes_).toEqual([]);
+        });
+
+        test("Edit mode disables the left orbit button and moves rotation to the right button (D-4)", () => {
+            const wave = getWaveInstance({});
+            const defaultLeft = wave.orbitControls.mouseButtons.LEFT;
+
+            wave.enableEditMode(true);
+            expect(wave.orbitControls.mouseButtons.LEFT).toBeFalsy();
+            expect(wave.orbitControls.mouseButtons.RIGHT).toBe(THREE.MOUSE.ROTATE);
+
+            wave.enableEditMode(false);
+            expect(wave.orbitControls.mouseButtons.LEFT).toBe(defaultLeft);
+        });
+
+        test("Dragging one atom of a multi-selection moves the whole group together, as a single commit", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const secondStart = secondAtom.position.clone();
+            wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
+
+            const { startPosition, endPosition } = simulateAtomDrag(wave, firstAtom, 40, 30, {
+                assertIntermediateState: false,
+            });
+            const firstDelta = endPosition.clone().sub(startPosition);
+
+            expect(
+                secondAtom.position.clone().sub(secondStart).distanceTo(firstDelta),
+            ).toBeLessThan(1e-6);
+            expect(structureModifiedCalls.length).toBe(1);
+        });
+
+        test("Group drag via the gizmo pivot moves every selected atom and commits once", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+
+            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const firstStart = firstAtom.position.clone();
+            const secondStart = secondAtom.position.clone();
+            wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
+
+            expect(wave.transformControls_.object).toBe(wave.selectionPivot_);
+
+            // TransformControls' own `dragging` property has a setter (see defineProperty in
+            // its source) that auto-dispatches both "dragging-changed" and "change" - no need to
+            // dispatch "dragging-changed" separately. Its real pointerUp() dispatches "mouseUp"
+            // BEFORE setting dragging = false, so transformDragStartPosition_ (reset by this
+            // mixin's "dragging-changed" listener on the false transition) is still valid when
+            // the mouseUp handler reads it; this order must be preserved here too.
+            wave.transformControls_.dragging = true;
+            wave.selectionPivot_.position.x += 1;
+            wave.transformControls_.dispatchEvent({ type: "change" });
+            wave.transformControls_.dispatchEvent({ type: "mouseUp" });
+            wave.transformControls_.dragging = false;
+
+            expect(firstAtom.position.x - firstStart.x).toBeCloseTo(1, 6);
+            expect(secondAtom.position.x - secondStart.x).toBeCloseTo(1, 6);
+            expect(structureModifiedCalls.length).toBe(1);
+        });
+
+        test("Escape during a group drag reverts every atom and commits nothing", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const firstStart = firstAtom.position.clone();
+            const secondStart = secondAtom.position.clone();
+            wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
+
+            const start = projectMeshToScreen(wave, firstAtom);
+            wave.handlePointerDownCapture_({ clientX: start.x, clientY: start.y });
+            wave.handlePointerMoveCapture_({ clientX: start.x + 40, clientY: start.y });
+            expect(wave.isDraggingGroup_).toBe(true);
+            wave.handlePointerMoveCapture_({ clientX: start.x + 80, clientY: start.y + 20 });
+
+            document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+            expect(firstAtom.position.equals(firstStart)).toBe(true);
+            expect(secondAtom.position.equals(secondStart)).toBe(true);
+            expect(structureModifiedCalls.length).toBe(0);
+        });
+
+        test("Removing a multi-selection removes every selected atom as a single commit", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+
+            const atoms = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes(atoms);
+            const initialCount = atoms.length;
+
+            wave.removeSelectedAtom();
+
+            expect(wave.collectAllAtoms().length).toBe(initialCount - atoms.length);
+            expect(structureModifiedCalls.length).toBe(1);
+            expect(wave.selectedMeshes_).toEqual([]);
+        });
+
+        test("A multi-selection survives an edit-mode disable/re-enable cycle (R12, extended to groups)", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+
+            const atoms = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes(atoms);
+
+            wave.enableEditMode(false);
+            expect(wave.selectedMeshes_).toEqual([]);
+
+            wave.enableEditMode(true);
+            expect(wave.selectedMeshes_.length).toBe(atoms.length);
+            expect(wave.selectedMeshes_.map((mesh) => mesh.userData.atomicIndex).sort()).toEqual(
+                atoms.map((mesh) => mesh.userData.atomicIndex).sort(),
+            );
+        });
     });
 });

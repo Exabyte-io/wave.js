@@ -154,7 +154,8 @@ describe("tests/helpers/editor.js", () => {
         simulateAtomDrag(wave, firstAtom, 40, 0);
 
         expect(selectionChangedCalls.length).toBeGreaterThan(0);
-        expect(selectionChangedCalls[0][0]).toBe(firstAtom.userData.atomicIndex);
+        // onSelectionChanged reports an array of atomicIndices (D-4: multi-select).
+        expect(selectionChangedCalls[0][0]).toEqual([firstAtom.userData.atomicIndex]);
         expect(structureModifiedCalls.length).toBe(1);
     });
 

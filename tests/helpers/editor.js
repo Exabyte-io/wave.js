@@ -206,6 +206,58 @@ export function simulateAtomDrag(
 }
 
 /**
+ * Simulates a rubber-band marquee selection (D-4): pointerdown on empty space, drag past the
+ * click/drag threshold, pointerup - selecting every atom whose projected screen position
+ * falls within the rectangle between the two points. shiftKey/ctrlKey/metaKey mirror the
+ * modifiers handlePointerDownCapture_ reads (captured at marquee start) to decide how the
+ * marquee's hits combine with the existing selection on release - see finishMarqueeSelection_
+ * (replace/add/toggle).
+ * @param {import("../../src/wave").Wave} wave
+ * @param {{x: number, y: number}} startCoords - screen pixels of one corner (over empty space)
+ * @param {{x: number, y: number}} endCoords - screen pixels of the opposite corner
+ * @param {{shiftKey?: boolean, ctrlKey?: boolean, metaKey?: boolean, mode?: "direct"|"dispatch"}} [options]
+ */
+export function simulateMarqueeSelect(
+    wave,
+    startCoords,
+    endCoords,
+    { shiftKey = false, ctrlKey = false, metaKey = false, mode = "direct" } = {},
+) {
+    if (mode === "direct") {
+        wave.handlePointerDownCapture_({
+            clientX: startCoords.x,
+            clientY: startCoords.y,
+            button: 0,
+            shiftKey,
+            ctrlKey,
+            metaKey,
+        });
+        wave.handlePointerMoveCapture_({ clientX: endCoords.x, clientY: endCoords.y, button: -1 });
+        wave.handlePointerUpCapture_({ clientX: endCoords.x, clientY: endCoords.y, button: 0 });
+        return;
+    }
+
+    ensurePointerCaptureStubs(wave.renderer.domElement);
+    const canvas = wave.renderer.domElement;
+    const fire = (type, coords, button) =>
+        canvas.dispatchEvent(
+            new MouseEvent(type, {
+                bubbles: true,
+                cancelable: true,
+                clientX: coords.x,
+                clientY: coords.y,
+                button,
+                shiftKey,
+                ctrlKey,
+                metaKey,
+            }),
+        );
+    fire("pointerdown", startCoords, 0);
+    fire("pointermove", endCoords, -1);
+    fire("pointerup", endCoords, 0);
+}
+
+/**
  * Wraps getWaveInstance, recording every settings.* callback call the mixin makes
  * (onStructureModified, onSelectionChanged) into plain arrays instead of requiring each test
  * to hand-roll a closure. settingsOverrides is merged in on top, so a caller can still supply
