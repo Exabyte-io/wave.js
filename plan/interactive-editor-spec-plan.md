@@ -14,9 +14,9 @@ All three commits are pushed to `origin/feat/upgrade-2026-07-11-separated`. Full
 | # | Decision | Status |
 |---|---|---|
 | D-1 | Undo ownership (wave vs. host vs. both) | Open |
-| D-2 | Multi-material editing replacement (materials-designer's deleted "Multi-Material 3D Editor") | Open |
+| D-2 | Multi-material editing replacement (materials-designer's deleted "Multi-Material 3D Editor") | Open — explicitly deferred 2026-07-14, not decided |
 | D-3 | Transactionality (incremental vs. session commit/cancel vs. hybrid) | Open |
-| D-4 | Rubber-band multi-select vs. orbit-on-empty-space-drag | **Open — this is the actual blocker for "click-and-drag to select multiple atoms," asked about 2026-07-14** |
+| D-4 | Rubber-band multi-select vs. orbit-on-empty-space-drag | **Decided 2026-07-14: drag-on-empty-space = marquee select; orbit moves to right-mouse-drag.** Not yet implemented — this is the current next task. |
 | D-5 | Default snap granularity (free/grid/lattice-site) | Open |
 | D-6 | Arrow-nudge axis frame (screen-relative vs. crystal-axis) | Open |
 | D-7 | Periodic wrapping of atoms dragged outside the cell | Open |
