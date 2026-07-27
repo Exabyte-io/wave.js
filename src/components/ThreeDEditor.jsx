@@ -2,9 +2,8 @@
 // import "../MuiClassNameSetup";
 
 import { DarkMaterialUITheme } from "@mat3ra/cove/dist/theme";
-import ThemeProvider from "@mat3ra/cove/dist/theme/provider";
+import ThemeProvider, { AlertProvider } from "@mat3ra/cove/dist/theme/provider";
 import { exportToDisk } from "@mat3ra/cove/dist/utils/downloader";
-import { AlertProvider } from "@mat3ra/cove/src/theme/provider";
 import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
