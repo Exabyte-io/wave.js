@@ -165,7 +165,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
                     this.commitMovedAtoms_(this.selectedMeshes_.map((mesh) => ({
                         atomicIndex: mesh.userData.atomicIndex,
                         position: mesh.position.clone(),
-                    })));
+                    })), "gizmo");
                     if (wasRotate) {
                         // The pivot's rotation is relative to each drag, not cumulative
                         // across drags - the atoms' new positions already encode the
@@ -174,7 +174,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
                     }
                 }
                 else {
-                    this.commitMovedAtom_(draggedObject.userData.atomicIndex, draggedObject.position);
+                    this.commitMovedAtom_(draggedObject.userData.atomicIndex, draggedObject.position, "gizmo");
                 }
             }
             this.groupDragStartPositions_ = null;
@@ -598,10 +598,10 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
             this.commitMovedAtoms_(groupMeshes.map((mesh) => ({
                 atomicIndex: mesh.userData.atomicIndex,
                 position: mesh.position.clone(),
-            })));
+            })), "drag");
         }
         else if (atom) {
-            this.commitMovedAtom_(atom.userData.atomicIndex, atom.position);
+            this.commitMovedAtom_(atom.userData.atomicIndex, atom.position, "drag");
         }
     }
     /**
@@ -1008,7 +1008,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         // from whatever was selected before Add Atom ran).
         this.reselectAtomByIndex(newIndex);
         if (this.settings.onStructureModified) {
-            this.settings.onStructureModified(newMaterial);
+            this.settings.onStructureModified(newMaterial, "add");
         }
     }
     /**
@@ -1044,7 +1044,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         this.structureGroup.name = newMaterial.name || newMaterial.formula;
         this.rebuildScene();
         if (this.settings.onStructureModified) {
-            this.settings.onStructureModified(newMaterial);
+            this.settings.onStructureModified(newMaterial, "remove");
         }
     }
     /**
@@ -1076,7 +1076,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         this.structureGroup.name = newMaterial.name || newMaterial.formula;
         this.rebuildScene();
         if (this.settings.onStructureModified) {
-            this.settings.onStructureModified(newMaterial);
+            this.settings.onStructureModified(newMaterial, "remove");
         }
     }
     /**
@@ -1138,7 +1138,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         // from whatever was selected going in).
         this.reselectAtomsByIndices(newIndices);
         if (this.settings.onStructureModified) {
-            this.settings.onStructureModified(newMaterial);
+            this.settings.onStructureModified(newMaterial, "clone");
         }
     }
     /**
@@ -1182,14 +1182,17 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
      * itself preserves the selection/gizmo across the rebuild when in edit mode (see
      * wave.js), so no explicit reselect is needed here for the move case.
      */
-    commitMovedAtom_(atomicIndex, cartesianPosition) {
-        this.commitMovedAtoms_([{ atomicIndex, position: cartesianPosition }]);
+    commitMovedAtom_(atomicIndex, cartesianPosition, source) {
+        this.commitMovedAtoms_([{ atomicIndex, position: cartesianPosition }], source);
     }
     /**
      * Commits any number of moved atoms as a single delta/commit (one history entry) applied
-     * to the current material, then rebuilds the scene around it.
+     * to the current material, then rebuilds the scene around it. `source` (spec Sec6.2's
+     * onEditCommit contract - "drag" for a direct body-drag, "gizmo" for a TransformControls
+     * drag) is forwarded to onStructureModified so ThreeDEditor.jsx can pass it on to a host's
+     * onEditCommit without having to re-infer which gesture produced this commit.
      */
-    commitMovedAtoms_(moves) {
+    commitMovedAtoms_(moves, source) {
         if (!moves.length)
             return;
         const newMaterial = this.applyBasisDelta_((basis) => {
@@ -1211,7 +1214,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         this.setStructure(newMaterial);
         this.rebuildScene();
         if (this.settings.onStructureModified) {
-            this.settings.onStructureModified(newMaterial);
+            this.settings.onStructureModified(newMaterial, source);
         }
     }
     /**

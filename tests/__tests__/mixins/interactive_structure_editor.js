@@ -1147,4 +1147,102 @@ describe("Interactive structure editor functionality tests", () => {
             expect(structureModifiedCalls.length).toBe(0);
         });
     });
+
+    describe("onEditCommit source tagging (spec §6.2)", () => {
+        // onStructureModified(material, source) is the mixin-level half of spec §6.2's
+        // onEditCommit(material, {source}) contract - ThreeDEditor.jsx forwards this second
+        // argument as-is. Verifying it at this layer (rather than only end-to-end through the
+        // component) pins down exactly which mixin method is responsible for which source value,
+        // independent of the React-side plumbing.
+        test("A direct body-drag commits with source 'drag'", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const [firstAtom] = wave.collectSelectableAtoms();
+            simulateAtomDrag(wave, firstAtom, 40, 30);
+
+            expect(structureModifiedCalls.length).toBe(1);
+            const [, source] = structureModifiedCalls[0];
+            expect(source).toBe("drag");
+        });
+
+        test("A group gizmo commit (translate or rotate) commits with source 'gizmo'", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+
+            const atoms = wave.collectSelectableAtoms();
+            wave.setSelectedAtomMeshes(atoms);
+
+            wave.transformControls_.dragging = true;
+            wave.selectionPivot_.position.x += 1;
+            wave.transformControls_.dispatchEvent({ type: "change" });
+            wave.transformControls_.dispatchEvent({ type: "mouseUp" });
+            wave.transformControls_.dragging = false;
+
+            expect(structureModifiedCalls.length).toBe(1);
+            const [, source] = structureModifiedCalls[0];
+            expect(source).toBe("gizmo");
+        });
+
+        test("A single-atom gizmo commit also commits with source 'gizmo'", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            const [firstAtom] = wave.collectSelectableAtoms();
+            wave.setSelectedAtomMesh(firstAtom);
+
+            wave.transformControls_.dragging = true;
+            firstAtom.position.x += 1;
+            wave.transformControls_.dispatchEvent({ type: "change" });
+            wave.transformControls_.dispatchEvent({ type: "mouseUp" });
+            wave.transformControls_.dragging = false;
+
+            expect(structureModifiedCalls.length).toBe(1);
+            const [, source] = structureModifiedCalls[0];
+            expect(source).toBe("gizmo");
+        });
+
+        test("Add Atom commits with source 'add'", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.addAtom("Si", [0, 0, 0]);
+
+            expect(structureModifiedCalls.length).toBe(1);
+            const [, source] = structureModifiedCalls[0];
+            expect(source).toBe("add");
+        });
+
+        test("Removing a single atom commits with source 'remove'", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            const [firstAtom] = wave.collectSelectableAtoms();
+            wave.selectedMesh_ = firstAtom;
+            wave.removeSelectedAtom();
+
+            expect(structureModifiedCalls.length).toBe(1);
+            const [, source] = structureModifiedCalls[0];
+            expect(source).toBe("remove");
+        });
+
+        test("Removing a multi-selection commits with source 'remove'", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            const atoms = wave.collectSelectableAtoms();
+            wave.setSelectedAtomMeshes(atoms);
+            wave.removeSelectedAtom();
+
+            expect(structureModifiedCalls.length).toBe(1);
+            const [, source] = structureModifiedCalls[0];
+            expect(source).toBe("remove");
+        });
+
+        test("Cloning commits with source 'clone'", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            const [firstAtom] = wave.collectSelectableAtoms();
+            wave.setSelectedAtomMeshes([firstAtom]);
+            wave.cloneSelectedAtoms();
+
+            expect(structureModifiedCalls.length).toBe(1);
+            const [, source] = structureModifiedCalls[0];
+            expect(source).toBe("clone");
+        });
+    });
 });

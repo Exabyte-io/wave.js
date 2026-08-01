@@ -61,7 +61,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleToggleOrbitControls(): void;
     handleToggleOrbitControlsAnimation(): void;
     handleToggleAxes(): void;
-    handleStructureModified(newMaterial: any): void;
+    handleStructureModified(newMaterial: any, source: any): void;
     handleUndo(): void;
     handleRedo(): void;
     /**
@@ -176,9 +176,12 @@ export class ThreeDEditor extends React.Component<any, any, any> {
      * Pushes a material to the viewer via the official setStructure()/rebuildScene() path and
      * notifies the parent. Used as the setState callback for every history-affecting change
      * (edit, undo, redo) once bypassReloadViewer has already been set so WaveComponent's own
-     * prop-driven reload doesn't race with it.
+     * prop-driven reload doesn't race with it. `source` is spec Sec6.2's onEditCommit contract
+     * (`drag`/`gizmo`/`coordinate-input`/`element-input`/`add`/`remove`/`clone`/`undo`/`redo`) -
+     * forwarded alongside the back-compat `onUpdate` channel so a host can record history without
+     * double-counting instead of having to re-infer what kind of edit just happened.
      */
-    _applyMaterialToViewer(material: any): void;
+    _applyMaterialToViewer(material: any, source: any): void;
     _getWaveProperty(name: any): any;
     /**
      * Returns a cover div to cover the area and prevent user interaction with component
@@ -345,6 +348,7 @@ export namespace ThreeDEditor {
         let isConventionalCellShown: PropTypes.Requireable<boolean>;
         let boundaryConditions: PropTypes.Requireable<object>;
         let onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
+        let onEditCommit: PropTypes.Requireable<(...args: any[]) => any>;
         let onEditModeChanged: PropTypes.Requireable<(...args: any[]) => any>;
         let onSelectionChanged: PropTypes.Requireable<(...args: any[]) => any>;
         let isStandalone: PropTypes.Requireable<boolean>;
@@ -358,6 +362,8 @@ export namespace ThreeDEditor {
         export { isConventionalCellShown_1 as isConventionalCellShown };
         let onUpdate_1: undefined;
         export { onUpdate_1 as onUpdate };
+        let onEditCommit_1: undefined;
+        export { onEditCommit_1 as onEditCommit };
         let onEditModeChanged_1: undefined;
         export { onEditModeChanged_1 as onEditModeChanged };
         let onSelectionChanged_1: undefined;

@@ -300,7 +300,7 @@ Diagram: **[data-flow.svg](./assets/data-flow.svg)**. The old modal contract (`m
 | Callback | Cadence | Purpose |
 |---|---|---|
 | `onUpdate(material′)` | Once per committed edit | Back-compat channel (existing MD wiring) |
-| `onEditCommit(material′, {source})` | Once per committed edit | `source ∈ drag · gizmo · coordinate-input · add · remove · undo · redo` — lets hosts record history without double-counting |
+| `onEditCommit(material′, {source})` | Once per committed edit | **Shipped 2026-08-01.** `source ∈ drag · gizmo · coordinate-input · element-input · add · remove · clone · undo · redo` (`element-input` and `clone` added to the original 7-value enum for this round's type-to-change and clone-atom features) — lets hosts record history without double-counting |
 | `onSelectionChanged(atomicIndices)` | On selection change | Promoted to a public prop (MD's selection footer needs it — gap #6). **Signature updated 2026-07-14 for D-4 (multi-select): reports an array, not a single index-or-null** — `[]` for none, one entry for the common single-atom case, 2+ for a group. This is a breaking change from the single-index contract this section originally specified; no external consumer existed yet (materials-designer is pinned to the pre-P0 export, unaffected) |
 | `onEditModeChanged(isActive)` | On toggle | Hosts disable conflicting UI |
 | `onEditSessionStart(material)` / `onEditSessionEnd(finalOrNull)` | Session bounds | Optional transactional layer (decision D-3): `null` = cancelled; restores the modal's commit-or-discard guarantee |

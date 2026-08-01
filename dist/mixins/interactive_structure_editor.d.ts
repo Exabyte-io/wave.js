@@ -305,15 +305,18 @@ export declare const InteractiveStructureEditorMixin: (superclass: any) => {
          * itself preserves the selection/gizmo across the rebuild when in edit mode (see
          * wave.js), so no explicit reselect is needed here for the move case.
          */
-        commitMovedAtom_(atomicIndex: number, cartesianPosition: THREE.Vector3): void;
+        commitMovedAtom_(atomicIndex: number, cartesianPosition: THREE.Vector3, source: string): void;
         /**
          * Commits any number of moved atoms as a single delta/commit (one history entry) applied
-         * to the current material, then rebuilds the scene around it.
+         * to the current material, then rebuilds the scene around it. `source` (spec Sec6.2's
+         * onEditCommit contract - "drag" for a direct body-drag, "gizmo" for a TransformControls
+         * drag) is forwarded to onStructureModified so ThreeDEditor.jsx can pass it on to a host's
+         * onEditCommit without having to re-infer which gesture produced this commit.
          */
         commitMovedAtoms_(moves: Array<{
             atomicIndex: number;
             position: THREE.Vector3;
-        }>): void;
+        }>, source: string): void;
         /**
          * Lifecycle hook to dispose event listeners and objects on visualizer destruction.
          */

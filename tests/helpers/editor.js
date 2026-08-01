@@ -169,10 +169,10 @@ export function simulateAtomDrag(
     // or a plain settings.onStructureModified); the original callback (if any) still fires.
     let modifiedMaterial = null;
     const originalOnStructureModified = wave.settings.onStructureModified;
-    wave.settings.onStructureModified = (material) => {
+    wave.settings.onStructureModified = (material, ...rest) => {
         modifiedMaterial = material;
-        if (onStructureModified) onStructureModified(material);
-        if (originalOnStructureModified) originalOnStructureModified(material);
+        if (onStructureModified) onStructureModified(material, ...rest);
+        if (originalOnStructureModified) originalOnStructureModified(material, ...rest);
     };
 
     try {

@@ -912,3 +912,81 @@ describe("TB-persona review fixes (PR #204 round 1-2)", () => {
         expect(onSelectionChanged).toHaveBeenLastCalledWith([]);
     });
 });
+
+describe("onEditCommit host callback (spec §6.2)", () => {
+    function mountWithOnEditCommit() {
+        const onEditCommit = jest.fn();
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor
+                material={new Made.Material(MATERIAL_CONFIG)}
+                editable
+                onEditCommit={onEditCommit}
+            />,
+            { attachTo: container },
+        );
+        return { wrapper, onEditCommit };
+    }
+
+    test("Fires alongside onUpdate, with {source: 'coordinate-input'}, for a typed coordinate edit", () => {
+        const { wrapper, onEditCommit } = mountWithOnEditCommit();
+        const instance = wrapper.instance();
+
+        instance.handleSelectionChanged([1]);
+        instance.handleCoordinateDraftChange(0, "0.42");
+        instance.handleCoordinateCommit(0);
+
+        expect(onEditCommit).toHaveBeenCalledTimes(1);
+        const [material, meta] = onEditCommit.mock.calls[0];
+        expect(material).toBe(wrapper.state("material"));
+        expect(meta).toEqual({ source: "coordinate-input" });
+    });
+
+    test("Fires with {source: 'element-input'} for a typed element rename", () => {
+        const { wrapper, onEditCommit } = mountWithOnEditCommit();
+        const instance = wrapper.instance();
+
+        instance.handleSelectionChanged([0]);
+        instance.handleElementDraftChange("fe");
+        instance.handleElementCommit();
+
+        expect(onEditCommit).toHaveBeenCalledTimes(1);
+        const [, meta] = onEditCommit.mock.calls[0];
+        expect(meta).toEqual({ source: "element-input" });
+    });
+
+    test("Fires with {source: 'add'} for Add Atom, forwarded from the mixin's own source tag", () => {
+        const { wrapper, onEditCommit } = mountWithOnEditCommit();
+        wrapper.instance().handleAddAtom();
+
+        expect(onEditCommit).toHaveBeenCalledTimes(1);
+        const [, meta] = onEditCommit.mock.calls[0];
+        expect(meta).toEqual({ source: "add" });
+    });
+
+    test("Fires with {source: 'undo'} / {source: 'redo'} for undo/redo, distinct from the edit's own source", () => {
+        const { wrapper, onEditCommit } = mountWithOnEditCommit();
+        const instance = wrapper.instance();
+
+        instance.handleAddAtom();
+        expect(onEditCommit).toHaveBeenLastCalledWith(expect.anything(), { source: "add" });
+
+        instance.handleUndo();
+        expect(onEditCommit).toHaveBeenLastCalledWith(expect.anything(), { source: "undo" });
+
+        instance.handleRedo();
+        expect(onEditCommit).toHaveBeenLastCalledWith(expect.anything(), { source: "redo" });
+
+        expect(onEditCommit).toHaveBeenCalledTimes(3);
+    });
+
+    test("Is not required - omitting the prop does not throw on commit", () => {
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />,
+            { attachTo: container },
+        );
+
+        expect(() => wrapper.instance().handleAddAtom()).not.toThrow();
+    });
+});

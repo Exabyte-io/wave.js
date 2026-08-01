@@ -604,10 +604,13 @@ export class ThreeDEditor extends React.Component {
      * Pushes a material to the viewer via the official setStructure()/rebuildScene() path and
      * notifies the parent. Used as the setState callback for every history-affecting change
      * (edit, undo, redo) once bypassReloadViewer has already been set so WaveComponent's own
-     * prop-driven reload doesn't race with it.
+     * prop-driven reload doesn't race with it. `source` is spec Sec6.2's onEditCommit contract
+     * (`drag`/`gizmo`/`coordinate-input`/`element-input`/`add`/`remove`/`clone`/`undo`/`redo`) -
+     * forwarded alongside the back-compat `onUpdate` channel so a host can record history without
+     * double-counting instead of having to re-infer what kind of edit just happened.
      */
-    _applyMaterialToViewer(material) {
-        const { onUpdate } = this.props;
+    _applyMaterialToViewer(material, source) {
+        const { onUpdate, onEditCommit } = this.props;
         if (this.WaveComponent && this.WaveComponent.wave) {
             this.WaveComponent.wave.bypassReloadViewer = false;
             this.WaveComponent.wave.setStructure(material);
@@ -616,8 +619,11 @@ export class ThreeDEditor extends React.Component {
         if (onUpdate) {
             onUpdate(material);
         }
+        if (onEditCommit) {
+            onEditCommit(material, { source });
+        }
     }
-    handleStructureModified(newMaterial) {
+    handleStructureModified(newMaterial, source) {
         const { material, historyStack, historyPointer } = this.state;
         if (this.WaveComponent && this.WaveComponent.wave) {
             this.WaveComponent.wave.bypassReloadViewer = true;
@@ -633,7 +639,7 @@ export class ThreeDEditor extends React.Component {
             material: clonedMaterial,
             historyStack: newStack,
             historyPointer: newStack.length - 1,
-        }, () => this._applyMaterialToViewer(clonedMaterial));
+        }, () => this._applyMaterialToViewer(clonedMaterial, source));
     }
     handleUndo() {
         const { historyStack, historyPointer } = this.state;
@@ -647,7 +653,7 @@ export class ThreeDEditor extends React.Component {
         this.setState({
             material: previousMaterial,
             historyPointer: previousPointer,
-        }, () => this._applyMaterialToViewer(previousMaterial));
+        }, () => this._applyMaterialToViewer(previousMaterial, "undo"));
     }
     handleRedo() {
         const { historyStack, historyPointer } = this.state;
@@ -661,7 +667,7 @@ export class ThreeDEditor extends React.Component {
         this.setState({
             material: nextMaterial,
             historyPointer: nextPointer,
-        }, () => this._applyMaterialToViewer(nextMaterial));
+        }, () => this._applyMaterialToViewer(nextMaterial, "redo"));
     }
     /**
      * Public, ref-accessible undo-availability check (part of the host embedding API - a host
@@ -723,7 +729,7 @@ export class ThreeDEditor extends React.Component {
             this.WaveComponent.wave.selectedMesh_.position.setComponent(axisIndex, floatValue);
             this.WaveComponent.wave.render();
         }
-        this.handleStructureModified(newMaterial);
+        this.handleStructureModified(newMaterial, "coordinate-input");
     }
     /**
      * Updates only the local draft string for one coordinate field while it's focused - no
@@ -894,7 +900,7 @@ export class ThreeDEditor extends React.Component {
                     };
                     newBasis.elements = newElements;
                     newMaterial.setBasis(newBasis.toJSON());
-                    this.handleStructureModified(newMaterial);
+                    this.handleStructureModified(newMaterial, "element-input");
                 }
             }
         }
@@ -1131,6 +1137,11 @@ ThreeDEditor.propTypes = {
     isConventionalCellShown: PropTypes.bool, // eslint-disable-next-line react/forbid-prop-types
     boundaryConditions: PropTypes.object,
     onUpdate: PropTypes.func,
+    // Fires once per committed edit, like onUpdate, but also carries {source} - one of "drag",
+    // "gizmo", "coordinate-input", "element-input", "add", "remove", "clone", "undo", "redo" - so
+    // a host can record its own history without double-counting onUpdate's every-edit cadence
+    // against its own undo/redo actions (spec §6.2).
+    onEditCommit: PropTypes.func,
     // Fires whenever edit mode is toggled on/off, so a host can disable conflicting UI.
     onEditModeChanged: PropTypes.func,
     // Fires with the current array of selected atomicIndex whenever the selection changes
@@ -1147,6 +1158,7 @@ ThreeDEditor.defaultProps = {
     boundaryConditions: {},
     isConventionalCellShown: false,
     onUpdate: undefined,
+    onEditCommit: undefined,
     onEditModeChanged: undefined,
     onSelectionChanged: undefined,
     editable: false,
