@@ -294,7 +294,7 @@ Diagram: **[data-flow.svg](./assets/data-flow.svg)**. The old modal contract (`m
 
 | Prop | Type | Notes |
 |---|---|---|
-| `material` | `Made.Material` (required) | Singular. Multi-material: decision D-2 |
+| `material` | `Made.Material` (required) | Singular, permanently — multi-material merge stays out of this component's contract (decision D-2, §9) |
 | `editable` | `bool` | Shows the Edit toggle |
 | `editSessionOptions` | `object` | `{ defaultElement, snap… }` — optional |
 | `boundaryConditions`, `isConventionalCellShown`, `initialViewSettings`, `isStandalone` | as today | Editing in conventional view: blocked or mapped back per D9 fix |
@@ -440,7 +440,7 @@ For resolution during this spec's review. Each: options → **recommendation**.
 | # | Decision | Options | Recommendation |
 |---|---|---|---|
 | D-1 | Undo/redo ownership | (a) wave owns intra-session, host records commits, ref API · (b) host owns all, wave stateless · (c) both (status quo) | **(a)** — matches the old modal's mental model; fixes MD's history flood with no host changes |
-| D-2 | Multi-material replacement | (a) `materials[]` prop + active index · (b) separate merge-workflow component · (c) drop capability, remove MD menu item | **(b) or explicit (c)** — an array complicates every callback; the decision can't be silent because MD's import breaks either way |
+| D-2 | Multi-material replacement | (a) `materials[]` prop + active index · (b) separate merge-workflow component · (c) drop capability, remove MD menu item | **Resolved 2026-08-01: neither (a) nor (b), in this repo.** The merge workflow (load N materials, position each as a rigid group via existing multi-select/group-transform, flatten to one material on commit) belongs in materials-designer, built on wave.js's existing single-material `ThreeDEditor` + group-transform primitives — not as new wave.js component surface. Two integration shapes MD can choose between, neither requiring wave.js changes today: (i) MD pre-merges materials into one (positioning offsets computed upstream) and hands `ThreeDEditor` a single material exactly as it does now; (ii) MD builds its own viewer against lower-level primitives (`Wave`, `createAtomsGroup`, `getUnitCellObject`), which would require exporting them from `src/exports.js` (currently only `ThreeDEditor` and the view-settings URL helpers are public) — deferred until MD actually needs it, so this package's public API doesn't grow speculatively. |
 | D-3 | Transactionality | (a) pure incremental (status quo) · (b) session commit-or-cancel · (c) hybrid: streaming + session-end commit | **(c)** — keeps live preview, restores the cancel guarantee, one host history entry per session |
 | D-4 | Rubber-band vs. orbit on empty-space drag (edit mode) | (a) drag = marquee, orbit needs modifier/RMB · (b) marquee needs `Shift`-drag · (c) explicit select-tool sub-mode (old `M` toggle) | **Decided and implemented 2026-07-14: (a)** — drag-on-empty-space is marquee select; orbit rotate moved to the right mouse button (`OrbitControls.mouseButtons` remapped while edit mode is active, restored on exit) |
 | D-5 | Default snap granularity | free (off) · fractional grid · nearest lattice site — all toggleable | **Off by default**, magnet toggle + `Ctrl/Cmd`-held snap; perturbation workflows dominate; the default exposed as a setting |
@@ -481,7 +481,7 @@ Phased; each phase lands with its regression tests. No code changes before this 
 
 ### P2 — roadmap items
 
-Per §11, gated on decisions D-2/D-5/D-6/D-7/D-9. (D-4 was resolved and implemented 2026-07-14 — see below; it no longer gates anything.)
+Per §11, gated on decisions D-5/D-6/D-7/D-9. (D-4 was resolved and implemented 2026-07-14 — see below; D-2 was resolved 2026-08-01 as out of scope for wave.js — see below; neither gates anything here anymore.)
 
 ## 11. Roadmap (designed, deferred)
 
@@ -498,8 +498,9 @@ While wiring group rotate, found and fixed a latent defect in `rebuildScene()` (
 | Snapping: fractional grid, lattice sites, snap-to-atom; magnet toggle + `Ctrl/Cmd` held | §3e, decision D-5 | Beyond old editor |
 | Keyboard nudge (arrows / `Shift`+arrows) | §3h, decision D-6 | Beyond old editor |
 | Periodic-wrap flag + one-click wrap for out-of-cell atoms | Decision D-7 | Beyond old editor |
-| Multi-material story | Decision D-2 | Yes — modal's merge workflow |
 | Configurable key bindings | Decision D-10 | Yes |
+
+Multi-material story (old-editor parity: yes, via the modal's merge workflow) is **not** a wave.js roadmap item — resolved 2026-08-01 by decision D-2 (§9) to live in materials-designer instead, built on this editor's existing single-material + group-transform primitives.
 
 Explicitly **out of scope** (dropped with the old editor, deliberately):
 

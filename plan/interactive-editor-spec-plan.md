@@ -46,7 +46,7 @@ Beyond the review's own findings, three further improvements were identified and
 | # | Decision | Status |
 |---|---|---|
 | D-1 | Undo ownership (wave vs. host vs. both) | Open |
-| D-2 | Multi-material editing replacement (materials-designer's deleted "Multi-Material 3D Editor") | Open — explicitly deferred 2026-07-14, not decided |
+| D-2 | Multi-material editing replacement (materials-designer's deleted "Multi-Material 3D Editor") | **Resolved 2026-08-01: out of scope for wave.js.** Belongs in materials-designer, built on this editor's existing single-material `ThreeDEditor` + group-transform primitives, not as new wave.js component surface. No wave.js code required unless MD chooses the lower-level-primitives integration path (§9, D-2) over pre-merging upstream — that would need `Wave`/`createAtomsGroup`/`getUnitCellObject` exported from `src/exports.js`, deferred until actually needed. |
 | D-3 | Transactionality (incremental vs. session commit/cancel vs. hybrid) | Open |
 | D-4 | Rubber-band multi-select vs. orbit-on-empty-space-drag | **Decided and implemented 2026-07-14; group rotate added 2026-08-01.** Translate and rotate are both shipped for a 2+ group. Double-click-selects-bonded-fragment stays deferred (needs bond connectivity data). |
 | D-5 | Default snap granularity (free/grid/lattice-site) | Open |
@@ -58,7 +58,7 @@ Beyond the review's own findings, three further improvements were identified and
 | D-11 | `postMessage` bridge fate | Resolved in P0 — removed entirely (no confirmed consumer) |
 | D-12 | Mode exclusivity (edit vs. measurement) | Resolved in P1 — mutually exclusive, per the spec's recommendation |
 
-Shipped so far: rubber-band multi-select + group translate/rotate about a centroid (D-4 — this is what restores the old editor's `MultipleSelectionControls` capability), type-to-change element rename + clone atom (D-9's type-to-change half), and camera focus-on-selection. Once the remaining open decisions are made, the rest becomes buildable: an Add-Atom element-picker (D-9's toolbar-picker half), lattice/fractional snapping (D-5/D-6), keyboard nudge (D-6), and the multi-material story (D-2).
+Shipped so far: rubber-band multi-select + group translate/rotate about a centroid (D-4 — this is what restores the old editor's `MultipleSelectionControls` capability), type-to-change element rename + clone atom (D-9's type-to-change half), and camera focus-on-selection. Once the remaining open decisions are made, the rest becomes buildable: an Add-Atom element-picker (D-9's toolbar-picker half), lattice/fractional snapping (D-5/D-6), keyboard nudge (D-6). The multi-material story (D-2) is resolved but not a wave.js buildable — it's materials-designer's to build, on top of what's already shipped here.
 
 Two things explicitly stay out of scope regardless of these decisions (spec §11): the old editor's generic 3D-authoring features (primitives, lights, materials editor, scripting) and its outliner/scene-tree panel — the new editor's structure state *is* the outliner, there's no separate group hierarchy to browse.
 
