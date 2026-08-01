@@ -445,7 +445,7 @@ For resolution during this spec's review. Each: options → **recommendation**.
 | D-6 | Arrow-nudge axis frame | screen-relative · crystal a/b/c-relative | **Screen-relative default, setting to switch** — camera-dependence makes neither universally right |
 | D-7 | Atom dragged outside cell | (a) leave as-is · (b) auto-wrap on commit · (c) leave + visual flag + one-click wrap | **(c)** — auto-wrap silently changes what the user placed; silence surprises |
 | D-8 | Lattice/cell editing in v1 | (a) out of scope · (b) numeric cell panel · (c) draggable cell handles | **(a), stated explicitly** — the delta path removes the old accidental pathway |
-| D-9 | Element selection UX | (a) toolbar periodic-table picker (active element) · (b) type-to-change in panel · (c) both | **(c)** — the active element also fixes hardcoded-"Si" adds (D22) |
+| D-9 | Element selection UX | (a) toolbar periodic-table picker (active element) · (b) type-to-change in panel · (c) both | **(c)** — the active element also fixes hardcoded-"Si" adds (D22). **(b) implemented 2026-08-01**; (a) (the Add-Atom default-element picker) remains open — see §11 |
 | D-10 | Edit-mode hotkey | reassign `e` from element labels · new key (e.g. `t`/`g`) · configurable bindings | **New key + honest tooltip**; configurable bindings are old-editor parity but not v1 |
 | D-11 | `postMessage` bridge | (a) remove · (b) origin-check + action allowlist as the official iframe API | **(b) only if an iframe consumer actually exists; else (a)** — the current reflective bridge (D17) does not ship either way |
 | D-12 | Mode exclusivity | force-disable measurement in edit mode (and vice versa) · coexist with disambiguated input | **Mutual exclusion** — coexistence has no prior-art support and doubles every click's meaning |
@@ -483,15 +483,16 @@ Per §11, gated on decisions D-2/D-5/D-6/D-7/D-9. (D-4 was resolved and implemen
 
 ## 11. Roadmap (designed, deferred)
 
-**Shipped 2026-07-14 (decision D-4):** rubber-band multi-select + group **translate** about a centroid pivot — `MultipleSelectionControls`-equivalent parity with the old editor's marquee/pivot behavior, committing directly with normal undo instead of its two-phase submit/cancel. `Click`/`Shift+click`/`Ctrl+click` selection modifiers, and dragging any selected atom (not just the gizmo) moves the whole group. **Group rotate is still deferred** (blocked on single-atom Rotate mode returning, D4) and **double-click-selects-bonded-fragment is still deferred** (needs bond connectivity data neither implementation touches yet).
+**Shipped 2026-07-14 (decision D-4):** rubber-band multi-select + group **translate** about a centroid pivot — `MultipleSelectionControls`-equivalent parity with the old editor's marquee/pivot behavior, committing directly with normal undo instead of its two-phase submit/cancel. `Click`/`Shift+click`/`Ctrl+click` selection modifiers, and dragging any selected atom (not just the gizmo) moves the whole group.
+
+**Shipped 2026-08-01:** group **rotate** about the shared centroid — extends D-4's translate-only pivot to the old editor's full pivot-group behavior (same gizmo, same one-commit-per-drag semantics), gated in the UI to a 2+ atom selection. Also shipped: **clone selected atom(s)** (single or group, small fixed Cartesian offset, clones become the new selection — old-editor parity, US-7 extension); **camera focus on selection** (`F` key + toolbar button; re-targets and re-distances without resetting the viewing angle, deliberately unlike the whole-cell "fit" reset); and the **type-to-change** half of decision D-9 (an editable Element field in the single-atom panel, validated against the periodic table, case-insensitive). Between clone and rename, the old editor's actual add-a-specific-element workflow ("clone existing, then rename") now has parity without needing decision D-9(a)'s toolbar picker — see the updated roadmap table below. **Double-click-selects-bonded-fragment remains deferred** (needs bond connectivity data neither implementation touches yet).
+
+While wiring group rotate, found and fixed a latent defect in `rebuildScene()` (`wave.js`, pre-existing since D-4): it only ever restored a *single*-atom selection after a scene rebuild, so a host's `onStructureModified` round-trip (which independently calls `setStructure`+`rebuildScene` again after the mixin's own commit) silently collapsed any 2+ group selection down to one atom — breaking a second consecutive group rotate or drag. Fixed to preserve the full multi-selection across a rebuild regardless of who triggers it; this also retroactively hardens D-4's group translate, which shared the same gap. Regression tests: `interactive_structure_editor: "A multi-selection survives a rebuild triggered independently of the mixin's own commit"` and `"A second consecutive group rotate still works after a host round-trip rebuild"`.
 
 | Item | Design anchor | Old-editor parity? |
 |---|---|---|
-| Group **rotate** about centroid (translate already shipped, see above) | §3f, decision D-4 | Yes — the old pivot group supported rotate too |
 | Double-click selects the bonded fragment | §3f | Beyond old editor |
-| Element picker (add + change-in-place) | Decision D-9; toolbar ghost row in [edit-toolbar-states.svg](./assets/edit-toolbar-states.svg) | Yes — clone/rename workflow |
-| Clone selected atom | US-7 extension | Yes |
-| Camera focus on selection (`F` / double-click) | — | Yes |
+| Toolbar periodic-table picker for the Add-Atom default element (decision D-9(a)) | Decision D-9; toolbar ghost row in [edit-toolbar-states.svg](./assets/edit-toolbar-states.svg) | Beyond old editor — clone+rename (shipped above) already matches the old editor's own add-a-specific-element workflow |
 | Snapping: fractional grid, lattice sites, snap-to-atom; magnet toggle + `Ctrl/Cmd` held | §3e, decision D-5 | Beyond old editor |
 | Keyboard nudge (arrows / `Shift`+arrows) | §3h, decision D-6 | Beyond old editor |
 | Periodic-wrap flag + one-click wrap for out-of-cell atoms | Decision D-7 | Beyond old editor |

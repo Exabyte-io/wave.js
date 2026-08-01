@@ -6,11 +6,14 @@ import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
 import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
 import { AlertProvider } from "@exabyte-io/cove.js/src/theme/provider";
 import { Made } from "@mat3ra/made";
+import { PERIODIC_TABLE } from "@mat3ra/periodic-table";
 import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
+import CenterFocusStrong from "@mui/icons-material/CenterFocusStrong";
 import CheckIcon from "@mui/icons-material/Check";
 import CloudDownload from "@mui/icons-material/CloudDownload";
+import ContentCopy from "@mui/icons-material/ContentCopy";
 import ControlCameraRounded from "@mui/icons-material/ControlCameraRounded";
 import Dehaze from "@mui/icons-material/Dehaze";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -25,6 +28,7 @@ import PictureInPicture from "@mui/icons-material/PictureInPicture";
 import Redo from "@mui/icons-material/Redo";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
+import RotateRight from "@mui/icons-material/RotateRight";
 import Settings from "@mui/icons-material/Settings";
 import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
@@ -297,6 +301,10 @@ export class ThreeDEditor extends React.Component {
             // "show the committed value". Lets a field be cleared or start with "-" while
             // focused without committing (and rebuilding the scene) on every keystroke (D18).
             coordinateDrafts: [null, null, null],
+            // Local draft string for the element field while focused; null means "show the
+            // committed value". Mirrors coordinateDrafts (D18) - no commit/history entry until
+            // blur/Enter.
+            elementDraft: null,
             // isDistanceAndAnglesShown: false,
             measurementsSettings: defaultMeasurementsSettings,
             // TODO: remove the need for `viewerTriggerResize`
@@ -354,6 +362,10 @@ export class ThreeDEditor extends React.Component {
         this.handleSetTransformMode = this.handleSetTransformMode.bind(this);
         this.handleAddAtom = this.handleAddAtom.bind(this);
         this.handleRemoveSelectedAtom = this.handleRemoveSelectedAtom.bind(this);
+        this.handleCloneSelectedAtoms = this.handleCloneSelectedAtoms.bind(this);
+        this.handleFocusCameraOnSelection = this.handleFocusCameraOnSelection.bind(this);
+        this.handleElementDraftChange = this.handleElementDraftChange.bind(this);
+        this.handleElementCommit = this.handleElementCommit.bind(this);
         this.handleSelectionChanged = this.handleSelectionChanged.bind(this);
         this.handleEditModeKeyDown = this.handleEditModeKeyDown.bind(this);
         this.canUndo = this.canUndo.bind(this);
@@ -473,6 +485,7 @@ export class ThreeDEditor extends React.Component {
             historyPointer: 0,
             selectedAtomIndices: [],
             coordinateDrafts: [null, null, null],
+            elementDraft: null,
         });
         this.handleResetMeasurements();
     }
@@ -741,12 +754,26 @@ export class ThreeDEditor extends React.Component {
      */
     handleSelectionChanged(indices) {
         var _a;
+        const { activeTransformMode } = this.state;
         if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
             this.WaveComponent.wave.bypassReloadViewer = true;
         }
-        this.setState({ selectedAtomIndices: indices, coordinateDrafts: [null, null, null] }, () => {
-            var _a;
-            if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+        // Rotate only makes sense for a group (it spins the selection about its centroid) - if
+        // the selection drops below 2 while rotate is active (e.g. a Shift-click deselect, or
+        // Delete removing atoms down to one), fall back to translate rather than leaving the
+        // toolbar showing a mode the gizmo can no longer meaningfully perform.
+        const nextTransformMode = activeTransformMode === "rotate" && indices.length < 2 ? "translate" : null;
+        this.setState({
+            selectedAtomIndices: indices,
+            coordinateDrafts: [null, null, null],
+            elementDraft: null,
+            ...(nextTransformMode ? { activeTransformMode: nextTransformMode } : {}),
+        }, () => {
+            var _a, _b;
+            if (nextTransformMode && ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave)) {
+                this.WaveComponent.wave.setTransformMode(nextTransformMode);
+            }
+            if ((_b = this.WaveComponent) === null || _b === void 0 ? void 0 : _b.wave) {
                 this.WaveComponent.wave.bypassReloadViewer = false;
             }
         });
@@ -802,6 +829,60 @@ export class ThreeDEditor extends React.Component {
         if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
             this.WaveComponent.wave.removeSelectedAtom();
         }
+    }
+    handleCloneSelectedAtoms() {
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.cloneSelectedAtoms();
+        }
+    }
+    handleFocusCameraOnSelection() {
+        var _a;
+        if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
+            this.WaveComponent.wave.focusCameraOnSelection();
+        }
+    }
+    /**
+     * Updates only the local draft string for the element field while it's focused - no commit,
+     * no history entry, no scene rebuild. Mirrors handleCoordinateDraftChange (D18).
+     */
+    handleElementDraftChange(value) {
+        this.setState({ elementDraft: value });
+    }
+    /**
+     * Commits the element draft (on blur/Enter) if it names a real element that differs from the
+     * current one, then clears the draft so the field reverts to showing the committed value.
+     * Operates directly on state.material like handleCoordinateChange, rather than through the
+     * mixin - this is a panel-typed edit, not a scene-gesture-driven one. Symbol casing is
+     * normalized (e.g. "si"/"SI" -> "Si") so the field isn't case-sensitive to use, then checked
+     * against PERIODIC_TABLE so a typo silently reverts instead of writing a bogus element.
+     */
+    handleElementCommit() {
+        const { elementDraft, selectedAtomIndices, material } = this.state;
+        if (elementDraft !== null) {
+            const trimmed = elementDraft.trim();
+            const symbol = trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+            if (selectedAtomIndices.length === 1 && symbol in PERIODIC_TABLE) {
+                const [selectedAtomIndex] = selectedAtomIndices;
+                const basis = material.Basis;
+                const { elements } = basis;
+                const currentEntry = elements[selectedAtomIndex];
+                const currentSymbol = typeof currentEntry === "string" ? currentEntry : currentEntry === null || currentEntry === void 0 ? void 0 : currentEntry.value;
+                if (currentEntry && currentSymbol !== symbol) {
+                    const newMaterial = material.clone();
+                    const newBasis = newMaterial.Basis;
+                    const newElements = newBasis.elements;
+                    newElements[selectedAtomIndex] = {
+                        ...newElements[selectedAtomIndex],
+                        value: symbol,
+                    };
+                    newBasis.elements = newElements;
+                    newMaterial.setBasis(newBasis.toJSON());
+                    this.handleStructureModified(newMaterial);
+                }
+            }
+        }
+        this.setState({ elementDraft: null });
     }
     // TODO: reset the colors for other buttons in the panel on call to the function below
     handleResetViewer() {
@@ -969,12 +1050,14 @@ export class ThreeDEditor extends React.Component {
     }
     renderEditToolbar() {
         var _a, _b;
-        const { activeTransformMode, selectedAtomIndices, material, coordinateDrafts } = this.state;
+        const { activeTransformMode, selectedAtomIndices, material, coordinateDrafts, elementDraft, } = this.state;
         const { editSessionOptions } = this.props;
         const hasUndo = this.canUndo();
         const hasRedo = this.canRedo();
         const defaultElement = (editSessionOptions === null || editSessionOptions === void 0 ? void 0 : editSessionOptions.defaultElement) || "Si";
         const isSingleAtomSelected = selectedAtomIndices.length === 1;
+        const hasSelection = selectedAtomIndices.length > 0;
+        const canRotate = selectedAtomIndices.length > 1;
         const [selectedAtomIndex] = selectedAtomIndices;
         let selectedCoordinates = [0, 0, 0];
         let selectedElement = "";
@@ -991,9 +1074,14 @@ export class ThreeDEditor extends React.Component {
                         : (elementObj === null || elementObj === void 0 ? void 0 : elementObj.value) || (elementObj === null || elementObj === void 0 ? void 0 : elementObj.element) || "";
             }
         }
-        return (_jsx(Paper, { elevation: 2, sx: { position: "absolute", top: "1em", right: "1em", boxShadow: 4 }, children: _jsxs(Stack, { alignItems: "center", spacing: 1, padding: 1, divider: _jsx(Divider, { flexItem: true, sx: { width: "80%", alignSelf: "center" } }), children: [_jsx(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: _jsx(SquareIconButton, { title: "Translate Mode", onClick: () => this.handleSetTransformMode("translate"), children: _jsx(OpenWith, { color: activeTransformMode === "translate" ? "primary" : "inherit" }) }) }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: `Add Atom (${defaultElement})`, onClick: this.handleAddAtom, children: _jsx(AddCircleOutline, {}) }), _jsx(SquareIconButton, { title: selectedAtomIndices.length > 1
+        return (_jsx(Paper, { elevation: 2, sx: { position: "absolute", top: "1em", right: "1em", boxShadow: 4 }, children: _jsxs(Stack, { alignItems: "center", spacing: 1, padding: 1, divider: _jsx(Divider, { flexItem: true, sx: { width: "80%", alignSelf: "center" } }), children: [_jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Translate Mode", onClick: () => this.handleSetTransformMode("translate"), children: _jsx(OpenWith, { color: activeTransformMode === "translate" ? "primary" : "inherit" }) }), _jsx(SquareIconButton, { title: canRotate ? "Rotate Mode" : "Select 2+ atoms to rotate as a group", disabled: !canRotate, onClick: () => this.handleSetTransformMode("rotate"), children: _jsx(RotateRight, { color: activeTransformMode === "rotate" ? "primary" : "inherit" }) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: `Add Atom (${defaultElement})`, onClick: this.handleAddAtom, children: _jsx(AddCircleOutline, {}) }), _jsx(SquareIconButton, { title: selectedAtomIndices.length > 1
+                                    ? `Clone ${selectedAtomIndices.length} Selected Atoms`
+                                    : "Clone Selected Atom", disabled: !hasSelection, onClick: this.handleCloneSelectedAtoms, children: _jsx(ContentCopy, {}) }), _jsx(SquareIconButton, { title: selectedAtomIndices.length > 1
                                     ? `Delete ${selectedAtomIndices.length} Selected Atoms`
-                                    : "Delete Selected Atom", disabled: selectedAtomIndices.length === 0, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndices.length > 1 && (_jsxs(Stack, { spacing: 0.5, alignItems: "center", sx: { width: "84px" }, children: [_jsxs(Typography, { variant: "caption", fontWeight: "bold", textAlign: "center", children: [selectedAtomIndices.length, " atoms selected"] }), _jsx(Typography, { variant: "caption", color: "text.secondary", textAlign: "center", children: "Drag or use the gizmo to move the group together" })] })), isSingleAtomSelected && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(Typography, { variant: "caption", fontWeight: "bold", children: selectedElement || "Si" }), _jsx(Typography, { variant: "caption", color: "text.secondary", sx: { mt: -1 }, children: ((_b = material === null || material === void 0 ? void 0 : material.basis) === null || _b === void 0 ? void 0 : _b.units) === "cartesian"
+                                    : "Delete Selected Atom", disabled: !hasSelection, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsx(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: _jsx(SquareIconButton, { title: "Focus Camera on Selection (F)", disabled: !hasSelection, onClick: this.handleFocusCameraOnSelection, children: _jsx(CenterFocusStrong, {}) }) }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndices.length > 1 && (_jsxs(Stack, { spacing: 0.5, alignItems: "center", sx: { width: "84px" }, children: [_jsxs(Typography, { variant: "caption", fontWeight: "bold", textAlign: "center", children: [selectedAtomIndices.length, " atoms selected"] }), _jsx(Typography, { variant: "caption", color: "text.secondary", textAlign: "center", children: "Drag, or use the gizmo, to move or rotate the group together" })] })), isSingleAtomSelected && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(TextField, { label: "Element", size: "small", type: "text", className: "inverse stepper", value: elementDraft !== null ? elementDraft : selectedElement || "Si", onChange: (event) => this.handleElementDraftChange(event.target.value), onBlur: this.handleElementCommit, onKeyDown: (event) => {
+                                    if (event.key === "Enter")
+                                        event.target.blur();
+                                } }), _jsx(Typography, { variant: "caption", color: "text.secondary", sx: { mt: -1 }, children: ((_b = material === null || material === void 0 ? void 0 : material.basis) === null || _b === void 0 ? void 0 : _b.units) === "cartesian"
                                     ? "cartesian, Å"
                                     : "crystal" }), ["X", "Y", "Z"].map((axisName, idx) => {
                                 const draftValue = coordinateDrafts[idx];

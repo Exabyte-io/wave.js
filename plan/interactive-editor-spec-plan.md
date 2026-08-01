@@ -1,14 +1,15 @@
 # Interactive editor: plan and status
 
-## Status (as of 2026-07-14)
+## Status (as of 2026-08-01)
 
 - ✅ **Spec written and approved**: [`docs/design/interactive-editor-spec.md`](../docs/design/interactive-editor-spec.md) — drives all further work on this feature.
 - ✅ **P0 implemented, tested, committed** — `97707ba`. Six critical/confirmed defects: camera-reset-on-every-edit (the original user-reported bug), phantom-atom scene extraction, non-periodic-boundary crash, dead edit-mode hotkey, no-op Rotate button, unauthenticated `postMessage` bridge.
 - ✅ **P1 implemented, tested, committed** — `03b1376` (reusable test helpers + manual smoke checklist) and `c2524a8` (architecture + polish). The core change: replaced "re-derive the whole material from the live Three.js scene on every edit" with basis-mutation deltas applied to the wave's own tracked material — the fix the D1/D5/D6/D7/D9 defect cluster hinged on. Also landed: drag pointer-capture/Esc-cancel, a dedicated selection/hover highlight channel, selection-without-reload, coordinate-field draft state, an identity-guarded material-prop reset, edit/measurement mode exclusivity, true-center add-atom placement, `dispose()`/`ResizeObserver` lifecycle cleanup, and keyboard shortcuts (Delete/Ctrl+Z/Ctrl+Shift+Z/Esc).
-- ✅ **D-4 (multi-select) implemented, tested, committed** — see commit hash below. Rubber-band marquee select, Shift/Ctrl+click modifiers, group translate via gizmo pivot or direct drag on any selected atom, one commit/one history entry per group move, orbit rotate remapped to the right mouse button while editing. `onSelectionChanged` now reports an array of atomicIndices (breaking change from the P1 single-index contract; no external consumer existed yet, so this was safe).
+- ✅ **D-4 (multi-select) implemented, tested, committed** — `88398a3`. Rubber-band marquee select, Shift/Ctrl+click modifiers, group translate via gizmo pivot or direct drag on any selected atom, one commit/one history entry per group move, orbit rotate remapped to the right mouse button while editing. `onSelectionChanged` now reports an array of atomicIndices (breaking change from the P1 single-index contract; no external consumer existed yet, so this was safe).
+- ✅ **Old-editor functionality parity implemented, tested** (this round, 2026-08-01): group **rotate** about the shared centroid (extends D-4's translate-only pivot), **clone selected atom(s)**, **camera focus on selection** (`F` key + button), and the **type-to-change** half of D-9 (editable Element field, periodic-table-validated). See spec §11 for the full writeup, including a real pre-existing multi-select bug found and fixed along the way (`rebuildScene()` in `wave.js` was single-atom-only, silently collapsing a group selection on any externally-triggered rebuild — e.g. the host's `onStructureModified` round-trip — which broke a second consecutive group rotate/drag).
 - ⬜ **Rest of P2 not started** — intentionally. Every remaining P2 item is gated on a product decision from spec §9 that's Timur's to make, not inferable from the spec itself.
 
-All commits are pushed to `origin/feat/upgrade-2026-07-11-separated` except the D-4 commit itself (not yet pushed as of this note). Full verification each phase: Jest suite green (127 tests passing after D-4, up from 115 after P1), `tsc --noEmit` clean, lint unchanged from baseline, live browser-tested (Shift+click, marquee overlay + hit-testing, group drag via gizmo and direct-drag, camera stability, one-commit-per-group-move all confirmed against the running dev server).
+All commits through D-4 are pushed to `origin/feat/upgrade-2026-07-11-separated`; this round's parity commit is not yet pushed as of this note. Full verification each phase: Jest suite green (145 tests passing after this round, up from 127 after D-4), `tsc --noEmit` clean, lint unchanged from baseline (0 errors, only pre-existing `no-explicit-any` warnings), production build clean, live browser-tested end-to-end (rotate math verified against the real WebGL/three.js runtime via direct wave-instance driving, clone offset math, real keyboard-driven element rename, toolbar gating for 0/1/2+ selections, all confirmed against the running dev server — see spec §11 for the dev-server pre-bundling fix (`vite.config.ts`) needed to load the new toolbar icons).
 
 ## What's outstanding: P2, gated on open decisions (spec §9)
 
@@ -17,17 +18,17 @@ All commits are pushed to `origin/feat/upgrade-2026-07-11-separated` except the 
 | D-1 | Undo ownership (wave vs. host vs. both) | Open |
 | D-2 | Multi-material editing replacement (materials-designer's deleted "Multi-Material 3D Editor") | Open — explicitly deferred 2026-07-14, not decided |
 | D-3 | Transactionality (incremental vs. session commit/cancel vs. hybrid) | Open |
-| D-4 | Rubber-band multi-select vs. orbit-on-empty-space-drag | **Decided and implemented 2026-07-14.** Group translate only - group rotate stays deferred (blocked on single-atom Rotate mode returning, D4 defect fix) and double-click-selects-bonded-fragment stays deferred (needs bond connectivity data). |
+| D-4 | Rubber-band multi-select vs. orbit-on-empty-space-drag | **Decided and implemented 2026-07-14; group rotate added 2026-08-01.** Translate and rotate are both shipped for a 2+ group. Double-click-selects-bonded-fragment stays deferred (needs bond connectivity data). |
 | D-5 | Default snap granularity (free/grid/lattice-site) | Open |
 | D-6 | Arrow-nudge axis frame (screen-relative vs. crystal-axis) | Open |
 | D-7 | Periodic wrapping of atoms dragged outside the cell | Open |
 | D-8 | Lattice/cell editing scope (in v1 or out) | Open |
-| D-9 | Element-picker UX for Add Atom / change-in-place (fixes hardcoded "Si") | Open |
+| D-9 | Element-picker UX for Add Atom / change-in-place (fixes hardcoded "Si") | **Type-to-change implemented 2026-08-01.** The Add-Atom default-element toolbar picker half is open, but now non-blocking - clone+rename already matches the old editor's own add-a-specific-element workflow. |
 | D-10 | Edit-mode hotkey binding | Resolved in P0 — `t`, per the spec's own recommendation |
 | D-11 | `postMessage` bridge fate | Resolved in P0 — removed entirely (no confirmed consumer) |
 | D-12 | Mode exclusivity (edit vs. measurement) | Resolved in P1 — mutually exclusive, per the spec's recommendation |
 
-Once the open decisions are made, the roadmap items that depend on them become buildable: rubber-band multi-select + group translate/rotate about a centroid (D-4; this is what restores the old editor's `MultipleSelectionControls` capability), element picker + clone atom (D-9), camera focus-on-selection, lattice/fractional snapping (D-5/D-6), keyboard nudge (D-6), and the multi-material story (D-2).
+Shipped so far: rubber-band multi-select + group translate/rotate about a centroid (D-4 — this is what restores the old editor's `MultipleSelectionControls` capability), type-to-change element rename + clone atom (D-9's type-to-change half), and camera focus-on-selection. Once the remaining open decisions are made, the rest becomes buildable: an Add-Atom element-picker (D-9's toolbar-picker half), lattice/fractional snapping (D-5/D-6), keyboard nudge (D-6), and the multi-material story (D-2).
 
 Two things explicitly stay out of scope regardless of these decisions (spec §11): the old editor's generic 3D-authoring features (primitives, lights, materials editor, scripting) and its outliner/scene-tree panel — the new editor's structure state *is* the outliner, there's no separate group hierarchy to browse.
 

@@ -16,6 +16,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         super(config);
         this.transformControls_ = null;
         this.transformDragStartPosition_ = null;
+        this.transformDragStartQuaternion_ = null;
         this.raycaster_ = null;
         this.pointer_ = null;
         this.selectedMesh_ = null;
@@ -53,6 +54,8 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         this.setTransformMode = this.setTransformMode.bind(this);
         this.addAtom = this.addAtom.bind(this);
         this.removeSelectedAtom = this.removeSelectedAtom.bind(this);
+        this.cloneSelectedAtoms = this.cloneSelectedAtoms.bind(this);
+        this.focusCameraOnSelection = this.focusCameraOnSelection.bind(this);
         this.enableEditMode = this.enableEditMode.bind(this);
         this.disableEditMode = this.disableEditMode.bind(this);
         this.toggleOrthographicCamera = this.toggleOrthographicCamera.bind(this);
@@ -73,29 +76,48 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         this.scene.add(this.hoverHighlightMesh_);
         // Rerender the viewport on every translation/rotation frame update; while dragging the
         // group pivot, also propagate its live delta to every selected atom so they move
-        // rigidly together during the gizmo drag, not just once on commit.
+        // rigidly together during the gizmo drag, not just once on commit. Translate mode
+        // moves the pivot's position (apply the same position delta to each atom); rotate
+        // mode leaves the pivot's position fixed at the centroid and instead rotates its
+        // quaternion (rotate each atom's offset-from-centroid by that same quaternion, so the
+        // group rotates rigidly about its shared centroid - the old editor's pivot-group
+        // behavior, decision D-4's "group rotate" half).
         this.transformControls_.addEventListener("change", () => {
             var _a;
             if (((_a = this.transformControls_) === null || _a === void 0 ? void 0 : _a.dragging) &&
                 this.transformControls_.object === this.selectionPivot_ &&
                 this.groupDragStartPositions_ &&
                 this.transformDragStartPosition_) {
-                const delta = this.selectionPivot_.position
-                    .clone()
-                    .sub(this.transformDragStartPosition_);
-                this.selectedMeshes_.forEach((mesh) => {
-                    var _a;
-                    const start = (_a = this.groupDragStartPositions_) === null || _a === void 0 ? void 0 : _a.get(mesh);
-                    if (start)
-                        mesh.position.copy(start.clone().add(delta));
-                });
+                if (this.transformControls_.mode === "rotate") {
+                    const pivotCenter = this.transformDragStartPosition_;
+                    const rotation = this.selectionPivot_.quaternion;
+                    this.selectedMeshes_.forEach((mesh) => {
+                        var _a;
+                        const start = (_a = this.groupDragStartPositions_) === null || _a === void 0 ? void 0 : _a.get(mesh);
+                        if (!start)
+                            return;
+                        const offset = start.clone().sub(pivotCenter).applyQuaternion(rotation);
+                        mesh.position.copy(pivotCenter.clone().add(offset));
+                    });
+                }
+                else {
+                    const delta = this.selectionPivot_.position
+                        .clone()
+                        .sub(this.transformDragStartPosition_);
+                    this.selectedMeshes_.forEach((mesh) => {
+                        var _a;
+                        const start = (_a = this.groupDragStartPositions_) === null || _a === void 0 ? void 0 : _a.get(mesh);
+                        if (start)
+                            mesh.position.copy(start.clone().add(delta));
+                    });
+                }
                 this.syncHighlightPoolTo_(this.selectedMeshes_);
             }
             this.render();
         });
         // Disables the OrbitControls while dragging an atom to avoid camera movement conflicts
         this.transformControls_.addEventListener("dragging-changed", (event) => {
-            var _a, _b, _c, _d, _e, _f;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j;
             if (event.value) {
                 this.orbitControlsEnabledBeforeDrag_ = (_b = (_a = this.orbitControls) === null || _a === void 0 ? void 0 : _a.enabled) !== null && _b !== void 0 ? _b : true;
                 if (this.orbitControls)
@@ -105,7 +127,9 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
                 // must not commit), and Esc can revert to it.
                 this.transformDragStartPosition_ =
                     (_e = (_d = (_c = this.transformControls_) === null || _c === void 0 ? void 0 : _c.object) === null || _d === void 0 ? void 0 : _d.position.clone()) !== null && _e !== void 0 ? _e : null;
-                if (((_f = this.transformControls_) === null || _f === void 0 ? void 0 : _f.object) === this.selectionPivot_) {
+                this.transformDragStartQuaternion_ =
+                    (_h = (_g = (_f = this.transformControls_) === null || _f === void 0 ? void 0 : _f.object) === null || _g === void 0 ? void 0 : _g.quaternion.clone()) !== null && _h !== void 0 ? _h : null;
+                if (((_j = this.transformControls_) === null || _j === void 0 ? void 0 : _j.object) === this.selectionPivot_) {
                     this.groupDragStartPositions_ = new Map(this.selectedMeshes_.map((mesh) => [
                         mesh,
                         mesh.position.clone(),
@@ -117,22 +141,37 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
                     this.orbitControls.enabled = this.orbitControlsEnabledBeforeDrag_;
                 }
                 this.transformDragStartPosition_ = null;
+                this.transformDragStartQuaternion_ = null;
             }
         });
         // Rerender scene and trigger callbacks when the drag operation completes
         this.transformControls_.addEventListener("mouseUp", () => {
-            var _a;
+            var _a, _b;
             const draggedObject = (_a = this.transformControls_) === null || _a === void 0 ? void 0 : _a.object;
             const startPosition = this.transformDragStartPosition_;
+            const startQuaternion = this.transformDragStartQuaternion_;
+            const wasRotate = ((_b = this.transformControls_) === null || _b === void 0 ? void 0 : _b.mode) === "rotate";
             const hasMoved = !!draggedObject &&
                 !!startPosition &&
                 draggedObject.position.distanceTo(startPosition) > DRAG_COMMIT_EPSILON;
-            if (hasMoved && draggedObject) {
+            // A pure rotation about the pivot's own (fixed) position never changes
+            // draggedObject.position, so a rotate-mode commit must be detected via the
+            // quaternion instead - hasMoved alone would never fire for it.
+            const hasRotated = !!draggedObject &&
+                !!startQuaternion &&
+                draggedObject.quaternion.angleTo(startQuaternion) > DRAG_COMMIT_EPSILON;
+            if ((hasMoved || hasRotated) && draggedObject) {
                 if (draggedObject === this.selectionPivot_) {
                     this.commitMovedAtoms_(this.selectedMeshes_.map((mesh) => ({
                         atomicIndex: mesh.userData.atomicIndex,
                         position: mesh.position.clone(),
                     })));
+                    if (wasRotate) {
+                        // The pivot's rotation is relative to each drag, not cumulative
+                        // across drags - the atoms' new positions already encode the
+                        // rotation, so reset it to identity for the next attach/drag.
+                        this.selectionPivot_.quaternion.identity();
+                    }
                 }
                 else {
                     this.commitMovedAtom_(draggedObject.userData.atomicIndex, draggedObject.position);
@@ -327,17 +366,26 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
             var _a;
             if (!this.isEditModeEnabled_)
                 return;
-            if (event.key !== "Escape")
+            // Don't act on Escape/F while the user is typing in a form field (e.g. the
+            // coordinate panel or the element-rename field) - "f" in particular is a normal
+            // character a user might type there (e.g. renaming an atom to "Fe").
+            const target = event.target;
+            if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.nodeName))
                 return;
-            if (this.isDraggingAtom_ || ((_a = this.transformControls_) === null || _a === void 0 ? void 0 : _a.dragging)) {
-                this.cancelAtomDrag_();
-            }
-            else if (this.selectedMeshes_.length > 0) {
-                this.clearSelection();
-                if (this.settings.onSelectionChanged) {
-                    this.settings.onSelectionChanged([]);
+            if (event.key === "Escape") {
+                if (this.isDraggingAtom_ || ((_a = this.transformControls_) === null || _a === void 0 ? void 0 : _a.dragging)) {
+                    this.cancelAtomDrag_();
                 }
-                this.render();
+                else if (this.selectedMeshes_.length > 0) {
+                    this.clearSelection();
+                    if (this.settings.onSelectionChanged) {
+                        this.settings.onSelectionChanged([]);
+                    }
+                    this.render();
+                }
+            }
+            else if (event.key.toLowerCase() === "f" && this.selectedMeshes_.length > 0) {
+                this.focusCameraOnSelection();
             }
         };
         document.addEventListener("keydown", this.handleEditModeKeyDown_);
@@ -715,6 +763,10 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         this.selectedMeshes_.forEach((mesh) => centroid.add(mesh.position));
         centroid.divideScalar(this.selectedMeshes_.length);
         this.selectionPivot_.position.copy(centroid);
+        // A fresh attach always starts unrotated, even if a previous group drag left the
+        // pivot's quaternion non-identity for any reason (the mouseUp handler already resets
+        // it after every rotate commit - this is a defensive backstop, not the primary path).
+        this.selectionPivot_.quaternion.identity();
         if (this.transformControls_)
             this.transformControls_.attach(this.selectionPivot_);
     }
@@ -945,6 +997,80 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         if (this.settings.onStructureModified) {
             this.settings.onStructureModified(newMaterial);
         }
+    }
+    /**
+     * Duplicates every selected atom at a small fixed offset from its source, preserving
+     * element and (for the group case) relative positions, as a single commit. The clones
+     * become the new selection, matching Add Atom's auto-select behavior. Old-editor parity:
+     * its "clone existing" was one of only two ways to add an atom of a specific element,
+     * the other being a plain add-then-rename (see changeAtomElement / D-9).
+     */
+    cloneSelectedAtoms() {
+        if (this.selectedMeshes_.length === 0)
+            return;
+        const CLONE_OFFSET = new THREE.Vector3(0.3, 0.3, 0.3);
+        const { elements } = this.structure.basis;
+        const sourceAtoms = this.selectedMeshes_.map((mesh) => {
+            var _a;
+            const elementEntry = elements[mesh.userData.atomicIndex];
+            const element = typeof elementEntry === "string" ? elementEntry : (_a = elementEntry === null || elementEntry === void 0 ? void 0 : elementEntry.value) !== null && _a !== void 0 ? _a : "Si";
+            return { element, position: mesh.position.clone().add(CLONE_OFFSET) };
+        });
+        const newMaterial = this.applyBasisDelta_((basis) => {
+            const wasCartesian = basis.isInCartesianUnits;
+            basis.toCartesian();
+            sourceAtoms.forEach(({ element, position }) => {
+                basis.addAtom({ element, coordinate: position.toArray() });
+            });
+            if (!wasCartesian)
+                basis.toCrystal();
+        });
+        const startIndex = newMaterial.Basis.elements.length - sourceAtoms.length;
+        const newIndices = sourceAtoms.map((_atom, index) => startIndex + index);
+        this.setStructure(newMaterial);
+        this.rebuildScene();
+        this.reselectAtomsByIndices(newIndices);
+        if (this.settings.onSelectionChanged) {
+            this.settings.onSelectionChanged(newIndices);
+        }
+        if (this.settings.onStructureModified) {
+            this.settings.onStructureModified(newMaterial);
+        }
+    }
+    /**
+     * Frames the camera on the current selection's bounding sphere, preserving the current
+     * viewing angle (only re-targeting and re-distancing, not resetting to a canonical
+     * axis-aligned view like adjustCamerasAndOrbitControlsToCell does for the whole cell).
+     * The one camera move an edit-mode interaction is allowed to make, since it's a direct,
+     * explicit user action (F key) rather than a side effect of an edit (US-12).
+     */
+    focusCameraOnSelection() {
+        if (this.selectedMeshes_.length === 0 || !this.orbitControls)
+            return;
+        const boundingBox = new THREE.Box3();
+        this.selectedMeshes_.forEach((mesh) => boundingBox.expandByPoint(mesh.position));
+        const center = boundingBox.getCenter(new THREE.Vector3());
+        const extent = boundingBox.getSize(new THREE.Vector3()).length();
+        const MIN_FOCUS_RADIUS = 2; // Å; keeps a single-atom focus from zooming in absurdly close
+        const radius = Math.max(extent / 2, MIN_FOCUS_RADIUS);
+        const previousTarget = this.orbitControls.target.clone();
+        const viewDirection = this.camera.position.clone().sub(previousTarget);
+        if (viewDirection.lengthSq() < 1e-9)
+            viewDirection.set(0, 0, 1);
+        viewDirection.normalize();
+        if (this.camera.isOrthographicCamera) {
+            this.setOrthographicCameraFrustum(this.PADDING_RATIO * radius * 2);
+            this.camera.position.copy(center.clone().add(viewDirection.multiplyScalar(Math.max(radius * 4, 10))));
+        }
+        else {
+            const fovInRadians = (this.camera.fov * Math.PI) / 180;
+            const distance = (this.PADDING_RATIO * radius * 2) / Math.tan(fovInRadians / 2);
+            this.camera.position.copy(center.clone().add(viewDirection.multiplyScalar(distance)));
+        }
+        this.orbitControls.target.copy(center);
+        this.camera.lookAt(center);
+        this.orbitControls.update();
+        this.render();
     }
     /**
      * Commits a single moved atom (from either a direct drag or a gizmo drag) as one delta

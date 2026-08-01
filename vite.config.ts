@@ -26,7 +26,13 @@ export default defineConfig({
     },
     optimizeDeps: {
         entries: ["index.html"],
-        include: ["@emotion/react", "@emotion/styled"],
+        include: [
+            "@emotion/react",
+            "@emotion/styled",
+            "@mui/icons-material/RotateRight",
+            "@mui/icons-material/ContentCopy",
+            "@mui/icons-material/CenterFocusStrong",
+        ],
     },
     build: {
         outDir: "build",

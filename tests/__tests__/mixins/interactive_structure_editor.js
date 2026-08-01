@@ -633,6 +633,35 @@ describe("Interactive structure editor functionality tests", () => {
             expect(firstAtom.position.x - firstStart.x).toBeCloseTo(1, 6);
             expect(secondAtom.position.x - secondStart.x).toBeCloseTo(1, 6);
             expect(structureModifiedCalls.length).toBe(1);
+            // rebuildScene() (wave.js) replaces every atom mesh - the commit must leave the
+            // FULL group selected, not just the last-selected atom, so a second group action
+            // (e.g. another drag) is still possible immediately after.
+            expect(wave.selectedMeshes_.length).toBe(2);
+            expect(wave.selectedMeshes_.map((mesh) => mesh.userData.atomicIndex).sort()).toEqual([
+                0, 1,
+            ]);
+        });
+
+        test("A multi-selection survives a rebuild triggered independently of the mixin's own commit (regression: host round-trip via onStructureModified must not collapse it to one atom)", () => {
+            // A real host (ThreeDEditor.jsx's handleStructureModified -> _applyMaterialToViewer)
+            // reacts to onStructureModified by calling setStructure()+rebuildScene() AGAIN, on
+            // top of the rebuild the mixin's own commit already performed. rebuildScene() itself
+            // (wave.js) must be multi-select-aware for this second, externally-triggered rebuild
+            // to preserve the group too - simulate that second round-trip directly.
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+
+            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
+
+            wave.setStructure(wave.structure);
+            wave.rebuildScene();
+
+            expect(wave.selectedMeshes_.length).toBe(2);
+            expect(wave.selectedMeshes_.map((mesh) => mesh.userData.atomicIndex).sort()).toEqual([
+                0, 1,
+            ]);
+            expect(wave.transformControls_.object).toBe(wave.selectionPivot_);
         });
 
         test("Escape during a group drag reverts every atom and commits nothing", () => {
@@ -688,6 +717,213 @@ describe("Interactive structure editor functionality tests", () => {
             expect(wave.selectedMeshes_.map((mesh) => mesh.userData.atomicIndex).sort()).toEqual(
                 atoms.map((mesh) => mesh.userData.atomicIndex).sort(),
             );
+        });
+    });
+
+    describe("Parity: group rotate, clone, camera focus (old-editor parity)", () => {
+        test("Rotating the group pivot via the gizmo rotates every selected atom rigidly about the shared centroid, as a single commit", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+
+            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
+            wave.setTransformMode("rotate");
+
+            const centroid = firstAtom.position.clone().add(secondAtom.position).divideScalar(2);
+            const firstRadius = firstAtom.position.distanceTo(centroid);
+            const secondRadius = secondAtom.position.distanceTo(centroid);
+            const firstOffset = firstAtom.position.clone().sub(centroid);
+            const quaternion = new THREE.Quaternion().setFromAxisAngle(
+                new THREE.Vector3(0, 0, 1),
+                Math.PI / 2,
+            );
+
+            // Same real event order as the group-translate test above: dragging=true auto-fires
+            // dragging-changed+change (snapshotting transformDragStartPosition_/Quaternion_),
+            // the pivot's quaternion is then set directly (as TransformControls itself would),
+            // a manual "change" propagates it to the atoms, "mouseUp" commits while the start
+            // snapshot is still valid, and only then dragging=false.
+            wave.transformControls_.dragging = true;
+            wave.selectionPivot_.quaternion.copy(quaternion);
+            wave.transformControls_.dispatchEvent({ type: "change" });
+            wave.transformControls_.dispatchEvent({ type: "mouseUp" });
+            wave.transformControls_.dragging = false;
+
+            const expectedFirst = centroid
+                .clone()
+                .add(firstOffset.clone().applyQuaternion(quaternion));
+            expect(firstAtom.position.distanceTo(expectedFirst)).toBeLessThan(1e-6);
+            // Rigid rotation about the shared centroid: each atom's distance from it is preserved.
+            expect(firstAtom.position.distanceTo(centroid)).toBeCloseTo(firstRadius, 6);
+            expect(secondAtom.position.distanceTo(centroid)).toBeCloseTo(secondRadius, 6);
+            expect(structureModifiedCalls.length).toBe(1);
+            // The pivot's rotation is relative to each drag, not cumulative - reset to identity
+            // after commit so the next attach/drag starts clean.
+            expect(wave.selectionPivot_.quaternion.angleTo(new THREE.Quaternion())).toBeLessThan(
+                1e-9,
+            );
+            // rebuildScene() must leave the FULL group selected (not just one atom), or the
+            // Rotate button would go right back to disabled and a second rotate would be
+            // impossible.
+            expect(wave.selectedMeshes_.length).toBe(2);
+        });
+
+        test("A second consecutive group rotate still works after a host round-trip rebuild (regression)", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+
+            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
+            wave.setTransformMode("rotate");
+
+            const rotateOnce = () => {
+                wave.transformControls_.dragging = true;
+                wave.selectionPivot_.quaternion.setFromAxisAngle(
+                    new THREE.Vector3(0, 0, 1),
+                    Math.PI / 4,
+                );
+                wave.transformControls_.dispatchEvent({ type: "change" });
+                wave.transformControls_.dispatchEvent({ type: "mouseUp" });
+                wave.transformControls_.dragging = false;
+            };
+
+            rotateOnce();
+            // Simulate the host's onStructureModified round-trip (ThreeDEditor.jsx's
+            // handleStructureModified -> _applyMaterialToViewer), which independently calls
+            // setStructure()+rebuildScene() again on top of the mixin's own commit.
+            wave.setStructure(wave.structure);
+            wave.rebuildScene();
+            expect(wave.selectedMeshes_.length).toBe(2);
+            expect(wave.transformControls_.object).toBe(wave.selectionPivot_);
+
+            const beforeSecond = wave.collectAllAtoms().map((atom) => atom.position.clone());
+            rotateOnce();
+            const afterSecond = wave.collectAllAtoms().map((atom) => atom.position.clone());
+
+            expect(structureModifiedCalls.length).toBe(2);
+            expect(wave.selectedMeshes_.length).toBe(2);
+            beforeSecond.forEach((position, index) => {
+                expect(position.distanceTo(afterSecond[index])).toBeGreaterThan(1e-3);
+            });
+        });
+
+        test("no structure-modified event from a zero-rotation gizmo click-release", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+
+            const atoms = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes(atoms);
+            wave.setTransformMode("rotate");
+
+            wave.transformControls_.dragging = true;
+            wave.transformControls_.dispatchEvent({ type: "mouseUp" });
+            wave.transformControls_.dragging = false;
+
+            expect(structureModifiedCalls.length).toBe(0);
+        });
+
+        test("Cloning a single selected atom adds one atom of the same element at an offset and selects the clone", () => {
+            const { wave, structureModifiedCalls, selectionChangedCalls } =
+                getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+
+            const [firstAtom] = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes([firstAtom]);
+            const initialCount = wave.collectAllAtoms().length;
+            const sourcePosition = firstAtom.position.clone();
+
+            wave.cloneSelectedAtoms();
+
+            const atoms = wave.collectAllAtoms();
+            expect(atoms.length).toBe(initialCount + 1);
+            expect(structureModifiedCalls.length).toBe(1);
+
+            const newAtom = atoms[atoms.length - 1];
+            expect(newAtom.userData.atomicIndex).toBe(initialCount);
+            expect(newAtom.position.distanceTo(sourcePosition)).toBeGreaterThan(0.01);
+            // Selection moves to the clone, matching Add Atom's auto-select behavior.
+            expect(wave.selectedMeshes_).toEqual([newAtom]);
+            expect(selectionChangedCalls[selectionChangedCalls.length - 1]).toEqual([
+                [initialCount],
+            ]);
+
+            const toSymbol = (element) => (typeof element === "string" ? element : element.value);
+            const clonedElement = wave.structure.basis.elements[newAtom.userData.atomicIndex];
+            const originalElement = wave.structure.basis.elements[firstAtom.userData.atomicIndex];
+            expect(toSymbol(clonedElement)).toBe(toSymbol(originalElement));
+        });
+
+        test("Cloning a multi-atom selection adds one clone per atom, preserving relative offsets, as a single commit", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+
+            const atoms = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes(atoms);
+            const initialCount = atoms.length;
+            const originalRelativeOffset = atoms[1].position.clone().sub(atoms[0].position);
+
+            wave.cloneSelectedAtoms();
+
+            const allAtoms = wave.collectAllAtoms();
+            expect(allAtoms.length).toBe(initialCount * 2);
+            expect(structureModifiedCalls.length).toBe(1);
+            expect(wave.selectedMeshes_.length).toBe(initialCount);
+
+            const clones = allAtoms.slice(initialCount);
+            const clonedRelativeOffset = clones[1].position.clone().sub(clones[0].position);
+            expect(clonedRelativeOffset.distanceTo(originalRelativeOffset)).toBeLessThan(1e-6);
+        });
+
+        test("Cloning with nothing selected is a no-op", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            const initialCount = wave.collectAllAtoms().length;
+
+            wave.cloneSelectedAtoms();
+
+            expect(wave.collectAllAtoms().length).toBe(initialCount);
+            expect(structureModifiedCalls.length).toBe(0);
+        });
+
+        test("Focusing the camera on a selection re-targets and re-distances without changing the viewing angle", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            // A distinctive, non-default position/target so a coincidental match with the
+            // selection's centroid can't hide a bug.
+            wave.camera.position.set(20, 5, 8);
+            wave.orbitControls.target.set(1, 1, 1);
+            wave.camera.lookAt(wave.orbitControls.target);
+            const previousDirection = wave.camera.position
+                .clone()
+                .sub(wave.orbitControls.target)
+                .normalize();
+
+            const atoms = wave.collectAllAtoms();
+            wave.setSelectedAtomMeshes(atoms);
+            const expectedCenter = new THREE.Vector3();
+            atoms.forEach((atom) => expectedCenter.add(atom.position));
+            expectedCenter.divideScalar(atoms.length);
+
+            wave.focusCameraOnSelection();
+
+            expect(wave.orbitControls.target.distanceTo(expectedCenter)).toBeLessThan(1e-6);
+            const newDirection = wave.camera.position
+                .clone()
+                .sub(wave.orbitControls.target)
+                .normalize();
+            expect(newDirection.distanceTo(previousDirection)).toBeLessThan(1e-6);
+        });
+
+        test("Focusing the camera with nothing selected is a no-op", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            const previousPosition = wave.camera.position.clone();
+            const previousTarget = wave.orbitControls.target.clone();
+
+            wave.focusCameraOnSelection();
+
+            expect(wave.camera.position.equals(previousPosition)).toBe(true);
+            expect(wave.orbitControls.target.equals(previousTarget)).toBe(true);
         });
     });
 });

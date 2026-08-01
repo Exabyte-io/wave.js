@@ -1,4 +1,5 @@
 import { Made } from "@mat3ra/made";
+import RotateRight from "@mui/icons-material/RotateRight";
 import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
 import Enzyme from "enzyme";
 import expect from "expect";
@@ -454,4 +455,159 @@ test("selecting an atom does not trigger a full viewer reload (D3/R17)", () => {
     wrapper.instance().handleSelectionChanged([1]);
 
     expect(reloadViewerSpy).not.toHaveBeenCalled();
+});
+
+describe("Parity: group rotate, clone, camera focus, element rename (old-editor parity)", () => {
+    test("Rotate mode button is disabled below 2 selected atoms and enabled at 2+", () => {
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />,
+            { attachTo: container },
+        );
+        // The edit toolbar (and thus the Rotate button) only renders while both interactive and
+        // edit mode are active - see renderWaveOrThreejsEditorModal.
+        wrapper.find(`${SELECTORS.interactiveIconToolbar} button`).prop("onClick")();
+        wrapper.instance().handleToggleEditMode();
+        wrapper.update();
+        const findRotateButton = () => wrapper.find(RotateRight).closest("button");
+
+        expect(findRotateButton().prop("disabled")).toBe(true);
+
+        wrapper.instance().handleSelectionChanged([0, 1]);
+        wrapper.update();
+
+        expect(findRotateButton().prop("disabled")).toBeFalsy();
+
+        wrapper.instance().handleSelectionChanged([0]);
+        wrapper.update();
+
+        expect(findRotateButton().prop("disabled")).toBe(true);
+    });
+
+    test("Dropping the selection below 2 atoms while rotate mode is active auto-reverts to translate", () => {
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />,
+            { attachTo: container },
+        );
+        const instance = wrapper.instance();
+        const { wave } = wrapper.find(WaveComponent).instance();
+        const setTransformModeSpy = jest.spyOn(wave, "setTransformMode");
+
+        instance.handleSelectionChanged([0, 1]);
+        instance.handleSetTransformMode("rotate");
+        wrapper.update();
+        expect(wrapper.state("activeTransformMode")).toBe("rotate");
+
+        instance.handleSelectionChanged([0]);
+        wrapper.update();
+
+        expect(wrapper.state("activeTransformMode")).toBe("translate");
+        expect(setTransformModeSpy).toHaveBeenLastCalledWith("translate");
+
+        // A group selection (or no selection at all) leaves an already-active translate mode
+        // alone - only a rotate-mode selection drop below 2 forces a mode change.
+        setTransformModeSpy.mockClear();
+        instance.handleSelectionChanged([]);
+        wrapper.update();
+        expect(wrapper.state("activeTransformMode")).toBe("translate");
+        expect(setTransformModeSpy).not.toHaveBeenCalled();
+    });
+
+    test("Clone and Focus toolbar actions delegate to the wave instance", () => {
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />,
+            { attachTo: container },
+        );
+        const instance = wrapper.instance();
+        const { wave } = wrapper.find(WaveComponent).instance();
+        const cloneSpy = jest.spyOn(wave, "cloneSelectedAtoms");
+        const focusSpy = jest.spyOn(wave, "focusCameraOnSelection");
+
+        instance.handleCloneSelectedAtoms();
+        instance.handleFocusCameraOnSelection();
+
+        expect(cloneSpy).toHaveBeenCalledTimes(1);
+        expect(focusSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test("Element field commits a case-insensitive valid rename as a single history entry", () => {
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />,
+            { attachTo: container },
+        );
+        const instance = wrapper.instance();
+        const handleStructureModifiedSpy = jest.spyOn(instance, "handleStructureModified");
+
+        instance.handleSelectionChanged([0]);
+        instance.handleElementDraftChange("fe");
+        expect(handleStructureModifiedSpy).not.toHaveBeenCalled();
+        wrapper.update();
+        expect(wrapper.state("elementDraft")).toBe("fe");
+
+        instance.handleElementCommit();
+
+        expect(handleStructureModifiedSpy).toHaveBeenCalledTimes(1);
+        wrapper.update();
+        expect(wrapper.state("elementDraft")).toBeNull();
+        const element = wrapper.state("material").basis.elements[0];
+        const symbol = typeof element === "string" ? element : element.value;
+        expect(symbol).toBe("Fe");
+    });
+
+    test("Element field reverts silently on an unrecognized element name", () => {
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />,
+            { attachTo: container },
+        );
+        const instance = wrapper.instance();
+        const handleStructureModifiedSpy = jest.spyOn(instance, "handleStructureModified");
+
+        instance.handleSelectionChanged([0]);
+        instance.handleElementDraftChange("Xx");
+        instance.handleElementCommit();
+
+        expect(handleStructureModifiedSpy).not.toHaveBeenCalled();
+        wrapper.update();
+        expect(wrapper.state("elementDraft")).toBeNull();
+        const element = wrapper.state("material").basis.elements[0];
+        const symbol = typeof element === "string" ? element : element.value;
+        expect(symbol).toBe("Si");
+    });
+
+    test("Committing the element field with the same element already set is a no-op", () => {
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />,
+            { attachTo: container },
+        );
+        const instance = wrapper.instance();
+        const handleStructureModifiedSpy = jest.spyOn(instance, "handleStructureModified");
+
+        // MATERIAL_CONFIG's atom 0 is already "Si".
+        instance.handleSelectionChanged([0]);
+        instance.handleElementDraftChange("Si");
+        instance.handleElementCommit();
+
+        expect(handleStructureModifiedSpy).not.toHaveBeenCalled();
+    });
+
+    test("Element rename is a no-op unless exactly one atom is selected", () => {
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />,
+            { attachTo: container },
+        );
+        const instance = wrapper.instance();
+        const handleStructureModifiedSpy = jest.spyOn(instance, "handleStructureModified");
+
+        instance.handleSelectionChanged([0, 1]);
+        instance.handleElementDraftChange("Fe");
+        instance.handleElementCommit();
+
+        expect(handleStructureModifiedSpy).not.toHaveBeenCalled();
+    });
 });

@@ -247,10 +247,13 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
     }
     // Called on each change to the Redux store via reloadViewer.
     rebuildScene() {
-        var _a;
         // Rebuilding replaces every atom mesh, so the edit-mode selection (and the gizmo
-        // attached to it) must be re-pointed at the atom's new mesh instance afterwards.
-        const selectedAtomicIndex = (_a = this.selectedMesh_) === null || _a === void 0 ? void 0 : _a.userData.atomicIndex;
+        // attached to it) must be re-pointed at the atoms' new mesh instances afterwards. Uses
+        // the full multi-select array (D-4), not just the single last-selected atom - otherwise
+        // a rebuild mid-group-selection (e.g. the host's onStructureModified round-trip calling
+        // setStructure+rebuildScene again after a group move/rotate/clone) would silently
+        // collapse the selection down to one atom.
+        const selectedAtomicIndices = (this.selectedMeshes_ || []).map((mesh) => mesh.userData.atomicIndex);
         this.clearView();
         this.drawAtomsAsSpheres();
         this.drawUnitCell();
@@ -260,7 +263,7 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         this.createAllLabels();
         this.createAllMeasurements();
         if (this.isEditModeEnabled_)
-            this.reselectAtomByIndex(selectedAtomicIndex);
+            this.reselectAtomsByIndices(selectedAtomicIndices);
         this.render();
     }
     render() {

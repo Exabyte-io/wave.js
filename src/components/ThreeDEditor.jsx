@@ -6,11 +6,14 @@ import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
 import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
 import { AlertProvider } from "@exabyte-io/cove.js/src/theme/provider";
 import { Made } from "@mat3ra/made";
+import { PERIODIC_TABLE } from "@mat3ra/periodic-table";
 import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
+import CenterFocusStrong from "@mui/icons-material/CenterFocusStrong";
 import CheckIcon from "@mui/icons-material/Check";
 import CloudDownload from "@mui/icons-material/CloudDownload";
+import ContentCopy from "@mui/icons-material/ContentCopy";
 import ControlCameraRounded from "@mui/icons-material/ControlCameraRounded";
 import Dehaze from "@mui/icons-material/Dehaze";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -25,6 +28,7 @@ import PictureInPicture from "@mui/icons-material/PictureInPicture";
 import Redo from "@mui/icons-material/Redo";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
+import RotateRight from "@mui/icons-material/RotateRight";
 import Settings from "@mui/icons-material/Settings";
 import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
@@ -85,6 +89,10 @@ export class ThreeDEditor extends React.Component {
             // "show the committed value". Lets a field be cleared or start with "-" while
             // focused without committing (and rebuilding the scene) on every keystroke (D18).
             coordinateDrafts: [null, null, null],
+            // Local draft string for the element field while focused; null means "show the
+            // committed value". Mirrors coordinateDrafts (D18) - no commit/history entry until
+            // blur/Enter.
+            elementDraft: null,
             // isDistanceAndAnglesShown: false,
             measurementsSettings: defaultMeasurementsSettings,
             // TODO: remove the need for `viewerTriggerResize`
@@ -148,6 +156,10 @@ export class ThreeDEditor extends React.Component {
         this.handleSetTransformMode = this.handleSetTransformMode.bind(this);
         this.handleAddAtom = this.handleAddAtom.bind(this);
         this.handleRemoveSelectedAtom = this.handleRemoveSelectedAtom.bind(this);
+        this.handleCloneSelectedAtoms = this.handleCloneSelectedAtoms.bind(this);
+        this.handleFocusCameraOnSelection = this.handleFocusCameraOnSelection.bind(this);
+        this.handleElementDraftChange = this.handleElementDraftChange.bind(this);
+        this.handleElementCommit = this.handleElementCommit.bind(this);
         this.handleSelectionChanged = this.handleSelectionChanged.bind(this);
         this.handleEditModeKeyDown = this.handleEditModeKeyDown.bind(this);
         this.canUndo = this.canUndo.bind(this);
@@ -272,6 +284,7 @@ export class ThreeDEditor extends React.Component {
             historyPointer: 0,
             selectedAtomIndices: [],
             coordinateDrafts: [null, null, null],
+            elementDraft: null,
         });
         this.handleResetMeasurements();
     }
@@ -631,12 +644,27 @@ export class ThreeDEditor extends React.Component {
      * single atom, 2+ for a group selection.
      */
     handleSelectionChanged(indices) {
+        const { activeTransformMode } = this.state;
         if (this.WaveComponent?.wave) {
             this.WaveComponent.wave.bypassReloadViewer = true;
         }
+        // Rotate only makes sense for a group (it spins the selection about its centroid) - if
+        // the selection drops below 2 while rotate is active (e.g. a Shift-click deselect, or
+        // Delete removing atoms down to one), fall back to translate rather than leaving the
+        // toolbar showing a mode the gizmo can no longer meaningfully perform.
+        const nextTransformMode =
+            activeTransformMode === "rotate" && indices.length < 2 ? "translate" : null;
         this.setState(
-            { selectedAtomIndices: indices, coordinateDrafts: [null, null, null] },
+            {
+                selectedAtomIndices: indices,
+                coordinateDrafts: [null, null, null],
+                elementDraft: null,
+                ...(nextTransformMode ? { activeTransformMode: nextTransformMode } : {}),
+            },
             () => {
+                if (nextTransformMode && this.WaveComponent?.wave) {
+                    this.WaveComponent.wave.setTransformMode(nextTransformMode);
+                }
                 if (this.WaveComponent?.wave) {
                     this.WaveComponent.wave.bypassReloadViewer = false;
                 }
@@ -709,6 +737,64 @@ export class ThreeDEditor extends React.Component {
         if (this.WaveComponent?.wave) {
             this.WaveComponent.wave.removeSelectedAtom();
         }
+    }
+
+    handleCloneSelectedAtoms() {
+        if (this.WaveComponent?.wave) {
+            this.WaveComponent.wave.cloneSelectedAtoms();
+        }
+    }
+
+    handleFocusCameraOnSelection() {
+        if (this.WaveComponent?.wave) {
+            this.WaveComponent.wave.focusCameraOnSelection();
+        }
+    }
+
+    /**
+     * Updates only the local draft string for the element field while it's focused - no commit,
+     * no history entry, no scene rebuild. Mirrors handleCoordinateDraftChange (D18).
+     */
+    handleElementDraftChange(value) {
+        this.setState({ elementDraft: value });
+    }
+
+    /**
+     * Commits the element draft (on blur/Enter) if it names a real element that differs from the
+     * current one, then clears the draft so the field reverts to showing the committed value.
+     * Operates directly on state.material like handleCoordinateChange, rather than through the
+     * mixin - this is a panel-typed edit, not a scene-gesture-driven one. Symbol casing is
+     * normalized (e.g. "si"/"SI" -> "Si") so the field isn't case-sensitive to use, then checked
+     * against PERIODIC_TABLE so a typo silently reverts instead of writing a bogus element.
+     */
+    handleElementCommit() {
+        const { elementDraft, selectedAtomIndices, material } = this.state;
+        if (elementDraft !== null) {
+            const trimmed = elementDraft.trim();
+            const symbol = trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+
+            if (selectedAtomIndices.length === 1 && symbol in PERIODIC_TABLE) {
+                const [selectedAtomIndex] = selectedAtomIndices;
+                const basis = material.Basis;
+                const { elements } = basis;
+                const currentEntry = elements[selectedAtomIndex];
+                const currentSymbol =
+                    typeof currentEntry === "string" ? currentEntry : currentEntry?.value;
+                if (currentEntry && currentSymbol !== symbol) {
+                    const newMaterial = material.clone();
+                    const newBasis = newMaterial.Basis;
+                    const newElements = newBasis.elements;
+                    newElements[selectedAtomIndex] = {
+                        ...newElements[selectedAtomIndex],
+                        value: symbol,
+                    };
+                    newBasis.elements = newElements;
+                    newMaterial.setBasis(newBasis.toJSON());
+                    this.handleStructureModified(newMaterial);
+                }
+            }
+        }
+        this.setState({ elementDraft: null });
     }
 
     // TODO: reset the colors for other buttons in the panel on call to the function below
@@ -1142,12 +1228,20 @@ export class ThreeDEditor extends React.Component {
     }
 
     renderEditToolbar() {
-        const { activeTransformMode, selectedAtomIndices, material, coordinateDrafts } = this.state;
+        const {
+            activeTransformMode,
+            selectedAtomIndices,
+            material,
+            coordinateDrafts,
+            elementDraft,
+        } = this.state;
         const { editSessionOptions } = this.props;
         const hasUndo = this.canUndo();
         const hasRedo = this.canRedo();
         const defaultElement = editSessionOptions?.defaultElement || "Si";
         const isSingleAtomSelected = selectedAtomIndices.length === 1;
+        const hasSelection = selectedAtomIndices.length > 0;
+        const canRotate = selectedAtomIndices.length > 1;
         const [selectedAtomIndex] = selectedAtomIndices;
 
         let selectedCoordinates = [0, 0, 0];
@@ -1186,6 +1280,17 @@ export class ThreeDEditor extends React.Component {
                                 color={activeTransformMode === "translate" ? "primary" : "inherit"}
                             />
                         </SquareIconButton>
+                        <SquareIconButton
+                            title={
+                                canRotate ? "Rotate Mode" : "Select 2+ atoms to rotate as a group"
+                            }
+                            disabled={!canRotate}
+                            onClick={() => this.handleSetTransformMode("rotate")}
+                        >
+                            <RotateRight
+                                color={activeTransformMode === "rotate" ? "primary" : "inherit"}
+                            />
+                        </SquareIconButton>
                     </ButtonGroup>
 
                     <ButtonGroup orientation="vertical" variant="outlined" color="inherit">
@@ -1198,13 +1303,34 @@ export class ThreeDEditor extends React.Component {
                         <SquareIconButton
                             title={
                                 selectedAtomIndices.length > 1
+                                    ? `Clone ${selectedAtomIndices.length} Selected Atoms`
+                                    : "Clone Selected Atom"
+                            }
+                            disabled={!hasSelection}
+                            onClick={this.handleCloneSelectedAtoms}
+                        >
+                            <ContentCopy />
+                        </SquareIconButton>
+                        <SquareIconButton
+                            title={
+                                selectedAtomIndices.length > 1
                                     ? `Delete ${selectedAtomIndices.length} Selected Atoms`
                                     : "Delete Selected Atom"
                             }
-                            disabled={selectedAtomIndices.length === 0}
+                            disabled={!hasSelection}
                             onClick={this.handleRemoveSelectedAtom}
                         >
                             <DeleteIcon />
+                        </SquareIconButton>
+                    </ButtonGroup>
+
+                    <ButtonGroup orientation="vertical" variant="outlined" color="inherit">
+                        <SquareIconButton
+                            title="Focus Camera on Selection (F)"
+                            disabled={!hasSelection}
+                            onClick={this.handleFocusCameraOnSelection}
+                        >
+                            <CenterFocusStrong />
                         </SquareIconButton>
                     </ButtonGroup>
 
@@ -1231,16 +1357,29 @@ export class ThreeDEditor extends React.Component {
                                 {selectedAtomIndices.length} atoms selected
                             </Typography>
                             <Typography variant="caption" color="text.secondary" textAlign="center">
-                                Drag or use the gizmo to move the group together
+                                Drag, or use the gizmo, to move or rotate the group together
                             </Typography>
                         </Stack>
                     )}
 
                     {isSingleAtomSelected && (
                         <Stack spacing={1} alignItems="center" sx={{ width: "84px" }}>
-                            <Typography variant="caption" fontWeight="bold">
-                                {selectedElement || "Si"}
-                            </Typography>
+                            <TextField
+                                label="Element"
+                                size="small"
+                                type="text"
+                                className="inverse stepper"
+                                value={
+                                    elementDraft !== null ? elementDraft : selectedElement || "Si"
+                                }
+                                onChange={(event) =>
+                                    this.handleElementDraftChange(event.target.value)
+                                }
+                                onBlur={this.handleElementCommit}
+                                onKeyDown={(event) => {
+                                    if (event.key === "Enter") event.target.blur();
+                                }}
+                            />
                             <Typography variant="caption" color="text.secondary" sx={{ mt: -1 }}>
                                 {material?.basis?.units === "cartesian"
                                     ? "cartesian, Å"
