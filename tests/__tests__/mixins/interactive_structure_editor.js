@@ -1245,4 +1245,126 @@ describe("Interactive structure editor functionality tests", () => {
             expect(source).toBe("clone");
         });
     });
+
+    describe("Basis unit-conversion scoped to touched atoms (spec §5.2)", () => {
+        // MATERIAL_CONFIG's basis is stored in crystal (fractional) units. Before this fix,
+        // commitMovedAtoms_/addAtom/cloneSelectedAtoms flipped the WHOLE basis to Cartesian and
+        // back via basis.toCartesian()/toCrystal() just to place one touched atom's coordinate -
+        // toCartesian()/toCrystal() round-trip EVERY atom (mapArrayInPlace), not just the
+        // touched one. These tests pin down that only the touched atom's coordinate is ever
+        // converted now, independent of Basis's own serialize-time rounding (Cell.roundPrecision)
+        // incidentally masking the difference for well-conditioned lattices.
+        //
+        // The spy targets ONLY the ephemeral basis instance applyBasisDelta_ builds for this one
+        // commit (via an instance-level jest.spyOn, not the shared class prototype) - the wave
+        // also legitimately calls toCartesian/toCrystal elsewhere unrelated to this fix
+        // (setStructure's own always-Cartesian rendering basis; Made's repeat() tool computing
+        // periodic-image positions during rebuildScene), and a prototype-wide spy would wrongly
+        // flag those too.
+        const toValue = (coordinate) => (Array.isArray(coordinate) ? coordinate : coordinate.value);
+
+        function spyOnDeltaBasisConversions(wave) {
+            const originalApplyBasisDelta = wave.applyBasisDelta_.bind(wave);
+            const spies = {};
+            jest.spyOn(wave, "applyBasisDelta_").mockImplementation((mutateBasis) =>
+                originalApplyBasisDelta((basis) => {
+                    spies.toCartesian = jest.spyOn(basis, "toCartesian");
+                    spies.toCrystal = jest.spyOn(basis, "toCrystal");
+                    return mutateBasis(basis);
+                }),
+            );
+            return spies;
+        }
+
+        afterEach(() => {
+            jest.restoreAllMocks();
+        });
+
+        test("Dragging an atom does not round-trip the touched basis through toCartesian/toCrystal", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+            const spies = spyOnDeltaBasisConversions(wave);
+
+            const [firstAtom] = wave.collectSelectableAtoms();
+            simulateAtomDrag(wave, firstAtom, 40, 30);
+
+            expect(spies.toCartesian).not.toHaveBeenCalled();
+            expect(spies.toCrystal).not.toHaveBeenCalled();
+        });
+
+        test("Adding an atom does not round-trip the touched basis through toCartesian/toCrystal", () => {
+            const wave = getWaveInstance({});
+            const spies = spyOnDeltaBasisConversions(wave);
+
+            wave.addAtom("Si", [0, 0, 0]);
+
+            expect(spies.toCartesian).not.toHaveBeenCalled();
+            expect(spies.toCrystal).not.toHaveBeenCalled();
+        });
+
+        test("Cloning atoms does not round-trip the touched basis through toCartesian/toCrystal", () => {
+            const wave = getWaveInstance({});
+            const [firstAtom] = wave.collectSelectableAtoms();
+            wave.setSelectedAtomMeshes([firstAtom]);
+            const spies = spyOnDeltaBasisConversions(wave);
+
+            wave.cloneSelectedAtoms();
+
+            expect(spies.toCartesian).not.toHaveBeenCalled();
+            expect(spies.toCrystal).not.toHaveBeenCalled();
+        });
+
+        test("Dragging one atom leaves every other atom's crystal coordinate exactly unchanged", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
+            const untouchedIndex = secondAtom.userData.atomicIndex;
+            const untouchedBefore = toValue(wave.structure.basis.coordinates[untouchedIndex]);
+
+            simulateAtomDrag(wave, firstAtom, 40, 30);
+
+            const [committedMaterial] = structureModifiedCalls[structureModifiedCalls.length - 1];
+            const untouchedAfter = toValue(committedMaterial.basis.coordinates[untouchedIndex]);
+            expect(untouchedAfter).toEqual(untouchedBefore);
+        });
+
+        test("A dragged atom's committed crystal coordinate converts back to its exact dragged Cartesian position", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const [firstAtom] = wave.collectSelectableAtoms();
+            const targetIndex = firstAtom.userData.atomicIndex;
+
+            const { endPosition } = simulateAtomDrag(wave, firstAtom, 40, 30);
+
+            const [committedMaterial] = structureModifiedCalls[structureModifiedCalls.length - 1];
+            const committedCrystal = toValue(committedMaterial.basis.coordinates[targetIndex]);
+            const roundTripped =
+                committedMaterial.Basis.cell.convertPointToCartesian(committedCrystal);
+
+            ["x", "y", "z"].forEach((axis, i) => {
+                expect(roundTripped[i]).toBeCloseTo(endPosition[axis], 6);
+            });
+        });
+
+        test("Cloning an atom leaves the source atom's crystal coordinate exactly unchanged", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+
+            const [firstAtom] = wave.collectSelectableAtoms();
+            const sourceIndex = firstAtom.userData.atomicIndex;
+            const sourceBefore = toValue(wave.structure.basis.coordinates[sourceIndex]);
+            wave.setSelectedAtomMeshes([firstAtom]);
+
+            wave.cloneSelectedAtoms();
+
+            const [committedMaterial] = structureModifiedCalls[structureModifiedCalls.length - 1];
+            const sourceAfter = toValue(committedMaterial.basis.coordinates[sourceIndex]);
+            expect(sourceAfter).toEqual(sourceBefore);
+        });
+    });
 });

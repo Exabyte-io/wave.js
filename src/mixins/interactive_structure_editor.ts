@@ -1139,10 +1139,10 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
          */
         addAtom(elementName: string, cartesianCoordinates: Coordinate3D): void {
             const newMaterial = this.applyBasisDelta_((basis: any) => {
-                const wasCartesian = basis.isInCartesianUnits;
-                basis.toCartesian();
-                basis.addAtom({ element: elementName, coordinate: cartesianCoordinates });
-                if (!wasCartesian) basis.toCrystal();
+                const coordinate = basis.isInCartesianUnits
+                    ? cartesianCoordinates
+                    : basis.cell.convertPointToCrystal(cartesianCoordinates);
+                basis.addAtom({ element: elementName, coordinate });
             });
             const newIndex = newMaterial.Basis.elements.length - 1;
 
@@ -1296,12 +1296,12 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
             });
 
             const newMaterial = this.applyBasisDelta_((basis: any) => {
-                const wasCartesian = basis.isInCartesianUnits;
-                basis.toCartesian();
                 sourceAtoms.forEach(({ element, position }: any) => {
-                    basis.addAtom({ element, coordinate: position.toArray() });
+                    const coordinate = basis.isInCartesianUnits
+                        ? position.toArray()
+                        : basis.cell.convertPointToCrystal(position.toArray());
+                    basis.addAtom({ element, coordinate });
                 });
-                if (!wasCartesian) basis.toCrystal();
             });
 
             const startIndex = newMaterial.Basis.elements.length - sourceAtoms.length;
@@ -1387,18 +1387,18 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
         ): void {
             if (!moves.length) return;
             const newMaterial = this.applyBasisDelta_((basis: any) => {
-                const wasCartesian = basis.isInCartesianUnits;
-                basis.toCartesian();
                 const { coordinates } = basis;
                 moves.forEach(({ atomicIndex, position }) => {
                     if (!coordinates[atomicIndex]) return;
+                    const value = basis.isInCartesianUnits
+                        ? position.toArray()
+                        : basis.cell.convertPointToCrystal(position.toArray());
                     coordinates[atomicIndex] = {
                         ...coordinates[atomicIndex],
-                        value: position.toArray(),
+                        value,
                     };
                 });
                 basis.coordinates = coordinates;
-                if (!wasCartesian) basis.toCrystal();
             });
 
             this.setStructure(newMaterial);
