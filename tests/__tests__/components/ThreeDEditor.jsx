@@ -4,13 +4,21 @@ import Adapter from "@wojtekmaj/enzyme-adapter-react-17";
 import Enzyme from "enzyme";
 import expect from "expect";
 import React from "react";
+import * as THREE from "three";
 
 import { ThreeDEditor } from "../../../src/components/ThreeDEditor";
 import { WaveComponent } from "../../../src/components/WaveComponent";
 import settings from "../../../src/settings";
 import { ELEMENT_PROPERTIES, getWaveInstance, MATERIAL_CONFIG, WAVE_SETTINGS } from "../../enums";
+import {
+    projectMeshToScreen,
+    simulateAtomDrag,
+    simulateClick,
+    simulateMarqueeSelect,
+    stubCanvasRect,
+} from "../../helpers/editor";
 import { SELECTORS } from "../../selectors";
-import { createElement, takeSnapshotAndAssertEqualityAsync } from "../../utils";
+import { createElement, HEIGHT, takeSnapshotAndAssertEqualityAsync, WIDTH } from "../../utils";
 
 Enzyme.configure({ adapter: new Adapter() });
 
@@ -609,5 +617,225 @@ describe("Parity: group rotate, clone, camera focus, element rename (old-editor 
         instance.handleElementCommit();
 
         expect(handleStructureModifiedSpy).not.toHaveBeenCalled();
+    });
+});
+
+// Everything above drives ThreeDEditor's own handler methods directly (instance.handleX()) or
+// clicks real toolbar buttons - it proves the React-level wiring, but never exercises a real
+// pointer gesture against the mounted wave's canvas, nor the full host round-trip a gizmo commit
+// triggers (wave commit -> onStructureModified -> React setState -> _applyMaterialToViewer's own
+// second setStructure()+rebuildScene()). That full loop is exactly where a real regression hid
+// (rebuildScene() silently collapsing a multi-selection - see interactive_structure_editor.js's
+// own "host round-trip" tests) and no test at either layer alone would have caught it: the mixin
+// tests never go through React's callback, and the tests above never dispatch a real pointer
+// gesture. These tests close that gap by mounting the real component and driving its real,
+// running wave instance with the same helpers the mixin suite uses.
+describe("Full-stack regression: pre-existing interactions survive through the real, mounted component", () => {
+    function mountEditableEditor() {
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />,
+            { attachTo: container },
+        );
+        wrapper.instance().handleToggleEditMode();
+        const { wave } = wrapper.find(WaveComponent).instance();
+        // WaveComponent renders its own inner <div ref> as the Wave's actual canvas container -
+        // a real React-created node, not the outer `container` above - so it never picks up
+        // ELEMENT_PROPERTIES' clientWidth/clientHeight overrides, and the renderer sizes itself
+        // to 0x0 in jsdom (no real layout engine). Force the drawing-buffer size directly so
+        // raycasting-based pointer tests (real pixel<->NDC math) behave like a real browser,
+        // matching what the bare getWaveInstance() harness gets "for free" via ELEMENT_PROPERTIES.
+        wave.renderer.setSize(WIDTH, HEIGHT);
+        stubCanvasRect(wave);
+        return { wrapper, wave };
+    }
+
+    test("A real click on an atom selects it end-to-end (mixin -> onSelectionChanged -> React state)", () => {
+        const { wrapper, wave } = mountEditableEditor();
+
+        const [firstAtom] = wave.collectAllAtoms();
+        simulateClick(wave, firstAtom);
+        wrapper.update();
+
+        expect(wrapper.state("selectedAtomIndices")).toEqual([firstAtom.userData.atomicIndex]);
+    });
+
+    test("A real click-and-drag move commits through the full host round-trip and updates the material", () => {
+        const { wrapper, wave } = mountEditableEditor();
+
+        const [firstAtom] = wave.collectAllAtoms();
+        const { startPosition, endPosition } = simulateAtomDrag(wave, firstAtom, 40, 30);
+        wrapper.update();
+
+        expect(startPosition.equals(endPosition)).toBe(false);
+        expect(wrapper.state("historyPointer")).toBe(1);
+
+        const basis = wrapper.state("material").Basis;
+        basis.toCartesian();
+        const committed = basis.coordinatesAsArray[firstAtom.userData.atomicIndex];
+        expect(committed[0]).toBeCloseTo(endPosition.x, 5);
+        expect(committed[1]).toBeCloseTo(endPosition.y, 5);
+        expect(committed[2]).toBeCloseTo(endPosition.z, 5);
+    });
+
+    test("Shift+click multi-select works end-to-end through the mounted component", () => {
+        const { wrapper, wave } = mountEditableEditor();
+
+        const [firstAtom, secondAtom] = wave.collectAllAtoms();
+        simulateClick(wave, firstAtom);
+        const coords = projectMeshToScreen(wave, secondAtom);
+        wave.handlePointerDownCapture_({ clientX: coords.x, clientY: coords.y, shiftKey: true });
+        wave.handlePointerUpCapture_({ clientX: coords.x, clientY: coords.y, shiftKey: true });
+        wrapper.update();
+
+        expect(wrapper.state("selectedAtomIndices").slice().sort()).toEqual(
+            [firstAtom, secondAtom].map((atom) => atom.userData.atomicIndex).sort(),
+        );
+    });
+
+    test("Marquee (click-and-drag on empty space) multi-select works end-to-end through the mounted component", () => {
+        const { wrapper, wave } = mountEditableEditor();
+
+        const atoms = wave.collectAllAtoms();
+        const screenPoints = atoms.map((atom) => projectMeshToScreen(wave, atom));
+        const margin = 60;
+        const rectStart = {
+            x: Math.min(...screenPoints.map((p) => p.x)) - margin,
+            y: Math.min(...screenPoints.map((p) => p.y)) - margin,
+        };
+        const rectEnd = {
+            x: Math.max(...screenPoints.map((p) => p.x)) + margin,
+            y: Math.max(...screenPoints.map((p) => p.y)) + margin,
+        };
+        simulateMarqueeSelect(wave, rectStart, rectEnd);
+        wrapper.update();
+
+        expect(wrapper.state("selectedAtomIndices").slice().sort()).toEqual(
+            atoms.map((atom) => atom.userData.atomicIndex).sort(),
+        );
+    });
+
+    test("Group translate via the gizmo survives the REAL host round-trip - a second group translate still works", () => {
+        const { wrapper, wave } = mountEditableEditor();
+
+        const atoms = wave.collectAllAtoms();
+        wave.setSelectedAtomMeshes(atoms);
+        const starts = atoms.map((atom) => atom.position.clone());
+
+        const translateOnce = () => {
+            wave.transformControls_.dragging = true;
+            wave.selectionPivot_.position.x += 1;
+            wave.transformControls_.dispatchEvent({ type: "change" });
+            wave.transformControls_.dispatchEvent({ type: "mouseUp" });
+            wave.transformControls_.dragging = false;
+        };
+
+        translateOnce();
+        wrapper.update();
+        // handleStructureModified's setState callback synchronously calls
+        // _applyMaterialToViewer, which independently calls setStructure()+rebuildScene() AGAIN
+        // on top of the mixin's own commit - this is the real host round-trip, not a simulation
+        // of it.
+        expect(wrapper.state("historyPointer")).toBe(1);
+        expect(wave.selectedMeshes_.length).toBe(atoms.length);
+        expect(wave.transformControls_.object).toBe(wave.selectionPivot_);
+
+        translateOnce();
+        wrapper.update();
+
+        expect(wrapper.state("historyPointer")).toBe(2);
+        expect(wave.selectedMeshes_.length).toBe(atoms.length);
+        const finalAtoms = wave.collectAllAtoms();
+        starts.forEach((start, index) => {
+            expect(finalAtoms[index].position.x - start.x).toBeCloseTo(2, 5);
+        });
+    });
+
+    test("Group rotate via the gizmo survives the REAL host round-trip - a second group rotate still works (regression)", () => {
+        const { wrapper, wave } = mountEditableEditor();
+
+        const atoms = wave.collectAllAtoms();
+        wave.setSelectedAtomMeshes(atoms);
+        wave.setTransformMode("rotate");
+
+        const rotateOnce = () => {
+            wave.transformControls_.dragging = true;
+            wave.selectionPivot_.quaternion.setFromAxisAngle(
+                new THREE.Vector3(0, 0, 1),
+                Math.PI / 4,
+            );
+            wave.transformControls_.dispatchEvent({ type: "change" });
+            wave.transformControls_.dispatchEvent({ type: "mouseUp" });
+            wave.transformControls_.dragging = false;
+        };
+
+        rotateOnce();
+        wrapper.update();
+        expect(wrapper.state("historyPointer")).toBe(1);
+        // This is exactly what rebuildScene()'s pre-fix bug broke: the host's own
+        // onStructureModified round-trip (triggered above via real React state, not simulated)
+        // used to collapse the selection to one atom, silently detaching the gizmo from the
+        // pivot and making a second group rotate impossible.
+        expect(wave.selectedMeshes_.length).toBe(atoms.length);
+        expect(wave.transformControls_.object).toBe(wave.selectionPivot_);
+
+        const beforeSecond = wave.collectAllAtoms().map((atom) => atom.position.clone());
+        rotateOnce();
+        wrapper.update();
+        const afterSecond = wave.collectAllAtoms().map((atom) => atom.position.clone());
+
+        expect(wrapper.state("historyPointer")).toBe(2);
+        expect(wave.selectedMeshes_.length).toBe(atoms.length);
+        beforeSecond.forEach((position, index) => {
+            expect(position.distanceTo(afterSecond[index])).toBeGreaterThan(1e-3);
+        });
+    });
+
+    test("Undo after a group move restores original positions and keeps the group selected", () => {
+        const { wrapper, wave } = mountEditableEditor();
+
+        const atoms = wave.collectAllAtoms();
+        wave.setSelectedAtomMeshes(atoms);
+        const starts = atoms.map((atom) => atom.position.clone());
+
+        wave.transformControls_.dragging = true;
+        wave.selectionPivot_.position.x += 1;
+        wave.transformControls_.dispatchEvent({ type: "change" });
+        wave.transformControls_.dispatchEvent({ type: "mouseUp" });
+        wave.transformControls_.dragging = false;
+        wrapper.update();
+        expect(wrapper.state("historyPointer")).toBe(1);
+
+        wrapper.instance().handleUndo();
+        wrapper.update();
+
+        expect(wrapper.state("historyPointer")).toBe(0);
+        const restoredAtoms = wave.collectAllAtoms();
+        starts.forEach((start, index) => {
+            expect(restoredAtoms[index].position.distanceTo(start)).toBeLessThan(1e-6);
+        });
+    });
+
+    test("Clone via the real toolbar handler, then a real click-drag on the clone, both commit correctly", () => {
+        const { wrapper, wave } = mountEditableEditor();
+
+        const initialCount = wave.collectAllAtoms().length;
+        const [firstAtom] = wave.collectAllAtoms();
+        wave.setSelectedAtomMeshes([firstAtom]);
+
+        wrapper.instance().handleCloneSelectedAtoms();
+        wrapper.update();
+        expect(wrapper.state("historyPointer")).toBe(1);
+
+        const atomsAfterClone = wave.collectAllAtoms();
+        expect(atomsAfterClone.length).toBe(initialCount + 1);
+        const clone = atomsAfterClone[atomsAfterClone.length - 1];
+        expect(wave.selectedMeshes_).toEqual([clone]);
+
+        const { startPosition, endPosition } = simulateAtomDrag(wave, clone, 30, 20);
+        wrapper.update();
+
+        expect(startPosition.equals(endPosition)).toBe(false);
+        expect(wrapper.state("historyPointer")).toBe(2);
     });
 });
