@@ -8,9 +8,11 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
+import { GroupTransformMixin } from "./mixins/group_transform";
 import { ImageMixin } from "./mixins/image";
 import { InteractiveStructureEditorMixin } from "./mixins/interactive_structure_editor";
 import { AllLabelsMixin } from "./mixins/labels/all";
+import { MarqueeSelectionMixin } from "./mixins/marquee_selection";
 import { AllMeasurementsMixin } from "./mixins/measurements/all";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
@@ -209,7 +211,7 @@ class WaveBase {
 /**
  * Wave draws atoms as spheres according to the material geometry passed.
  */
-export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, AllLabelsMixin, AllMeasurementsMixin, ImageMixin, InteractiveStructureEditorMixin) {
+export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, RepetitionMixin, ControlsMixin, BoundaryMixin, AllLabelsMixin, AllMeasurementsMixin, ImageMixin, MarqueeSelectionMixin, GroupTransformMixin, InteractiveStructureEditorMixin) {
     /**
      *
      * @param {Object} config

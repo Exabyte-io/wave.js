@@ -1,15 +1,14 @@
 import * as THREE from "three";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls";
 
+import { DRAG_THRESHOLD_PX } from "./interactive_editor_constants";
+
 type Coordinate3D = [number, number, number];
 
 const HOVER_HIGHLIGHT_COLOR = 0x54aeff;
 const SELECTION_HIGHLIGHT_COLOR = 0x0969da;
 const HIGHLIGHT_SCALE_FACTOR = 1.25;
-const DRAG_THRESHOLD_PX = 5;
 const DRAG_COMMIT_EPSILON = 1e-6;
-const MARQUEE_FILL_COLOR = "rgba(84, 174, 255, 0.15)";
-const MARQUEE_BORDER_COLOR = "#54aeff";
 
 /**
  * Mixin providing interactive structure editing capabilities inside the Wave visualizer.
@@ -37,8 +36,6 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
 
         hoverHighlightMesh_: THREE.Mesh | null;
 
-        selectionPivot_: THREE.Object3D | null;
-
         isEditModeEnabled_: boolean;
 
         pointerDownPosition_: { x: number; y: number } | null;
@@ -46,10 +43,6 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
         pendingDragAtom_: THREE.Mesh | null;
 
         isDraggingAtom_: boolean;
-
-        isDraggingGroup_: boolean;
-
-        groupDragStartPositions_: Map<THREE.Mesh, THREE.Vector3> | null;
 
         dragPlane_: THREE.Plane | null;
 
@@ -64,16 +57,6 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
         orbitControlsDefaultMouseButtons_: any | null;
 
         lastSelectedAtomicIndices_: number[] | null;
-
-        marqueeStartScreen_: { x: number; y: number } | null;
-
-        isMarqueeSelecting_: boolean;
-
-        marqueeOverlayElement_: HTMLDivElement | null;
-
-        marqueeModifierAdd_: boolean;
-
-        marqueeModifierToggle_: boolean;
 
         handlePointerDownCapture_: ((event: PointerEvent) => void) | null;
 
@@ -98,13 +81,10 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
             this.hoveredMesh_ = null;
             this.selectionHighlightPool_ = [];
             this.hoverHighlightMesh_ = null;
-            this.selectionPivot_ = null;
             this.isEditModeEnabled_ = false;
             this.pointerDownPosition_ = null;
             this.pendingDragAtom_ = null;
             this.isDraggingAtom_ = false;
-            this.isDraggingGroup_ = false;
-            this.groupDragStartPositions_ = null;
             this.dragPlane_ = null;
             this.dragOffset_ = null;
             this.dragStartPosition_ = null;
@@ -112,11 +92,6 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
             this.orbitControlsEnabledBeforeDrag_ = true;
             this.orbitControlsDefaultMouseButtons_ = null;
             this.lastSelectedAtomicIndices_ = null;
-            this.marqueeStartScreen_ = null;
-            this.isMarqueeSelecting_ = false;
-            this.marqueeOverlayElement_ = null;
-            this.marqueeModifierAdd_ = false;
-            this.marqueeModifierToggle_ = false;
             this.handlePointerDownCapture_ = null;
             this.handlePointerMoveCapture_ = null;
             this.handlePointerUpCapture_ = null;
@@ -155,40 +130,11 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
             this.scene.add(this.hoverHighlightMesh_);
 
             // Rerender the viewport on every translation/rotation frame update; while dragging the
-            // group pivot, also propagate its live delta to every selected atom so they move
-            // rigidly together during the gizmo drag, not just once on commit. Translate mode
-            // moves the pivot's position (apply the same position delta to each atom); rotate
-            // mode leaves the pivot's position fixed at the centroid and instead rotates its
-            // quaternion (rotate each atom's offset-from-centroid by that same quaternion, so the
-            // group rotates rigidly about its shared centroid - the old editor's pivot-group
-            // behavior, decision D-4's "group rotate" half).
+            // group pivot, handleGroupPivotChange_ (GroupTransformMixin) also propagates its live
+            // delta to every selected atom so they move rigidly together during the gizmo drag,
+            // not just once on commit (decision D-4's "group rotate" half).
             this.transformControls_.addEventListener("change", () => {
-                if (
-                    this.transformControls_?.dragging &&
-                    this.transformControls_.object === this.selectionPivot_ &&
-                    this.groupDragStartPositions_ &&
-                    this.transformDragStartPosition_
-                ) {
-                    if (this.transformControls_.mode === "rotate") {
-                        const pivotCenter = this.transformDragStartPosition_;
-                        const rotation = this.selectionPivot_.quaternion;
-                        this.selectedMeshes_.forEach((mesh: THREE.Mesh) => {
-                            const start = this.groupDragStartPositions_?.get(mesh);
-                            if (!start) return;
-                            const offset = start.clone().sub(pivotCenter).applyQuaternion(rotation);
-                            mesh.position.copy(pivotCenter.clone().add(offset));
-                        });
-                    } else {
-                        const delta = this.selectionPivot_.position
-                            .clone()
-                            .sub(this.transformDragStartPosition_);
-                        this.selectedMeshes_.forEach((mesh: THREE.Mesh) => {
-                            const start = this.groupDragStartPositions_?.get(mesh);
-                            if (start) mesh.position.copy(start.clone().add(delta));
-                        });
-                    }
-                    this.syncHighlightPoolTo_(this.selectedMeshes_);
-                }
+                this.handleGroupPivotChange_();
                 this.render();
             });
 
@@ -205,12 +151,7 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
                     this.transformDragStartQuaternion_ =
                         this.transformControls_?.object?.quaternion.clone() ?? null;
                     if (this.transformControls_?.object === this.selectionPivot_) {
-                        this.groupDragStartPositions_ = new Map(
-                            this.selectedMeshes_.map((mesh: THREE.Mesh) => [
-                                mesh,
-                                mesh.position.clone(),
-                            ]),
-                        );
+                        this.captureGroupDragStartPositions_();
                     }
                 } else {
                     if (this.orbitControls) {
@@ -241,19 +182,7 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
 
                 if ((hasMoved || hasRotated) && draggedObject) {
                     if (draggedObject === this.selectionPivot_) {
-                        this.commitMovedAtoms_(
-                            this.selectedMeshes_.map((mesh: THREE.Mesh) => ({
-                                atomicIndex: mesh.userData.atomicIndex,
-                                position: mesh.position.clone(),
-                            })),
-                            "gizmo",
-                        );
-                        if (wasRotate) {
-                            // The pivot's rotation is relative to each drag, not cumulative
-                            // across drags - the atoms' new positions already encode the
-                            // rotation, so reset it to identity for the next attach/drag.
-                            this.selectionPivot_.quaternion.identity();
-                        }
+                        this.commitGroupGizmoDrag_(wasRotate);
                     } else {
                         this.commitMovedAtom_(
                             draggedObject.userData.atomicIndex,
@@ -391,28 +320,10 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
                 if (!point) return;
                 const newPosition = point.add(this.dragOffset_);
 
-                if (
-                    this.isDraggingGroup_ &&
-                    this.groupDragStartPositions_ &&
-                    this.pendingDragAtom_
-                ) {
-                    const draggedStart = this.groupDragStartPositions_.get(this.pendingDragAtom_);
-                    if (draggedStart) {
-                        const delta = newPosition.clone().sub(draggedStart);
-                        this.selectedMeshes_.forEach((mesh: THREE.Mesh) => {
-                            const start = this.groupDragStartPositions_?.get(mesh);
-                            if (start) mesh.position.copy(start.clone().add(delta));
-                        });
-                        // Keep the gizmo (attached to the pivot, not to any one dragged mesh)
-                        // visually tracking the group instead of staying frozen at the pre-drag
-                        // centroid for the whole gesture.
-                        if (this.selectionPivot_) {
-                            this.selectionPivot_.position.copy(
-                                this.computeCentroid_(this.selectedMeshes_),
-                            );
-                        }
-                    }
-                } else {
+                // applyGroupDragDelta_ (GroupTransformMixin) also keeps the gizmo (attached to
+                // the pivot, not to any one dragged mesh) visually tracking the group instead of
+                // staying frozen at the pre-drag centroid for the whole gesture.
+                if (!this.applyGroupDragDelta_(newPosition)) {
                     this.pendingDragAtom_.position.copy(newPosition);
                 }
                 this.syncHighlightPoolTo_(this.selectedMeshes_);
@@ -516,141 +427,11 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
             this.render();
         }
 
-        // ---- Marquee (rubber-band) selection --------------------------------------------
-
-        /**
-         * Grows the marquee's screen-space rectangle as the pointer moves, activating it (and
-         * showing the overlay) only once the drag exceeds the same click-vs-drag threshold used
-         * for atom dragging, so a plain click on empty space still falls through to
-         * finishMarqueeSelection_'s deselect path instead of drawing a zero-size box.
-         */
-        updateMarqueeState_(event: PointerEvent): void {
-            if (!this.marqueeStartScreen_) return;
-            const distance = Math.sqrt(
-                (event.clientX - this.marqueeStartScreen_.x) ** 2 +
-                    (event.clientY - this.marqueeStartScreen_.y) ** 2,
-            );
-            if (!this.isMarqueeSelecting_) {
-                if (distance < DRAG_THRESHOLD_PX) return;
-                this.isMarqueeSelecting_ = true;
-                this.showMarqueeOverlay_();
-            }
-            this.updateMarqueeOverlay_(event.clientX, event.clientY);
-        }
-
-        showMarqueeOverlay_(): void {
-            if (!this.marqueeOverlayElement_) {
-                const element = document.createElement("div");
-                element.style.position = "absolute";
-                element.style.border = `1px solid ${MARQUEE_BORDER_COLOR}`;
-                element.style.backgroundColor = MARQUEE_FILL_COLOR;
-                element.style.pointerEvents = "none";
-                element.style.zIndex = "10";
-                this.container.appendChild(element);
-                this.marqueeOverlayElement_ = element;
-            }
-            this.marqueeOverlayElement_.style.display = "block";
-            if (this.marqueeStartScreen_) {
-                this.updateMarqueeOverlay_(this.marqueeStartScreen_.x, this.marqueeStartScreen_.y);
-            }
-        }
-
-        updateMarqueeOverlay_(currentX: number, currentY: number): void {
-            if (!this.marqueeOverlayElement_ || !this.marqueeStartScreen_) return;
-            const containerRect = this.container.getBoundingClientRect();
-            const left = Math.min(this.marqueeStartScreen_.x, currentX) - containerRect.left;
-            const top = Math.min(this.marqueeStartScreen_.y, currentY) - containerRect.top;
-            const width = Math.abs(currentX - this.marqueeStartScreen_.x);
-            const height = Math.abs(currentY - this.marqueeStartScreen_.y);
-            this.marqueeOverlayElement_.style.left = `${left}px`;
-            this.marqueeOverlayElement_.style.top = `${top}px`;
-            this.marqueeOverlayElement_.style.width = `${width}px`;
-            this.marqueeOverlayElement_.style.height = `${height}px`;
-        }
-
-        hideMarqueeOverlay_(): void {
-            if (this.marqueeOverlayElement_) this.marqueeOverlayElement_.style.display = "none";
-        }
-
-        /**
-         * Returns every atom whose projected screen position falls within the given
-         * (unordered) screen-space rectangle. Atoms behind the camera (or beyond the far
-         * plane) are excluded via the projected z check.
-         */
-        getAtomsInScreenRect_(rect: {
-            left: number;
-            right: number;
-            top: number;
-            bottom: number;
-        }): THREE.Mesh[] {
-            const boundingRectangle = this.renderer.domElement.getBoundingClientRect();
-            return this.collectSelectableAtoms().filter((atom: THREE.Mesh) => {
-                const projected = atom.position.clone().project(this.camera);
-                if (projected.z < -1 || projected.z > 1) return false;
-                const screenX =
-                    boundingRectangle.left + ((projected.x + 1) / 2) * boundingRectangle.width;
-                const screenY =
-                    boundingRectangle.top + ((1 - projected.y) / 2) * boundingRectangle.height;
-                return (
-                    screenX >= rect.left &&
-                    screenX <= rect.right &&
-                    screenY >= rect.top &&
-                    screenY <= rect.bottom
-                );
-            });
-        }
-
-        /**
-         * Resolves a completed (or abandoned) marquee gesture. A release before crossing the
-         * drag threshold is just a plain click on empty space, so it falls through to the
-         * existing handlePointerDown click-to-deselect/select path rather than selecting an
-         * empty rectangle.
-         */
-        finishMarqueeSelection_(event: PointerEvent): void {
-            const wasSelecting = this.isMarqueeSelecting_;
-            const startScreen = this.marqueeStartScreen_;
-            const addModifier = this.marqueeModifierAdd_;
-            const toggleModifier = this.marqueeModifierToggle_;
-            this.hideMarqueeOverlay_();
-            this.marqueeStartScreen_ = null;
-            this.isMarqueeSelecting_ = false;
-
-            if (!wasSelecting || !startScreen) {
-                this.handlePointerDown(event);
-                return;
-            }
-
-            const rect = {
-                left: Math.min(startScreen.x, event.clientX),
-                right: Math.max(startScreen.x, event.clientX),
-                top: Math.min(startScreen.y, event.clientY),
-                bottom: Math.max(startScreen.y, event.clientY),
-            };
-            const hits = this.getAtomsInScreenRect_(rect);
-
-            let nextSelection: THREE.Mesh[];
-            if (toggleModifier) {
-                const hitSet = new Set(hits);
-                const kept = this.selectedMeshes_.filter((mesh: THREE.Mesh) => !hitSet.has(mesh));
-                const added = hits.filter((mesh) => !this.selectedMeshes_.includes(mesh));
-                nextSelection = [...kept, ...added];
-            } else if (addModifier) {
-                const added = hits.filter((mesh) => !this.selectedMeshes_.includes(mesh));
-                nextSelection = [...this.selectedMeshes_, ...added];
-            } else {
-                nextSelection = hits;
-            }
-
-            this.setSelectedAtomMeshes(nextSelection);
-            if (this.settings.onSelectionChanged) {
-                this.settings.onSelectionChanged(
-                    nextSelection.map((mesh) => mesh.userData.atomicIndex),
-                );
-            }
-            this.render();
-        }
-
         // ---- Direct atom drag (single or, for a multi-selected atom, the whole group) -----
+        //
+        // Marquee (rubber-band) selection lives in MarqueeSelectionMixin (updateMarqueeState_,
+        // showMarqueeOverlay_/updateMarqueeOverlay_/hideMarqueeOverlay_, getAtomsInScreenRect_,
+        // finishMarqueeSelection_), called from the pointer capture handlers below.
 
         /**
          * Selects the pending atom and sets up the camera-facing drag plane through its current
@@ -668,9 +449,7 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
                 this.selectedMeshes_.length > 1 &&
                 this.selectedMeshes_.includes(this.pendingDragAtom_);
             if (this.isDraggingGroup_) {
-                this.groupDragStartPositions_ = new Map(
-                    this.selectedMeshes_.map((mesh: THREE.Mesh) => [mesh, mesh.position.clone()]),
-                );
+                this.captureGroupDragStartPositions_();
             } else {
                 this.groupDragStartPositions_ = null;
                 this.setSelectedAtomMesh(this.pendingDragAtom_);
@@ -936,34 +715,6 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
             } else {
                 this.attachPivotToSelection_();
             }
-        }
-
-        /**
-         * Repositions the group-transform pivot at the current selection's centroid and attaches
-         * the gizmo to it.
-         */
-        attachPivotToSelection_(): void {
-            if (!this.selectionPivot_ || this.selectedMeshes_.length === 0) return;
-            this.selectionPivot_.position.copy(this.computeCentroid_(this.selectedMeshes_));
-            // A fresh attach always starts unrotated, even if a previous group drag left the
-            // pivot's quaternion non-identity for any reason (the mouseUp handler already resets
-            // it after every rotate commit - this is a defensive backstop, not the primary path).
-            this.selectionPivot_.quaternion.identity();
-            if (this.transformControls_) this.transformControls_.attach(this.selectionPivot_);
-        }
-
-        /**
-         * Shared by attachPivotToSelection_ and the group direct-drag move handler, which must
-         * keep the pivot (and therefore the visible gizmo) tracking the group's centroid as it
-         * moves - without this, the gizmo would stay frozen at the pre-drag centroid for the
-         * whole gesture and only jump to the correct spot once the post-commit rebuild reattaches
-         * it.
-         */
-        // eslint-disable-next-line class-methods-use-this
-        computeCentroid_(meshes: THREE.Mesh[]): THREE.Vector3 {
-            const centroid = new THREE.Vector3();
-            meshes.forEach((mesh: THREE.Mesh) => centroid.add(mesh.position));
-            return centroid.divideScalar(meshes.length);
         }
 
         /**

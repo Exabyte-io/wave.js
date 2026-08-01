@@ -18,7 +18,6 @@ export declare const InteractiveStructureEditorMixin: (superclass: any) => {
         hoveredMesh_: THREE.Mesh | null;
         selectionHighlightPool_: THREE.Mesh[];
         hoverHighlightMesh_: THREE.Mesh | null;
-        selectionPivot_: THREE.Object3D | null;
         isEditModeEnabled_: boolean;
         pointerDownPosition_: {
             x: number;
@@ -26,8 +25,6 @@ export declare const InteractiveStructureEditorMixin: (superclass: any) => {
         } | null;
         pendingDragAtom_: THREE.Mesh | null;
         isDraggingAtom_: boolean;
-        isDraggingGroup_: boolean;
-        groupDragStartPositions_: Map<THREE.Mesh, THREE.Vector3> | null;
         dragPlane_: THREE.Plane | null;
         dragOffset_: THREE.Vector3 | null;
         dragStartPosition_: THREE.Vector3 | null;
@@ -35,14 +32,6 @@ export declare const InteractiveStructureEditorMixin: (superclass: any) => {
         orbitControlsEnabledBeforeDrag_: boolean;
         orbitControlsDefaultMouseButtons_: any | null;
         lastSelectedAtomicIndices_: number[] | null;
-        marqueeStartScreen_: {
-            x: number;
-            y: number;
-        } | null;
-        isMarqueeSelecting_: boolean;
-        marqueeOverlayElement_: HTMLDivElement | null;
-        marqueeModifierAdd_: boolean;
-        marqueeModifierToggle_: boolean;
         handlePointerDownCapture_: ((event: PointerEvent) => void) | null;
         handlePointerMoveCapture_: ((event: PointerEvent) => void) | null;
         handlePointerUpCapture_: ((event: PointerEvent) => void) | null;
@@ -90,34 +79,6 @@ export declare const InteractiveStructureEditorMixin: (superclass: any) => {
          * the hot path of an in-progress drag.
          */
         updateHoverFromPointer_(event: PointerEvent): void;
-        /**
-         * Grows the marquee's screen-space rectangle as the pointer moves, activating it (and
-         * showing the overlay) only once the drag exceeds the same click-vs-drag threshold used
-         * for atom dragging, so a plain click on empty space still falls through to
-         * finishMarqueeSelection_'s deselect path instead of drawing a zero-size box.
-         */
-        updateMarqueeState_(event: PointerEvent): void;
-        showMarqueeOverlay_(): void;
-        updateMarqueeOverlay_(currentX: number, currentY: number): void;
-        hideMarqueeOverlay_(): void;
-        /**
-         * Returns every atom whose projected screen position falls within the given
-         * (unordered) screen-space rectangle. Atoms behind the camera (or beyond the far
-         * plane) are excluded via the projected z check.
-         */
-        getAtomsInScreenRect_(rect: {
-            left: number;
-            right: number;
-            top: number;
-            bottom: number;
-        }): THREE.Mesh[];
-        /**
-         * Resolves a completed (or abandoned) marquee gesture. A release before crossing the
-         * drag threshold is just a plain click on empty space, so it falls through to the
-         * existing handlePointerDown click-to-deselect/select path rather than selecting an
-         * empty rectangle.
-         */
-        finishMarqueeSelection_(event: PointerEvent): void;
         /**
          * Selects the pending atom and sets up the camera-facing drag plane through its current
          * position, offset so the atom doesn't jump to snap its center to the cursor. If the
@@ -177,19 +138,6 @@ export declare const InteractiveStructureEditorMixin: (superclass: any) => {
          * (see beginAtomDrag_/the TransformControls "change"/"mouseUp" listeners).
          */
         setSelectedAtomMeshes(meshes: THREE.Mesh[]): void;
-        /**
-         * Repositions the group-transform pivot at the current selection's centroid and attaches
-         * the gizmo to it.
-         */
-        attachPivotToSelection_(): void;
-        /**
-         * Shared by attachPivotToSelection_ and the group direct-drag move handler, which must
-         * keep the pivot (and therefore the visible gizmo) tracking the group's centroid as it
-         * moves - without this, the gizmo would stay frozen at the pre-drag centroid for the
-         * whole gesture and only jump to the correct spot once the post-commit rebuild reattaches
-         * it.
-         */
-        computeCentroid_(meshes: THREE.Mesh[]): THREE.Vector3;
         /**
          * Clears the current atom selection, removes its highlight(s), and detaches the gizmo.
          * @param {boolean} forgetLastSelection - Also forget the remembered indices used to
