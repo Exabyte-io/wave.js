@@ -452,6 +452,26 @@ test("canUndo/canRedo reflect the history pointer", () => {
     expect(instance.canRedo()).toBe(true);
 });
 
+test("undo()/redo() ref-API aliases work (spec §6.3 names these undo/redo, not handleUndo/handleRedo)", () => {
+    const container = createElement("div", ELEMENT_PROPERTIES);
+    const wrapper = mount(<ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />, {
+        attachTo: container,
+    });
+    const instance = wrapper.instance();
+
+    instance.handleStructureModified(new Made.Material({ ...MATERIAL_CONFIG, name: "Edited" }));
+    wrapper.update();
+    expect(wrapper.state("historyPointer")).toBe(1);
+
+    instance.undo();
+    wrapper.update();
+    expect(wrapper.state("historyPointer")).toBe(0);
+
+    instance.redo();
+    wrapper.update();
+    expect(wrapper.state("historyPointer")).toBe(1);
+});
+
 test("selecting an atom does not trigger a full viewer reload (D3/R17)", () => {
     const container = createElement("div", ELEMENT_PROPERTIES);
     const wrapper = mount(<ThreeDEditor material={new Made.Material(MATERIAL_CONFIG)} editable />, {
@@ -653,7 +673,7 @@ describe("Full-stack regression: pre-existing interactions survive through the r
     test("A real click on an atom selects it end-to-end (mixin -> onSelectionChanged -> React state)", () => {
         const { wrapper, wave } = mountEditableEditor();
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         simulateClick(wave, firstAtom);
         wrapper.update();
 
@@ -663,7 +683,7 @@ describe("Full-stack regression: pre-existing interactions survive through the r
     test("A real click-and-drag move commits through the full host round-trip and updates the material", () => {
         const { wrapper, wave } = mountEditableEditor();
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         const { startPosition, endPosition } = simulateAtomDrag(wave, firstAtom, 40, 30);
         wrapper.update();
 
@@ -681,7 +701,7 @@ describe("Full-stack regression: pre-existing interactions survive through the r
     test("Shift+click multi-select works end-to-end through the mounted component", () => {
         const { wrapper, wave } = mountEditableEditor();
 
-        const [firstAtom, secondAtom] = wave.collectAllAtoms();
+        const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
         simulateClick(wave, firstAtom);
         const coords = projectMeshToScreen(wave, secondAtom);
         wave.handlePointerDownCapture_({ clientX: coords.x, clientY: coords.y, shiftKey: true });
@@ -696,7 +716,7 @@ describe("Full-stack regression: pre-existing interactions survive through the r
     test("Marquee (click-and-drag on empty space) multi-select works end-to-end through the mounted component", () => {
         const { wrapper, wave } = mountEditableEditor();
 
-        const atoms = wave.collectAllAtoms();
+        const atoms = wave.collectSelectableAtoms();
         const screenPoints = atoms.map((atom) => projectMeshToScreen(wave, atom));
         const margin = 60;
         const rectStart = {
@@ -718,7 +738,7 @@ describe("Full-stack regression: pre-existing interactions survive through the r
     test("Group translate via the gizmo survives the REAL host round-trip - a second group translate still works", () => {
         const { wrapper, wave } = mountEditableEditor();
 
-        const atoms = wave.collectAllAtoms();
+        const atoms = wave.collectSelectableAtoms();
         wave.setSelectedAtomMeshes(atoms);
         const starts = atoms.map((atom) => atom.position.clone());
 
@@ -745,7 +765,7 @@ describe("Full-stack regression: pre-existing interactions survive through the r
 
         expect(wrapper.state("historyPointer")).toBe(2);
         expect(wave.selectedMeshes_.length).toBe(atoms.length);
-        const finalAtoms = wave.collectAllAtoms();
+        const finalAtoms = wave.collectSelectableAtoms();
         starts.forEach((start, index) => {
             expect(finalAtoms[index].position.x - start.x).toBeCloseTo(2, 5);
         });
@@ -754,7 +774,7 @@ describe("Full-stack regression: pre-existing interactions survive through the r
     test("Group rotate via the gizmo survives the REAL host round-trip - a second group rotate still works (regression)", () => {
         const { wrapper, wave } = mountEditableEditor();
 
-        const atoms = wave.collectAllAtoms();
+        const atoms = wave.collectSelectableAtoms();
         wave.setSelectedAtomMeshes(atoms);
         wave.setTransformMode("rotate");
 
@@ -779,10 +799,10 @@ describe("Full-stack regression: pre-existing interactions survive through the r
         expect(wave.selectedMeshes_.length).toBe(atoms.length);
         expect(wave.transformControls_.object).toBe(wave.selectionPivot_);
 
-        const beforeSecond = wave.collectAllAtoms().map((atom) => atom.position.clone());
+        const beforeSecond = wave.collectSelectableAtoms().map((atom) => atom.position.clone());
         rotateOnce();
         wrapper.update();
-        const afterSecond = wave.collectAllAtoms().map((atom) => atom.position.clone());
+        const afterSecond = wave.collectSelectableAtoms().map((atom) => atom.position.clone());
 
         expect(wrapper.state("historyPointer")).toBe(2);
         expect(wave.selectedMeshes_.length).toBe(atoms.length);
@@ -794,7 +814,7 @@ describe("Full-stack regression: pre-existing interactions survive through the r
     test("Undo after a group move restores original positions and keeps the group selected", () => {
         const { wrapper, wave } = mountEditableEditor();
 
-        const atoms = wave.collectAllAtoms();
+        const atoms = wave.collectSelectableAtoms();
         wave.setSelectedAtomMeshes(atoms);
         const starts = atoms.map((atom) => atom.position.clone());
 
@@ -810,7 +830,7 @@ describe("Full-stack regression: pre-existing interactions survive through the r
         wrapper.update();
 
         expect(wrapper.state("historyPointer")).toBe(0);
-        const restoredAtoms = wave.collectAllAtoms();
+        const restoredAtoms = wave.collectSelectableAtoms();
         starts.forEach((start, index) => {
             expect(restoredAtoms[index].position.distanceTo(start)).toBeLessThan(1e-6);
         });
@@ -819,15 +839,15 @@ describe("Full-stack regression: pre-existing interactions survive through the r
     test("Clone via the real toolbar handler, then a real click-drag on the clone, both commit correctly", () => {
         const { wrapper, wave } = mountEditableEditor();
 
-        const initialCount = wave.collectAllAtoms().length;
-        const [firstAtom] = wave.collectAllAtoms();
+        const initialCount = wave.collectSelectableAtoms().length;
+        const [firstAtom] = wave.collectSelectableAtoms();
         wave.setSelectedAtomMeshes([firstAtom]);
 
         wrapper.instance().handleCloneSelectedAtoms();
         wrapper.update();
         expect(wrapper.state("historyPointer")).toBe(1);
 
-        const atomsAfterClone = wave.collectAllAtoms();
+        const atomsAfterClone = wave.collectSelectableAtoms();
         expect(atomsAfterClone.length).toBe(initialCount + 1);
         const clone = atomsAfterClone[atomsAfterClone.length - 1];
         expect(wave.selectedMeshes_).toEqual([clone]);
@@ -837,5 +857,58 @@ describe("Full-stack regression: pre-existing interactions survive through the r
 
         expect(startPosition.equals(endPosition)).toBe(false);
         expect(wrapper.state("historyPointer")).toBe(2);
+    });
+});
+
+describe("TB-persona review fixes (PR #204 round 1-2)", () => {
+    test("onSelectionChanged prop fires with the current indices whenever the selection changes (spec §6.2)", () => {
+        const onSelectionChanged = jest.fn();
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor
+                material={new Made.Material(MATERIAL_CONFIG)}
+                editable
+                onSelectionChanged={onSelectionChanged}
+            />,
+            { attachTo: container },
+        );
+
+        wrapper.instance().handleSelectionChanged([1]);
+        expect(onSelectionChanged).toHaveBeenLastCalledWith([1]);
+
+        wrapper.instance().handleSelectionChanged([0, 1]);
+        expect(onSelectionChanged).toHaveBeenLastCalledWith([0, 1]);
+
+        wrapper.instance().handleSelectionChanged([]);
+        expect(onSelectionChanged).toHaveBeenLastCalledWith([]);
+    });
+
+    test("Undo across an atom-count change (Add Atom, then undo) clears the stale selection instead of leaving it pointing at a deleted atom", () => {
+        // Full-stack regression for the same underlying bug the mixin-level test drives directly
+        // against wave.rebuildScene(): this proves it end to end through the real
+        // handleUndo -> _applyMaterialToViewer -> wave.setStructure()+rebuildScene() path.
+        const onSelectionChanged = jest.fn();
+        const container = createElement("div", ELEMENT_PROPERTIES);
+        const wrapper = mount(
+            <ThreeDEditor
+                material={new Made.Material(MATERIAL_CONFIG)}
+                editable
+                onSelectionChanged={onSelectionChanged}
+            />,
+            { attachTo: container },
+        );
+        const instance = wrapper.instance();
+        instance.handleToggleEditMode();
+
+        instance.handleAddAtom();
+        wrapper.update();
+        const addedIndex = wrapper.state("selectedAtomIndices")[0];
+        expect(addedIndex).toBeGreaterThanOrEqual(0);
+
+        instance.handleUndo();
+        wrapper.update();
+
+        expect(wrapper.state("selectedAtomIndices")).toEqual([]);
+        expect(onSelectionChanged).toHaveBeenLastCalledWith([]);
     });
 });

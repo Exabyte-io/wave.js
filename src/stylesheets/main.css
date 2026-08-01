@@ -14,7 +14,6 @@ body {
 #threejs-editor {
     /* osx */
     /* Listbox */
-    /* CodeMirror */
     /* outliner */
     /* */
     /* */
@@ -106,20 +105,6 @@ body {
 }
 #threejs-editor .Listbox .ListboxItem.active {
     background-color: rgba(0, 0, 0, 0.04);
-}
-#threejs-editor .CodeMirror {
-    position: absolute !important;
-    top: 37px;
-    width: 100% !important;
-    height: calc(100% - 37px) !important;
-}
-#threejs-editor .CodeMirror .errorLine {
-    background: rgba(255, 0, 0, 0.25);
-}
-#threejs-editor .CodeMirror .esprima-error {
-    color: #f00;
-    text-align: right;
-    padding: 0 20px;
 }
 #threejs-editor #outliner .opener {
     display: inline-block;

@@ -138,6 +138,8 @@ declare const _default: {
         toggleAnglesShown: string;
         toggleCopyCoordinatesShown: string;
         deleteConnection: string;
+        toggleEditMode: string;
+        focusCameraOnSelection: string;
     };
     measurementLabelsConfig: {
         areSpritesUsed: boolean;

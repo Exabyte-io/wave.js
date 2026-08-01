@@ -1,6 +1,7 @@
 import expect from "expect";
 import * as THREE from "three";
 
+import settings from "../../../src/settings";
 import { getWaveInstance } from "../../enums";
 import {
     getWaveWithRecordedCallbacks,
@@ -52,12 +53,12 @@ describe("Interactive structure editor functionality tests", () => {
             },
         });
 
-        const initialAtomCount = wave.collectAllAtoms().length;
+        const initialAtomCount = wave.collectSelectableAtoms().length;
 
         // Add atom at the cell center coordinate
         wave.addAtom("Si", [0.0, 0.0, 0.0]);
 
-        const updatedAtomCount = wave.collectAllAtoms().length;
+        const updatedAtomCount = wave.collectSelectableAtoms().length;
         expect(updatedAtomCount).toBe(initialAtomCount + 1);
         expect(callbackFired).toBe(true);
 
@@ -114,15 +115,15 @@ describe("Interactive structure editor functionality tests", () => {
         });
 
         // Select the first atom mesh, the way handlePointerDown would on a real click.
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         expect(firstAtom.userData.atomicIndex).toBe(0);
         wave.selectedMesh_ = firstAtom;
 
-        const initialAtomCount = wave.collectAllAtoms().length;
+        const initialAtomCount = wave.collectSelectableAtoms().length;
 
         wave.removeSelectedAtom();
 
-        const updatedAtomCount = wave.collectAllAtoms().length;
+        const updatedAtomCount = wave.collectSelectableAtoms().length;
         expect(updatedAtomCount).toBe(initialAtomCount - 1);
         expect(callbackMaterial.basis.elements.length).toBe(updatedAtomCount);
         expect(callbackFired).toBe(true);
@@ -133,7 +134,7 @@ describe("Interactive structure editor functionality tests", () => {
         const wave = getWaveInstance({});
         wave.enableEditMode(true);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         wave.setSelectedAtomMesh(firstAtom);
         expect(wave.transformControls_.object).toBe(firstAtom);
 
@@ -175,7 +176,7 @@ describe("Interactive structure editor functionality tests", () => {
             height: canvas.height,
         });
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         const startEvent = getEventObjectBy3DPosition(firstAtom.position, wave.camera, canvas);
         const startPosition = firstAtom.position.clone();
 
@@ -233,7 +234,7 @@ describe("Interactive structure editor functionality tests", () => {
             height: canvas.height,
         });
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         const clickEvent = getEventObjectBy3DPosition(firstAtom.position, wave.camera, canvas);
 
         wave.handlePointerDownCapture_({ clientX: clickEvent.layerX, clientY: clickEvent.layerY });
@@ -247,7 +248,7 @@ describe("Interactive structure editor functionality tests", () => {
         const wave = getWaveInstance({});
         wave.enableEditMode(true);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         wave.setSelectedAtomMesh(firstAtom);
 
         wave.reselectAtomByIndex(999);
@@ -265,7 +266,7 @@ describe("Interactive structure editor functionality tests", () => {
         });
         wave.enableEditMode(true);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         wave.setSelectedAtomMesh(firstAtom);
 
         // Simulate grabbing a gizmo handle and releasing it without any net movement.
@@ -284,7 +285,7 @@ describe("Interactive structure editor functionality tests", () => {
         });
         wave.enableEditMode(true);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         wave.setSelectedAtomMesh(firstAtom);
 
         wave.transformControls_.dispatchEvent({ type: "dragging-changed", value: true });
@@ -311,7 +312,7 @@ describe("Interactive structure editor functionality tests", () => {
             height: canvas.height,
         });
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         const startEvent = getEventObjectBy3DPosition(firstAtom.position, wave.camera, canvas);
         const startPosition = firstAtom.position.clone();
 
@@ -344,7 +345,7 @@ describe("Interactive structure editor functionality tests", () => {
         });
         wave.enableEditMode(true);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         wave.setSelectedAtomMesh(firstAtom);
 
         document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
@@ -365,7 +366,7 @@ describe("Interactive structure editor functionality tests", () => {
             height: canvas.height,
         });
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         const clickEvent = getEventObjectBy3DPosition(firstAtom.position, wave.camera, canvas);
 
         wave.handlePointerDownCapture_({
@@ -396,7 +397,7 @@ describe("Interactive structure editor functionality tests", () => {
             height: canvas.height,
         });
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         const startEvent = getEventObjectBy3DPosition(firstAtom.position, wave.camera, canvas);
 
         wave.handlePointerDownCapture_({ clientX: startEvent.layerX, clientY: startEvent.layerY });
@@ -417,7 +418,7 @@ describe("Interactive structure editor functionality tests", () => {
         const wave = getWaveInstance({});
         wave.enableEditMode(true);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         wave.setSelectedAtomMesh(firstAtom);
 
         wave.enableEditMode(false);
@@ -432,7 +433,7 @@ describe("Interactive structure editor functionality tests", () => {
         const wave = getWaveInstance({});
         wave.enableEditMode(true);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         wave.setSelectedAtomMesh(firstAtom);
         wave.clearSelectedAtom();
 
@@ -454,7 +455,7 @@ describe("Interactive structure editor functionality tests", () => {
             height: canvas.height,
         });
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         const overAtom = getEventObjectBy3DPosition(firstAtom.position, wave.camera, canvas);
 
         wave.handlePointerMoveCapture_({ clientX: overAtom.layerX, clientY: overAtom.layerY });
@@ -474,7 +475,7 @@ describe("Interactive structure editor functionality tests", () => {
             wave.enableEditMode(true);
             stubCanvasRect(wave);
 
-            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
             simulateClick(wave, firstAtom);
             expect(wave.selectedMeshes_).toEqual([firstAtom]);
 
@@ -494,7 +495,7 @@ describe("Interactive structure editor functionality tests", () => {
             wave.enableEditMode(true);
             stubCanvasRect(wave);
 
-            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
 
             const coords = projectMeshToScreen(wave, secondAtom);
@@ -509,7 +510,7 @@ describe("Interactive structure editor functionality tests", () => {
             wave.enableEditMode(true);
             stubCanvasRect(wave);
 
-            const [firstAtom] = wave.collectAllAtoms();
+            const [firstAtom] = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes([firstAtom]);
 
             wave.handlePointerDownCapture_({ clientX: -9999, clientY: -9999, shiftKey: true });
@@ -523,7 +524,7 @@ describe("Interactive structure editor functionality tests", () => {
             wave.enableEditMode(true);
             stubCanvasRect(wave);
 
-            const atoms = wave.collectAllAtoms();
+            const atoms = wave.collectSelectableAtoms();
             const screenPoints = atoms.map((atom) => projectMeshToScreen(wave, atom));
             const margin = 60;
             const rectStart = {
@@ -546,7 +547,7 @@ describe("Interactive structure editor functionality tests", () => {
             wave.enableEditMode(true);
             stubCanvasRect(wave);
 
-            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
             // Select an atom that is NOT inside the upcoming marquee rectangle.
             wave.setSelectedAtomMeshes([firstAtom]);
 
@@ -567,7 +568,7 @@ describe("Interactive structure editor functionality tests", () => {
             wave.enableEditMode(true);
             stubCanvasRect(wave);
 
-            const [firstAtom] = wave.collectAllAtoms();
+            const [firstAtom] = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes([firstAtom]);
 
             simulateMarqueeSelect(wave, { x: -9999, y: -9999 }, { x: -9998, y: -9999 });
@@ -592,7 +593,7 @@ describe("Interactive structure editor functionality tests", () => {
             wave.enableEditMode(true);
             stubCanvasRect(wave);
 
-            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
             const secondStart = secondAtom.position.clone();
             wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
 
@@ -611,7 +612,7 @@ describe("Interactive structure editor functionality tests", () => {
             const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
             wave.enableEditMode(true);
 
-            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
             const firstStart = firstAtom.position.clone();
             const secondStart = secondAtom.position.clone();
             wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
@@ -651,7 +652,7 @@ describe("Interactive structure editor functionality tests", () => {
             const wave = getWaveInstance({});
             wave.enableEditMode(true);
 
-            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
 
             wave.setStructure(wave.structure);
@@ -669,7 +670,7 @@ describe("Interactive structure editor functionality tests", () => {
             wave.enableEditMode(true);
             stubCanvasRect(wave);
 
-            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
             const firstStart = firstAtom.position.clone();
             const secondStart = secondAtom.position.clone();
             wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
@@ -691,13 +692,13 @@ describe("Interactive structure editor functionality tests", () => {
             const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
             wave.enableEditMode(true);
 
-            const atoms = wave.collectAllAtoms();
+            const atoms = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes(atoms);
             const initialCount = atoms.length;
 
             wave.removeSelectedAtom();
 
-            expect(wave.collectAllAtoms().length).toBe(initialCount - atoms.length);
+            expect(wave.collectSelectableAtoms().length).toBe(initialCount - atoms.length);
             expect(structureModifiedCalls.length).toBe(1);
             expect(wave.selectedMeshes_).toEqual([]);
         });
@@ -706,7 +707,7 @@ describe("Interactive structure editor functionality tests", () => {
             const wave = getWaveInstance({});
             wave.enableEditMode(true);
 
-            const atoms = wave.collectAllAtoms();
+            const atoms = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes(atoms);
 
             wave.enableEditMode(false);
@@ -725,7 +726,7 @@ describe("Interactive structure editor functionality tests", () => {
             const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
             wave.enableEditMode(true);
 
-            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
             wave.setTransformMode("rotate");
 
@@ -772,7 +773,7 @@ describe("Interactive structure editor functionality tests", () => {
             const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
             wave.enableEditMode(true);
 
-            const [firstAtom, secondAtom] = wave.collectAllAtoms();
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
             wave.setTransformMode("rotate");
 
@@ -796,9 +797,9 @@ describe("Interactive structure editor functionality tests", () => {
             expect(wave.selectedMeshes_.length).toBe(2);
             expect(wave.transformControls_.object).toBe(wave.selectionPivot_);
 
-            const beforeSecond = wave.collectAllAtoms().map((atom) => atom.position.clone());
+            const beforeSecond = wave.collectSelectableAtoms().map((atom) => atom.position.clone());
             rotateOnce();
-            const afterSecond = wave.collectAllAtoms().map((atom) => atom.position.clone());
+            const afterSecond = wave.collectSelectableAtoms().map((atom) => atom.position.clone());
 
             expect(structureModifiedCalls.length).toBe(2);
             expect(wave.selectedMeshes_.length).toBe(2);
@@ -811,7 +812,7 @@ describe("Interactive structure editor functionality tests", () => {
             const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
             wave.enableEditMode(true);
 
-            const atoms = wave.collectAllAtoms();
+            const atoms = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes(atoms);
             wave.setTransformMode("rotate");
 
@@ -827,14 +828,14 @@ describe("Interactive structure editor functionality tests", () => {
                 getWaveWithRecordedCallbacks();
             wave.enableEditMode(true);
 
-            const [firstAtom] = wave.collectAllAtoms();
+            const [firstAtom] = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes([firstAtom]);
-            const initialCount = wave.collectAllAtoms().length;
+            const initialCount = wave.collectSelectableAtoms().length;
             const sourcePosition = firstAtom.position.clone();
 
             wave.cloneSelectedAtoms();
 
-            const atoms = wave.collectAllAtoms();
+            const atoms = wave.collectSelectableAtoms();
             expect(atoms.length).toBe(initialCount + 1);
             expect(structureModifiedCalls.length).toBe(1);
 
@@ -857,14 +858,14 @@ describe("Interactive structure editor functionality tests", () => {
             const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
             wave.enableEditMode(true);
 
-            const atoms = wave.collectAllAtoms();
+            const atoms = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes(atoms);
             const initialCount = atoms.length;
             const originalRelativeOffset = atoms[1].position.clone().sub(atoms[0].position);
 
             wave.cloneSelectedAtoms();
 
-            const allAtoms = wave.collectAllAtoms();
+            const allAtoms = wave.collectSelectableAtoms();
             expect(allAtoms.length).toBe(initialCount * 2);
             expect(structureModifiedCalls.length).toBe(1);
             expect(wave.selectedMeshes_.length).toBe(initialCount);
@@ -877,11 +878,11 @@ describe("Interactive structure editor functionality tests", () => {
         test("Cloning with nothing selected is a no-op", () => {
             const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
             wave.enableEditMode(true);
-            const initialCount = wave.collectAllAtoms().length;
+            const initialCount = wave.collectSelectableAtoms().length;
 
             wave.cloneSelectedAtoms();
 
-            expect(wave.collectAllAtoms().length).toBe(initialCount);
+            expect(wave.collectSelectableAtoms().length).toBe(initialCount);
             expect(structureModifiedCalls.length).toBe(0);
         });
 
@@ -898,7 +899,7 @@ describe("Interactive structure editor functionality tests", () => {
                 .sub(wave.orbitControls.target)
                 .normalize();
 
-            const atoms = wave.collectAllAtoms();
+            const atoms = wave.collectSelectableAtoms();
             wave.setSelectedAtomMeshes(atoms);
             const expectedCenter = new THREE.Vector3();
             atoms.forEach((atom) => expectedCenter.add(atom.position));
@@ -924,6 +925,226 @@ describe("Interactive structure editor functionality tests", () => {
 
             expect(wave.camera.position.equals(previousPosition)).toBe(true);
             expect(wave.orbitControls.target.equals(previousTarget)).toBe(true);
+        });
+    });
+
+    describe("TB-persona review fixes (PR #204 round 1-2)", () => {
+        test("The camera-focus hotkey is driven by settings.hotKeysConfig, not a hardcoded literal", () => {
+            // Every other hotkey-advertising tooltip in ThreeDEditor.jsx derives its key from
+            // settings.hotKeysConfig (the direct fix for D2 - a hardcoded tooltip that drifted
+            // from the actual binding). "F" for camera-focus was wired the old, broken way: a
+            // bare `event.key.toLowerCase() === "f"` literal with no config entry, so a future
+            // rebind (or a collision with some other feature's key) would silently desync the
+            // tooltip from the real binding again with nothing to catch it. This test exercises
+            // the real keydown dispatch path (not a direct focusCameraOnSelection() call) so it
+            // actually proves the configured key - not just "f" - is what triggers the focus.
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            const [firstAtom] = wave.collectSelectableAtoms();
+            wave.setSelectedAtomMesh(firstAtom);
+
+            const focusSpy = jest.spyOn(wave, "focusCameraOnSelection");
+            document.dispatchEvent(
+                new KeyboardEvent("keydown", {
+                    key: settings.hotKeysConfig.focusCameraOnSelection,
+                }),
+            );
+
+            expect(focusSpy).toHaveBeenCalledTimes(1);
+        });
+
+        test("Repetition-clone atoms are not selectable/draggable - editor picking is scoped to the base structure only (regression)", () => {
+            // RepetitionMixin.repeatAtomsAtRepetitionCoordinates (repetition.js, unrelated to and
+            // unchanged by this PR) names every repetition-clone group ATOM_GROUP_NAME too, same
+            // as the one real base-structure group, and deliberately gives each clone atom an
+            // atomicIndex offset out of the material's actual range. collectSelectableAtoms()
+            // (renamed from collectAllAtoms, wave.js) used to walk every matching group, making
+            // those clones real, clickable, draggable meshes in edit mode with an out-of-range
+            // index: selecting one indexed material.basis.coordinates[] out of bounds (a blank
+            // panel), and dragging one committed a spurious no-op history entry before visibly
+            // snapping back on the next rebuild (its position is always re-derived from the
+            // unchanged base atom, never actually stored). Fixed by scoping to the FIRST matching
+            // group only - the same fix (and the same underlying invariant: the base group is
+            // added before any clone) extractBasisFromScene already uses, per utils.js's own
+            // documented traversal.
+            const wave = getWaveInstance({
+                repetitionsAlongLatticeVectorA: 3,
+                repetitionsAlongLatticeVectorB: 2,
+                repetitionsAlongLatticeVectorC: 1,
+            });
+            wave.enableEditMode(true);
+
+            // getAtomGroups() (atoms.ts) is the measurement feature's own, deliberately
+            // clone-inclusive collector (RepetitionMixin's clones are real, intentional targets
+            // for measuring distances/angles to a periodic image) - it must stay unaffected.
+            const allRenderedAtoms = wave.getAtomGroups();
+            const selectableAtoms = wave.collectSelectableAtoms();
+
+            expect(allRenderedAtoms.length).toBeGreaterThan(selectableAtoms.length);
+            expect(selectableAtoms.length).toBe(2); // MATERIAL_CONFIG's base atom count
+            selectableAtoms.forEach((atom) => {
+                expect(atom.userData.atomicIndex).toBeLessThan(selectableAtoms.length);
+            });
+        });
+
+        test("A scene rebuild that removes the currently selected atom notifies onSelectionChanged (regression: undo/redo desync)", () => {
+            // ThreeDEditor.jsx's undo/redo calls wave.setStructure()+wave.rebuildScene()
+            // directly, entirely independently of any explicit selection action -
+            // reselectAtomsByIndices (called from inside rebuildScene(), wave.js) must itself
+            // notify the host when this silently invalidates the current selection, or the
+            // host's selection state is left pointing at an atomicIndex that no longer exists on
+            // the wave side (a "phantom" selection: the coordinate panel shows a stale/blank
+            // atom, and Delete/Clone/Focus stay enabled but silently no-op).
+            const { wave, selectionChangedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+
+            const atoms = wave.collectSelectableAtoms();
+            const lastIndex = atoms.length - 1;
+            wave.setSelectedAtomMesh(atoms[lastIndex]);
+
+            const materialWithoutLastAtom = wave.applyBasisDelta_((basis) => {
+                basis.elements = basis.elements.filter((_element, index) => index !== lastIndex);
+                basis.coordinates = basis.coordinates.filter(
+                    (_coordinate, index) => index !== lastIndex,
+                );
+            });
+            wave.setStructure(materialWithoutLastAtom);
+            wave.rebuildScene();
+
+            expect(wave.selectedMeshes_).toEqual([]);
+            expect(selectionChangedCalls[selectionChangedCalls.length - 1]).toEqual([[]]);
+        });
+
+        test("A scene rebuild that does not affect the current selection does not fire a spurious onSelectionChanged", () => {
+            const { wave, selectionChangedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            const [firstAtom] = wave.collectSelectableAtoms();
+            wave.setSelectedAtomMesh(firstAtom);
+
+            wave.rebuildScene(); // e.g. triggered by an unrelated viewer-setting change
+
+            expect(selectionChangedCalls.length).toBe(0);
+        });
+
+        test("Group direct-drag (not the gizmo) keeps the pivot tracking the live centroid instead of staying frozen at the pre-drag spot", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            stubCanvasRect(wave);
+
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
+            wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
+            const pivotStart = wave.selectionPivot_.position.clone();
+
+            const start = projectMeshToScreen(wave, firstAtom);
+            wave.handlePointerDownCapture_({ clientX: start.x, clientY: start.y });
+            wave.handlePointerMoveCapture_({ clientX: start.x + 40, clientY: start.y });
+            expect(wave.isDraggingGroup_).toBe(true);
+            wave.handlePointerMoveCapture_({ clientX: start.x + 80, clientY: start.y + 20 });
+
+            const expectedCentroid = firstAtom.position
+                .clone()
+                .add(secondAtom.position)
+                .divideScalar(2);
+            expect(wave.selectionPivot_.position.distanceTo(expectedCentroid)).toBeLessThan(1e-6);
+            expect(wave.selectionPivot_.position.distanceTo(pivotStart)).toBeGreaterThan(0.01);
+
+            wave.handlePointerUpCapture_({ clientX: start.x + 80, clientY: start.y + 20 });
+        });
+
+        test("Cloning the same atom twice in a row does not stack the clones at a coincident position (occupied-site guard, mirrors D22)", () => {
+            const wave = getWaveInstance({});
+            wave.enableEditMode(true);
+            const [firstAtom] = wave.collectSelectableAtoms();
+
+            wave.setSelectedAtomMeshes([firstAtom]);
+            wave.cloneSelectedAtoms();
+            const [firstClone] = wave.selectedMeshes_;
+
+            wave.setSelectedAtomMeshes([firstAtom]);
+            wave.cloneSelectedAtoms();
+            const [secondClone] = wave.selectedMeshes_;
+
+            expect(firstClone.position.distanceTo(secondClone.position)).toBeGreaterThan(0.4);
+        });
+
+        test("Escape during a single-atom GIZMO drag reverts the atom and commits nothing", () => {
+            // Direct-body-drag Esc-cancel was already covered ("Escape mid-drag reverts the atom
+            // and commits nothing", above) - but that path (isDraggingAtom_/pendingDragAtom_)
+            // never engages for a gizmo-handle drag, which uses TransformControls' own dragging
+            // flag instead. Before this fix, Esc during translate mode's default interaction -
+            // grabbing the gizmo - silently did nothing: the drag continued, and the eventual
+            // real mouseup committed a delta the user had tried to cancel.
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            const [firstAtom] = wave.collectSelectableAtoms();
+            wave.setSelectedAtomMesh(firstAtom);
+            const startPosition = firstAtom.position.clone();
+
+            wave.transformControls_.dragging = true;
+            firstAtom.position.x += 1;
+            wave.transformControls_.dispatchEvent({ type: "change" });
+            expect(firstAtom.position.equals(startPosition)).toBe(false);
+
+            document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+            expect(firstAtom.position.equals(startPosition)).toBe(true);
+            expect(wave.transformControls_.dragging).toBe(false);
+            expect(structureModifiedCalls.length).toBe(0);
+        });
+
+        test("Escape during a group gizmo TRANSLATE drag reverts every atom and the pivot, and commits nothing", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
+            wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
+            const firstStart = firstAtom.position.clone();
+            const secondStart = secondAtom.position.clone();
+            const pivotStart = wave.selectionPivot_.position.clone();
+
+            wave.transformControls_.dragging = true;
+            wave.selectionPivot_.position.x += 1;
+            wave.transformControls_.dispatchEvent({ type: "change" });
+            expect(firstAtom.position.equals(firstStart)).toBe(false);
+
+            document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+            expect(firstAtom.position.equals(firstStart)).toBe(true);
+            expect(secondAtom.position.equals(secondStart)).toBe(true);
+            expect(wave.selectionPivot_.position.equals(pivotStart)).toBe(true);
+            expect(wave.transformControls_.dragging).toBe(false);
+            expect(structureModifiedCalls.length).toBe(0);
+            // The group must still be fully selected and grabbable afterward - Esc shouldn't
+            // leave the gizmo half-detached.
+            expect(wave.selectedMeshes_.length).toBe(2);
+            expect(wave.transformControls_.object).toBe(wave.selectionPivot_);
+        });
+
+        test("Escape during a group gizmo ROTATE drag reverts every atom's rotation and commits nothing", () => {
+            const { wave, structureModifiedCalls } = getWaveWithRecordedCallbacks();
+            wave.enableEditMode(true);
+            const [firstAtom, secondAtom] = wave.collectSelectableAtoms();
+            wave.setSelectedAtomMeshes([firstAtom, secondAtom]);
+            wave.setTransformMode("rotate");
+            const firstStart = firstAtom.position.clone();
+            const secondStart = secondAtom.position.clone();
+
+            wave.transformControls_.dragging = true;
+            wave.selectionPivot_.quaternion.setFromAxisAngle(
+                new THREE.Vector3(0, 0, 1),
+                Math.PI / 3,
+            );
+            wave.transformControls_.dispatchEvent({ type: "change" });
+            expect(firstAtom.position.equals(firstStart)).toBe(false);
+
+            document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+            expect(firstAtom.position.distanceTo(firstStart)).toBeLessThan(1e-6);
+            expect(secondAtom.position.distanceTo(secondStart)).toBeLessThan(1e-6);
+            expect(wave.selectionPivot_.quaternion.angleTo(new THREE.Quaternion())).toBeLessThan(
+                1e-9,
+            );
+            expect(wave.transformControls_.dragging).toBe(false);
+            expect(structureModifiedCalls.length).toBe(0);
         });
     });
 });

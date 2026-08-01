@@ -313,6 +313,12 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
                         if (start)
                             mesh.position.copy(start.clone().add(delta));
                     });
+                    // Keep the gizmo (attached to the pivot, not to any one dragged mesh)
+                    // visually tracking the group instead of staying frozen at the pre-drag
+                    // centroid for the whole gesture.
+                    if (this.selectionPivot_) {
+                        this.selectionPivot_.position.copy(this.computeCentroid_(this.selectedMeshes_));
+                    }
                 }
             }
             else {
@@ -363,7 +369,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         this.renderer.domElement.addEventListener("pointerup", this.handlePointerUpCapture_);
         this.renderer.domElement.addEventListener("pointercancel", this.handlePointerCancelCapture_);
         this.handleEditModeKeyDown_ = (event) => {
-            var _a;
+            var _a, _b;
             if (!this.isEditModeEnabled_)
                 return;
             // Don't act on Escape/F while the user is typing in a form field (e.g. the
@@ -384,7 +390,9 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
                     this.render();
                 }
             }
-            else if (event.key.toLowerCase() === "f" && this.selectedMeshes_.length > 0) {
+            else if (event.key.toLowerCase() ===
+                ((_b = this.settings.hotKeysConfig) === null || _b === void 0 ? void 0 : _b.focusCameraOnSelection) &&
+                this.selectedMeshes_.length > 0) {
                 this.focusCameraOnSelection();
             }
         };
@@ -464,7 +472,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
      */
     getAtomsInScreenRect_(rect) {
         const boundingRectangle = this.renderer.domElement.getBoundingClientRect();
-        return this.collectAllAtoms().filter((atom) => {
+        return this.collectSelectableAtoms().filter((atom) => {
             const projected = atom.position.clone().project(this.camera);
             if (projected.z < -1 || projected.z > 1)
                 return false;
@@ -602,7 +610,43 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
      * callback.
      */
     cancelAtomDrag_() {
-        if (this.isDraggingGroup_ && this.groupDragStartPositions_) {
+        var _a, _b, _c;
+        // Covers all four drag shapes this mixin supports: a direct body-drag on one atom or
+        // on a multi-selected group (isDraggingGroup_/pendingDragAtom_ below), and the
+        // gizmo-driven equivalent of either (a lone atom or the group pivot attached to
+        // TransformControls, handled here via draggedObject). Without this branch, Esc during
+        // a gizmo drag - translate mode's default interaction - reverted nothing: it silently
+        // continued dragging (TransformControls had no idea Esc was pressed), and on the
+        // eventual real mouseup committed a delta the user had just tried to cancel.
+        const draggedObject = ((_a = this.transformControls_) === null || _a === void 0 ? void 0 : _a.dragging)
+            ? this.transformControls_.object
+            : null;
+        if (draggedObject === this.selectionPivot_ && this.groupDragStartPositions_) {
+            this.selectedMeshes_.forEach((mesh) => {
+                var _a;
+                const start = (_a = this.groupDragStartPositions_) === null || _a === void 0 ? void 0 : _a.get(mesh);
+                if (start)
+                    mesh.position.copy(start);
+            });
+            if (this.transformDragStartPosition_) {
+                (_b = this.selectionPivot_) === null || _b === void 0 ? void 0 : _b.position.copy(this.transformDragStartPosition_);
+            }
+            // Harmless no-op for a cancelled translate (the pivot's quaternion never left
+            // identity); for a cancelled rotate this is the actual revert, mirroring the
+            // commit path's own post-rotate reset.
+            (_c = this.selectionPivot_) === null || _c === void 0 ? void 0 : _c.quaternion.identity();
+            this.syncHighlightPoolTo_(this.selectedMeshes_);
+            this.render();
+        }
+        else if (draggedObject && this.transformDragStartPosition_) {
+            draggedObject.position.copy(this.transformDragStartPosition_);
+            if (this.transformDragStartQuaternion_) {
+                draggedObject.quaternion.copy(this.transformDragStartQuaternion_);
+            }
+            this.syncHighlightPoolTo_(this.selectedMeshes_);
+            this.render();
+        }
+        else if (this.isDraggingGroup_ && this.groupDragStartPositions_) {
             this.selectedMeshes_.forEach((mesh) => {
                 var _a;
                 const start = (_a = this.groupDragStartPositions_) === null || _a === void 0 ? void 0 : _a.get(mesh);
@@ -617,6 +661,17 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
             this.syncHighlightPoolTo_(this.selectedMeshes_);
             this.render();
         }
+        // Setting dragging = false is a no-op if it's already false (TransformControls' own
+        // property setter only dispatches when the value actually changes - see its
+        // defineProperty helper), so this is safe to call unconditionally even for a
+        // non-gizmo cancel. For a real gizmo cancel, it's also sufficient on its own to halt
+        // TransformControls' further internal pointerMove/pointerUp handling - both
+        // early-return once `dragging` reads false, per its source - even though the real
+        // mouse button may still be physically held; the auto-fired "dragging-changed" event
+        // this triggers is what restores orbitControls.enabled and clears
+        // transformDragStartPosition_/Quaternion_ below (read above, before this point).
+        if (this.transformControls_)
+            this.transformControls_.dragging = false;
         this.releaseActiveDragPointer_();
         this.isDraggingAtom_ = false;
         this.isDraggingGroup_ = false;
@@ -659,7 +714,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         if (!this.pointer_ || !this.raycaster_)
             return null;
         this.updateRaycasterFromPointer_(event);
-        const intersections = this.raycaster_.intersectObjects(this.collectAllAtoms());
+        const intersections = this.raycaster_.intersectObjects(this.collectSelectableAtoms());
         return intersections.length > 0 ? intersections[0].object : null;
     }
     /**
@@ -759,16 +814,26 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
     attachPivotToSelection_() {
         if (!this.selectionPivot_ || this.selectedMeshes_.length === 0)
             return;
-        const centroid = new THREE.Vector3();
-        this.selectedMeshes_.forEach((mesh) => centroid.add(mesh.position));
-        centroid.divideScalar(this.selectedMeshes_.length);
-        this.selectionPivot_.position.copy(centroid);
+        this.selectionPivot_.position.copy(this.computeCentroid_(this.selectedMeshes_));
         // A fresh attach always starts unrotated, even if a previous group drag left the
         // pivot's quaternion non-identity for any reason (the mouseUp handler already resets
         // it after every rotate commit - this is a defensive backstop, not the primary path).
         this.selectionPivot_.quaternion.identity();
         if (this.transformControls_)
             this.transformControls_.attach(this.selectionPivot_);
+    }
+    /**
+     * Shared by attachPivotToSelection_ and the group direct-drag move handler, which must
+     * keep the pivot (and therefore the visible gizmo) tracking the group's centroid as it
+     * moves - without this, the gizmo would stay frozen at the pre-drag centroid for the
+     * whole gesture and only jump to the correct spot once the post-commit rebuild reattaches
+     * it.
+     */
+    // eslint-disable-next-line class-methods-use-this
+    computeCentroid_(meshes) {
+        const centroid = new THREE.Vector3();
+        meshes.forEach((mesh) => centroid.add(mesh.position));
+        return centroid.divideScalar(meshes.length);
     }
     /**
      * Clears the current atom selection, removes its highlight(s), and detaches the gizmo.
@@ -795,6 +860,16 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
      * Clears the selection if none of the given indices match any atom any more (e.g. it was
      * deleted). Indices with no match are silently dropped rather than clearing everything,
      * so removing one atom out of a multi-selection keeps the rest selected.
+     *
+     * The sole place that notifies onSelectionChanged for a reselect, and only when the
+     * result actually differs from what was selected going in - critically, this covers
+     * rebuildScene() (wave.js), which calls this on every rebuild (including one triggered by
+     * undo/redo, which can shift or remove indices out from under an unrelated rebuild) but
+     * has no way to notify the host itself. Without this, undo/redo across an add/remove
+     * boundary left the host's selection state pointing at an atomicIndex that had silently
+     * stopped existing on the wave side. Callers that already know their own new selection
+     * (addAtom, cloneSelectedAtoms, enableEditMode's restore) used to fire this explicitly
+     * too; that's now redundant and has been removed to keep this the single source of truth.
      */
     reselectAtomsByIndices(atomicIndices) {
         if (!atomicIndices || atomicIndices.length === 0)
@@ -802,8 +877,15 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         const validIndices = atomicIndices.filter((index) => index !== null && index !== undefined);
         if (validIndices.length === 0)
             return;
-        const matches = this.collectAllAtoms().filter((atom) => validIndices.includes(atom.userData.atomicIndex));
+        const previousIndices = this.selectedMeshes_.map((mesh) => mesh.userData.atomicIndex);
+        const matches = this.collectSelectableAtoms().filter((atom) => validIndices.includes(atom.userData.atomicIndex));
         this.setSelectedAtomMeshes(matches);
+        const resultIndices = matches.map((atom) => atom.userData.atomicIndex);
+        const isUnchanged = resultIndices.length === previousIndices.length &&
+            resultIndices.every((index) => previousIndices.includes(index));
+        if (!isUnchanged && this.settings.onSelectionChanged) {
+            this.settings.onSelectionChanged(resultIndices);
+        }
     }
     /**
      * Single-index-named alias for reselectAtomsByIndices, kept for existing callers/tests.
@@ -856,10 +938,10 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
             }
         }
         else if (this.lastSelectedAtomicIndices_) {
+            // reselectAtomsByIndices fires onSelectionChanged itself when this actually
+            // restores a selection (selectedMeshes_ is empty at this point, from the disable
+            // branch's clearSelection(false) above, so the restore always counts as changed).
             this.reselectAtomsByIndices(this.lastSelectedAtomicIndices_);
-            if (this.settings.onSelectionChanged) {
-                this.settings.onSelectionChanged(this.selectedMeshes_.map((mesh) => mesh.userData.atomicIndex));
-            }
         }
     }
     /**
@@ -922,10 +1004,9 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         this.setStructure(newMaterial);
         this.structureGroup.name = newMaterial.name || newMaterial.formula;
         this.rebuildScene();
+        // reselectAtomByIndex fires onSelectionChanged itself (the new atom always differs
+        // from whatever was selected before Add Atom ran).
         this.reselectAtomByIndex(newIndex);
-        if (this.settings.onSelectionChanged) {
-            this.settings.onSelectionChanged([newIndex]);
-        }
         if (this.settings.onStructureModified) {
             this.settings.onStructureModified(newMaterial);
         }
@@ -999,22 +1080,46 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         }
     }
     /**
-     * Duplicates every selected atom at a small fixed offset from its source, preserving
-     * element and (for the group case) relative positions, as a single commit. The clones
-     * become the new selection, matching Add Atom's auto-select behavior. Old-editor parity:
-     * its "clone existing" was one of only two ways to add an atom of a specific element,
-     * the other being a plain add-then-rename (see changeAtomElement / D-9).
+     * Duplicates every selected atom at a small offset from its source, preserving element
+     * and (for the group case) relative positions, as a single commit. The clones become the
+     * new selection, matching Add Atom's auto-select behavior. Old-editor parity: its "clone
+     * existing" was one of only two ways to add an atom of a specific element, the other
+     * being a plain add-then-rename (see changeAtomElement / D-9).
+     *
+     * Shares Add Atom's occupied-site guard (D22): the offset nudges further along the same
+     * diagonal until clear of every existing atom (and of any sibling clone already placed
+     * earlier in this same call, so cloning several selected atoms at once can't collide with
+     * each other either), so cloning the same atom repeatedly doesn't silently stack
+     * coincident duplicates.
      */
     cloneSelectedAtoms() {
         if (this.selectedMeshes_.length === 0)
             return;
-        const CLONE_OFFSET = new THREE.Vector3(0.3, 0.3, 0.3);
+        const OCCUPIED_TOLERANCE = 0.5; // Å; below any realistic bond length
+        const OFFSET_STEP = new THREE.Vector3(0.3, 0.3, 0.3);
+        const MAX_OFFSET_ATTEMPTS = 10;
         const { elements } = this.structure.basis;
+        // this.basis (AtomsMixin) is kept in Cartesian units from setStructure() onward -
+        // exactly the space CLONE_OFFSET/OCCUPIED_TOLERANCE are defined in.
+        const existingPositions = this.basis.coordinatesAsArray.map((coordinate) => new THREE.Vector3(...coordinate));
+        const placedPositions = [];
+        const isOccupied = (position) => existingPositions
+            .concat(placedPositions)
+            .some((existing) => existing.distanceTo(position) < OCCUPIED_TOLERANCE);
         const sourceAtoms = this.selectedMeshes_.map((mesh) => {
             var _a;
             const elementEntry = elements[mesh.userData.atomicIndex];
             const element = typeof elementEntry === "string" ? elementEntry : (_a = elementEntry === null || elementEntry === void 0 ? void 0 : elementEntry.value) !== null && _a !== void 0 ? _a : "Si";
-            return { element, position: mesh.position.clone().add(CLONE_OFFSET) };
+            let attempts = 1;
+            let candidate = mesh.position.clone().add(OFFSET_STEP);
+            while (isOccupied(candidate) && attempts < MAX_OFFSET_ATTEMPTS) {
+                attempts += 1;
+                candidate = mesh.position
+                    .clone()
+                    .add(OFFSET_STEP.clone().multiplyScalar(attempts));
+            }
+            placedPositions.push(candidate);
+            return { element, position: candidate };
         });
         const newMaterial = this.applyBasisDelta_((basis) => {
             const wasCartesian = basis.isInCartesianUnits;
@@ -1029,10 +1134,9 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
         const newIndices = sourceAtoms.map((_atom, index) => startIndex + index);
         this.setStructure(newMaterial);
         this.rebuildScene();
+        // reselectAtomsByIndices fires onSelectionChanged itself (the clones always differ
+        // from whatever was selected going in).
         this.reselectAtomsByIndices(newIndices);
-        if (this.settings.onSelectionChanged) {
-            this.settings.onSelectionChanged(newIndices);
-        }
         if (this.settings.onStructureModified) {
             this.settings.onStructureModified(newMaterial);
         }

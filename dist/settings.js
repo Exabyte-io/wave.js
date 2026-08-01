@@ -144,6 +144,7 @@ export default {
         toggleCopyCoordinatesShown: "c",
         deleteConnection: "x",
         toggleEditMode: "t",
+        focusCameraOnSelection: "f",
     },
     measurementLabelsConfig: {
         areSpritesUsed: true,

@@ -370,6 +370,8 @@ export class ThreeDEditor extends React.Component {
         this.handleEditModeKeyDown = this.handleEditModeKeyDown.bind(this);
         this.canUndo = this.canUndo.bind(this);
         this.canRedo = this.canRedo.bind(this);
+        this.undo = this.undo.bind(this);
+        this.redo = this.redo.bind(this);
         this.renderEditToolbar = this.renderEditToolbar.bind(this);
         this.handleChemicalConnectivityFactorChange =
             this.handleChemicalConnectivityFactorChange.bind(this);
@@ -674,6 +676,17 @@ export class ThreeDEditor extends React.Component {
         return historyPointer < historyStack.length - 1;
     }
     /**
+     * Spec §6.3's documented ref API names these undo()/redo() (canUndo/canRedo already matched);
+     * thin aliases so `ref.current.undo()` works as documented instead of only the internal
+     * handleUndo/handleRedo names.
+     */
+    undo() {
+        this.handleUndo();
+    }
+    redo() {
+        this.handleRedo();
+    }
+    /**
      * Commits a single axis of the selected atom's coordinate. Only called once per field edit
      * (on blur/Enter, via handleCoordinateCommit below) rather than per keystroke, so this is
      * naturally one history entry per edit (D18). Mutates a clone's basis in place via
@@ -755,9 +768,12 @@ export class ThreeDEditor extends React.Component {
     handleSelectionChanged(indices) {
         var _a;
         const { activeTransformMode } = this.state;
+        const { onSelectionChanged } = this.props;
         if ((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) {
             this.WaveComponent.wave.bypassReloadViewer = true;
         }
+        if (onSelectionChanged)
+            onSelectionChanged(indices);
         // Rotate only makes sense for a group (it spins the selection about its centroid) - if
         // the selection drops below 2 while rotate is active (e.g. a Shift-click deselect, or
         // Delete removing atoms down to one), fall back to translate rather than leaving the
@@ -1078,7 +1094,7 @@ export class ThreeDEditor extends React.Component {
                                     ? `Clone ${selectedAtomIndices.length} Selected Atoms`
                                     : "Clone Selected Atom", disabled: !hasSelection, onClick: this.handleCloneSelectedAtoms, children: _jsx(ContentCopy, {}) }), _jsx(SquareIconButton, { title: selectedAtomIndices.length > 1
                                     ? `Delete ${selectedAtomIndices.length} Selected Atoms`
-                                    : "Delete Selected Atom", disabled: !hasSelection, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsx(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: _jsx(SquareIconButton, { title: "Focus Camera on Selection (F)", disabled: !hasSelection, onClick: this.handleFocusCameraOnSelection, children: _jsx(CenterFocusStrong, {}) }) }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndices.length > 1 && (_jsxs(Stack, { spacing: 0.5, alignItems: "center", sx: { width: "84px" }, children: [_jsxs(Typography, { variant: "caption", fontWeight: "bold", textAlign: "center", children: [selectedAtomIndices.length, " atoms selected"] }), _jsx(Typography, { variant: "caption", color: "text.secondary", textAlign: "center", children: "Drag, or use the gizmo, to move or rotate the group together" })] })), isSingleAtomSelected && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(TextField, { label: "Element", size: "small", type: "text", className: "inverse stepper", value: elementDraft !== null ? elementDraft : selectedElement || "Si", onChange: (event) => this.handleElementDraftChange(event.target.value), onBlur: this.handleElementCommit, onKeyDown: (event) => {
+                                    : "Delete Selected Atom", disabled: !hasSelection, onClick: this.handleRemoveSelectedAtom, children: _jsx(DeleteIcon, {}) })] }), _jsx(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: _jsx(SquareIconButton, { title: `Focus Camera on Selection [${settings.hotKeysConfig.focusCameraOnSelection.toUpperCase()}]`, disabled: !hasSelection, onClick: this.handleFocusCameraOnSelection, children: _jsx(CenterFocusStrong, {}) }) }), _jsxs(ButtonGroup, { orientation: "vertical", variant: "outlined", color: "inherit", children: [_jsx(SquareIconButton, { title: "Undo", disabled: !hasUndo, onClick: this.handleUndo, children: _jsx(Undo, {}) }), _jsx(SquareIconButton, { title: "Redo", disabled: !hasRedo, onClick: this.handleRedo, children: _jsx(Redo, {}) })] }), selectedAtomIndices.length > 1 && (_jsxs(Stack, { spacing: 0.5, alignItems: "center", sx: { width: "84px" }, children: [_jsxs(Typography, { variant: "caption", fontWeight: "bold", textAlign: "center", children: [selectedAtomIndices.length, " atoms selected"] }), _jsx(Typography, { variant: "caption", color: "text.secondary", textAlign: "center", children: "Drag, or use the gizmo, to move or rotate the group together" })] })), isSingleAtomSelected && (_jsxs(Stack, { spacing: 1, alignItems: "center", sx: { width: "84px" }, children: [_jsx(TextField, { label: "Element", size: "small", type: "text", className: "inverse stepper", value: elementDraft !== null ? elementDraft : selectedElement || "Si", onChange: (event) => this.handleElementDraftChange(event.target.value), onBlur: this.handleElementCommit, onKeyDown: (event) => {
                                     if (event.key === "Enter")
                                         event.target.blur();
                                 } }), _jsx(Typography, { variant: "caption", color: "text.secondary", sx: { mt: -1 }, children: ((_b = material === null || material === void 0 ? void 0 : material.basis) === null || _b === void 0 ? void 0 : _b.units) === "cartesian"
@@ -1117,6 +1133,9 @@ ThreeDEditor.propTypes = {
     onUpdate: PropTypes.func,
     // Fires whenever edit mode is toggled on/off, so a host can disable conflicting UI.
     onEditModeChanged: PropTypes.func,
+    // Fires with the current array of selected atomicIndex whenever the selection changes
+    // (empty for none, 2+ for a group) - spec §6.2's data source for a host's selection-info UI.
+    onSelectionChanged: PropTypes.func,
     isStandalone: PropTypes.bool,
     // eslint-disable-next-line react/forbid-prop-types
     initialViewSettings: PropTypes.object,
@@ -1129,6 +1148,7 @@ ThreeDEditor.defaultProps = {
     isConventionalCellShown: false,
     onUpdate: undefined,
     onEditModeChanged: undefined,
+    onSelectionChanged: undefined,
     editable: false,
     isStandalone: false,
     initialViewSettings: {},

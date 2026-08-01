@@ -38,7 +38,7 @@ describe("tests/helpers/editor.js", () => {
         const wave = getWaveInstance({});
         stubCanvasRect(wave);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         const { x, y } = projectToScreen(wave, firstAtom.position);
 
         const canvas = wave.renderer.domElement;
@@ -50,7 +50,7 @@ describe("tests/helpers/editor.js", () => {
 
     test("projectToScreen shifts by the stubbed rect's left/top offset", () => {
         const wave = getWaveInstance({});
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
 
         stubCanvasRect(wave);
         const atOrigin = projectToScreen(wave, firstAtom.position);
@@ -66,7 +66,7 @@ describe("tests/helpers/editor.js", () => {
         const wave = getWaveInstance({});
         stubCanvasRect(wave);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         expect(projectMeshToScreen(wave, firstAtom)).toEqual(
             projectToScreen(wave, firstAtom.position),
         );
@@ -79,7 +79,7 @@ describe("tests/helpers/editor.js", () => {
             wave.enableEditMode(true);
             stubCanvasRect(wave);
 
-            const [firstAtom] = wave.collectAllAtoms();
+            const [firstAtom] = wave.collectSelectableAtoms();
             const coords = projectMeshToScreen(wave, firstAtom);
 
             dispatchPointerEvent(wave, "pointerdown", coords, { mode });
@@ -94,7 +94,7 @@ describe("tests/helpers/editor.js", () => {
         wave.enableEditMode(true);
         stubCanvasRect(wave);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         const selected = simulateClick(wave, firstAtom);
 
         expect(selected).toBe(firstAtom);
@@ -106,7 +106,7 @@ describe("tests/helpers/editor.js", () => {
         wave.enableEditMode(true);
         stubCanvasRect(wave);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         const position = firstAtom.position.toArray();
         const selected = simulateClick(wave, position);
 
@@ -118,7 +118,7 @@ describe("tests/helpers/editor.js", () => {
         wave.enableEditMode(true);
         stubCanvasRect(wave);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         const { startPosition, endPosition, modifiedMaterial } = simulateAtomDrag(
             wave,
             firstAtom,
@@ -137,7 +137,7 @@ describe("tests/helpers/editor.js", () => {
         wave.enableEditMode(true);
         stubCanvasRect(wave);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         expect(() =>
             simulateAtomDrag(wave, firstAtom, 40, 0, { assertIntermediateState: false }),
         ).not.toThrow();
@@ -149,7 +149,7 @@ describe("tests/helpers/editor.js", () => {
         wave.enableEditMode(true);
         stubCanvasRect(wave);
 
-        const [firstAtom] = wave.collectAllAtoms();
+        const [firstAtom] = wave.collectSelectableAtoms();
         simulateClick(wave, firstAtom);
         simulateAtomDrag(wave, firstAtom, 40, 0);
 

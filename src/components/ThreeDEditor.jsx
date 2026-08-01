@@ -164,6 +164,8 @@ export class ThreeDEditor extends React.Component {
         this.handleEditModeKeyDown = this.handleEditModeKeyDown.bind(this);
         this.canUndo = this.canUndo.bind(this);
         this.canRedo = this.canRedo.bind(this);
+        this.undo = this.undo.bind(this);
+        this.redo = this.redo.bind(this);
         this.renderEditToolbar = this.renderEditToolbar.bind(this);
         this.handleChemicalConnectivityFactorChange =
             this.handleChemicalConnectivityFactorChange.bind(this);
@@ -561,6 +563,19 @@ export class ThreeDEditor extends React.Component {
     }
 
     /**
+     * Spec §6.3's documented ref API names these undo()/redo() (canUndo/canRedo already matched);
+     * thin aliases so `ref.current.undo()` works as documented instead of only the internal
+     * handleUndo/handleRedo names.
+     */
+    undo() {
+        this.handleUndo();
+    }
+
+    redo() {
+        this.handleRedo();
+    }
+
+    /**
      * Commits a single axis of the selected atom's coordinate. Only called once per field edit
      * (on blur/Enter, via handleCoordinateCommit below) rather than per keystroke, so this is
      * naturally one history entry per edit (D18). Mutates a clone's basis in place via
@@ -645,9 +660,11 @@ export class ThreeDEditor extends React.Component {
      */
     handleSelectionChanged(indices) {
         const { activeTransformMode } = this.state;
+        const { onSelectionChanged } = this.props;
         if (this.WaveComponent?.wave) {
             this.WaveComponent.wave.bypassReloadViewer = true;
         }
+        if (onSelectionChanged) onSelectionChanged(indices);
         // Rotate only makes sense for a group (it spins the selection about its centroid) - if
         // the selection drops below 2 while rotate is active (e.g. a Shift-click deselect, or
         // Delete removing atoms down to one), fall back to translate rather than leaving the
@@ -1326,7 +1343,7 @@ export class ThreeDEditor extends React.Component {
 
                     <ButtonGroup orientation="vertical" variant="outlined" color="inherit">
                         <SquareIconButton
-                            title="Focus Camera on Selection (F)"
+                            title={`Focus Camera on Selection [${settings.hotKeysConfig.focusCameraOnSelection.toUpperCase()}]`}
                             disabled={!hasSelection}
                             onClick={this.handleFocusCameraOnSelection}
                         >
@@ -1466,6 +1483,9 @@ ThreeDEditor.propTypes = {
     onUpdate: PropTypes.func,
     // Fires whenever edit mode is toggled on/off, so a host can disable conflicting UI.
     onEditModeChanged: PropTypes.func,
+    // Fires with the current array of selected atomicIndex whenever the selection changes
+    // (empty for none, 2+ for a group) - spec §6.2's data source for a host's selection-info UI.
+    onSelectionChanged: PropTypes.func,
     isStandalone: PropTypes.bool,
     // eslint-disable-next-line react/forbid-prop-types
     initialViewSettings: PropTypes.object,
@@ -1479,6 +1499,7 @@ ThreeDEditor.defaultProps = {
     isConventionalCellShown: false,
     onUpdate: undefined,
     onEditModeChanged: undefined,
+    onSelectionChanged: undefined,
     editable: false,
     isStandalone: false,
     initialViewSettings: {},

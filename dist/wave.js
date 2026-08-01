@@ -232,17 +232,26 @@ export class Wave extends mix(WaveBase).with(AtomsMixin, BondsMixin, CellMixin, 
         this.adjustCamerasTargetAndFrustum(cellViewParams);
         this.adjustOrbitControlsTarget(cellViewParams.center);
     }
-    collectAllAtoms() {
+    // Scoped to the FIRST child named ATOM_GROUP_NAME, matching extractBasisFromScene's own
+    // (already-fixed) traversal in utils.js: RepetitionMixin.repeatAtomsAtRepetitionCoordinates
+    // adds the real, base-structure group first and every repetition clone after, each also
+    // named ATOM_GROUP_NAME but with its atoms' userData.atomicIndex deliberately offset out of
+    // the material's actual range. Iterating every matching group (the previous behavior) made
+    // those clones - with out-of-range indices - real, clickable, draggable meshes in edit mode:
+    // selecting one showed a blank/zero coordinate panel (indexing basis.coordinates[] with an
+    // index that doesn't exist), and dragging one committed a spurious no-op history entry before
+    // visibly snapping back on the next rebuild (the clone's position is always re-derived from
+    // the unchanged base atom, never actually stored).
+    collectSelectableAtoms() {
         const atoms = [];
-        this.structureGroup.children.forEach((group) => {
-            if (group.name !== ATOM_GROUP_NAME)
-                return;
-            group.children.forEach((atom) => {
+        const atomsGroup = this.structureGroup.children.find((group) => group.name === ATOM_GROUP_NAME);
+        if (atomsGroup) {
+            atomsGroup.children.forEach((atom) => {
                 if (atom instanceof THREE.Mesh) {
                     atoms.push(atom);
                 }
             });
-        });
+        }
         return atoms;
     }
     // Called on each change to the Redux store via reloadViewer.

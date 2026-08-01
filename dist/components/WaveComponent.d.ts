@@ -5,6 +5,7 @@ export class WaveComponent extends React.Component<any, any, any> {
     };
     componentDidMount(): void;
     componentDidUpdate(prevProps: any, prevState: any, snapshot: any): void;
+    componentWillUnmount(): void;
     shouldViewerAdjust(prevProps: any): boolean;
     _cleanViewer(): void;
     initViewer(): void;

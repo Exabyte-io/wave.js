@@ -10,7 +10,13 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     state: {
         isInteractive: boolean;
         activeToolbarMenu: null;
-        isThreejsEditorModalShown: boolean;
+        isEditModeActive: boolean;
+        activeTransformMode: string;
+        historyStack: any[];
+        historyPointer: number;
+        selectedAtomIndices: never[];
+        coordinateDrafts: null[];
+        elementDraft: null;
         measurementsSettings: {
             isActive: boolean;
             measurementType: string;
@@ -44,7 +50,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleToggleInteractive(): void;
     handleToggleToolbarMenu(toolbarMenuName: any): void;
     handleToggleBonds(): void;
-    toggleThreejsEditorModal(): void;
+    handleToggleEditMode(): void;
     handleToggleOrthographicCamera(): void;
     handleToggleElementLabels(): void;
     handleToggleCoordinateLabels(): void;
@@ -55,7 +61,91 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleToggleOrbitControls(): void;
     handleToggleOrbitControlsAnimation(): void;
     handleToggleAxes(): void;
-    onThreejsEditorModalHide(material: any): void;
+    handleStructureModified(newMaterial: any): void;
+    handleUndo(): void;
+    handleRedo(): void;
+    /**
+     * Commits a single axis of the selected atom's coordinate. Only called once per field edit
+     * (on blur/Enter, via handleCoordinateCommit below) rather than per keystroke, so this is
+     * naturally one history entry per edit (D18). Mutates a clone's basis in place via
+     * Basis/setBasis rather than reconstructing via fromElementsAndCoordinates, so labels and
+     * constraints on every atom (including the one being edited) survive untouched (D7). Only
+     * meaningful for exactly one selected atom - the coordinate panel itself is hidden for 0 or
+     * 2+ selected (see renderEditToolbar), so this is a defensive guard, not the primary gate.
+     */
+    handleCoordinateChange(axisIndex: any, value: any): void;
+    /**
+     * Updates only the local draft string for one coordinate field while it's focused - no
+     * commit, no history entry, no scene rebuild. Lets the field be cleared or start with "-"
+     * without the browser's number-input semantics dropping the keystroke (D18).
+     */
+    handleCoordinateDraftChange(axisIndex: any, value: any): void;
+    /**
+     * Commits the draft for one coordinate field (on blur/Enter) if it parses to a real number,
+     * then clears the draft so the field reverts to showing the committed value.
+     */
+    handleCoordinateCommit(axisIndex: any): void;
+    handleSetTransformMode(mode: any): void;
+    /**
+     * Places a new atom at the true center of the cell - (a+b+c)/2, the vector sum of the three
+     * lattice vectors halved - not the component-wise (ax/2, by/2, cz/2), which lands off-center
+     * or outside the cell entirely for non-orthogonal lattices (D22). If that position is
+     * already occupied (e.g. a second click with nothing else changed), nudges the candidate
+     * along the diagonal until it clears every existing atom by OCCUPIED_TOLERANCE, so repeated
+     * clicks don't silently stack coincident duplicates.
+     */
+    handleAddAtom(): void;
+    handleRemoveSelectedAtom(): void;
+    handleCloneSelectedAtoms(): void;
+    handleFocusCameraOnSelection(): void;
+    /**
+     * Updates only the local draft string for the element field while it's focused - no commit,
+     * no history entry, no scene rebuild. Mirrors handleCoordinateDraftChange (D18).
+     */
+    handleElementDraftChange(value: any): void;
+    /**
+     * Commits the element draft (on blur/Enter) if it names a real element that differs from the
+     * current one, then clears the draft so the field reverts to showing the committed value.
+     * Operates directly on state.material like handleCoordinateChange, rather than through the
+     * mixin - this is a panel-typed edit, not a scene-gesture-driven one. Symbol casing is
+     * normalized (e.g. "si"/"SI" -> "Si") so the field isn't case-sensitive to use, then checked
+     * against PERIODIC_TABLE so a typo silently reverts instead of writing a bogus element.
+     */
+    handleElementCommit(): void;
+    /**
+     * Selection changes are a visual-only, wave-internal concern (highlight + gizmo, already
+     * handled inside the mixin) - the only reason React needs to know the indices at all is to
+     * drive the coordinate panel/toolbar. Without the bypass guard, this setState triggers a
+     * WaveComponent re-render with a freshly cloned structure prop, which componentDidUpdate
+     * sees as "changed" and reloads/rebuilds the entire scene on every single click or hover-driven
+     * selection - orphaning an in-progress drag's mesh reference (D3) and making selection
+     * sluggish on larger structures (R17).
+     *
+     * indices is an array of atomicIndex (D-4: multi-select) - empty for none, one entry for a
+     * single atom, 2+ for a group selection.
+     */
+    handleSelectionChanged(indices: any): void;
+    /**
+     * Delete/Backspace/Ctrl(Cmd)+Z/Ctrl(Cmd)+Shift+Z don't fire the "keypress" event the rest of
+     * this component's hotkeys rely on (keypress only fires for character-producing keys), so
+     * they're handled separately here on "keydown". Guarded the same way as handleKeyPress:
+     * only while interactive and not while a form field has focus.
+     */
+    handleEditModeKeyDown(event: any): void;
+    /**
+     * Public, ref-accessible undo-availability check (part of the host embedding API - a host
+     * can drive undo/redo via a ref to this component instead of only through this toolbar).
+     */
+    canUndo(): boolean;
+    canRedo(): boolean;
+    /**
+     * Spec §6.3's documented ref API names these undo()/redo() (canUndo/canRedo already matched);
+     * thin aliases so `ref.current.undo()` works as documented instead of only the internal
+     * handleUndo/handleRedo names.
+     */
+    undo(): void;
+    redo(): void;
+    renderEditToolbar(): import("react/jsx-runtime").JSX.Element;
     handleChemicalConnectivityFactorChange(e: any): void;
     handleToggleMeasurement(measurementMode: any): void;
     handleSetState(newState: any): void;
@@ -65,7 +155,6 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     addHotKeyListener(): void;
     removeHotKeyListener(): void;
     handleStartGifRecording(downloadPath: any, rotationSpeed?: number, frameDuration?: number): Promise<void>;
-    handleMessage: (event: any) => void;
     handleSetMaterial(newMaterialConfig: any): void;
     componentDidMount(): void;
     /**
@@ -80,10 +169,16 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleSetSetting: (setting: any) => void;
     getKeyConfig(): {
         [x: string]: () => void;
-        [x: number]: () => void;
     };
     handleKeyPress: (e: any) => void;
     getPrimitiveOrConventionalMaterial(material: any, isConventionalCellShown?: boolean): any;
+    /**
+     * Pushes a material to the viewer via the official setStructure()/rebuildScene() path and
+     * notifies the parent. Used as the setState callback for every history-affecting change
+     * (edit, undo, redo) once bypassReloadViewer has already been set so WaveComponent's own
+     * prop-driven reload doesn't race with it.
+     */
+    _applyMaterialToViewer(material: any): void;
     _getWaveProperty(name: any): any;
     /**
      * Returns a cover div to cover the area and prevent user interaction with component
@@ -250,8 +345,11 @@ export namespace ThreeDEditor {
         let isConventionalCellShown: PropTypes.Requireable<boolean>;
         let boundaryConditions: PropTypes.Requireable<object>;
         let onUpdate: PropTypes.Requireable<(...args: any[]) => any>;
+        let onEditModeChanged: PropTypes.Requireable<(...args: any[]) => any>;
+        let onSelectionChanged: PropTypes.Requireable<(...args: any[]) => any>;
         let isStandalone: PropTypes.Requireable<boolean>;
         let initialViewSettings: PropTypes.Requireable<object>;
+        let editSessionOptions: PropTypes.Requireable<object>;
     }
     namespace defaultProps {
         let boundaryConditions_1: {};
@@ -260,12 +358,18 @@ export namespace ThreeDEditor {
         export { isConventionalCellShown_1 as isConventionalCellShown };
         let onUpdate_1: undefined;
         export { onUpdate_1 as onUpdate };
+        let onEditModeChanged_1: undefined;
+        export { onEditModeChanged_1 as onEditModeChanged };
+        let onSelectionChanged_1: undefined;
+        export { onSelectionChanged_1 as onSelectionChanged };
         let editable_1: boolean;
         export { editable_1 as editable };
         let isStandalone_1: boolean;
         export { isStandalone_1 as isStandalone };
         let initialViewSettings_1: {};
         export { initialViewSettings_1 as initialViewSettings };
+        let editSessionOptions_1: {};
+        export { editSessionOptions_1 as editSessionOptions };
     }
 }
 import React from "react";

@@ -1,7 +1,4 @@
 {
   "extends": "@mat3ra/tsconfig/tsconfig-react-jsx.json",
-  "compilerOptions": {
-    "declaration": false
-  },
   "exclude": ["src/editor/**/*", "threejs_fork/**/*", "agents/**/*"]
 }

@@ -193,7 +193,10 @@ describe("angles measurements", () => {
 
         camera = wave.camera;
         canvas = wave.renderer.domElement;
-        atoms = wave.collectAllAtoms().slice(-3);
+        // getAtomGroups() (not collectAllAtoms()) is what the measurement feature itself uses
+        // to let a user click a periodic repetition image, not just a base atom - matching that
+        // is what makes this "3 atoms" from a 2-atom base material with repetitions enabled.
+        atoms = wave.getAtomGroups().slice(-3);
     });
 
     afterEach(() => {
