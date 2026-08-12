@@ -8,6 +8,7 @@ import { Made } from "@mat3ra/made";
 import { PERIODIC_TABLE } from "@mat3ra/periodic-table";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
+import CameraAlt from "@mui/icons-material/CameraAlt";
 import CloudDownload from "@mui/icons-material/CloudDownload";
 import ControlCameraRounded from "@mui/icons-material/ControlCameraRounded";
 import Dehaze from "@mui/icons-material/Dehaze";
@@ -39,8 +40,8 @@ import {
     MeasurementSettingsHandler,
 } from "../mixins/measurements/MeasurementSettingsHandler";
 import settings from "../settings";
-import { matchesEditorKey } from "../utils/keyBindings";
 import { describeEditCommit, EDIT_HINT_TIMEOUT_MS } from "../utils/editActions";
+import { matchesEditorKey } from "../utils/keyBindings";
 import { formatMeasurementValue } from "../utils/measurementReadout";
 import EditToolbar from "./EditToolbar";
 import IconsToolbar from "./IconsToolbar";
@@ -180,6 +181,7 @@ export class ThreeDEditor extends React.Component {
         this.handleCloseKeyboardSheet = this.handleCloseKeyboardSheet.bind(this);
         this.handleViewerError = this.handleViewerError.bind(this);
         this.handleDisplayUnitsChange = this.handleDisplayUnitsChange.bind(this);
+        this.handleViewAlongAxis = this.handleViewAlongAxis.bind(this);
         this.handleRetryViewer = this.handleRetryViewer.bind(this);
         this.handleEditModeKeyDown = this.handleEditModeKeyDown.bind(this);
         this.canUndo = this.canUndo.bind(this);
@@ -985,6 +987,14 @@ export class ThreeDEditor extends React.Component {
         return null;
     }
 
+    /**
+     * Points the camera down a lattice vector. Reset View was the only camera command the viewer
+     * had (F12); axis views are a primary control in VESTA and CrystalMaker.
+     */
+    handleViewAlongAxis(axis) {
+        this.WaveComponent?.wave?.setCameraAlongCellVector?.(axis);
+    }
+
     handleToggleKeyboardSheet() {
         const { isKeyboardSheetOpen } = this.state;
         this.setState({ isKeyboardSheetOpen: !isKeyboardSheetOpen });
@@ -1226,6 +1236,23 @@ export class ThreeDEditor extends React.Component {
                 onClick: this.handleToggleIsViewAdjustable,
                 shouldMenuStayOpened: true,
             },
+            {
+                id: "divider-camera",
+                isDivider: true,
+            },
+            ...[
+                { axis: "a", label: "View along a" },
+                { axis: "b", label: "View along b" },
+                { axis: "c", label: "View along c" },
+                { axis: "111", label: "View along [111]" },
+            ].map(({ axis, label }) => ({
+                id: `view-along-${axis}`,
+                disabled: false,
+                content: label,
+                leftIcon: <CameraAlt />,
+                onClick: () => this.handleViewAlongAxis(axis),
+                shouldMenuStayOpened: true,
+            })),
             {
                 id: "divider-2",
                 isDivider: true,
