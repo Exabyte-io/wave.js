@@ -48,6 +48,7 @@ import IconsToolbar from "./IconsToolbar";
 import KeyboardSheet from "./KeyboardSheet";
 import ModePill from "./ModePill";
 import ParametersMenu from "./ParametersMenu";
+import QuickToggles from "./QuickToggles";
 import SelectionInspector from "./SelectionInspector";
 import StatusBar, { normalizeElement } from "./StatusBar";
 import ToggleIndicator from "./ToggleIndicator";
@@ -1385,6 +1386,57 @@ export class ThreeDEditor extends React.Component {
         );
     };
 
+    /**
+     * The View items people flip repeatedly rather than set once, promoted out of a dropdown that
+     * closes on every choice (U-7). Same state and same handlers as the menu entries - this is a
+     * shortcut, not a move, so the menu keeps working exactly as before.
+     */
+    getQuickToggleItems() {
+        const areLabelsVisibleByType = (type) =>
+            this.WaveComponent?.wave?.areLabelsVisibleByType?.(type);
+        const keys = settings.hotKeysConfig;
+        return [
+            {
+                id: "bonds",
+                title: "Bonds",
+                hotKey: keys.toggleBonds,
+                isActive: Boolean(this._getWaveProperty("isDrawBondsEnabled")),
+                icon: <Dehaze />,
+                onToggle: this.handleToggleBonds,
+            },
+            {
+                id: "element-labels",
+                title: "Element labels",
+                hotKey: keys.toggleElementLabels,
+                isActive: Boolean(areLabelsVisibleByType && areLabelsVisibleByType("element")),
+                icon: <Spellcheck />,
+                onToggle: this.handleToggleElementLabels,
+            },
+            {
+                id: "axes",
+                title: "Axes",
+                isActive: Boolean(this._getWaveProperty("areAxesEnabled")),
+                icon: <GpsFixed />,
+                onToggle: this.handleToggleAxes,
+            },
+            {
+                id: "orthographic",
+                title: "Orthographic camera",
+                isActive: Boolean(this._getWaveProperty("isCameraOrthographic")),
+                icon: <SwitchCamera />,
+                onToggle: this.handleToggleOrthographicCamera,
+            },
+            {
+                id: "orbit",
+                title: "Rotate / zoom",
+                hotKey: keys.toggleOrbitControls,
+                isActive: Boolean(this._getWaveProperty("areOrbitControlsEnabled")),
+                icon: <ThreeDRotation />,
+                onToggle: this.handleToggleOrbitControls,
+            },
+        ];
+    }
+
     getToolbarConfig() {
         const toolbarConfig = [
             {
@@ -1604,6 +1656,7 @@ export class ThreeDEditor extends React.Component {
                         isOrbitEnabled={Boolean(this._getWaveProperty("areOrbitControlsEnabled"))}
                     />
                 )}
+                {isViewerUsable && <QuickToggles items={this.getQuickToggleItems()} />}
                 {isInteractive && (
                     <StatusBar
                         material={material}
