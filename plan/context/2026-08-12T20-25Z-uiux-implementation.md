@@ -30,8 +30,13 @@ P0 and P1 — `U-1` through `U-11` — as one branch per item.
 | — | (tip) | `e338f12` | merge `origin/dev` |
 | — | (tip) | `5882636` | regenerate 17 visual baselines |
 | — | (tip) | `6850383` | Netlify deploy config |
+| — | (tip) | `2e5fa89` | this context record |
+| — | (tip) | `19527bd` | retry `npm ci` (sharp/libvips 503) |
+| U-12 | `claude/uiux-p2-figure-export` | `e4fb816` | figure export |
+| U-13 | `claude/uiux-p2-touch-support` | `52539cf` | touch + small screens |
 
-Suite: **185 → 340 passing**, 25/25 suites, 0 failed. `tsc --noEmit` clean, `eslint src tests` 0 errors.
+Suite: **185 → 440 passing**, 30/30 suites, 0 failed. `tsc --noEmit` clean, `eslint src tests` 0 errors.
+**Every U-n is now shipped.**
 
 ## 2. Decisions worth not relitigating
 
@@ -57,6 +62,20 @@ Suite: **185 → 340 passing**, 25/25 suites, 0 failed. `tsc --noEmit` clean, `e
   is enabled (it starts disabled); `?` went unmentioned until the sheet existed; `U-8` ships no bond
   count because bonds are computed asynchronously.
 - **Regeneration over tolerance for the visual baselines.** See §4.
+- **`U-12` renders offscreen by resizing the real renderer, not by allocating a second one.** A
+  second `WebGLRenderer` means a second GL context, a second copy of every texture and geometry, and
+  a scene that can only belong to one of them at a time. Resizing the existing drawing buffer inside
+  a `try/finally` gets the same result with one context; what it costs is the discipline of restoring
+  *everything* — size, pixel ratio, clear colour and alpha, scene background, fog, and every material
+  colour touched — which is what the tests pin.
+- **`U-13` sizes by pointer capability, never by viewport width.** The `isMobile` it replaces asked
+  the wrong question in both directions. Sizing keys off `(pointer: coarse)`, documentation off
+  whether touch exists at all, and both are read at call time — a window can be dragged to a
+  touchscreen mid-session.
+- **`U-13` is not a mobile port and should not grow into one.** The existing chrome was *measured* at
+  390×844 and fits: no collisions, no clipping. The defects were gesture ownership, 32 px targets and
+  labels naming keys the device lacks. A bottom sheet would have been a rewrite in search of a
+  problem.
 
 ## 3. Confirmed *not* defects — do not re-investigate
 
@@ -67,6 +86,15 @@ Suite: **185 → 340 passing**, 25/25 suites, 0 failed. `tsc --noEmit` clean, `e
 - **MUI text fields and toggle buttons "without a focus indicator".** A crude outline/box-shadow
   probe reports those as unindicated; they signal focus through border and background instead. False
   negative, not a finding.
+- **Full-width horizontal lines across an exported figure.** They are the axes/ruler overlay, present
+  identically on screen — the export is faithful. Toggle Axes off. (Whether that overlay should look
+  like a dense ruler grid at all is a separate question, untouched here.)
+- **`document.querySelector("canvas")` returning a 100×100 element.** That is the axes-indicator
+  overlay canvas; the main one is a later sibling. Any probe measuring "the canvas" must take the
+  largest, or it silently measures the wrong element.
+- **Two CI runs per commit on this chain.** Both branches (the per-item branch and the PR head) point
+  at the same SHA, and `on: [push]` with a ref-keyed concurrency group gives each its own run. Not a
+  race; the duplicate is expected while the chain is pushed twice.
 
 ## 4. Why CI was red, and how it was fixed
 
@@ -113,7 +141,7 @@ that tolerance on its own evidence, not as a way to hide a stale reference.
 
 ## 6. What the browser pass caught that jsdom could not
 
-Five defects in newly written code, which is the argument for keeping a real-browser pass in the
+Nine defects in newly written code, which is the argument for keeping a real-browser pass in the
 loop rather than trusting the suite alone:
 
 1. The pill advertised `RMB = orbit` unconditionally while orbit starts disabled.
@@ -123,19 +151,44 @@ loop rather than trusting the suite alone:
    `MuiClassNameSetup` renames MUI classes to `wave-Mui*`, so a `.MuiInputBase-root` selector never
    matches — it needs a class-substring selector.
 5. Slider range marks overlapped their caption, because MUI positions mark labels absolutely.
+6. The figure export's scale-bar label was set at `height/36`, about 5 pt at 300 dpi — under most
+   journals' minimum type size. Only visible by looking at a rendered figure.
+7. The shortcut sheet still promised "? or Esc to close" on a touch profile with neither, and had no
+   visible way out at all (the exits were `?`, Escape, or knowing that the backdrop dismisses).
+8. The touch gesture group rendered *last*, below three groups of keyboard shortcuts, on the one
+   device where those gestures are the only way in — and the sheet is single-column there, so group
+   order is scroll distance.
+9. Probes that measured "the canvas" were measuring the 100×100 axes overlay, not the viewer.
 
-## 7. Open / next
+Two pre-existing bugs also came out of verification rather than reading (both fixed): the
+orthographic projection matrix never being updated after the frustum was fitted to the cell, and
+`touch-action: auto` swallowing every touch drag. The first was caught by cross-checking the scale
+bar against the camera's own projection over a known 2 Å separation — the kind of assertion that
+catches a formula wrong by a constant factor, which nothing else in the suite would have.
 
-- **`U-12` figure export** — the publication case: white or transparent background, fixed output
-  resolution independent of the on-screen canvas, chrome excluded.
-- **`U-13` touch and small screens** — needs the scope call below.
-- **The scope question** both P2 items hinge on: where does wave.js stop and the host app begin?
-  Decision D-2 answered it for multi-material editing. For mobile specifically the proposal's
-  position is that half-support is the worst of the three options, and `isMobile` is currently
-  half-computed (`IconsToolbar.tsx` computes it and forwards it to one dropdown; nothing else
-  adapts).
+## 7. Deployment
+
+Netlify is live and confirmed. Site `mat3ra-mave`; PR #214's preview serves at
+`https://deploy-preview-214--mat3ra-mave.netlify.app/` (HTTP 200, verified). The production URL 404s
+because `netlify.toml` only exists on this chain, so no build has run for `dev` yet — expected, and it
+resolves when this lands. Nothing appeared on commit `6850383` because the site was linked *after*
+that push; Netlify builds on new pushes, so the first evidence arrives with the next commit.
+
+## 8. Open / next
+
+Every `U-n` is shipped. What remains is not this work:
+
 - **PR size.** #214 carries the 25-commit editor stack it sits on (that work is not on `dev` —
-  `interactive_structure_editor.ts` does not exist there) plus ~18 commits of this work. If the
+  `interactive_structure_editor.ts` does not exist there) plus ~22 commits of this work. If the
   editor stack lands separately first, this PR shrinks to just the UI work.
 - **Still true from the status analysis:** `dist/` is tracked and produced half the merge conflict
-  surface again; untracking it remains the right fix.
+  surface again; untracking it remains the right fix. It also means every commit here carries a
+  rebuilt `dist/`.
+- **`initRenderer`'s dead `style.width = "100%"` pair**, overwritten by the `setSize` two lines later.
+  Harmless while resizes keep them in step, deliberately not changed blind — it governs what the
+  canvas does if a resize is ever missed, and that deserves a visual check rather than a guess.
+- **`sharp` via `looks-same`.** The retry in `19527bd` makes an upstream 503 cost a retry instead of a
+  red build, but the dependency itself is the fragility. Replacing the visual comparator, or vendoring
+  a prebuilt libvips into the test image, would remove it.
+- **The axes overlay's appearance.** It renders as a dense full-width ruler grid, on screen and in
+  exports alike. Faithful, and arguably not what anyone wants; never in scope here.
