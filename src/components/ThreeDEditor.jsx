@@ -50,7 +50,9 @@ import {
     MeasurementSettingsHandler,
 } from "../mixins/measurements/MeasurementSettingsHandler";
 import settings from "../settings";
+import { formatMeasurementValue } from "../utils/measurementReadout";
 import IconsToolbar from "./IconsToolbar";
+import ModePill from "./ModePill";
 import ParametersMenu from "./ParametersMenu";
 import SquareIconButton from "./SquareIconButton";
 import StatusBar, { normalizeElement } from "./StatusBar";
@@ -918,6 +920,16 @@ export class ThreeDEditor extends React.Component {
     }
 
     /**
+     * The armed measurement mode, or null. Read straight off the state the managers already push
+     * through updateState on every click, so the mode pill and the status-bar readout follow the
+     * measurement without any new callback out of the mixin.
+     */
+    getActiveMeasurement() {
+        const { measurementsSettings } = this.state;
+        return new MeasurementSettingsHandler(measurementsSettings).getActiveMeasurement();
+    }
+
+    /**
      * Element symbol of the single selected atom, or "" for none/multiple. The status bar and the
      * edit panel both need it, and the basis stores an element as either a bare symbol or a
      * `{ value }` cell depending on the fixture - hence the shared normalizer.
@@ -1485,6 +1497,7 @@ export class ThreeDEditor extends React.Component {
 
     renderViewerWithToolbars() {
         const { isInteractive, isEditModeActive, material, selectedAtomIndices } = this.state;
+        const activeMeasurement = this.getActiveMeasurement();
 
         return (
             <div className="wave-component-holder" style={{ position: "relative", height: "100%" }}>
@@ -1497,10 +1510,19 @@ export class ThreeDEditor extends React.Component {
                 {this.renderWaveComponent()}
                 {isInteractive && isEditModeActive && this.renderEditToolbar()}
                 {isInteractive && (
+                    <ModePill
+                        isEditModeActive={isEditModeActive}
+                        activeMeasurement={activeMeasurement}
+                        onExitEditMode={this.handleToggleEditMode}
+                        onExitMeasurement={this.handleToggleMeasurement}
+                    />
+                )}
+                {isInteractive && (
                     <StatusBar
                         material={material}
                         selectedAtomIndices={selectedAtomIndices}
                         selectedElement={this.getSelectedElementSymbol()}
+                        measurement={formatMeasurementValue(activeMeasurement)}
                         // Chip-click selection only has machinery to act on in edit mode, so
                         // outside it the chips stay a pure legend rather than a dead control.
                         onSelectElement={isEditModeActive ? this.handleSelectElement : undefined}

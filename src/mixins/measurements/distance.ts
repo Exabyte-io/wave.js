@@ -10,6 +10,8 @@ import { BaseMeasurementManager } from "./base";
 export class DistancesMeasurementManager extends BaseMeasurementManager<DistanceLabelsManager> {
     measurementType = MEASUREMENT_MODES_ENUM.DISTANCE;
 
+    override atomsPerMeasurement = 2;
+
     override LabelsManagerCls: LabelsManagerConstructor<DistanceLabelsManager> =
         DistanceLabelsManager;
 
