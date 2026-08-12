@@ -55,6 +55,10 @@ export class WaveComponent extends React.Component {
     }
 
     componentWillUnmount() {
+        if (this._resizeTransitionTimeout) {
+            clearTimeout(this._resizeTransitionTimeout);
+            this._resizeTransitionTimeout = null;
+        }
         this.wave?.dispose();
     }
 
@@ -100,23 +104,30 @@ export class WaveComponent extends React.Component {
         // This is a workaround: OrbitControls in Wave.js listens to resize events properly, but fails to resize the
         // renderer component on fullscreen event. Here we explicitly do that and wait for the event to finish, assuming
         // that 500 milliseconds is enough.
-        setTimeout(() => this.wave.handleResize(), 500);
+        //
+        // The handle is retained so componentWillUnmount can cancel it: unmounting inside the
+        // 500ms window otherwise ran handleResize() against an already-disposed renderer.
+        // Any pending transition is superseded rather than stacked, since only the latest
+        // container size matters.
+        if (this._resizeTransitionTimeout) clearTimeout(this._resizeTransitionTimeout);
+        this._resizeTransitionTimeout = setTimeout(() => {
+            this._resizeTransitionTimeout = null;
+            this.wave?.handleResize();
+        }, 500);
     }
 
     reloadViewer(createBondsAsync) {
-        // When running in headless mode in tests the browser does not support
-        // WebGL, so exception will be thrown. It may get in a way with other events => catching it.
-        try {
-            const { settings, structure, boundaryConditions, cell } = this.props;
-            this.wave.updateSettings(settings);
-            this.wave.setStructure(structure);
-            this.wave.boundaryConditions = boundaryConditions;
-            this.wave.setCell(cell);
-            if (createBondsAsync) this.wave.createBondsAsync();
-            this.wave.rebuildScene();
-        } catch (e) {
-            console.warn("exception caught when rendering atomic viewer", e);
-        }
+        // Deliberately not wrapped in try/catch. This used to swallow every exception into a
+        // console.warn, justified by tests having no WebGL - but the suite now renders through
+        // a real headless-gl context, so the only thing the catch achieved in production was
+        // hiding genuine render failures behind a stale viewer and a console message.
+        const { settings, structure, boundaryConditions, cell } = this.props;
+        this.wave.updateSettings(settings);
+        this.wave.setStructure(structure);
+        this.wave.boundaryConditions = boundaryConditions;
+        this.wave.setCell(cell);
+        if (createBondsAsync) this.wave.createBondsAsync();
+        this.wave.rebuildScene();
     }
 
     render() {

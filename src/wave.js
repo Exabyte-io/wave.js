@@ -18,7 +18,6 @@ import { MarqueeSelectionMixin } from "./mixins/marquee_selection";
 import { AllMeasurementsMixin } from "./mixins/measurements/all";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
-// eslint-disable-next-line import/no-cycle
 
 const TV3 = THREE.Vector3;
 const TCo = THREE.Color;

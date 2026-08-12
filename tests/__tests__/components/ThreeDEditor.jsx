@@ -147,18 +147,22 @@ test("ignores window postMessage events", () => {
         attachTo: container,
     });
 
-    const handleSetMaterialSpy = jest.spyOn(wrapper.instance(), "handleSetMaterial");
+    // The removed postMessage bridge (D-11) reflectively invoked whatever method a message
+    // named. The canary was `handleSetMaterial`, an orphaned method with no caller, since
+    // deleted; this now watches `handleStructureModified`, which is live and both mutates
+    // editor state and notifies the host - a faithful stand-in for what the bridge could reach.
+    const handleStructureModifiedSpy = jest.spyOn(wrapper.instance(), "handleStructureModified");
 
     window.dispatchEvent(
         new MessageEvent("message", {
             data: {
-                action: "handleSetMaterial",
-                parameters: [MATERIAL_CONFIG],
+                action: "handleStructureModified",
+                parameters: [new Made.Material(MATERIAL_CONFIG)],
             },
         }),
     );
 
-    expect(handleSetMaterialSpy).not.toHaveBeenCalled();
+    expect(handleStructureModifiedSpy).not.toHaveBeenCalled();
 });
 
 test("an echoed material prop with identical content does not wipe history or selection (D16)", () => {
@@ -493,7 +497,7 @@ describe("Parity: group rotate, clone, camera focus, element rename (old-editor 
             { attachTo: container },
         );
         // The edit toolbar (and thus the Rotate button) only renders while both interactive and
-        // edit mode are active - see renderWaveOrThreejsEditorModal.
+        // edit mode are active - see renderViewerWithToolbars.
         wrapper.find(`${SELECTORS.interactiveIconToolbar} button`).prop("onClick")();
         wrapper.instance().handleToggleEditMode();
         wrapper.update();

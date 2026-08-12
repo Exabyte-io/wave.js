@@ -10,8 +10,8 @@
         "prepack": "npm run transpile",
         "prestart": "npm-link-shared ./node_modules/@exabyte-io/cove.js/node_modules . react",
         "test": "npx jest",
-        "lint": "eslint src tests",
-        "lint:fix": "eslint --fix --cache src tests",
+        "lint": "eslint src tests --report-unused-disable-directives",
+        "lint:fix": "eslint --fix --cache src tests --report-unused-disable-directives",
         "prepare": "husky install"
     },
     "repository": {

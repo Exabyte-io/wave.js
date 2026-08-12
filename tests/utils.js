@@ -1,4 +1,3 @@
-/* eslint-disable prefer-promise-reject-errors */
 import expect from "expect";
 import fs from "fs";
 import path from "path";

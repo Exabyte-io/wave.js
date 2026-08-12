@@ -14,9 +14,11 @@ export const ImageMixin = (superclass) =>
         }
 
         getScreenshotImage() {
-            const canvas = this.renderer.domElement;
-            canvas.getContext("2d", { willReadFrequently: true });
-            return canvas.toDataURL("image/png");
+            // Reading back the canvas relies on the renderer being constructed with
+            // preserveDrawingBuffer: true (see WaveBase.initRenderer). There was a
+            // getContext("2d", { willReadFrequently: true }) call here, which returns null on a
+            // canvas that already holds a WebGL context and therefore did nothing at all.
+            return this.renderer.domElement.toDataURL("image/png");
         }
 
         async updateScene() {
@@ -38,8 +40,10 @@ export const ImageMixin = (superclass) =>
             const autoRotateSpeed = 60 / animationDuration; // RPM
             const frameDuration = totalGifDuration / totalFrames;
 
+            // `canvas.willReadFrequently = true/false` used to be set around this block;
+            // willReadFrequently is a getContext() attribute, not a canvas property, so those
+            // assignments only added an inert expando.
             const canvas = this.renderer.domElement;
-            canvas.willReadFrequently = true;
             const { width, height } = canvas;
 
             if (this.orbitControls.autoRotate) {
@@ -52,31 +56,33 @@ export const ImageMixin = (superclass) =>
             this.orbitControls.autoRotateSpeed = autoRotateSpeed;
             this.orbitControls.autoRotate = true;
 
-            const frames = [];
+            // try/finally so a throw mid-capture cannot leave the viewer spinning: the restore
+            // below used to be plain trailing statements, so any failure in frame capture or
+            // GIF encoding left autoRotate on at the modified speed for the rest of the session.
+            try {
+                const frames = [];
 
-            for (let i = 0; i < totalFrames; i += 1) {
-                this.orbitControls.update(); // Move scene to new position
-                // eslint-disable-next-line no-await-in-loop
-                await this.updateScene(); // Wait for rendering to finish
-                frames.push(this.getScreenshotImage()); // Capture screenshot
+                for (let i = 0; i < totalFrames; i += 1) {
+                    this.orbitControls.update(); // Move scene to new position
+                    // eslint-disable-next-line no-await-in-loop
+                    await this.updateScene(); // Wait for rendering to finish
+                    frames.push(this.getScreenshotImage()); // Capture screenshot
+                }
+
+                showInfoAlert("GIF is being created. Please wait...");
+
+                return await createGIFAsync({
+                    images: frames,
+                    gifWidth: width,
+                    gifHeight: height,
+                    sampleInterval,
+                    frameDuration,
+                });
+            } finally {
+                // Restore original rotation settings
+                this.orbitControls.autoRotateSpeed = originalSpeed;
+                this.orbitControls.autoRotate = false;
             }
-
-            showInfoAlert("GIF is being created. Please wait...");
-
-            const gifData = await createGIFAsync({
-                images: frames,
-                gifWidth: width,
-                gifHeight: height,
-                sampleInterval,
-                frameDuration,
-            });
-
-            // Restore original rotation settings
-            this.orbitControls.autoRotateSpeed = originalSpeed;
-            this.orbitControls.autoRotate = false;
-            canvas.willReadFrequently = false;
-
-            return gifData;
         }
 
         async takeGifScreenshot(options = {}) {

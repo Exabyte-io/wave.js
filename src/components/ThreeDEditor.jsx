@@ -57,6 +57,12 @@ import SquareIconButton from "./SquareIconButton";
 import { WaveComponent } from "./WaveComponent";
 
 /**
+ * Maximum number of undo/redo entries retained. Each entry is a full Material clone, so this
+ * bounds the editor's memory footprint over a long session; older entries fall off the back.
+ */
+const MAX_HISTORY_ENTRIES = 50;
+
+/**
  * Wrapper component containing 3D visualization through `WaveComponent` and the associated controls
  */
 export class ThreeDEditor extends React.Component {
@@ -123,7 +129,7 @@ export class ThreeDEditor extends React.Component {
             boundaryConditions,
             isConventionalCellShown:
                 initialViewSettings.conventionalCell ?? isConventionalCellShown,
-            // material that is originally passed to the component and can be modified in ThreejsEditorModal component.
+            // material as originally passed in by the host, before any in-editor modification.
             originalMaterial: material,
             // material that is passed to WaveComponent to be visualized and may have repetition and radius adjusted.
             material: props.material.clone(),
@@ -177,7 +183,6 @@ export class ThreeDEditor extends React.Component {
         this.addHotKeyListener = this.addHotKeyListener.bind(this);
         this.removeHotKeyListener = this.removeHotKeyListener.bind(this);
         this.handleStartGifRecording = this.handleStartGifRecording.bind(this);
-        this.handleSetMaterial = this.handleSetMaterial.bind(this);
     }
 
     componentDidMount() {
@@ -193,7 +198,21 @@ export class ThreeDEditor extends React.Component {
      */
     _applyInitialToggleSettings() {
         const { _initialToggleSettings } = this.state;
-        if (!_initialToggleSettings || !this.WaveComponent?.wave) return;
+        if (!_initialToggleSettings) return;
+        // These settings arrive from URL params and are applied imperatively to the Wave
+        // instance, so they need one to exist. Returning early used to drop them permanently
+        // whenever the instance was not ready yet, silently losing every toggle in a shared
+        // view link; retry on the next tick instead, once the child's own componentDidMount
+        // has constructed it.
+        if (!this.WaveComponent?.wave) {
+            if (this._initialToggleSettingsRetried) return;
+            this._initialToggleSettingsRetried = true;
+            this._initialToggleSettingsTimeout = setTimeout(
+                () => this._applyInitialToggleSettings(),
+                0,
+            );
+            return;
+        }
 
         if (_initialToggleSettings.orthographicCamera) {
             this.handleToggleOrthographicCamera();
@@ -218,6 +237,10 @@ export class ThreeDEditor extends React.Component {
     componentWillUnmount() {
         this.removeHotKeyListener();
         document.removeEventListener("keydown", this.handleEditModeKeyDown);
+        if (this._initialToggleSettingsTimeout) {
+            clearTimeout(this._initialToggleSettingsTimeout);
+            this._initialToggleSettingsTimeout = null;
+        }
     }
 
     /**
@@ -231,7 +254,6 @@ export class ThreeDEditor extends React.Component {
         if (
             !isInteractive ||
             !isEditModeActive ||
-            event.target.closest(".cm-editor") ||
             ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.nodeName)
         ) {
             return;
@@ -340,11 +362,7 @@ export class ThreeDEditor extends React.Component {
         const { editable } = this.props;
 
         // Check if interactive mode is off, or if the event originated from an input-like element
-        if (
-            !isInteractive ||
-            e.target.closest(".cm-editor") ||
-            ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.nodeName)
-        ) {
+        if (!isInteractive || ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.nodeName)) {
             return;
         }
 
@@ -505,11 +523,17 @@ export class ThreeDEditor extends React.Component {
         const newStack = historyStack.slice(0, historyPointer + 1);
         newStack.push(clonedMaterial);
 
+        // Every entry is a full Material clone, so an unbounded stack grows without limit for
+        // as long as the session lasts - material to worry about on structures with thousands
+        // of atoms. Drop the oldest entries past the cap; the pointer moves with them.
+        const overflow = Math.max(0, newStack.length - MAX_HISTORY_ENTRIES);
+        const cappedStack = overflow ? newStack.slice(overflow) : newStack;
+
         this.setState(
             {
                 material: clonedMaterial,
-                historyStack: newStack,
-                historyPointer: newStack.length - 1,
+                historyStack: cappedStack,
+                historyPointer: cappedStack.length - 1,
             },
             () => this._applyMaterialToViewer(clonedMaterial, source),
         );
@@ -890,23 +914,6 @@ export class ThreeDEditor extends React.Component {
         if (isAnyMeasurementActive && isEditModeActive) {
             this.handleToggleEditMode();
         }
-    }
-
-    handleSetMaterial(newMaterialConfig) {
-        const { material } = this.state;
-        const newMaterial = new Made.Material(newMaterialConfig);
-        this.setState(
-            {
-                originalMaterial: material,
-                material: newMaterial,
-            },
-            () => {
-                // Force Wave component to update after state change
-                if (this.WaveComponent?.wave) {
-                    this.WaveComponent.wave.rebuildScene();
-                }
-            },
-        );
     }
 
     /**
@@ -1447,7 +1454,7 @@ export class ThreeDEditor extends React.Component {
         );
     }
 
-    renderWaveOrThreejsEditorModal() {
+    renderViewerWithToolbars() {
         const { isInteractive, isEditModeActive } = this.state;
 
         return (
@@ -1470,9 +1477,9 @@ export class ThreeDEditor extends React.Component {
             <ThemeProvider theme={DarkMaterialUITheme}>
                 <ScopedCssBaseline enableColorScheme style={{ height: "100%" }}>
                     {isStandalone ? (
-                        <AlertProvider>{this.renderWaveOrThreejsEditorModal()}</AlertProvider>
+                        <AlertProvider>{this.renderViewerWithToolbars()}</AlertProvider>
                     ) : (
-                        this.renderWaveOrThreejsEditorModal()
+                        this.renderViewerWithToolbars()
                     )}
                 </ScopedCssBaseline>
             </ThemeProvider>

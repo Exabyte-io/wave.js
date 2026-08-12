@@ -176,7 +176,6 @@ export const BondsMixin = (superclass: any) =>
                 this.getElementsAndCoordinatesArrayWithEdgeNeighbors(maxBondLength);
 
             const tree = createKDTree(
-                // eslint-disable-next-line no-unused-vars
                 elementsAndCoordinatesArray2.map(
                     ([element, coordinate]: ElementAndCoordinateAsArray) => coordinate,
                 ),
