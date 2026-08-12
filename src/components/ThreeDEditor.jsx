@@ -19,6 +19,7 @@ import HeightIcon from "@mui/icons-material/Height";
 import ImportExport from "@mui/icons-material/ImportExport";
 import LooksIcon from "@mui/icons-material/Looks";
 import PictureInPicture from "@mui/icons-material/PictureInPicture";
+import Redo from "@mui/icons-material/Redo";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
 import Settings from "@mui/icons-material/Settings";
@@ -26,6 +27,7 @@ import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
+import Undo from "@mui/icons-material/Undo";
 import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
 import Stack from "@mui/material/Stack";
 import PropTypes from "prop-types";
@@ -38,6 +40,7 @@ import {
 } from "../mixins/measurements/MeasurementSettingsHandler";
 import settings from "../settings";
 import { matchesEditorKey } from "../utils/keyBindings";
+import { describeEditCommit, EDIT_HINT_TIMEOUT_MS } from "../utils/editActions";
 import { formatMeasurementValue } from "../utils/measurementReadout";
 import EditToolbar from "./EditToolbar";
 import IconsToolbar from "./IconsToolbar";
@@ -100,6 +103,8 @@ export class ThreeDEditor extends React.Component {
             // Units the inspector *shows*. Independent of material.basis.units, which is what
             // the material stores and the only thing edits write to.
             displayUnits: null,
+            // Transient "what just happened" hint, from onEditCommit's own {source} enum.
+            lastActionHint: null,
             // Set when the viewer subtree throws; cleared by a retry, which also bumps
             // viewerResetKey to remount the boundary's children.
             viewerError: null,
@@ -251,6 +256,10 @@ export class ThreeDEditor extends React.Component {
             clearTimeout(this._initialToggleSettingsTimeout);
             this._initialToggleSettingsTimeout = null;
         }
+        if (this._editHintTimeout) {
+            clearTimeout(this._editHintTimeout);
+            this._editHintTimeout = null;
+        }
     }
 
     /**
@@ -261,11 +270,7 @@ export class ThreeDEditor extends React.Component {
      */
     handleEditModeKeyDown(event) {
         const { isInteractive, isEditModeActive } = this.state;
-        if (
-            !isInteractive ||
-            !isEditModeActive ||
-            ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.nodeName)
-        ) {
+        if (!isInteractive || ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.nodeName)) {
             return;
         }
 
@@ -274,15 +279,23 @@ export class ThreeDEditor extends React.Component {
         // declared there too but implemented in the mixin, which owns cancel-drag-versus-deselect.
         const { undo, redo, removeSelected } = settings.editorKeysConfig;
 
+        // Undo/redo are deliberately NOT gated on edit mode (F6): leaving edit mode does not clear
+        // historyStack, so gating them made a surviving history unreachable. They are gated on
+        // there being something to do instead - which also keeps the viewer from swallowing a key
+        // an embedding host may want for its own undo when our stack is empty.
+        //
         // Redo is checked first: it is undo's binding plus Shift, and matchesEditorKey treats
         // Shift as significant, so order only matters if a future binding relaxes that.
         if (matchesEditorKey(event, redo)) {
+            if (!this.canRedo()) return;
             event.preventDefault();
             this.handleRedo();
         } else if (matchesEditorKey(event, undo)) {
+            if (!this.canUndo()) return;
             event.preventDefault();
             this.handleUndo();
-        } else if (matchesEditorKey(event, removeSelected)) {
+        } else if (isEditModeActive && matchesEditorKey(event, removeSelected)) {
+            // Removing an atom is an edit-mode action; outside it there is no selection to remove.
             this.handleRemoveSelectedAtom();
         }
     }
@@ -508,8 +521,25 @@ export class ThreeDEditor extends React.Component {
      * forwarded alongside the back-compat `onUpdate` channel so a host can record history without
      * double-counting instead of having to re-infer what kind of edit just happened.
      */
+    /**
+     * Shows a transient hint describing the edit that just committed, then clears it. The handle is
+     * retained so unmount can cancel it - an uncleared setTimeout calling setState on an unmounted
+     * component is the same defect class as S-2.
+     */
+    _showEditHint(source) {
+        const lastActionHint = describeEditCommit(source);
+        if (!lastActionHint) return;
+        if (this._editHintTimeout) clearTimeout(this._editHintTimeout);
+        this.setState({ lastActionHint });
+        this._editHintTimeout = setTimeout(() => {
+            this._editHintTimeout = null;
+            this.setState({ lastActionHint: null });
+        }, EDIT_HINT_TIMEOUT_MS);
+    }
+
     _applyMaterialToViewer(material, source) {
         const { onUpdate, onEditCommit } = this.props;
+        this._showEditHint(source);
         if (this.WaveComponent && this.WaveComponent.wave) {
             this.WaveComponent.wave.bypassReloadViewer = false;
             this.WaveComponent.wave.setStructure(material);
@@ -1366,6 +1396,28 @@ export class ThreeDEditor extends React.Component {
 
         const { editable } = this.props;
         const { isEditModeActive } = this.state;
+
+        // History outlives edit mode (F6), so undo/redo need to be reachable outside it. Inside
+        // edit mode the edit toolbar already carries them, so they are not duplicated here.
+        if (!isEditModeActive && (this.canUndo() || this.canRedo())) {
+            toolbarConfig.push(
+                {
+                    id: "Undo",
+                    title: "Undo",
+                    leftIcon: <Undo />,
+                    disabled: !this.canUndo(),
+                    onClick: this.handleUndo,
+                },
+                {
+                    id: "Redo",
+                    title: "Redo",
+                    leftIcon: <Redo />,
+                    disabled: !this.canRedo(),
+                    onClick: this.handleRedo,
+                },
+            );
+        }
+
         if (editable) {
             toolbarConfig.splice(4, 0, {
                 id: "3DEdit",
@@ -1483,6 +1535,7 @@ export class ThreeDEditor extends React.Component {
             isKeyboardSheetOpen,
             viewerError,
             viewerResetKey,
+            lastActionHint,
         } = this.state;
         const { editable } = this.props;
         const activeMeasurement = this.getActiveMeasurement();
@@ -1530,6 +1583,7 @@ export class ThreeDEditor extends React.Component {
                         selectedAtomIndices={selectedAtomIndices}
                         selectedElement={this.getSelectedElementSymbol()}
                         measurement={formatMeasurementValue(activeMeasurement)}
+                        lastActionHint={lastActionHint}
                         // Chip-click selection only has machinery to act on in edit mode, so
                         // outside it the chips stay a pure legend rather than a dead control.
                         onSelectElement={

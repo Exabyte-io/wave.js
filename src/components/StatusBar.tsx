@@ -48,6 +48,8 @@ export interface StatusBarProps {
     selectedElement?: string;
     /** Latest measurement readout, e.g. `"d = 2.351 Å"`. Null hides the slot. */
     measurement?: string | null;
+    /** Transient description of the edit that just committed, e.g. "Moved atom · Ctrl + Z to undo". */
+    lastActionHint?: string | null;
     /** Click a composition chip. Omit to render the chips as a plain legend. */
     onSelectElement?: (elementSymbol: string) => void;
 }
@@ -148,6 +150,7 @@ function StatusBar(props: StatusBarProps) {
         selectedAtomIndices = [],
         selectedElement = "",
         measurement = null,
+        lastActionHint = null,
         onSelectElement,
     } = props;
     const theme = useTheme();
@@ -263,6 +266,11 @@ function StatusBar(props: StatusBarProps) {
                 aria-atomic="true"
                 data-name="StatusBarLive"
             >
+                {lastActionHint && (
+                    <Typography variant="caption" color="primary.main" data-name="StatusBarHint">
+                        {lastActionHint}
+                    </Typography>
+                )}
                 {selectionText && <Typography variant="caption">{selectionText}</Typography>}
                 {measurement && (
                     <Typography variant="caption" color="warning.main">
