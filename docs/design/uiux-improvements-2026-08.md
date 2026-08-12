@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Proposal for review — no code changes yet |
+| **Status** | P0 shipped 2026-08-12 (§0.1); P1/P2 still proposals |
 | **Date** | 2026-08-12 |
 | **Scope** | The viewer's own chrome: toolbars, panels, feedback, discoverability. Not the interaction model (settled in the [editor spec](./interactive-editor-spec.md)), not rendering. |
 | **Basis** | Read of `ThreeDEditor.jsx`, `IconsToolbar.tsx`, `ParametersMenu.tsx`, `SquareIconButton.tsx`, `settings.ts`, `main.css`; the editor spec's own R-register; the [status analysis](../codebase-status-2026-08.md). Prior art: VESTA, CrystalMaker, Avogadro 2, Blender, Figma. |
@@ -24,6 +24,48 @@ The editor spec fixed *what happens when you click*. Almost nothing has yet been
 The three highest-value additions are a **status bar**, a **mode pill**, and a **keyboard sheet**. None of them touch the interaction model, the material, or the render loop; all three are new read-only surfaces over state the component already holds. That is the P0 slice, and it is small.
 
 ---
+
+## 0.1 What shipped
+
+The P0 slice is implemented as a branch chain off this document's branch, one branch per item:
+
+| # | Branch | Commit | Tests |
+|---|---|---|---|
+| U-1 | `claude/uiux-p0-status-bar` | `667b4e6` | 19 |
+| U-2 | `claude/uiux-p0-mode-pill` | `6591930` | 22 |
+| U-3 | `claude/uiux-p0-keyboard-sheet` | `10cb287` | 21 |
+| U-4 | `claude/uiux-p0-view-switches` | `0bc1f91`, `5d7ddc4` | 8 |
+| U-5 | `claude/uiux-p0-viewer-states` | `eef4704` | 11 |
+
+`tsc --noEmit` and `eslint` are clean on the tip. The suite goes from 185 passing to
+**249 passing**; the 19 failures are unchanged from the pre-change baseline (measured by stashing)
+and are all visual-snapshot tests comparing against `.expected.png` files that are Git LFS pointer
+stubs in a container without `git-lfs`. Every surface was also driven in Chromium against the live
+dev server — view mode, edit mode, the keyboard sheet, the View menu, and an armed distance
+measurement — with no console or page errors.
+
+**Where the implementation deviates from this document**, and why:
+
+1. **U-5 uses an inline card, not `AlertDialog`.** A render failure is not a decision the user has
+   to make, and a modal would cover the toolbar needed to recover. `AlertDialog` and `ModalDialog`
+   remain unused; they should be deleted or moved to cove rather than given a contrived caller.
+2. **The status bar is hidden while the viewer is not interactive**, so "at all times" in U-1 means
+   "whenever the viewer is on". The power toggle is an explicit off state; adding chrome to it
+   would contradict that.
+3. **U-2's pill does not claim `RMB = orbit` unconditionally.** Orbit controls start disabled
+   (`initOrbitControls(enabled = false)`, confirmed by dragging the live app), so while orbit is
+   off the pill names the key that enables it instead of a gesture that does nothing.
+4. **U-3 dropped the mockup's "advertised nowhere" markers.** They were a device for arguing the
+   case here; as code they would be a claim about other UI with nothing keeping them true.
+5. **U-2 needed no new mixin callback.** The measurement managers already push `getSettings()`
+   through `updateState` on every click; two facts were added to that payload
+   (`selectedAtomsCount`, `atomsPerMeasurement`) instead of adding a channel.
+
+Two things surfaced during implementation that are **not** defects, recorded so they are not
+re-investigated: the View menu reporting *Rotate/Zoom* as off at startup is correct, not rough
+edge R7's desync — orbit really is off until toggled; and F1's clipping is still live, since the
+edit panel plus a single-atom selection reaches roughly 630 px against the status bar's 730 px, so
+a short viewer still collides. U-6 is what fixes that.
 
 ## 1. What the UI is today
 
@@ -64,7 +106,7 @@ Each verified against the source, not inferred.
 
 Effort is rough developer-days for one person including tests. "Decision" flags proposals that need a call from a maintainer before implementation.
 
-### P0 — read-only surfaces over state we already have
+### P0 — read-only surfaces over state we already have — **shipped**, see §0.1
 
 | # | Proposal | Fixes | Effort | Mockup |
 |---|---|---|---|---|
