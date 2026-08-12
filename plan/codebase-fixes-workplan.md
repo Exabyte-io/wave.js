@@ -59,6 +59,7 @@ code with no gate to keep it fixed.
       at `sphereRadius` (1.5) regardless of element. Fix the map shape, add a unit test
       asserting radius ordering across elements, and regenerate the visual baselines
       (which encode the bug as correct). **Visual change — flagged for review.**
+      ⚠️ **Baselines outstanding — see "One step left" below.**
 - [x] **S-1** `WaveComponent.reloadViewer` swallows every exception into `console.warn`,
       justified by a stale comment about headless tests having no WebGL. Tests now use
       real `headless-gl`. Remove the catch so render failures surface.
@@ -110,6 +111,30 @@ npx tsc --noEmit              # exit 0
 xvfb-run -s "-ac -screen 0 1024x768x24" npx jest    # all suites
 npm run build
 ```
+
+## One step left: regenerate the visual baselines
+
+**17 snapshot tests fail on this branch, expectedly.** Atoms legitimately render larger after
+the vdW fix, and the baselines were generated with the bug in place, so they encode it as
+correct. The regeneration was done and visually verified locally — only sphere radii changed,
+with cell wireframes, positions and colors pixel-identical — but the baselines are LFS-tracked
+and **this environment cannot write LFS objects**: `lfs.github.com` returns a 403 organization
+policy denial. They were dropped from the commit rather than half-landed.
+
+Un-LFSing them was considered and rejected: 1.2 MB across 18 images against a 1.43 MB pack, and
+every future refresh would add another ~1.2 MB to history permanently. LFS is correct for these.
+
+To finish, from an environment with LFS write access:
+
+```bash
+docker-compose build && docker-compose run test   # writes the .actual.png files
+./move-actual-expected.sh forward
+# diff each image: atoms larger, everything else identical
+git add tests/__tests__/__snapshots__/expected && git commit
+```
+
+The four unit tests in `tests/__tests__/mixins/atoms.js` prove the fix independently of the
+images, which is why they were written that way.
 
 ## Outcome
 
