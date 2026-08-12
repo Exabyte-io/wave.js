@@ -1,0 +1,26 @@
+@charset "UTF-8";
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    margin: 0;
+    overflow: hidden;
+}
+
+.selectBox {
+    border: 1px solid #55aaff;
+    background-color: rgba(75, 160, 255, 0.3);
+    position: fixed;
+}
+
+.three-renderer {
+    height: 100%;
+}
+
+.three-renderer canvas:first-child {
+    position: absolute;
+    right: 10px;
+}
+.three-renderer .three-renderer-selection {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.4);
+    visibility: hidden;
+}

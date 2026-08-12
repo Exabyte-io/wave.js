@@ -15,10 +15,12 @@ code with no gate to keep it fixed.
 
 - [x] **A1** `.gitignore`: drop the bare `plan` entry. It silently swallowed every new
       file under `plan/`, including this workplan.
-- [x] **A2** Untrack `dist/`. `git rm -r --cached dist`, add to `.gitignore`, drop
-      `npm run transpile && git add dist` from `.husky/pre-commit`, and build in the
-      publish job instead. Removes 2 of PR #212's 4 conflicting files and 43% of
-      historical commit churn (74 of 174 commits touched `dist/`).
+- [~] **A2** ~~Untrack `dist/`~~ — **reverted on request (batch E).** `dist/` is consumed
+      directly from the repository by other packages, so it has to stay tracked; the
+      pre-commit hook keeps it in sync with `src/` as before. The observation stands that it
+      accounts for two of PR #212's four merge conflicts and 43% of commit churn (74 of 174
+      commits), but that is the accepted cost of git-installable consumption. `prepack` is
+      kept so a published tarball always carries a freshly-built `dist/` regardless.
 - [x] **A3** Un-LFS `tests/fixtures/**`. `.gitattributes` scoped to binaries only
       (`*.png`, `*.snap`); the 769-byte `material.json` and `FeO.json` become normal
       blobs. Without this, a clone with no `git-lfs` fails all 13 suites at parse time.
@@ -40,10 +42,16 @@ code with no gate to keep it fixed.
 
 ## Batch C — dependency and packaging cleanup
 
-- [x] **C1** Remove six declared dependencies with zero import sites: `moment`,
-      `underscore.string`, `sprintf-js`, `classnames`, `@mui/styles`, `@mui/lab`.
-- [x] **C2** Drop `underscore` (critical advisory GHSA-cf4h-3jhx-xvhq, arbitrary code
-      execution) — one import site, `SquareIconButton.tsx`.
+- [~] **C1** Remove declared dependencies with zero import sites. `underscore.string` and
+      `sprintf-js` are gone. **`moment`, `classnames`, `@mui/styles` and `@mui/lab` were
+      wrongly removed and have been restored (batch E):** wave.js does not import them, but
+      they are `@mat3ra/cove`'s `peerDependencies`, and this project installs with
+      `--legacy-peer-deps` (the publish action passes it explicitly), which does not
+      auto-install peers. `dev` declares all four for the same reason. The original analysis
+      checked wave.js's imports and not its peer's requirements.
+- [~] **C2** Drop `underscore` — one import site, `SquareIconButton.tsx`. The rewrite stands
+      (one fewer direct import), but the **declaration was restored (batch E)**: it is also a
+      cove peer. It never cleared the advisory anyway, for the separate reason below.
 - [x] **C3** Drop `jquery` — three call sites in `ThreeDEditor.jsx`, all
       `parseFloat($(e.target).val())` → `e.target.value`.
 - [x] **C4** Move `typescript` and `pixelmatch` from `dependencies` to `devDependencies`.
@@ -74,11 +82,28 @@ code with no gate to keep it fixed.
       the `Wave` instance is not ready; give it one retry once the instance exists.
 - [x] **S-7** Cap the unbounded `historyStack` (full `Material` clones per edit).
 - [x] **S-9** Delete dead surface from the removed modal editor: `.cm-editor` guards ×2,
-      99 of 496 lines of `#threejs-editor` CSS, `materialsToThreeDSceneData`,
+      470 of 496 lines of `#threejs-editor` CSS, `materialsToThreeDSceneData`,
       `handleSetMaterial`, and rename `renderWaveOrThreejsEditorModal`.
 - [x] **Docs** Rewrite `AGENTS.md` for this repo (keep the OOP/mixin section verbatim,
       translate naming rules to JS/TS, add the missing "how to run the tests" section)
       and correct the stale README and `package.json` URLs.
+
+## Batch E — `@mat3ra` scope migration, and two corrections
+
+- [x] **E1** Migrate off the `@exabyte-io` scope, matching `dev` (`#205`/`#206`): package
+      renamed `@mat3ra/wave.js`, `@exabyte-io/cove.js` → `@mat3ra/cove@2026.7.18-4` in peer
+      and dev dependencies, `prestart`'s `npm-link-shared` path, all 8 source import sites,
+      `jest.config.js`'s `transformIgnorePatterns`, and the README badge/install/linking
+      instructions. Every import path and export shape was verified against the new package
+      before migrating; all were compatible.
+- [x] **E2** Drop the untranspiled-source import. `AlertProvider` was imported from
+      `@exabyte-io/cove.js/src/theme/provider` because it was not in that version's `dist/`.
+      In `@mat3ra/cove` it ships from `dist/theme/provider` alongside the default
+      `ThemeProvider` export, so the two collapse into one `dist/` import. This was the sole
+      reason wave.js forced a bundler exception on its consumers.
+- [x] **E3** Restore `dist/` tracking (see A2) — other packages consume it from the repo.
+- [x] **E4** Restore the four `@mat3ra/cove` peer packages wrongly pruned in C1, plus
+      `underscore` from C2 (see those entries).
 
 ## Deliberately not in this branch
 
@@ -90,10 +115,9 @@ code with no gate to keep it fixed.
 - **`ThreeDEditor.jsx` → `.tsx` and the 1,519-line split.** `src/components/ThreeDEditor.jsx`
   is already one of PR #212's four conflicting files. Rewriting it now would turn a
   tractable conflict into an intractable one. This must land *after* the stack merges.
-- **Landing the stack / the `@mat3ra/cove` migration / sequencing PR #202.** These are
-  release decisions across five open PRs plus another team's branch, not fixes. The cove
-  jump is `@exabyte-io/cove.js@2025.2.22-0` → `@mat3ra/cove@2026.7.18-4` — ~17 months of
-  drift across 9 import sites, needing its own branch and its own verification.
+- **Landing the stack / sequencing PR #202.** These are release decisions across five open
+  PRs plus another team's branch, not fixes. (The `@mat3ra` scope migration was originally
+  listed here too; it has since been done on request — see batch E.)
 - **Merging the 13 open Dependabot PRs.** Actions on existing PRs, not code changes here.
 - **Clearing the transitive `underscore` critical.** Requires `@mat3ra/periodic-table` to stop
   depending on `underscore@1.8.3`, and its current release does not install standalone (see
@@ -145,10 +169,12 @@ images, which is why they were written that way.
 | tests | 183 (181 passing, 2 skipped) | **187 (185 passing, 2 skipped)** |
 | coverage reported | ~9% (JS-only glob) | **82.9% stmts / 69.4% branch**, with a floor |
 | CI gates | containerized tests only | + lint, typecheck, build on every push |
-| tracked build output | 129 files in `dist/` | none |
-| runtime dependencies | 19 | **10** |
+| tracked build output | 129 files in `dist/` | 129 files (kept, by design — E3) |
+| runtime dependencies | 19 | **15** (3 genuinely unused dropped, `typescript`/`pixelmatch` moved to dev) |
 | prod-tree vulnerabilities | 13 (2 critical, 7 high) | **13 — unchanged, see below** |
 | `main.css` | 496 lines, 470 of them dead | **26 lines** |
+| package scope | `@exabyte-io/wave.js` + `cove.js@2025.2.22-0` | **`@mat3ra/wave.js` + `cove@2026.7.18-4`** |
+| imports from a dependency's `src/` | 1 (forced a bundler exception downstream) | **0** |
 
 **The vulnerability count did not move, and the status report was over-optimistic about why it
 would.** Dropping the direct `underscore` dependency removed wave.js's own use of it, but the
@@ -182,6 +208,7 @@ Notes worth carrying forward:
 - `move-actual-expected.sh` was silently a no-op — it looked for baselines one directory above
   where they live. Fixed; it had presumably not worked since the baselines moved into
   `expected/`.
-- This branch still carries `@exabyte-io/*` naming, so it will conflict with `dev`'s scope
-  migration exactly as PR #212 does. That is the untouched P0 and it is a merge decision, not a
-  fix.
+- The `@mat3ra` scope migration is done (batch E), so this branch no longer conflicts with
+  `dev` on package naming. It still differs from `dev` on `three`: this branch uses stock
+  `^0.140.2` where `dev` still pins the `npm:@exabyte-io/three@2023.8.23-0` fork. That swap was
+  analysed as safe for this codebase's usage during the PR #204 review and is deliberately kept.

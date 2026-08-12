@@ -94,18 +94,6 @@ jobs:
         with:
           lfs: true
 
-      - name: Setup NodeJS
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-
-      # dist/ is no longer committed to the repository, so it must be built here. The
-      # package.json `prepack` script also transpiles on `npm publish`, so this step is
-      # belt-and-braces - its real value is making a build break fail visibly here
-      # rather than inside the publish action.
-      - name: Build distribution
-        run: npm ci && npm run transpile
-
       - name: Checkout actions repository
         uses: actions/checkout@v4
         with:

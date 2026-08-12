@@ -1,10 +1,9 @@
 /* eslint-disable react/sort-comp */
 // import "../MuiClassNameSetup";
 
-import { DarkMaterialUITheme } from "@exabyte-io/cove.js/dist/theme";
-import ThemeProvider from "@exabyte-io/cove.js/dist/theme/provider";
-import { exportToDisk } from "@exabyte-io/cove.js/dist/utils/downloader";
-import { AlertProvider } from "@exabyte-io/cove.js/src/theme/provider";
+import { DarkMaterialUITheme } from "@mat3ra/cove/dist/theme";
+import ThemeProvider, { AlertProvider } from "@mat3ra/cove/dist/theme/provider";
+import { exportToDisk } from "@mat3ra/cove/dist/utils/downloader";
 import { Made } from "@mat3ra/made";
 import { PERIODIC_TABLE } from "@mat3ra/periodic-table";
 import AddCircleOutline from "@mui/icons-material/AddCircleOutline";

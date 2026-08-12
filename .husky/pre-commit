@@ -2,3 +2,7 @@
 . "$(dirname "$0")/_/husky.sh"
 
 npx lint-staged --allow-empty
+# dist/ is committed so other packages can consume it straight from the repository;
+# rebuild and stage it so it never drifts from src/.
+npm run transpile
+git add dist

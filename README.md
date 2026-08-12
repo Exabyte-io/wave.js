@@ -1,4 +1,4 @@
-[![npm version](https://badge.fury.io/js/%40exabyte-io%2Fwave.js.svg)](https://badge.fury.io/js/%40exabyte-io%2Fwave.js)
+[![npm version](https://badge.fury.io/js/%40mat3ra%2Fwave.js.svg)](https://badge.fury.io/js/%40mat3ra%2Fwave.js)
 [![License: Apache](https://img.shields.io/badge/License-Apache-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 # Wave.js
@@ -36,7 +36,7 @@ The package is written in a modular way easy to extend. Contributions can be in 
 From NPM for use within a software project:
 
 ```bash
-npm install @exabyte-io/wave.js
+npm install @mat3ra/wave.js
 
 ```
 
@@ -121,20 +121,20 @@ xvfb-run -s "-ac -screen 0 1024x768x24" npm test
 
 This package depends on [Made.js](https://github.com/mat3ra/made) and on stock [THREE.js](https://threejs.org/). See [package.json](package.json) for the full list.
 
-### 4.3. Using `cove.js` for local development
+### 4.3. Using `cove` for local development
 
-In case you need to link Cove.js into the app for local development you need
+In case you need to link Cove into the app for local development you need
 
-1. Add local path of Cove.js to package.json
+1. Add local path of Cove to package.json
 ```bash
-    "@exabyte-io/cove.js": "file:../../cove.js"
+    "@mat3ra/cove": "file:../../cove.js"
 ```
 2. Run the app
 ```bash
     npm start
 ```
 
-If you need to re-link it again, remove node_modules in cove.js and the app, run npm install, then run npm start again.
+If you need to re-link it again, remove node_modules in cove and the app, run npm install, then run npm start again.
 
 
 ## 5. Links.
