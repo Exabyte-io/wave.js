@@ -9,6 +9,34 @@ concurrency:
 
 jobs:
 
+  # Lint, typecheck and build. Deliberately not containerized: none of these need a GL
+  # context, so they run in ~2 minutes on a plain runner and gate every push. This
+  # replaces the commented-out `actions/js/validate` step below, whose absence let 19
+  # eslint errors accumulate on a branch unnoticed.
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
   run-tests:
     runs-on: ubuntu-24.04
 
@@ -56,7 +84,7 @@ jobs:
 
 
   publish:
-    needs: run-tests
+    needs: [verify, run-tests]
     runs-on: ubuntu-latest
     if: github.ref_name == 'dev'
 
@@ -65,6 +93,18 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: true
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      # dist/ is no longer committed to the repository, so it must be built here. The
+      # package.json `prepack` script also transpiles on `npm publish`, so this step is
+      # belt-and-braces - its real value is making a build break fail visibly here
+      # rather than inside the publish action.
+      - name: Build distribution
+        run: npm ci && npm run transpile
 
       - name: Checkout actions repository
         uses: actions/checkout@v4

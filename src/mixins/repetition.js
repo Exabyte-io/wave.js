@@ -26,7 +26,6 @@ export const RepetitionMixin = (superclass) =>
          * The method receives coordinates in the form of a cube (NxNxN) and repetitions we want to display
          * Returns a new array based on the received data
          */
-        // eslint-disable-next-line class-methods-use-this
         coordinatesByAxes(coordinates, repetitions) {
             const {
                 repetitionsAlongLatticeVectorA,
@@ -163,7 +162,6 @@ export const RepetitionMixin = (superclass) =>
         /**
          * Creates a cloned atom with a unique atomic index based on its position in the repetition grid
          */
-        // eslint-disable-next-line class-methods-use-this
         createClonedAtomWithUniqueIndex(
             originalAtom,
             gridPosition,

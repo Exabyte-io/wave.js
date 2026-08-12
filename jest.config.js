@@ -12,8 +12,22 @@ module.exports = {
 
     // coverage reports
     collectCoverage: true,
-    collectCoverageFrom: ["src/**/*.js"],
+    // Must cover TypeScript too: src/ is now majority TS, so the previous "src/**/*.js"
+    // glob measured under half the codebase and reported ~9% for a suite actually
+    // covering ~82%.
+    collectCoverageFrom: ["src/**/*.{js,jsx,ts,tsx}", "!src/**/*.d.ts"],
     coverageDirectory: "tests/coverage",
+
+    // Floor set just under the measured baseline, to be ratcheted up rather than
+    // silently eroded.
+    coverageThreshold: {
+        global: {
+            statements: 80,
+            branches: 65,
+            functions: 75,
+            lines: 80,
+        },
+    },
 
     // A list of paths to modules that run some code to configure or set up the testing environment.
     setupFiles: ["./tests/setupFiles.js"],

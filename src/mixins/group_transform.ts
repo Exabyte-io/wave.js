@@ -46,7 +46,6 @@ export const GroupTransformMixin = (superclass: any) =>
          * whole gesture and only jump to the correct spot once the post-commit rebuild reattaches
          * it.
          */
-        // eslint-disable-next-line class-methods-use-this
         computeCentroid_(meshes: THREE.Mesh[]): THREE.Vector3 {
             const centroid = new THREE.Vector3();
             meshes.forEach((mesh: THREE.Mesh) => centroid.add(mesh.position));

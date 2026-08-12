@@ -202,7 +202,6 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
          * write to - sharing that channel means selecting/deselecting an atom would erase
          * whichever of those effects got there first.
          */
-        // eslint-disable-next-line class-methods-use-this
         createHighlightMesh_(color: number, opacity: number): THREE.Mesh {
             const geometry = new THREE.SphereGeometry(1, 16, 16);
             const material = new THREE.MeshBasicMaterial({
@@ -223,7 +222,6 @@ export const InteractiveStructureEditorMixin = (superclass: any) =>
         /**
          * Positions and shows/hides a halo mesh around the given atom (or hides it if null).
          */
-        // eslint-disable-next-line class-methods-use-this
         updateHighlightMesh_(haloMesh: THREE.Mesh | null, atomMesh: THREE.Mesh | null): void {
             if (!haloMesh) return;
             if (!atomMesh) {

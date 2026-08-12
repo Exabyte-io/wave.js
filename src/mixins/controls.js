@@ -81,7 +81,6 @@ const OrbitControlsMixin = (superclass) =>
             this.performOrbitControlsAnimation();
         }
 
-        // eslint-disable-next-line class-methods-use-this
         performOrbitControlsAnimation(action = () => {}) {
             this.animationFrameId = window.requestAnimationFrame(
                 this.performOrbitControlsAnimation,

@@ -73,8 +73,8 @@ export function parseViewSettingsFromUrlParams(
 ): ViewSettingsFromUrl {
     const result: ViewSettingsFromUrl = {};
 
-    for (const [paramName, rawValue] of Object.entries(params)) {
-        if (rawValue === undefined || rawValue === "") continue;
+    Object.entries(params).forEach(([paramName, rawValue]) => {
+        if (rawValue === undefined || rawValue === "") return;
 
         const valueStr = String(rawValue);
 
@@ -94,11 +94,11 @@ export function parseViewSettingsFromUrlParams(
                 if (b !== undefined && b >= 1) result.repetitionsAlongLatticeVectorB = b;
                 if (c !== undefined && c >= 1) result.repetitionsAlongLatticeVectorC = c;
             }
-            continue;
+            return;
         }
 
         const parser = PARAM_PARSERS[paramName];
-        if (!parser) continue;
+        if (!parser) return;
 
         if (parser.type === "number") {
             const n = parseNumber(valueStr);
@@ -116,7 +116,7 @@ export function parseViewSettingsFromUrlParams(
                 }
             }
         }
-    }
+    });
 
     return result;
 }
@@ -152,7 +152,11 @@ export function serializeViewSettingsToUrlParams(
         const a = repA ?? settings.repetitions;
         const b = repB ?? settings.repetitions;
         const c = repC ?? settings.repetitions;
-        if (a !== settings.repetitions || b !== settings.repetitions || c !== settings.repetitions) {
+        if (
+            a !== settings.repetitions ||
+            b !== settings.repetitions ||
+            c !== settings.repetitions
+        ) {
             if (a === b && b === c) {
                 params.repetitions = String(a);
             } else {
@@ -171,11 +175,11 @@ export function serializeViewSettingsToUrlParams(
         { key: "coordinateLabels", urlKey: "coordinateLabels" },
         { key: "conventionalCell", urlKey: "conventionalCell" },
     ];
-    for (const { key, urlKey } of booleanParams) {
+    booleanParams.forEach(({ key, urlKey }) => {
         if (viewSettings[key] !== undefined) {
             params[urlKey] = String(viewSettings[key]);
         }
-    }
+    });
 
     if (
         viewSettings.isViewAdjustable !== undefined &&

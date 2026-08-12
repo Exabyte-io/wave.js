@@ -25,7 +25,7 @@ COPY tsconfig.json ./tsconfig.json
 COPY babel.config.json ./babel.config.json
 
 # Install project dependencies
-RUN npm install --legacy-peer-deps
+RUN npm ci
 
 # Copy the entire repository into the container
 COPY . .
