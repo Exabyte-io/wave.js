@@ -27,11 +27,26 @@ function SquareIconButton(props: SquareIconButtonProps) {
         onClick: consumedOnClick,
         isToggleable,
         isToggled,
+        sx: callerSx,
         ...iconButtonProps
     } = props;
 
+    /**
+     * `disableFocusRipple` removes MUI's only focus affordance, and neither MUI nor the browser
+     * leaves an outline on a ButtonBase - measured on the running app, a keyboard-focused toolbar
+     * button had `outline: none`, `box-shadow: none` and a transparent background, so focus was
+     * completely invisible (finding F9). The ripple is a poor focus indicator anyway (it fades),
+     * so it stays disabled and an explicit ring takes its place.
+     *
+     * `:focus-visible` rather than `:focus`, so a mouse click does not leave a ring behind.
+     */
     const defaultIconButtonStyle = {
         borderRadius: 0,
+        "&:focus-visible": {
+            outline: (theme: { palette: { primary: { main: string } } }) =>
+                `2px solid ${theme.palette.primary.main}`,
+            outlineOffset: "-2px",
+        },
     };
 
     const iconButton = (
@@ -42,7 +57,9 @@ function SquareIconButton(props: SquareIconButtonProps) {
             key={id}
             aria-label={label || title.toLowerCase()}
             onClick={onClick}
-            sx={defaultIconButtonStyle}
+            // Caller styles merge on top rather than replacing the defaults: passing `sx` used to
+            // drop borderRadius (and now the focus ring) entirely, since the spread came after it.
+            sx={[defaultIconButtonStyle, ...(Array.isArray(callerSx) ? callerSx : [callerSx])]}
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...iconButtonProps}
         />

@@ -116,7 +116,19 @@ function Pill({ label, accent, children, onExit, exitTitle, dataName }: PillProp
             {children}
             {onExit && (
                 <Tooltip title={exitTitle}>
-                    <IconButton size="small" aria-label={exitTitle} onClick={onExit}>
+                    <IconButton
+                        size="small"
+                        aria-label={exitTitle}
+                        onClick={onExit}
+                        // A bare IconButton, not a SquareIconButton, so it needs the same explicit
+                        // focus ring rather than relying on MUI's ripple (F9).
+                        sx={{
+                            "&:focus-visible": {
+                                outline: (theme) => `2px solid ${theme.palette[accent].main}`,
+                                outlineOffset: "1px",
+                            },
+                        }}
+                    >
                         <Close fontSize="inherit" />
                     </IconButton>
                 </Tooltip>
