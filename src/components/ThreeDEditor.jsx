@@ -1375,13 +1375,16 @@ export class ThreeDEditor extends React.Component {
     };
 
     getParametersActions = () => {
-        const { viewerSettings } = this.state;
+        const { viewerSettings, material } = this.state;
         return (
             <ParametersMenu
                 viewerSettings={viewerSettings}
-                handleSphereRadiusChange={this.handleSphereRadiusChange}
-                handleCellRepetitionsChange={this.handleCellRepetitionsChange}
-                handleChemicalConnectivityFactorChange={this.handleChemicalConnectivityFactorChange}
+                // Lets the menu state what a repetition will cost instead of leaving the user to
+                // discover it by waiting (F7).
+                atomCountInCell={material?.basis?.elements?.length || 0}
+                // One value-based callback in place of three event-shaped ones: sliders report a
+                // value, not an event, and handleSetSetting already takes a settings patch.
+                onSettingChange={this.handleSetSetting}
             />
         );
     };
