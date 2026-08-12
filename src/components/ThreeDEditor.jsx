@@ -6,12 +6,9 @@ import ThemeProvider, { AlertProvider } from "@mat3ra/cove/dist/theme/provider";
 import { exportToDisk } from "@mat3ra/cove/dist/utils/downloader";
 import { Made } from "@mat3ra/made";
 import { PERIODIC_TABLE } from "@mat3ra/periodic-table";
-import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
-import CenterFocusStrong from "@mui/icons-material/CenterFocusStrong";
 import CloudDownload from "@mui/icons-material/CloudDownload";
-import ContentCopy from "@mui/icons-material/ContentCopy";
 import ControlCameraRounded from "@mui/icons-material/ControlCameraRounded";
 import Dehaze from "@mui/icons-material/Dehaze";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -21,25 +18,16 @@ import GpsFixed from "@mui/icons-material/GpsFixed";
 import HeightIcon from "@mui/icons-material/Height";
 import ImportExport from "@mui/icons-material/ImportExport";
 import LooksIcon from "@mui/icons-material/Looks";
-import OpenWith from "@mui/icons-material/OpenWith";
 import PictureInPicture from "@mui/icons-material/PictureInPicture";
-import Redo from "@mui/icons-material/Redo";
 import RemoveRedEye from "@mui/icons-material/RemoveRedEye";
 import Replay from "@mui/icons-material/Replay";
-import RotateRight from "@mui/icons-material/RotateRight";
 import Settings from "@mui/icons-material/Settings";
 import Spellcheck from "@mui/icons-material/Spellcheck";
 import SquareFootIcon from "@mui/icons-material/SquareFoot";
 import SwitchCamera from "@mui/icons-material/SwitchCamera";
 import ThreeDRotation from "@mui/icons-material/ThreeDRotation";
-import Undo from "@mui/icons-material/Undo";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import Divider from "@mui/material/Divider";
-import Paper from "@mui/material/Paper";
 import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -51,11 +39,12 @@ import {
 import settings from "../settings";
 import { matchesEditorKey } from "../utils/keyBindings";
 import { formatMeasurementValue } from "../utils/measurementReadout";
+import EditToolbar from "./EditToolbar";
 import IconsToolbar from "./IconsToolbar";
 import KeyboardSheet from "./KeyboardSheet";
 import ModePill from "./ModePill";
 import ParametersMenu from "./ParametersMenu";
-import SquareIconButton from "./SquareIconButton";
+import SelectionInspector from "./SelectionInspector";
 import StatusBar, { normalizeElement } from "./StatusBar";
 import ToggleIndicator from "./ToggleIndicator";
 import { ViewerErrorBoundary } from "./ViewerErrorBoundary";
@@ -108,6 +97,9 @@ export class ThreeDEditor extends React.Component {
             measurementsSettings: defaultMeasurementsSettings,
             // Keyboard sheet (`?`) visibility - it is help, so available whenever interactive.
             isKeyboardSheetOpen: false,
+            // Units the inspector *shows*. Independent of material.basis.units, which is what
+            // the material stores and the only thing edits write to.
+            displayUnits: null,
             // Set when the viewer subtree throws; cleared by a retry, which also bumps
             // viewerResetKey to remount the boundary's children.
             viewerError: null,
@@ -182,13 +174,14 @@ export class ThreeDEditor extends React.Component {
         this.handleToggleKeyboardSheet = this.handleToggleKeyboardSheet.bind(this);
         this.handleCloseKeyboardSheet = this.handleCloseKeyboardSheet.bind(this);
         this.handleViewerError = this.handleViewerError.bind(this);
+        this.handleDisplayUnitsChange = this.handleDisplayUnitsChange.bind(this);
         this.handleRetryViewer = this.handleRetryViewer.bind(this);
         this.handleEditModeKeyDown = this.handleEditModeKeyDown.bind(this);
         this.canUndo = this.canUndo.bind(this);
         this.canRedo = this.canRedo.bind(this);
         this.undo = this.undo.bind(this);
         this.redo = this.redo.bind(this);
-        this.renderEditToolbar = this.renderEditToolbar.bind(this);
+        this.renderEditSurface = this.renderEditSurface.bind(this);
         this.handleChemicalConnectivityFactorChange =
             this.handleChemicalConnectivityFactorChange.bind(this);
         this.handleToggleMeasurement = this.handleToggleMeasurement.bind(this);
@@ -633,7 +626,7 @@ export class ThreeDEditor extends React.Component {
      * Basis/setBasis rather than reconstructing via fromElementsAndCoordinates, so labels and
      * constraints on every atom (including the one being edited) survive untouched (D7). Only
      * meaningful for exactly one selected atom - the coordinate panel itself is hidden for 0 or
-     * 2+ selected (see renderEditToolbar), so this is a defensive guard, not the primary gate.
+     * 2+ selected (see renderEditSurface), so this is a defensive guard, not the primary gate.
      */
     handleCoordinateChange(axisIndex, value) {
         const { selectedAtomIndices, material } = this.state;
@@ -969,6 +962,36 @@ export class ThreeDEditor extends React.Component {
 
     handleCloseKeyboardSheet() {
         this.setState({ isKeyboardSheetOpen: false });
+    }
+
+    handleDisplayUnitsChange(displayUnits) {
+        this.setState({ displayUnits });
+    }
+
+    /**
+     * The selected atom's coordinates expressed in `displayUnits`, or null when that is already the
+     * material's own unit (in which case the stored values are shown as-is).
+     *
+     * Converts the single touched point through `basis.cell`, the same primitive the delta-based
+     * edit path uses - never `Basis.toCartesian()/toCrystal()`, which rewrites every atom.
+     */
+    getDisplayCoordinates() {
+        const { material, selectedAtomIndices, displayUnits } = this.state;
+        if (selectedAtomIndices.length !== 1 || !displayUnits) return null;
+        const nativeUnits = material?.basis?.units === "cartesian" ? "cartesian" : "crystal";
+        if (displayUnits === nativeUnits) return null;
+        const point = material?.basis?.coordinates?.[selectedAtomIndices[0]]?.value;
+        if (!Array.isArray(point)) return null;
+        try {
+            const { cell } = material.Basis;
+            return displayUnits === "cartesian"
+                ? cell.convertPointToCartesian([...point])
+                : cell.convertPointToCrystal([...point]);
+        } catch (error) {
+            // A cell that cannot convert is not worth breaking the panel over; fall back to
+            // showing the stored values.
+            return null;
+        }
     }
 
     /**
@@ -1366,197 +1389,88 @@ export class ThreeDEditor extends React.Component {
         console.log("Recorded gif");
     }
 
-    renderEditToolbar() {
+    /**
+     * The edit surface: an icon strip of tools plus a selection inspector, side by side.
+     *
+     * The container is bounded top and bottom (`bottom` clears the status bar) and the inspector
+     * scrolls inside it. That is the structural half of the F1 fix - the previous single 84 px
+     * column was ~600 px tall with no scroll, so on a short viewer the coordinate fields were cut
+     * off and unreachable rather than merely cramped.
+     */
+    renderEditSurface() {
         const {
             activeTransformMode,
             selectedAtomIndices,
             material,
             coordinateDrafts,
             elementDraft,
+            displayUnits,
         } = this.state;
         const { editSessionOptions } = this.props;
-        const hasUndo = this.canUndo();
-        const hasRedo = this.canRedo();
-        const defaultElement = editSessionOptions?.defaultElement || "Si";
-        const isSingleAtomSelected = selectedAtomIndices.length === 1;
-        const hasSelection = selectedAtomIndices.length > 0;
-        const canRotate = selectedAtomIndices.length > 1;
         const [selectedAtomIndex] = selectedAtomIndices;
 
         let selectedCoordinates = [0, 0, 0];
-        let selectedElement = "";
-        if (isSingleAtomSelected && material?.basis?.coordinates) {
-            const selectedAtom = material.basis.coordinates[selectedAtomIndex];
+        if (selectedAtomIndices.length === 1) {
+            const selectedAtom = material?.basis?.coordinates?.[selectedAtomIndex];
             if (selectedAtom) {
                 selectedCoordinates = Array.isArray(selectedAtom)
                     ? selectedAtom
                     : selectedAtom.value || selectedAtom;
-                selectedElement = normalizeElement(material.basis.elements[selectedAtomIndex]);
             }
         }
+        const selectedElement = this.getSelectedElementSymbol();
+        const elementColor = selectedElement
+            ? settings.elementColors?.[selectedElement] || settings.defaultColor
+            : settings.defaultColor;
 
         return (
-            <Paper
-                elevation={2}
-                sx={{ position: "absolute", top: "1em", right: "1em", boxShadow: 4 }}
+            <Stack
+                direction="row"
+                spacing={1}
+                alignItems="flex-start"
+                justifyContent="flex-end"
+                sx={{
+                    position: "absolute",
+                    top: "1em",
+                    right: "1em",
+                    left: "1em",
+                    // Clears the status bar, so neither surface can ever sit under the other.
+                    bottom: "3em",
+                    pointerEvents: "none",
+                    "& > *": { pointerEvents: "auto" },
+                }}
             >
-                <Stack
-                    alignItems="center"
-                    spacing={1}
-                    padding={1}
-                    divider={<Divider flexItem sx={{ width: "80%", alignSelf: "center" }} />}
-                >
-                    <ButtonGroup orientation="vertical" variant="outlined" color="inherit">
-                        <SquareIconButton
-                            title="Translate Mode"
-                            onClick={() => this.handleSetTransformMode("translate")}
-                        >
-                            <OpenWith
-                                color={activeTransformMode === "translate" ? "primary" : "inherit"}
-                            />
-                        </SquareIconButton>
-                        <SquareIconButton
-                            title={
-                                canRotate ? "Rotate Mode" : "Select 2+ atoms to rotate as a group"
-                            }
-                            disabled={!canRotate}
-                            onClick={() => this.handleSetTransformMode("rotate")}
-                        >
-                            <RotateRight
-                                color={activeTransformMode === "rotate" ? "primary" : "inherit"}
-                            />
-                        </SquareIconButton>
-                    </ButtonGroup>
-
-                    <ButtonGroup orientation="vertical" variant="outlined" color="inherit">
-                        <SquareIconButton
-                            title={`Add Atom (${defaultElement})`}
-                            onClick={this.handleAddAtom}
-                        >
-                            <AddCircleOutline />
-                        </SquareIconButton>
-                        <SquareIconButton
-                            title={
-                                selectedAtomIndices.length > 1
-                                    ? `Clone ${selectedAtomIndices.length} Selected Atoms`
-                                    : "Clone Selected Atom"
-                            }
-                            disabled={!hasSelection}
-                            onClick={this.handleCloneSelectedAtoms}
-                        >
-                            <ContentCopy />
-                        </SquareIconButton>
-                        <SquareIconButton
-                            title={
-                                selectedAtomIndices.length > 1
-                                    ? `Delete ${selectedAtomIndices.length} Selected Atoms`
-                                    : "Delete Selected Atom"
-                            }
-                            disabled={!hasSelection}
-                            onClick={this.handleRemoveSelectedAtom}
-                        >
-                            <DeleteIcon />
-                        </SquareIconButton>
-                    </ButtonGroup>
-
-                    <ButtonGroup orientation="vertical" variant="outlined" color="inherit">
-                        <SquareIconButton
-                            title={`Focus Camera on Selection [${settings.hotKeysConfig.focusCameraOnSelection.toUpperCase()}]`}
-                            disabled={!hasSelection}
-                            onClick={this.handleFocusCameraOnSelection}
-                        >
-                            <CenterFocusStrong />
-                        </SquareIconButton>
-                    </ButtonGroup>
-
-                    <ButtonGroup orientation="vertical" variant="outlined" color="inherit">
-                        <SquareIconButton
-                            title="Undo"
-                            disabled={!hasUndo}
-                            onClick={this.handleUndo}
-                        >
-                            <Undo />
-                        </SquareIconButton>
-                        <SquareIconButton
-                            title="Redo"
-                            disabled={!hasRedo}
-                            onClick={this.handleRedo}
-                        >
-                            <Redo />
-                        </SquareIconButton>
-                    </ButtonGroup>
-
-                    {selectedAtomIndices.length > 1 && (
-                        <Stack spacing={0.5} alignItems="center" sx={{ width: "84px" }}>
-                            <Typography variant="caption" fontWeight="bold" textAlign="center">
-                                {selectedAtomIndices.length} atoms selected
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" textAlign="center">
-                                Drag, or use the gizmo, to move or rotate the group together
-                            </Typography>
-                        </Stack>
-                    )}
-
-                    {isSingleAtomSelected && (
-                        <Stack spacing={1} alignItems="center" sx={{ width: "84px" }}>
-                            <TextField
-                                label="Element"
-                                size="small"
-                                type="text"
-                                className="inverse stepper"
-                                value={
-                                    elementDraft !== null ? elementDraft : selectedElement || "Si"
-                                }
-                                onChange={(event) =>
-                                    this.handleElementDraftChange(event.target.value)
-                                }
-                                onBlur={this.handleElementCommit}
-                                onKeyDown={(event) => {
-                                    if (event.key === "Enter") event.target.blur();
-                                }}
-                            />
-                            <Typography variant="caption" color="text.secondary" sx={{ mt: -1 }}>
-                                {material?.basis?.units === "cartesian"
-                                    ? "cartesian, Å"
-                                    : "crystal"}
-                            </Typography>
-                            {["X", "Y", "Z"].map((axisName, idx) => {
-                                const draftValue = coordinateDrafts[idx];
-                                const committedValue =
-                                    selectedCoordinates[idx] !== undefined
-                                        ? selectedCoordinates[idx].toFixed(3)
-                                        : "0";
-                                return (
-                                    <TextField
-                                        key={axisName}
-                                        label={axisName}
-                                        size="small"
-                                        // type="text" (not "number"): a native number input
-                                        // silently drops a lone "-" or an empty string instead
-                                        // of firing onChange, which makes typing a negative
-                                        // coordinate or clearing the field to retype impossible
-                                        // (D18).
-                                        type="text"
-                                        inputMode="decimal"
-                                        className="inverse stepper"
-                                        value={draftValue !== null ? draftValue : committedValue}
-                                        onChange={(event) =>
-                                            this.handleCoordinateDraftChange(
-                                                idx,
-                                                event.target.value,
-                                            )
-                                        }
-                                        onBlur={() => this.handleCoordinateCommit(idx)}
-                                        onKeyDown={(event) => {
-                                            if (event.key === "Enter") event.target.blur();
-                                        }}
-                                    />
-                                );
-                            })}
-                        </Stack>
-                    )}
-                </Stack>
-            </Paper>
+                <SelectionInspector
+                    selectedAtomIndices={selectedAtomIndices}
+                    selectedElement={selectedElement}
+                    selectedCoordinates={selectedCoordinates}
+                    materialUnits={material?.basis?.units}
+                    displayUnits={displayUnits}
+                    displayCoordinates={this.getDisplayCoordinates()}
+                    elementColor={elementColor}
+                    coordinateDrafts={coordinateDrafts}
+                    elementDraft={elementDraft}
+                    onDisplayUnitsChange={this.handleDisplayUnitsChange}
+                    onCoordinateDraftChange={this.handleCoordinateDraftChange}
+                    onCoordinateCommit={this.handleCoordinateCommit}
+                    onElementDraftChange={this.handleElementDraftChange}
+                    onElementCommit={this.handleElementCommit}
+                />
+                <EditToolbar
+                    activeTransformMode={activeTransformMode}
+                    selectedCount={selectedAtomIndices.length}
+                    defaultElement={editSessionOptions?.defaultElement || "Si"}
+                    canUndo={this.canUndo()}
+                    canRedo={this.canRedo()}
+                    onSetTransformMode={this.handleSetTransformMode}
+                    onAddAtom={this.handleAddAtom}
+                    onCloneSelected={this.handleCloneSelectedAtoms}
+                    onRemoveSelected={this.handleRemoveSelectedAtom}
+                    onFocusCamera={this.handleFocusCameraOnSelection}
+                    onUndo={this.handleUndo}
+                    onRedo={this.handleRedo}
+                />
+            </Stack>
         );
     }
 
@@ -1600,7 +1514,7 @@ export class ThreeDEditor extends React.Component {
                     message={viewerError}
                     onRetry={this.handleRetryViewer}
                 />
-                {isViewerUsable && isEditModeActive && this.renderEditToolbar()}
+                {isViewerUsable && isEditModeActive && this.renderEditSurface()}
                 {isViewerUsable && (
                     <ModePill
                         isEditModeActive={isEditModeActive}
