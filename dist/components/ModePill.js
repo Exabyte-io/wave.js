@@ -6,6 +6,7 @@ import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import settings from "../settings";
+import { hasCoarsePointer } from "../utils/inputCapabilities";
 import { formatMeasurementValue, getMeasurementHint, getMeasurementLabel, getMeasurementProgress, } from "../utils/measurementReadout";
 import { useObservedWidth } from "../utils/useObservedWidth";
 import { INSPECTOR_WIDTH } from "./SelectionInspector";
@@ -45,28 +46,43 @@ const EDIT_SURFACE_INSET = `calc(${SIDE_CHROME_INSET} + ${INSPECTOR_WIDTH} + 8px
 /**
  * Bindings worth stating in the pill, sourced from settings so a rebind cannot desync them.
  *
- * `isOrbitEnabled` gates the right-button note. Orbit controls start disabled
+ * `isOrbitEnabled` gates the orbit note. Orbit controls start disabled
  * (`initOrbitControls(enabled = false)`), so while they are off the right button orbits nothing -
  * and advertising a binding that does nothing is the defect this whole slice is trying to undo.
+ *
+ * `isCoarsePointer` decides *which* orbit gesture is named. A phone has no right button, and edit
+ * mode reserves one finger for atoms exactly as it frees the left button, so there the camera is on
+ * two fingers (U-13). Naming the mouse binding on a touch device would be the same class of lie.
  */
-export function getEditModeBindings({ isOrbitEnabled = false, } = {}) {
+export function getEditModeBindings({ isOrbitEnabled = false, isCoarsePointer = hasCoarsePointer(), } = {}) {
     var _a;
     const keys = settings.hotKeysConfig;
     const orbitKey = (_a = keys === null || keys === void 0 ? void 0 : keys.toggleOrbitControls) === null || _a === void 0 ? void 0 : _a.toUpperCase();
     // The remap that surprises people: in edit mode a left-drag on empty space marquees, so orbit
-    // moves to the right button (D-4). That is only true once orbit is on, so while it is off the
-    // pill points at the key that turns it on instead of naming a button that does nothing.
+    // moves to the right button (D-4) - or to two fingers on touch. That is only true once orbit is
+    // on, so while it is off the pill points at the way to turn it on instead.
     let orbitNote = "";
     if (isOrbitEnabled)
-        orbitNote = "RMB = orbit";
+        orbitNote = isCoarsePointer ? "2 fingers = orbit" : "RMB = orbit";
+    else if (isCoarsePointer)
+        orbitNote = "Rotate/Zoom off";
     else if (orbitKey)
         orbitNote = `${orbitKey} = enable orbit`;
+    // Keyboard rows are dropped on a coarse pointer: Del and Esc name keys a phone does not have,
+    // and the toolbar's Remove button is the reachable equivalent.
+    const keyboardNotes = isCoarsePointer
+        ? []
+        : [
+            "Del = remove",
+            "Esc = deselect",
+            (keys === null || keys === void 0 ? void 0 : keys.focusCameraOnSelection)
+                ? `${keys.focusCameraOnSelection.toUpperCase()} = focus`
+                : "",
+        ];
     return [
-        "drag = move",
+        isCoarsePointer ? "drag atom = move" : "drag = move",
         orbitNote,
-        "Del = remove",
-        "Esc = deselect",
-        (keys === null || keys === void 0 ? void 0 : keys.focusCameraOnSelection) ? `${keys.focusCameraOnSelection.toUpperCase()} = focus` : "",
+        ...keyboardNotes,
     ].filter(Boolean);
 }
 function Pill({ label, accent, children, onExit, exitTitle, dataName }) {
@@ -112,8 +128,8 @@ function ModePill(props) {
             position: "absolute",
             top: "1em",
             // Insets clear the chrome pinned to either edge - the icon strip on the left, the edit
-            // toolbar on the right. Spanning the full width let the pill grow to 520 px and run
-            // underneath both of them, which is what an embedded viewer showed first.
+            // toolbar and inspector on the right. Spanning the full width let the pill grow to
+            // 520 px and run underneath all of them, which an embedded viewer showed first.
             left: SIDE_CHROME_INSET,
             right: isEditModeActive ? EDIT_SURFACE_INSET : SIDE_CHROME_INSET,
             // The canvas keeps its pointer events; each pill opts back in for itself.
