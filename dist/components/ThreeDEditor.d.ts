@@ -22,6 +22,11 @@ export class ThreeDEditor extends React.Component<any, any, any> {
             measurementType: string;
             values: never[];
         }[];
+        isKeyboardSheetOpen: boolean;
+        displayUnits: null;
+        lastActionHint: null;
+        viewerError: null;
+        viewerResetKey: number;
         viewerTriggerResize: boolean;
         viewerSettings: {
             isViewAdjustable: any;
@@ -71,7 +76,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
      * Basis/setBasis rather than reconstructing via fromElementsAndCoordinates, so labels and
      * constraints on every atom (including the one being edited) survive untouched (D7). Only
      * meaningful for exactly one selected atom - the coordinate panel itself is hidden for 0 or
-     * 2+ selected (see renderEditToolbar), so this is a defensive guard, not the primary gate.
+     * 2+ selected (see renderEditSurface), so this is a defensive guard, not the primary gate.
      */
     handleCoordinateChange(axisIndex: any, value: any): void;
     /**
@@ -126,6 +131,22 @@ export class ThreeDEditor extends React.Component<any, any, any> {
      */
     handleSelectionChanged(indices: any): void;
     /**
+     * Selects every atom of one element - the status bar's composition chips double as a
+     * select-all control. Routed through the mixin's reselectAtomsByIndices so it goes through
+     * the same single source of truth for onSelectionChanged as every other selection path.
+     */
+    handleSelectElement(elementSymbol: any): void;
+    handleToggleKeyboardSheet(): void;
+    handleCloseKeyboardSheet(): void;
+    handleViewerError(error: any): void;
+    handleDisplayUnitsChange(displayUnits: any): void;
+    /**
+     * Points the camera down a lattice vector. Reset View was the only camera command the viewer
+     * had (F12); axis views are a primary control in VESTA and CrystalMaker.
+     */
+    handleViewAlongAxis(axis: any): void;
+    handleRetryViewer(): void;
+    /**
      * Delete/Backspace/Ctrl(Cmd)+Z/Ctrl(Cmd)+Shift+Z don't fire the "keypress" event the rest of
      * this component's hotkeys rely on (keypress only fires for character-producing keys), so
      * they're handled separately here on "keydown". Guarded the same way as handleKeyPress:
@@ -145,7 +166,15 @@ export class ThreeDEditor extends React.Component<any, any, any> {
      */
     undo(): void;
     redo(): void;
-    renderEditToolbar(): import("react/jsx-runtime").JSX.Element;
+    /**
+     * The edit surface: an icon strip of tools plus a selection inspector, side by side.
+     *
+     * The container is bounded top and bottom (`bottom` clears the status bar) and the inspector
+     * scrolls inside it. That is the structural half of the F1 fix - the previous single 84 px
+     * column was ~600 px tall with no scroll, so on a short viewer the coordinate fields were cut
+     * off and unreachable rather than merely cramped.
+     */
+    renderEditSurface(): import("react/jsx-runtime").JSX.Element;
     handleChemicalConnectivityFactorChange(e: any): void;
     handleToggleMeasurement(measurementMode: any): void;
     handleSetState(newState: any): void;
@@ -165,6 +194,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     _initialToggleSettingsRetried: boolean | undefined;
     _initialToggleSettingsTimeout: number | null | undefined;
     componentWillUnmount(): void;
+    _editHintTimeout: any;
     UNSAFE_componentWillReceiveProps(nextProps: any, nextContext: any): void;
     _resetStateWaveComponent(): void;
     handleSetSetting: (setting: any) => void;
@@ -182,16 +212,59 @@ export class ThreeDEditor extends React.Component<any, any, any> {
      * forwarded alongside the back-compat `onUpdate` channel so a host can record history without
      * double-counting instead of having to re-infer what kind of edit just happened.
      */
+    /**
+     * Shows a transient hint describing the edit that just committed, then clears it. The handle is
+     * retained so unmount can cancel it - an uncleared setTimeout calling setState on an unmounted
+     * component is the same defect class as S-2.
+     */
+    _showEditHint(source: any): void;
     _applyMaterialToViewer(material: any, source: any): void;
     _getWaveProperty(name: any): any;
+    /**
+     * Which overlay state the canvas is in, or null for "showing a structure". Error wins over
+     * empty: if the build threw, the atom count is not evidence of anything.
+     */
+    getViewerStatusKind(): "error" | "empty" | null;
+    /**
+     * The selected atom's coordinates expressed in `displayUnits`, or null when that is already the
+     * material's own unit (in which case the stored values are shown as-is).
+     *
+     * Converts the single touched point through `basis.cell`, the same primitive the delta-based
+     * edit path uses - never `Basis.toCartesian()/toCrystal()`, which rewrites every atom.
+     */
+    getDisplayCoordinates(): any;
+    /**
+     * The armed measurement mode, or null. Read straight off the state the managers already push
+     * through updateState on every click, so the mode pill and the status-bar readout follow the
+     * measurement without any new callback out of the mixin.
+     */
+    getActiveMeasurement(): import("../mixins/measurements/MeasurementSettingsHandler").MeasurementSettingsForType | null;
+    /**
+     * Element symbol of the single selected atom, or "" for none/multiple. The status bar and the
+     * edit panel both need it, and the basis stores an element as either a bare symbol or a
+     * `{ value }` cell depending on the fixture - hence the shared normalizer.
+     */
+    getSelectedElementSymbol(): string;
     /**
      * Returns a cover div to cover the area and prevent user interaction with component
      */
     renderCoverDiv(): import("react/jsx-runtime").JSX.Element;
     renderWaveComponent(): import("react/jsx-runtime").JSX.Element;
     WaveComponent: WaveComponent | null | undefined;
-    getCheckmark(isActive: any): import("react/jsx-runtime").JSX.Element;
+    /**
+     * On/off state for a menu toggle, plus its hotkey in a fixed slot. Replaces the previous
+     * grey-checkmark-means-off rendering, which used one shape for both answers (F2), and takes
+     * the key out of the label text so every row advertises it the same way (F3).
+     */
+    getToggleIndicator(isActive: any, hotKey: any): import("react/jsx-runtime").JSX.Element;
     getViewSettingsActions: () => ({
+        id: string;
+        disabled: boolean;
+        content: string;
+        leftIcon: import("react/jsx-runtime").JSX.Element;
+        onClick: () => void;
+        shouldMenuStayOpened: boolean;
+    } | {
         id: string;
         disabled: boolean;
         content: string;
@@ -209,15 +282,6 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         rightIcon?: undefined;
         onClick?: undefined;
         shouldMenuStayOpened?: undefined;
-    } | {
-        id: string;
-        disabled: boolean;
-        content: string;
-        leftIcon: import("react/jsx-runtime").JSX.Element;
-        onClick: () => void;
-        shouldMenuStayOpened: boolean;
-        rightIcon?: undefined;
-        isDivider?: undefined;
     })[];
     getMeasurementsActions: () => ({
         id: string;
@@ -268,7 +332,60 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         onClick?: undefined;
     })[];
     getParametersActions: () => import("react/jsx-runtime").JSX.Element;
+    /**
+     * The View items people flip repeatedly rather than set once, promoted out of a dropdown that
+     * closes on every choice (U-7). Same state and same handlers as the menu entries - this is a
+     * shortcut, not a move, so the menu keeps working exactly as before.
+     */
+    getQuickToggleItems(): ({
+        id: string;
+        title: string;
+        hotKey: string;
+        isActive: boolean;
+        icon: import("react/jsx-runtime").JSX.Element;
+        onToggle: () => void;
+    } | {
+        id: string;
+        title: string;
+        isActive: boolean;
+        icon: import("react/jsx-runtime").JSX.Element;
+        onToggle: () => void;
+        hotKey?: undefined;
+    })[];
     getToolbarConfig(): ({
+        id: string;
+        title: string;
+        header: string;
+        leftIcon: import("react/jsx-runtime").JSX.Element;
+        actions: ({
+            id: string;
+            disabled: boolean;
+            content: string;
+            leftIcon: import("react/jsx-runtime").JSX.Element;
+            onClick: () => void;
+            shouldMenuStayOpened: boolean;
+        } | {
+            id: string;
+            disabled: boolean;
+            content: string;
+            leftIcon: import("react/jsx-runtime").JSX.Element;
+            rightIcon: import("react/jsx-runtime").JSX.Element;
+            onClick: () => void;
+            shouldMenuStayOpened: boolean;
+            isDivider?: undefined;
+        } | {
+            id: string;
+            isDivider: boolean;
+            disabled?: undefined;
+            content?: undefined;
+            leftIcon?: undefined;
+            rightIcon?: undefined;
+            onClick?: undefined;
+            shouldMenuStayOpened?: undefined;
+        })[];
+        onClick: () => void;
+        contentObject?: undefined;
+    } | {
         id: string;
         title: string;
         header: string;

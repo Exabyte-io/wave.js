@@ -143,7 +143,13 @@ export default {
         bc2: [0x0000ff, 0x0000ff],
         bc3: [0xffff00, 0x0000ff],
     },
+    /**
+     * Single-character keys, dispatched from a `keypress` handler. Every entry here appears in
+     * the keyboard sheet automatically, so a rebind cannot leave a stale label behind - the
+     * drift that produced defect D2, where a tooltip promised a hotkey that did not exist.
+     */
     hotKeysConfig: {
+        toggleKeyboardSheet: "?",
         toggleOrbitControls: "o",
         toggleInteractive: "i",
         toggleBonds: "b",
@@ -156,6 +162,32 @@ export default {
         deleteConnection: "x",
         toggleEditMode: "t",
         focusCameraOnSelection: "f",
+    },
+    /**
+     * Editor keys that `keypress` never fires for - non-character keys and modifier combos - so
+     * they are handled on `keydown` instead. They used to be hardcoded inside
+     * ThreeDEditor.handleEditModeKeyDown, which meant the keyboard sheet had no way to know about
+     * them and they appeared in no tooltip or menu at all. Declaring them here makes the handler
+     * and the sheet read from one source.
+     *
+     * `usesModifier: true` means Ctrl on Windows/Linux and Cmd on macOS; `requiresShift` is
+     * additive on top of it. `keys` lists every key that triggers the action.
+     */
+    editorKeysConfig: {
+        undo: { keys: ["z"], usesModifier: true, requiresShift: false, label: "Undo" },
+        redo: { keys: ["z"], usesModifier: true, requiresShift: true, label: "Redo" },
+        removeSelected: {
+            keys: ["Delete", "Backspace"],
+            usesModifier: false,
+            requiresShift: false,
+            label: "Remove selected",
+        },
+        cancelOrDeselect: {
+            keys: ["Escape"],
+            usesModifier: false,
+            requiresShift: false,
+            label: "Cancel drag · deselect",
+        },
     },
     measurementLabelsConfig: {
         areSpritesUsed: true,

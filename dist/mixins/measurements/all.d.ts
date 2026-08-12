@@ -15,6 +15,8 @@ export declare const AllMeasurementsMixin: (superclass: any) => {
             isActive: boolean;
             measurementType: MEASUREMENT_MODES_ENUM;
             values: any[];
+            selectedAtomsCount: number;
+            atomsPerMeasurement: number;
         }[];
         getMeasurementsSettingsHandler(): MeasurementSettingsHandler;
         toggleMeasurementByType(measurementType: MEASUREMENT_MODES_ENUM, updateState: any): void;

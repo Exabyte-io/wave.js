@@ -25,6 +25,14 @@ export declare class BaseMeasurementManager<T extends BaseLabelsManager> extends
     measurementType: MEASUREMENT_MODES_ENUM;
     selectedAtoms: THREE.Object3D[];
     isActive: boolean;
+    /**
+     * How many atom picks one measurement of this type consumes: a distance needs a pair, an
+     * angle a triplet, a coordinate copy just the one. Reported through getSettings() so the UI
+     * can say how many picks are still outstanding without hardcoding the arity a second time -
+     * the managers group their own selections by this number (getPairsOfSelectedAtoms,
+     * getTripletsOfSelectedAtoms), so this is the same fact, not a copy of it.
+     */
+    atomsPerMeasurement: number;
     values: any[];
     LabelsManagerCls: LabelsManagerConstructor<T>;
     labelsManager: any;
@@ -48,6 +56,8 @@ export declare class BaseMeasurementManager<T extends BaseLabelsManager> extends
         isActive: boolean;
         measurementType: MEASUREMENT_MODES_ENUM;
         values: any[];
+        selectedAtomsCount: number;
+        atomsPerMeasurement: number;
     };
     onClick(event: MouseEvent): void;
     onPointerMove: (event: MouseEvent) => void;
