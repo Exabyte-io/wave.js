@@ -17,16 +17,6 @@ export function ImageMixin(superclass: any): {
          */
         getWorldUnitsPerPixel(pixelHeight: any): number;
         /**
-         * Whether a line's colour is viewer chrome rather than data.
-         *
-         * The rule is "light and achromatic": the unit cell is `#CCCCCC` and the axes indicator is
-         * `#FFFFFF`, both drawn to be seen against the dark viewer and both invisible on a white
-         * page. Anything with a hue is carrying meaning - boundary-condition lines are amber and
-         * blue by type - and anything dark already reads on a light background, so neither is
-         * touched. Stated as a property of the colour so a new piece of chrome inherits it.
-         */
-        isChromeLineColor(color: any): boolean;
-        /**
          * Recolours the viewer's chrome - text label sprites and chrome-coloured lines - and returns
          * a function restoring every colour it changed.
          *
