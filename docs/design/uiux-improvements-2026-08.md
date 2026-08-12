@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | P0, P1 and U-12 shipped 2026-08-12 (§0.1). U-13 (touch) is a follow-up PR stacked on this one. |
+| **Status** | All of P0, P1 and P2 shipped 2026-08-12 (§0.1) — U-13 via a PR stacked on the rest. Every U-n is implemented. |
 | **Date** | 2026-08-12 |
 | **Scope** | The viewer's own chrome: toolbars, panels, feedback, discoverability. Not the interaction model (settled in the [editor spec](./interactive-editor-spec.md)), not rendering. |
 | **Basis** | Read of `ThreeDEditor.jsx`, `IconsToolbar.tsx`, `ParametersMenu.tsx`, `SquareIconButton.tsx`, `settings.ts`, `main.css`; the editor spec's own R-register; the [status analysis](../codebase-status-2026-08.md). Prior art: VESTA, CrystalMaker, Avogadro 2, Blender, Figma. |
@@ -27,7 +27,7 @@ The three highest-value additions are a **status bar**, a **mode pill**, and a *
 
 ## 0.1 What shipped
 
-P0, P1 and U-12 are implemented as a branch chain off this document's branch, one branch per item, opened as a single PR ([#214](https://github.com/mat3ra/wave.js/pull/214)) intended to squash-land. U-13 sits in its own PR on top, so this one stops growing:
+All thirteen proposals are implemented as a branch chain off this document's branch, one branch per item. P0, P1 and U-12 are one PR ([#214](https://github.com/mat3ra/wave.js/pull/214)); U-13 is a second PR stacked on it, because it is the only item that changes how existing input is handled rather than adding a surface. Both are intended to squash-land:
 
 | # | Branch | Commit | Tests |
 |---|---|---|---|
@@ -43,9 +43,10 @@ P0, P1 and U-12 are implemented as a branch chain off this document's branch, on
 | U-7 | `claude/uiux-p1-quick-toggles` | `319447c` | 8 |
 | U-8 | `claude/uiux-p1-parameters` | `7972622` | 15 |
 | U-12 | `claude/uiux-p2-figure-export` | `e4fb816` | 70 |
+| U-13 | `claude/uiux-p2-touch-support` | `b7f01b2` | 32 |
 
-`tsc --noEmit` and `npm run lint` are clean on the tip, and the whole suite passes: **410 passing**,
-28 suites, up from 185 at the branch point. The 17 visual-snapshot failures that were red throughout
+`tsc --noEmit` and `npm run lint` are clean on the tip, and the whole suite passes: **440 passing**,
+30 suites, up from 185 at the branch point. The 17 visual-snapshot failures that were red throughout
 this work were never caused by it — reproduced exactly on the branch point — and were fixed by
 regenerating the baselines the van der Waals radii fix (`7e3541f`) had invalidated (`5882636`, §4).
 Every surface was also driven in Chromium against the **production bundle**, not just the dev server.
@@ -81,6 +82,11 @@ Every surface was also driven in Chromium against the **production bundle**, not
    screen is still the common case and should not pay for a dialog. Figure export is the separate,
    publication case. Its scale bar is exact only under the orthographic camera, and the dialog says
    so rather than presenting a perspective approximation as a measurement.
+10. **U-13 sizes by pointer, not by viewport.** The `isMobile` it replaces asked the wrong question:
+    a narrow desktop window is not touch input, and a touch laptop is touch input at full width.
+    Sizing keys off `(pointer: coarse)`; the gesture documentation keys off whether touch exists at
+    all, so a touch laptop gets the gestures listed and keeps its compact chrome. No bottom sheet was
+    needed — the existing layout was measured at 390 px and fits.
 
 Recorded so they are not re-investigated: the View menu reporting *Rotate/Zoom* as off at startup
 is correct, not rough edge R7's desync — orbit really is off until toggled
@@ -92,7 +98,12 @@ Three layout bugs were found by measuring the live DOM rather than by eye, all i
 a clipped third coordinate field, MUI's `InputBase` 75 px `min-width` overriding its grid column,
 and slider mark labels overlapping a caption. None were visible in jsdom.
 
-**Pre-existing bugs U-12 surfaced**, fixed with it because each was load-bearing for it:
+**Pre-existing bugs the P2 work surfaced**, fixed with it because each was load-bearing for the
+feature that found it:
+
+- The canvas had `touch-action: auto`, so the browser claimed every touch drag for page scroll and
+  pinch-zoom and sent `pointercancel` to whatever had begun tracking it. No touch drag ever reached
+  any of the editor's pointer handlers, even though all of them are pointer-event based.
 
 - `setOrthographicCameraFrustum` never called `updateProjectionMatrix`, so from construction until
   the first resize the orthographic camera projected the initial ±10 frustum from `initCameras`
@@ -172,7 +183,7 @@ U-1 also gives accessibility a foothold for free: it is the natural `aria-live="
 | # | Proposal | Decision | Effort |
 |---|---|---|---|
 | **U-12** | **Figure export.** A small dialog for the publication case: white or transparent background, fixed pixel size independent of the on-screen canvas, chrome excluded, optionally a scale bar. Today every screenshot bakes in the dark theme at whatever size the canvas happens to be. | **Shipped (§0.1). wave.js owns it:** the render needs the scene graph, camera frustum and renderer clear state; a host has none of those and can only screenshot the canvas — the thing that does not work. The file handoff stays with the host. | 2.5 |
-| **U-13** | **Touch and small-screen support.** Either adapt properly — bottom sheet instead of a pinned strip, larger hit targets, a documented touch gesture set — or state that the viewer is desktop-only and stop half-computing `isMobile`. | Implemented in a **follow-up PR stacked on this one**, so it can be reviewed and reverted on its own — it is the only item here that changes how existing input is handled rather than adding a surface. | 1.5 |
+| **U-13** | **Touch and small-screen support.** Either adapt properly — bottom sheet instead of a pinned strip, larger hit targets, a documented touch gesture set — or state that the viewer is desktop-only and stop half-computing `isMobile`. | **Shipped (§0.1) as a stacked PR** — separate because it is the only item that changes how existing input is handled rather than adding a surface. **Adapt, but not as a port:** the layout already fits at 390 px (measured); what was missing was gesture ownership, finger-sized targets and honest labels. No bottom sheet, no viewport-width branching, `isMobile` replaced by pointer capability. | 1.5 |
 
 ## 4. Suggested order
 
@@ -180,17 +191,16 @@ U-1 also gives accessibility a foothold for free: it is the natural `aria-live="
 2. **U-4, U-5** as drive-by fixes alongside — half a day each, and U-5 unblocks the S-1 cleanup.
 3. **U-6, U-7** next: this is the real restructuring, and F1 is a functional defect, not a matter of taste.
 4. **U-8, U-9, U-10, U-11** in any order; independent of each other.
-5. **U-12, U-13** only once their decisions are made. *(Both decided — each answered its own scope
-   question once the code was in front of it, which is worth remembering the next time a slice is
-   held for a decision that only the implementation can inform. U-12 is here; U-13 is the stacked
-   follow-up.)*
+5. **U-12, U-13** only once their decisions are made. *(Both decided and shipped — each answered its
+   own scope question once the code was in front of it, which is worth remembering the next time a
+   slice is held for a decision that only the implementation can inform.)*
 
 Ordering caveat: U-6 rewrites the block the status doc already wants extracted (item 11 — `ThreeDEditor.jsx` → `.tsx`, with `EditToolbar` split out of the ~250-line render). Doing U-6 as part of that extraction rather than before it avoids paying for the same surgery twice.
 
 ## 5. Questions for review
 
 1. **Is the status bar acceptable as permanent chrome?** It costs ~40 px of canvas height. The alternative is a corner overlay that appears on hover, which is less discoverable but takes no space. Recommendation: permanent, collapsible.
-2. ~~**U-12 and U-13 both hinge on the same scope question**~~ — **answered**; see the P2 table in §3. Figure export needs renderer internals a host cannot reach, so it lives here. Touch support turned out not to be a mobile port at all — the layout already fits at 390 px, measured — so "is mobile in scope" dissolved into "stop half-doing it"; it ships as a stacked follow-up PR.
+2. ~~**U-12 and U-13 both hinge on the same scope question**~~ — **answered**; see the P2 table in §3. Figure export needs renderer internals a host cannot reach, so it lives here. Touch support turned out not to be a mobile port at all — the layout already fits at 390 px, measured — so "is mobile in scope" dissolved into "stop half-doing it". It ships as a stacked PR for reviewability, not because the decision was still open.
 3. **Should the element chips be interactive** (click to select every atom of that element) or purely a legend? Interactive composes cleanly with the existing multi-select and costs little, but it puts a selection control in a status bar, which is unusual.
 4. **U-9 relaxes a deliberate guard.** `Ctrl/Cmd+Z` is currently edit-mode-only. Ungating it means the viewer swallows a key that an embedding host might want for its own undo — the ref API in spec §6.3 exists precisely so hosts can drive our stack instead. Worth confirming against materials-designer's expectations before changing.
 

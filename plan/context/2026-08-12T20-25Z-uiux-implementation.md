@@ -33,13 +33,12 @@ P0 and P1 — `U-1` through `U-11` — as one branch per item.
 | — | (tip) | `2e5fa89` | this context record |
 | — | (tip) | `19527bd` | retry `npm ci` (sharp/libvips 503) |
 | U-12 | `claude/uiux-p2-figure-export` | `e4fb816` | figure export |
+| U-13 | `claude/uiux-p2-touch-support` | `b7f01b2` | touch + small screens |
 
-Suite: **185 → 410 passing**, 28/28 suites, 0 failed. `tsc --noEmit` clean, `npm run lint` 0 errors.
+Suite: **185 → 440 passing**, 30/30 suites, 0 failed. `tsc --noEmit` clean, `npm run lint` 0 errors.
+**Every U-n is shipped.**
 
-**`U-13` (touch and small screens) is a separate PR stacked on this one**, on branch
-`claude/uiux-p2-touch-support`. It is the only item in the set that changes how *existing* input is
-handled rather than adding a surface, so it is worth being separately reviewable and separately
-revertable. Its own record is in §8.
+`U-13` sits in a **second PR stacked on #214** rather than in it — see §8 for why.
 
 ## 2. Decisions worth not relitigating
 
@@ -71,6 +70,14 @@ revertable. Its own record is in §8.
   a `try/finally` gets the same result with one context; what it costs is the discipline of restoring
   *everything* — size, pixel ratio, clear colour and alpha, scene background, fog, and every material
   colour touched — which is what the tests pin.
+- **`U-13` sizes by pointer capability, never by viewport width.** The `isMobile` it replaces asked
+  the wrong question in both directions. Sizing keys off `(pointer: coarse)`, documentation off
+  whether touch exists at all, and both are read at call time — a window can be dragged to a
+  touchscreen mid-session.
+- **`U-13` is not a mobile port and should not grow into one.** The existing chrome was *measured* at
+  390×844 and fits: no collisions, no clipping. The defects were gesture ownership, 32 px targets and
+  labels naming keys the device lacks. A bottom sheet would have been a rewrite in search of a
+  problem.
 
 ## 3. Confirmed *not* defects — do not re-investigate
 
@@ -136,7 +143,7 @@ that tolerance on its own evidence, not as a way to hide a stale reference.
 
 ## 6. What the browser pass caught that jsdom could not
 
-Six defects in newly written code, which is the argument for keeping a real-browser pass in the
+Nine defects in newly written code, which is the argument for keeping a real-browser pass in the
 loop rather than trusting the suite alone:
 
 1. The pill advertised `RMB = orbit` unconditionally while orbit starts disabled.
@@ -148,11 +155,18 @@ loop rather than trusting the suite alone:
 5. Slider range marks overlapped their caption, because MUI positions mark labels absolutely.
 6. `U-12`'s scale-bar label was set at `height/28` only after looking at a rendered figure; the
    original `height/36` is about 5 pt at 300 dpi, under most journals' minimum type size.
+7. The shortcut sheet still promised "? or Esc to close" on a touch profile with neither, and had no
+   visible way out at all (the exits were `?`, Escape, or knowing that the backdrop dismisses).
+8. The touch gesture group rendered *last*, below three groups of keyboard shortcuts, on the one
+   device where those gestures are the only way in — and the sheet is single-column there, so group
+   order is scroll distance.
+9. Probes that measured "the canvas" were measuring the 100×100 axes overlay, not the viewer.
 
-One pre-existing bug also came out of verification rather than reading: the orthographic projection
-matrix was never updated after the frustum was fitted to the cell. Caught by cross-checking the
-scale bar against the camera's own projection over a known 2 Å separation — the kind of assertion
-that catches a formula wrong by a constant factor, which nothing else in the suite would have.
+Two pre-existing bugs also came out of verification rather than reading (both fixed): the
+orthographic projection matrix never being updated after the frustum was fitted to the cell, and
+`touch-action: auto` swallowing every touch drag. The first was caught by cross-checking the scale
+bar against the camera's own projection over a known 2 Å separation — the kind of assertion that
+catches a formula wrong by a constant factor, which nothing else in the suite would have.
 
 ## 7. Deployment
 
@@ -167,18 +181,22 @@ Chromium in this container cannot traverse the sandbox's egress proxy (curl can)
 was verified by fetching it, not by driving it. The interactive verification was done against the
 byte-identical local build of the same artifact.
 
-## 8. The stacked touch PR (`U-13`)
+## 8. Why `U-13` is a stacked PR rather than more commits on #214
 
-Branch `claude/uiux-p2-touch-support`, based on this PR's head rather than on `dev`. Kept separate
-because it is the only item in the set that changes how *existing* input is handled — `touch-action`
-on the canvas and OrbitControls' touch mapping in edit mode — rather than adding a new surface. That
-makes it the one slice worth being able to review and revert on its own.
+Branch `claude/uiux-p2-touch-support`, based on #214's head rather than on `dev`.
 
-What it contains: `touch-action: none` on the renderer canvas (without which no touch drag ever
-reached any handler); edit mode reserving the first finger, mirroring how it already frees the left
-mouse button; `utils/inputCapabilities.ts` replacing the viewport-width `isMobile` with pointer
-capability queries; 44 px targets under `(pointer: coarse)`; and the shortcut sheet reachable without
-a keyboard, with a touch-gesture section and honest labels.
+Every other item in this set *adds* a surface: a status bar, a pill, a sheet, a dialog. If any of them
+is wrong, the blast radius is the thing it added. `U-13` is the exception — it changes how input the
+viewer already receives is handled: `touch-action: none` on the canvas takes gesture ownership away
+from the browser for anything drawn over that canvas, and the edit-mode `touches` remap changes what a
+one-finger drag does. Both are correct and tested, and both are the kind of change worth being able to
+revert by itself without unpicking eleven unrelated features. So it gets its own reviewable PR.
+
+The practical consequence to keep straight: the branch chain was previously fast-forwarded so #214's
+head carried *everything*, which made a PR between the two branches an empty diff. Splitting meant
+rewinding #214's head to the U-12 tip and replaying the U-13 commits on top of it. The lint fix stayed
+with #214 (it fixes U-12's own file and is what makes `verify` green) and the design-doc update was
+split in two, so #214 alone never claims U-13 shipped.
 
 ## 9. Open / next
 
