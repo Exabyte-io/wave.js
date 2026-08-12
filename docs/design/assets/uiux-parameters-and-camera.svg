@@ -1,0 +1,118 @@
+<svg viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="1000" height="720" fill="#ffffff" stroke="#d0d7de" rx="10"/>
+  <text x="30" y="36" font-size="18" font-weight="600" fill="#24292f">Parameters you tune by feel deserve a control with feel — plus crystallographic camera presets</text>
+  <text x="30" y="58" font-size="12.5" fill="#57606a">Radius and bond cutoff are found by nudging until the picture reads right. Both are bare number inputs today, in a menu that closes on the first click.</text>
+
+  <!-- ===== TODAY ===== -->
+  <text x="30" y="90" font-size="12.5" font-weight="700" fill="#57606a">TODAY</text>
+  <rect x="30" y="100" width="400" height="250" rx="8" fill="#2b2b2b" stroke="#3f3f3f"/>
+  <text x="48" y="128" font-size="12" fill="#c9d1d9">Atomic radius</text>
+  <rect x="48" y="138" width="364" height="34" rx="5" fill="#1c1c1c" stroke="#4a4a4a"/>
+  <text x="60" y="153" font-size="8" fill="#8b949e">Value</text>
+  <text x="60" y="166" font-size="12" fill="#e6edf3">0.2</text>
+  <text x="398" y="152" font-size="8" fill="#8b949e" text-anchor="middle">▲</text>
+  <text x="398" y="164" font-size="8" fill="#8b949e" text-anchor="middle">▼</text>
+  <text x="48" y="196" font-size="12" fill="#c9d1d9">Repetition along vectors:</text>
+  <g>
+    <rect x="48" y="206" width="112" height="34" rx="5" fill="#1c1c1c" stroke="#4a4a4a"/>
+    <text x="60" y="221" font-size="8" fill="#8b949e">A</text>
+    <text x="60" y="234" font-size="12" fill="#e6edf3">1</text>
+    <rect x="172" y="206" width="112" height="34" rx="5" fill="#1c1c1c" stroke="#4a4a4a"/>
+    <text x="184" y="221" font-size="8" fill="#8b949e">B</text>
+    <text x="184" y="234" font-size="12" fill="#e6edf3">1</text>
+    <rect x="296" y="206" width="112" height="34" rx="5" fill="#1c1c1c" stroke="#4a4a4a"/>
+    <text x="308" y="221" font-size="8" fill="#8b949e">C</text>
+    <text x="308" y="234" font-size="12" fill="#e6edf3">1</text>
+  </g>
+  <text x="48" y="272" font-size="12" fill="#c9d1d9">Chemical connectivity factor</text>
+  <rect x="48" y="282" width="364" height="34" rx="5" fill="#1c1c1c" stroke="#4a4a4a"/>
+  <text x="60" y="297" font-size="8" fill="#8b949e">Value</text>
+  <text x="60" y="310" font-size="12" fill="#e6edf3">1.05</text>
+  <text x="48" y="338" font-size="11" fill="#e5534b">No range shown · no reset · no idea what 1.05 does until you look</text>
+
+  <!-- ===== PROPOSED ===== -->
+  <text x="490" y="90" font-size="12.5" font-weight="700" fill="#0969da">PROPOSED</text>
+  <rect x="490" y="100" width="480" height="290" rx="8" fill="#2b2b2b" stroke="#3f3f3f"/>
+
+  <!-- radius -->
+  <text x="508" y="126" font-size="12" fill="#c9d1d9">Atomic radius</text>
+  <text x="952" y="126" font-size="12" fill="#6cb6ff" text-anchor="end">⟲</text>
+  <line x1="508" y1="150" x2="856" y2="150" stroke="#4a5157" stroke-width="4" stroke-linecap="round"/>
+  <line x1="508" y1="150" x2="546" y2="150" stroke="#1f6feb" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="546" cy="150" r="7" fill="#ffffff" stroke="#1f6feb" stroke-width="2"/>
+  <text x="508" y="170" font-size="9.5" fill="#6e7681">0.1</text>
+  <text x="856" y="170" font-size="9.5" fill="#6e7681" text-anchor="end">10</text>
+  <rect x="876" y="136" width="76" height="28" rx="5" fill="#1c1c1c" stroke="#4a4a4a"/>
+  <text x="914" y="155" font-size="12" fill="#e6edf3" text-anchor="middle">0.20</text>
+
+  <!-- repetitions -->
+  <text x="508" y="200" font-size="12" fill="#c9d1d9">Cell repetitions</text>
+  <rect x="612" y="188" width="76" height="18" rx="9" fill="#0d2440" stroke="#1f6feb"/>
+  <text x="650" y="201" font-size="10" fill="#6cb6ff" text-anchor="middle">A = B = C</text>
+  <text x="952" y="200" font-size="12" fill="#6cb6ff" text-anchor="end">⟲</text>
+  <g>
+    <rect x="508" y="210" width="100" height="30" rx="5" fill="#1c1c1c" stroke="#4a4a4a"/>
+    <text x="518" y="223" font-size="8" fill="#8b949e">A</text>
+    <text x="518" y="235" font-size="12" fill="#e6edf3">2</text>
+    <rect x="620" y="210" width="100" height="30" rx="5" fill="#1c1c1c" stroke="#4a4a4a"/>
+    <text x="630" y="223" font-size="8" fill="#8b949e">B</text>
+    <text x="630" y="235" font-size="12" fill="#e6edf3">2</text>
+    <rect x="732" y="210" width="100" height="30" rx="5" fill="#1c1c1c" stroke="#4a4a4a"/>
+    <text x="742" y="223" font-size="8" fill="#8b949e">C</text>
+    <text x="742" y="235" font-size="12" fill="#e6edf3">2</text>
+  </g>
+  <text x="508" y="258" font-size="11" fill="#8b949e">2 × 2 × 2 → <tspan fill="#e6edf3">192 atoms drawn</tspan> from 24 in the cell</text>
+
+  <!-- bond cutoff -->
+  <text x="508" y="292" font-size="12" fill="#c9d1d9">Bond cutoff</text>
+  <text x="952" y="292" font-size="12" fill="#6cb6ff" text-anchor="end">⟲</text>
+  <line x1="508" y1="316" x2="856" y2="316" stroke="#4a5157" stroke-width="4" stroke-linecap="round"/>
+  <line x1="508" y1="316" x2="691" y2="316" stroke="#1f6feb" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="691" cy="316" r="7" fill="#ffffff" stroke="#1f6feb" stroke-width="2"/>
+  <text x="508" y="336" font-size="9.5" fill="#6e7681">0</text>
+  <text x="856" y="336" font-size="9.5" fill="#6e7681" text-anchor="end">2</text>
+  <rect x="876" y="302" width="76" height="28" rx="5" fill="#1c1c1c" stroke="#4a4a4a"/>
+  <text x="914" y="321" font-size="12" fill="#e6edf3" text-anchor="middle">1.05</text>
+  <text x="508" y="358" font-size="11" fill="#8b949e">× the sum of van der Waals radii · <tspan fill="#e6edf3">32 bonds</tspan> at this cutoff</text>
+  <text x="508" y="378" font-size="11" fill="#6cb6ff">Reset all to defaults</text>
+
+  <!-- ===== CAMERA PRESETS ===== -->
+  <text x="30" y="428" font-size="12.5" font-weight="700" fill="#0969da">PROPOSED · CAMERA PRESETS</text>
+  <rect x="30" y="438" width="940" height="96" rx="8" fill="#202020"/>
+  <g>
+    <rect x="290" y="470" width="420" height="40" rx="20" fill="#2b2b2b" stroke="#3f3f3f"/>
+    <rect x="302" y="476" width="52" height="28" rx="14" fill="#3a3a3a" stroke="#555"/>
+    <text x="328" y="495" font-size="11" fill="#c9d1d9" text-anchor="middle">⤢ Fit</text>
+    <line x1="364" y1="480" x2="364" y2="500" stroke="#454545"/>
+    <rect x="374" y="476" width="40" height="28" rx="14" fill="#1f6feb" stroke="#54aeff"/>
+    <text x="394" y="495" font-size="12" font-style="italic" font-weight="700" fill="#ffffff" text-anchor="middle">a</text>
+    <rect x="420" y="476" width="40" height="28" rx="14" fill="#3a3a3a" stroke="#555"/>
+    <text x="440" y="495" font-size="12" font-style="italic" fill="#c9d1d9" text-anchor="middle">b</text>
+    <rect x="466" y="476" width="40" height="28" rx="14" fill="#3a3a3a" stroke="#555"/>
+    <text x="486" y="495" font-size="12" font-style="italic" fill="#c9d1d9" text-anchor="middle">c</text>
+    <rect x="512" y="476" width="52" height="28" rx="14" fill="#3a3a3a" stroke="#555"/>
+    <text x="538" y="495" font-size="11" fill="#c9d1d9" text-anchor="middle">[111]</text>
+    <line x1="574" y1="480" x2="574" y2="500" stroke="#454545"/>
+    <rect x="584" y="476" width="52" height="28" rx="14" fill="#1f6feb" stroke="#54aeff"/>
+    <text x="610" y="495" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">▣ ortho</text>
+    <rect x="642" y="476" width="56" height="28" rx="14" fill="#3a3a3a" stroke="#555"/>
+    <text x="670" y="495" font-size="11" fill="#c9d1d9" text-anchor="middle">◎ focus</text>
+  </g>
+  <text x="48" y="462" font-size="10.5" font-weight="700" fill="#6e7681" letter-spacing="0.6">CAMERA</text>
+  <text x="724" y="488" font-size="11" fill="#8b949e">Axis view + orthographic = an exact</text>
+  <text x="724" y="504" font-size="11" fill="#8b949e">projection, which turns a screen drag</text>
+  <text x="724" y="520" font-size="11" fill="#8b949e">into an exact two-axis move.</text>
+
+  <!-- Legend -->
+  <g font-size="12.5" fill="#24292f">
+    <text x="30" y="566"><tspan font-weight="600">Sliders where the value is aesthetic, numbers where it is exact.</tspan> Radius and bond cutoff get a slider with the range visible plus a</text>
+    <text x="30" y="584">numeric box for reproducibility; repetitions stay integer fields, with a link toggle because A=B=C is the common case. Every row resets</text>
+    <text x="30" y="602">to its default — nothing offers that today.</text>
+
+    <text x="30" y="630"><tspan font-weight="600">Say what a value costs.</tspan> “2 × 2 × 2 → 192 atoms drawn” and “32 bonds at this cutoff” turn two opaque numbers into a prediction,</text>
+    <text x="30" y="648">and give the user a reason to expect the slowdown a large repetition brings.</text>
+
+    <text x="30" y="676"><tspan font-weight="600">Camera presets are prior art</tspan> (VESTA, CrystalMaker): view down a, b, c or [111]. Reset View exists; the axis views do not, though</text>
+    <text x="30" y="694">the camera math for them already does — <tspan font-family="monospace" font-size="11.5">focusCameraOnSelection</tspan> and <tspan font-family="monospace" font-size="11.5">adjustCamerasTargetAndFrustum</tspan>.</text>
+  </g>
+</svg>

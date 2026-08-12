@@ -1,0 +1,168 @@
+<svg viewBox="0 0 1000 780" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <radialGradient id="atomSi" cx="0.35" cy="0.3" r="0.9">
+      <stop offset="0%" stop-color="#fdeedd"/>
+      <stop offset="100%" stop-color="#d9a06b"/>
+    </radialGradient>
+    <radialGradient id="atomO" cx="0.35" cy="0.3" r="0.9">
+      <stop offset="0%" stop-color="#ff9c9c"/>
+      <stop offset="100%" stop-color="#c22c2c"/>
+    </radialGradient>
+    <marker id="cArrowR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#e5534b"/>
+    </marker>
+    <marker id="cArrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57ab5a"/>
+    </marker>
+    <marker id="cArrowB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#539bf5"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1000" height="780" fill="#ffffff" stroke="#d0d7de" rx="10"/>
+  <text x="30" y="36" font-size="18" font-weight="600" fill="#24292f">Proposed viewer chrome — status bar, mode pill, quick toggles</text>
+
+  <!-- Canvas -->
+  <rect x="30" y="56" width="940" height="470" rx="8" fill="#202020"/>
+
+  <!-- Left menu strip (unchanged surface, shown for context) -->
+  <g>
+    <rect x="46" y="72" width="44" height="236" rx="6" fill="#2b2b2b"/>
+    <rect x="52" y="80" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="68" y="101" font-size="13" fill="#c9d1d9" text-anchor="middle">⏻</text>
+    <rect x="52" y="118" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="68" y="139" font-size="12" fill="#c9d1d9" text-anchor="middle">👁</text>
+    <rect x="52" y="156" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="68" y="177" font-size="12" fill="#c9d1d9" text-anchor="middle">⚙</text>
+    <rect x="52" y="194" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="68" y="215" font-size="12" fill="#c9d1d9" text-anchor="middle">📏</text>
+    <rect x="52" y="232" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="68" y="253" font-size="12" fill="#c9d1d9" text-anchor="middle">⇅</text>
+    <rect x="52" y="270" width="32" height="32" rx="5" fill="#1f6feb" stroke="#54aeff"/>
+    <text x="68" y="291" font-size="12" fill="#ffffff" text-anchor="middle" font-weight="700">✎</text>
+  </g>
+
+  <!-- NEW: mode pill, top centre -->
+  <g>
+    <rect x="330" y="72" width="392" height="34" rx="17" fill="#0d2440" stroke="#1f6feb"/>
+    <rect x="340" y="80" width="46" height="18" rx="9" fill="#1f6feb"/>
+    <text x="363" y="93" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">EDIT</text>
+    <text x="396" y="94" font-size="11.5" fill="#cbe3ff">drag = move · RMB = orbit · Esc = deselect · ? = keys</text>
+    <text x="706" y="94" font-size="13" fill="#8fb8e8" text-anchor="middle">✕</text>
+  </g>
+
+  <!-- Unit cell + atoms -->
+  <g stroke="#8b949e" stroke-width="1.2" fill="none" opacity="0.9">
+    <polygon points="210,190 470,215 452,400 192,375"/>
+    <polygon points="262,160 522,185 504,370 244,345" opacity="0.55"/>
+    <line x1="210" y1="190" x2="262" y2="160"/>
+    <line x1="470" y1="215" x2="522" y2="185"/>
+    <line x1="452" y1="400" x2="504" y2="370"/>
+    <line x1="192" y1="375" x2="244" y2="345"/>
+  </g>
+  <circle cx="290" cy="330" r="21" fill="url(#atomSi)"/>
+  <circle cx="430" cy="310" r="13" fill="url(#atomO)"/>
+  <circle cx="255" cy="245" r="13" fill="url(#atomO)"/>
+  <circle cx="470" cy="245" r="21" fill="url(#atomSi)"/>
+
+  <!-- selected atom + gizmo -->
+  <circle cx="360" cy="255" r="21" fill="url(#atomSi)" stroke="#54aeff" stroke-width="3"/>
+  <line x1="360" y1="255" x2="424" y2="255" stroke="#e5534b" stroke-width="2.5" marker-end="url(#cArrowR)"/>
+  <line x1="360" y1="255" x2="360" y2="191" stroke="#57ab5a" stroke-width="2.5" marker-end="url(#cArrowG)"/>
+  <line x1="360" y1="255" x2="316" y2="296" stroke="#539bf5" stroke-width="2.5" marker-end="url(#cArrowB)"/>
+
+  <!-- NEW: quick-toggle pill, bottom centre -->
+  <g>
+    <rect x="372" y="430" width="256" height="40" rx="20" fill="#2b2b2b" stroke="#3f3f3f"/>
+    <rect x="388" y="434" width="32" height="32" rx="16" fill="#1f6feb" stroke="#54aeff"/>
+    <text x="404" y="455" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">B</text>
+    <rect x="436" y="434" width="32" height="32" rx="16" fill="#3a3a3a" stroke="#555"/>
+    <text x="452" y="455" font-size="12" fill="#c9d1d9" text-anchor="middle">E</text>
+    <rect x="484" y="434" width="32" height="32" rx="16" fill="#3a3a3a" stroke="#555"/>
+    <text x="500" y="455" font-size="12" fill="#c9d1d9" text-anchor="middle">K</text>
+    <rect x="532" y="434" width="32" height="32" rx="16" fill="#3a3a3a" stroke="#555"/>
+    <text x="548" y="455" font-size="12" fill="#c9d1d9" text-anchor="middle">⊹</text>
+    <rect x="580" y="434" width="32" height="32" rx="16" fill="#1f6feb" stroke="#54aeff"/>
+    <text x="596" y="455" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">▣</text>
+  </g>
+
+  <!-- Right: tool strip + selection inspector (detail in uiux-inspector-panel.svg) -->
+  <g>
+    <rect x="906" y="72" width="44" height="198" rx="6" fill="#2b2b2b"/>
+    <rect x="912" y="80" width="32" height="32" rx="5" fill="#1f6feb" stroke="#54aeff"/>
+    <text x="928" y="101" font-size="12" fill="#ffffff" text-anchor="middle">✥</text>
+    <rect x="912" y="118" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="928" y="139" font-size="12" fill="#c9d1d9" text-anchor="middle">+</text>
+    <rect x="912" y="156" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="928" y="177" font-size="11" fill="#c9d1d9" text-anchor="middle">⧉</text>
+    <rect x="912" y="194" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="928" y="215" font-size="11" fill="#c9d1d9" text-anchor="middle">🗑</text>
+    <rect x="912" y="232" width="32" height="32" rx="5" fill="#3a3a3a" stroke="#555"/>
+    <text x="928" y="253" font-size="12" fill="#c9d1d9" text-anchor="middle">↺</text>
+  </g>
+  <g>
+    <rect x="736" y="286" width="214" height="130" rx="8" fill="#ffffff" stroke="#d0d7de"/>
+    <text x="750" y="306" font-size="11" font-weight="700" fill="#57606a" letter-spacing="0.6">SELECTION</text>
+    <circle cx="754" cy="330" r="7" fill="#f0c8a0"/>
+    <text x="768" y="335" font-size="13" font-weight="600" fill="#24292f">Si</text>
+    <text x="788" y="335" font-size="12" fill="#57606a">site 12 · 4 bonds</text>
+    <rect x="750" y="346" width="60" height="20" rx="10" fill="#ddf4ff" stroke="#54aeff"/>
+    <text x="780" y="360" font-size="10.5" fill="#0969da" text-anchor="middle">crystal</text>
+    <rect x="814" y="346" width="66" height="20" rx="10" fill="#f6f8fa" stroke="#d0d7de"/>
+    <text x="847" y="360" font-size="10.5" fill="#57606a" text-anchor="middle">cartesian</text>
+    <rect x="750" y="376" width="60" height="28" rx="5" fill="#ffffff" stroke="#d0d7de"/>
+    <text x="756" y="386" font-size="8" fill="#57606a">X</text>
+    <text x="756" y="399" font-size="11.5" fill="#24292f">0.250</text>
+    <rect x="816" y="376" width="60" height="28" rx="5" fill="#ffffff" stroke="#d0d7de"/>
+    <text x="822" y="386" font-size="8" fill="#57606a">Y</text>
+    <text x="822" y="399" font-size="11.5" fill="#24292f">0.250</text>
+    <rect x="882" y="376" width="54" height="28" rx="5" fill="#ffffff" stroke="#d0d7de"/>
+    <text x="888" y="386" font-size="8" fill="#57606a">Z</text>
+    <text x="888" y="399" font-size="11.5" fill="#24292f">0.125</text>
+  </g>
+
+  <!-- NEW: status bar -->
+  <path d="M 30 486 H 970 V 518 A 8 8 0 0 1 962 526 H 38 A 8 8 0 0 1 30 518 Z" fill="#181818"/>
+  <line x1="30" y1="486" x2="970" y2="486" stroke="#3a3a3a"/>
+  <g>
+    <text x="46" y="511" font-size="13" font-weight="700" fill="#e6edf3">Si<tspan font-size="9" dy="3">8</tspan><tspan font-size="13" dy="-3">O</tspan><tspan font-size="9" dy="3">16</tspan></text>
+    <text x="104" y="511" font-size="11.5" fill="#8b949e">24 atoms · cubic · a = 7.164 Å · crystal units</text>
+    <!-- composition chips double as an element legend and a select-all-of-element control -->
+    <rect x="392" y="495" width="66" height="22" rx="11" fill="#262626" stroke="#3f3f3f"/>
+    <circle cx="405" cy="506" r="5" fill="#f0c8a0"/>
+    <text x="416" y="510" font-size="11" fill="#c9d1d9">Si 8</text>
+    <rect x="466" y="495" width="66" height="22" rx="11" fill="#262626" stroke="#3f3f3f"/>
+    <circle cx="479" cy="506" r="5" fill="#ff5555"/>
+    <text x="490" y="510" font-size="11" fill="#c9d1d9">O 16</text>
+    <text x="954" y="510" font-size="11.5" fill="#8b949e" text-anchor="end">
+      <tspan fill="#e6edf3">Si #12 selected</tspan><tspan>  ·  </tspan><tspan fill="#d29922">d = 2.351 Å copied</tspan>
+    </text>
+  </g>
+
+  <!-- Callouts -->
+  <g font-size="13" font-weight="700">
+    <circle cx="110" cy="290" r="12" fill="#0969da"/><text x="110" y="295" fill="#fff" text-anchor="middle">1</text>
+    <circle cx="752" cy="89" r="12" fill="#0969da"/><text x="752" y="94" fill="#fff" text-anchor="middle">2</text>
+    <circle cx="650" cy="450" r="12" fill="#0969da"/><text x="650" y="455" fill="#fff" text-anchor="middle">3</text>
+    <circle cx="714" cy="300" r="12" fill="#0969da"/><text x="714" y="305" fill="#fff" text-anchor="middle">4</text>
+    <circle cx="352" cy="506" r="12" fill="#0969da"/><text x="352" y="511" fill="#fff" text-anchor="middle">5</text>
+  </g>
+
+  <!-- Legend -->
+  <g font-size="12.5" fill="#24292f">
+    <text x="30" y="556"><tspan font-weight="700">1</tspan>  Existing menu strip, unchanged — power · View · Parameters · Measurements · Export · Edit.</text>
+
+    <text x="30" y="584"><tspan font-weight="700">2</tspan>  <tspan font-weight="600">Mode pill (new).</tspan> Names the active mode and the bindings that exist nowhere in the UI today — notably that edit</text>
+    <text x="47" y="602">mode moves orbit-rotate to RMB (spec §3f). The ✕ exits without going back through a menu. One pill per measurement mode too.</text>
+
+    <text x="30" y="630"><tspan font-weight="700">3</tspan>  <tspan font-weight="600">Quick toggles (new).</tspan> The highest-frequency View items promoted out of the dropdown: bonds, element labels,</text>
+    <text x="47" y="648">coordinate labels, axes, orthographic. Active state is a filled button rather than a grey checkmark.</text>
+
+    <text x="30" y="676"><tspan font-weight="700">4</tspan>  <tspan font-weight="600">Selection inspector (new placement).</tspan> Per-atom data split out of the icon toolbar, with a display-only crystal/cartesian</text>
+    <text x="47" y="694">toggle. Detail: <tspan font-style="italic">uiux-inspector-panel.svg</tspan>.</text>
+
+    <text x="30" y="722"><tspan font-weight="700">5</tspan>  <tspan font-weight="600">Status bar (new).</tspan> Formula, atom count, lattice and units at all times; element chips as legend and as a</text>
+    <text x="47" y="740">select-all-of-element control; selection and measurement readout at the right, where a measurement result is today only a 3D</text>
+    <text x="47" y="758">sprite plus a silent clipboard write. Also the natural home for an <tspan font-family="monospace" font-size="11.5">aria-live</tspan> region.</text>
+  </g>
+</svg>

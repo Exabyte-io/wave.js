@@ -1,0 +1,119 @@
+<svg viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="1000" height="720" fill="#ffffff" stroke="#d0d7de" rx="10"/>
+  <text x="30" y="36" font-size="18" font-weight="600" fill="#24292f">Keyboard sheet — “?” opens it, and it is generated, not hand-written</text>
+  <text x="30" y="58" font-size="12.5" fill="#57606a">Twelve configured keys plus nine hard-coded pointer and key bindings. Ten of the twenty-one appear in no tooltip and no menu —</text>
+  <text x="30" y="76" font-size="12.5" fill="#57606a">every selection modifier, the right-button orbit remap, Delete, and undo itself.</text>
+
+  <!-- dimmed canvas -->
+  <rect x="30" y="92" width="940" height="482" rx="8" fill="#202020"/>
+  <rect x="30" y="92" width="940" height="482" rx="8" fill="#000000" opacity="0.35"/>
+
+  <!-- sheet card -->
+  <rect x="76" y="116" width="848" height="434" rx="10" fill="#1c2128" stroke="#444c56"/>
+  <text x="100" y="148" font-size="14" font-weight="700" fill="#e6edf3">Keyboard shortcuts</text>
+  <text x="900" y="148" font-size="12" fill="#8b949e" text-anchor="end">? or Esc to close</text>
+  <line x1="100" y1="162" x2="900" y2="162" stroke="#30363d"/>
+
+  <g font-size="11.5">
+    <!-- ===== column 1 ===== -->
+    <text x="100" y="188" font-size="10.5" font-weight="700" fill="#6cb6ff" letter-spacing="0.6">VIEW &amp; CAMERA</text>
+    <g fill="#c9d1d9">
+      <circle cx="103" cy="210" r="3" fill="#539bf5"/>
+      <text x="114" y="214">Interactive on / off</text>
+      <text x="346" y="214" font-family="monospace" fill="#e6edf3" text-anchor="end">I</text>
+      <text x="114" y="238">Rotate / zoom</text>
+      <text x="346" y="238" font-family="monospace" fill="#e6edf3" text-anchor="end">O</text>
+      <text x="114" y="262">Bonds</text>
+      <text x="346" y="262" font-family="monospace" fill="#e6edf3" text-anchor="end">B</text>
+      <text x="114" y="286">Element labels</text>
+      <text x="346" y="286" font-family="monospace" fill="#e6edf3" text-anchor="end">E</text>
+      <text x="114" y="310">Coordinate labels</text>
+      <text x="346" y="310" font-family="monospace" fill="#e6edf3" text-anchor="end">K</text>
+      <text x="114" y="334">Reset view</text>
+      <text x="346" y="334" font-family="monospace" fill="#e6edf3" text-anchor="end">R</text>
+      <circle cx="103" cy="354" r="3.2" fill="none" stroke="#e8a33d" stroke-width="1.4"/>
+      <text x="114" y="358">View along a / b / c</text>
+      <text x="346" y="358" font-family="monospace" fill="#e8a33d" text-anchor="end">1  2  3</text>
+      <circle cx="103" cy="378" r="3.2" fill="none" stroke="#e8a33d" stroke-width="1.4"/>
+      <text x="114" y="382">This sheet</text>
+      <text x="346" y="382" font-family="monospace" fill="#e8a33d" text-anchor="end">?</text>
+    </g>
+
+    <!-- ===== column 2 ===== -->
+    <text x="382" y="188" font-size="10.5" font-weight="700" fill="#6cb6ff" letter-spacing="0.6">SELECT &amp; EDIT</text>
+    <g fill="#c9d1d9">
+      <text x="396" y="214">Edit mode</text>
+      <text x="628" y="214" font-family="monospace" fill="#e6edf3" text-anchor="end">T</text>
+      <text x="396" y="238">Select atom</text>
+      <text x="628" y="238" font-family="monospace" fill="#e6edf3" text-anchor="end">click</text>
+      <circle cx="385" cy="258" r="3" fill="#539bf5"/>
+      <text x="396" y="262">Add to selection</text>
+      <text x="628" y="262" font-family="monospace" fill="#e6edf3" text-anchor="end">Shift + click</text>
+      <circle cx="385" cy="282" r="3" fill="#539bf5"/>
+      <text x="396" y="286">Toggle one atom</text>
+      <text x="628" y="286" font-family="monospace" fill="#e6edf3" text-anchor="end">Cmd + click</text>
+      <circle cx="385" cy="306" r="3" fill="#539bf5"/>
+      <text x="396" y="310">Marquee select</text>
+      <text x="628" y="310" font-family="monospace" fill="#e6edf3" text-anchor="end">drag empty space</text>
+      <circle cx="385" cy="330" r="3" fill="#539bf5"/>
+      <text x="396" y="334">Orbit while editing</text>
+      <text x="628" y="334" font-family="monospace" fill="#e6edf3" text-anchor="end">right-drag</text>
+      <circle cx="385" cy="354" r="3" fill="#539bf5"/>
+      <text x="396" y="358">Move atom / group</text>
+      <text x="628" y="358" font-family="monospace" fill="#e6edf3" text-anchor="end">drag atom</text>
+      <circle cx="385" cy="378" r="3" fill="#539bf5"/>
+      <text x="396" y="382">Cancel drag · deselect</text>
+      <text x="628" y="382" font-family="monospace" fill="#e6edf3" text-anchor="end">Esc</text>
+      <circle cx="385" cy="402" r="3" fill="#539bf5"/>
+      <text x="396" y="406">Remove selected</text>
+      <text x="628" y="406" font-family="monospace" fill="#e6edf3" text-anchor="end">Del / Backspace</text>
+      <circle cx="385" cy="426" r="3" fill="#539bf5"/>
+      <text x="396" y="430">Undo</text>
+      <text x="628" y="430" font-family="monospace" fill="#e6edf3" text-anchor="end">Cmd + Z</text>
+      <circle cx="385" cy="450" r="3" fill="#539bf5"/>
+      <text x="396" y="454">Redo</text>
+      <text x="628" y="454" font-family="monospace" fill="#e6edf3" text-anchor="end">Cmd + Shift + Z</text>
+      <text x="396" y="478">Focus on selection</text>
+      <text x="628" y="478" font-family="monospace" fill="#e6edf3" text-anchor="end">F</text>
+    </g>
+
+    <!-- ===== column 3 ===== -->
+    <text x="664" y="188" font-size="10.5" font-weight="700" fill="#6cb6ff" letter-spacing="0.6">MEASURE</text>
+    <g fill="#c9d1d9">
+      <text x="678" y="214">Distances</text>
+      <text x="900" y="214" font-family="monospace" fill="#e6edf3" text-anchor="end">D</text>
+      <text x="678" y="238">Angles</text>
+      <text x="900" y="238" font-family="monospace" fill="#e6edf3" text-anchor="end">A</text>
+      <text x="678" y="262">Copy coordinates</text>
+      <text x="900" y="262" font-family="monospace" fill="#e6edf3" text-anchor="end">C</text>
+      <text x="678" y="286">Clear last connection</text>
+      <text x="900" y="286" font-family="monospace" fill="#e6edf3" text-anchor="end">X</text>
+    </g>
+    <rect x="664" y="308" width="236" height="104" rx="6" fill="#22272e" stroke="#373e47"/>
+    <text x="678" y="330" font-size="10.5" font-weight="700" fill="#8b949e">MUTUALLY EXCLUSIVE</text>
+    <text x="678" y="350" font-size="11" fill="#adbac7">Arming a measurement leaves</text>
+    <text x="678" y="366" font-size="11" fill="#adbac7">edit mode, and entering edit</text>
+    <text x="678" y="382" font-size="11" fill="#adbac7">mode clears measurements</text>
+    <text x="678" y="398" font-size="11" fill="#adbac7">(decision D-12).</text>
+    <text x="678" y="440" font-size="11" fill="#8b949e">Cmd is Ctrl on Windows and</text>
+    <text x="678" y="456" font-size="11" fill="#8b949e">Linux — resolved per platform.</text>
+  </g>
+
+  <!-- footer key -->
+  <line x1="100" y1="504" x2="900" y2="504" stroke="#30363d"/>
+  <circle cx="103" cy="525" r="3" fill="#539bf5"/>
+  <text x="114" y="529" font-size="11" fill="#8b949e">exists today, advertised nowhere</text>
+  <circle cx="313" cy="525" r="3.2" fill="none" stroke="#e8a33d" stroke-width="1.4"/>
+  <text x="324" y="529" font-size="11" fill="#8b949e">proposed addition</text>
+  <text x="900" y="529" font-size="11" fill="#8b949e" text-anchor="end">Rendered from settings.hotKeysConfig — one source of truth for sheet and tooltips alike</text>
+
+  <!-- Legend -->
+  <g font-size="12.5" fill="#24292f">
+    <text x="30" y="608">Tooltips advertise eleven of the twelve configured keys — only <tspan font-family="monospace" font-size="11.5">I</tspan> is missing — and none of the nine hard-coded interactions, so the</text>
+    <text x="30" y="626">fastest paths in the editor are also the least discoverable. Defect D2, a tooltip that promised a hotkey which did not exist, was the</text>
+    <text x="30" y="644">same drift running the other way.</text>
+
+    <text x="30" y="674">Driving the sheet and every tooltip from <tspan font-family="monospace" font-size="11.5">settings.hotKeysConfig</tspan> makes that class of drift structural rather than a review item: rebind a</text>
+    <text x="30" y="692">key and the label follows. The four hard-coded editor keys (Esc, Delete, undo, redo) move into the same config on the way.</text>
+  </g>
+</svg>
