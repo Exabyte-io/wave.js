@@ -31,6 +31,7 @@ export declare const InteractiveStructureEditorMixin: (superclass: any) => {
         activePointerId_: number | null;
         orbitControlsEnabledBeforeDrag_: boolean;
         orbitControlsDefaultMouseButtons_: any | null;
+        orbitControlsDefaultTouches_: any | null;
         lastSelectedAtomicIndices_: number[] | null;
         handlePointerDownCapture_: ((event: PointerEvent) => void) | null;
         handlePointerMoveCapture_: ((event: PointerEvent) => void) | null;
@@ -180,6 +181,12 @@ export declare const InteractiveStructureEditorMixin: (superclass: any) => {
          * OrbitControls left mouse button off (freeing it for marquee-select on empty space) and
          * moves camera rotation onto the right mouse button (decision D-4); the defaults are
          * restored on disable.
+         *
+         * Touch gets the same treatment for the same reason (U-13). OrbitControls' default
+         * `touches.ONE` is ROTATE, which is the finger the editor needs for selecting, dragging an
+         * atom and marquee-selecting - so while edit mode is on, one finger belongs to the editor and
+         * the camera moves to two fingers (DOLLY_ROTATE: pinch to zoom, twist to orbit). There is no
+         * right button to move it to.
          * @param {boolean} enabled - True to enable, false to disable.
          */
         enableEditMode(enabled: boolean): void;

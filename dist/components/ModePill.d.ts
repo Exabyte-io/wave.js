@@ -26,12 +26,17 @@ export interface ModePillProps {
 /**
  * Bindings worth stating in the pill, sourced from settings so a rebind cannot desync them.
  *
- * `isOrbitEnabled` gates the right-button note. Orbit controls start disabled
+ * `isOrbitEnabled` gates the orbit note. Orbit controls start disabled
  * (`initOrbitControls(enabled = false)`), so while they are off the right button orbits nothing -
  * and advertising a binding that does nothing is the defect this whole slice is trying to undo.
+ *
+ * `isCoarsePointer` decides *which* orbit gesture is named. A phone has no right button, and edit
+ * mode reserves one finger for atoms exactly as it frees the left button, so there the camera is on
+ * two fingers (U-13). Naming the mouse binding on a touch device would be the same class of lie.
  */
-export declare function getEditModeBindings({ isOrbitEnabled, }?: {
+export declare function getEditModeBindings({ isOrbitEnabled, isCoarsePointer, }?: {
     isOrbitEnabled?: boolean;
+    isCoarsePointer?: boolean;
 }): string[];
 declare function ModePill(props: ModePillProps): import("react/jsx-runtime").JSX.Element | null;
 export default ModePill;
