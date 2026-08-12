@@ -137,6 +137,26 @@ In case you need to link Cove into the app for local development you need
 If you need to re-link it again, remove node_modules in cove and the app, run npm install, then run npm start again.
 
 
+### 4.4. Deployed previews (Netlify)
+
+[`netlify.toml`](netlify.toml) configures a deploy of the demo viewer, so a branch can be tried in
+a real browser. Every pull request gets its own Deploy Preview URL.
+
+That matters because the Jest suite structurally cannot reach some things — real browser event
+ordering, pointer capture, CSS layout at a given viewport, and GPU rendering are all listed as
+out-of-reach in the [editor spec §8.1](docs/design/interactive-editor-spec.md#81-what-the-stack-can-and-cannot-prove),
+which is why [`MANUAL_SMOKE.md`](docs/design/MANUAL_SMOKE.md) exists. A preview URL is where that
+checklist gets run.
+
+Note that `vite.config.js` sets `base: "/wave.js/"` for the GitHub Pages deploy; Netlify serves
+from the domain root, so its build overrides the base on the command line
+(`npx vite build --base=/`). Building for Pages is unaffected.
+
+**One-time setup, which cannot be done from this repository:** link the repo to a Netlify site
+(Netlify UI → *Add new site* → *Import an existing project* → pick this repo). The build command,
+publish directory and Node version all come from `netlify.toml`, so nothing needs configuring in
+the UI.
+
 ## 5. Links.
 
 1. [Exabyte Source of Schemas and Examples (ESSE), Github Repository](https://github.com/exabyte-io/exabyte-esse)
