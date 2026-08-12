@@ -53,6 +53,7 @@ import settings from "../settings";
 import IconsToolbar from "./IconsToolbar";
 import ParametersMenu from "./ParametersMenu";
 import SquareIconButton from "./SquareIconButton";
+import StatusBar, { normalizeElement } from "./StatusBar";
 import { WaveComponent } from "./WaveComponent";
 
 /**
@@ -165,6 +166,7 @@ export class ThreeDEditor extends React.Component {
         this.handleElementDraftChange = this.handleElementDraftChange.bind(this);
         this.handleElementCommit = this.handleElementCommit.bind(this);
         this.handleSelectionChanged = this.handleSelectionChanged.bind(this);
+        this.handleSelectElement = this.handleSelectElement.bind(this);
         this.handleEditModeKeyDown = this.handleEditModeKeyDown.bind(this);
         this.canUndo = this.canUndo.bind(this);
         this.canRedo = this.canRedo.bind(this);
@@ -916,6 +918,38 @@ export class ThreeDEditor extends React.Component {
     }
 
     /**
+     * Element symbol of the single selected atom, or "" for none/multiple. The status bar and the
+     * edit panel both need it, and the basis stores an element as either a bare symbol or a
+     * `{ value }` cell depending on the fixture - hence the shared normalizer.
+     */
+    getSelectedElementSymbol() {
+        const { selectedAtomIndices, material } = this.state;
+        if (selectedAtomIndices.length !== 1) return "";
+        const [index] = selectedAtomIndices;
+        return normalizeElement(material?.basis?.elements?.[index]);
+    }
+
+    /**
+     * Selects every atom of one element - the status bar's composition chips double as a
+     * select-all control. Routed through the mixin's reselectAtomsByIndices so it goes through
+     * the same single source of truth for onSelectionChanged as every other selection path.
+     */
+    handleSelectElement(elementSymbol) {
+        const wave = this.WaveComponent?.wave;
+        const { material } = this.state;
+        if (!wave?.reselectAtomsByIndices) return;
+        const elements = material?.basis?.elements;
+        if (!Array.isArray(elements)) return;
+        const indices = elements.reduce((accumulated, entry, index) => {
+            if (normalizeElement(entry) === elementSymbol) accumulated.push(index);
+            return accumulated;
+        }, []);
+        if (!indices.length) return;
+        wave.reselectAtomsByIndices(indices);
+        wave.render();
+    }
+
+    /**
      * Returns a cover div to cover the area and prevent user interaction with component
      */
     renderCoverDiv() {
@@ -1280,11 +1314,7 @@ export class ThreeDEditor extends React.Component {
                 selectedCoordinates = Array.isArray(selectedAtom)
                     ? selectedAtom
                     : selectedAtom.value || selectedAtom;
-                const elementObj = material.basis.elements[selectedAtomIndex];
-                selectedElement =
-                    typeof elementObj === "string"
-                        ? elementObj
-                        : elementObj?.value || elementObj?.element || "";
+                selectedElement = normalizeElement(material.basis.elements[selectedAtomIndex]);
             }
         }
 
@@ -1454,7 +1484,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     renderViewerWithToolbars() {
-        const { isInteractive, isEditModeActive } = this.state;
+        const { isInteractive, isEditModeActive, material, selectedAtomIndices } = this.state;
 
         return (
             <div className="wave-component-holder" style={{ position: "relative", height: "100%" }}>
@@ -1466,6 +1496,16 @@ export class ThreeDEditor extends React.Component {
                 />
                 {this.renderWaveComponent()}
                 {isInteractive && isEditModeActive && this.renderEditToolbar()}
+                {isInteractive && (
+                    <StatusBar
+                        material={material}
+                        selectedAtomIndices={selectedAtomIndices}
+                        selectedElement={this.getSelectedElementSymbol()}
+                        // Chip-click selection only has machinery to act on in edit mode, so
+                        // outside it the chips stay a pure legend rather than a dead control.
+                        onSelectElement={isEditModeActive ? this.handleSelectElement : undefined}
+                    />
+                )}
             </div>
         );
     }
