@@ -100,7 +100,7 @@ function KeyboardSheet(props: KeyboardSheetProps) {
                 </Stack>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="caption" color="text.secondary">
-                    {`${getModifierLabel()} is Ctrl on Windows and Linux and Cmd on macOS. Edit mode and the measurement modes are mutually exclusive: arming a measurement leaves edit mode, and entering edit mode clears measurements.`}
+                    {`The modifier resolves per platform — Ctrl on Windows and Linux, Cmd on macOS; shown above as ${getModifierLabel()}. Edit mode and the measurement modes are mutually exclusive: arming a measurement leaves edit mode, and entering edit mode clears measurements.`}
                 </Typography>
             </DialogContent>
         </Dialog>

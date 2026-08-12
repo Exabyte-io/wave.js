@@ -1555,6 +1555,7 @@ export class ThreeDEditor extends React.Component {
                         activeMeasurement={activeMeasurement}
                         onExitEditMode={this.handleToggleEditMode}
                         onExitMeasurement={this.handleToggleMeasurement}
+                        isOrbitEnabled={Boolean(this._getWaveProperty("areOrbitControlsEnabled"))}
                     />
                 )}
                 {isInteractive && (

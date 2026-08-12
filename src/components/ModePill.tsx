@@ -37,16 +37,32 @@ export interface ModePillProps {
     onExitEditMode?: () => void;
     /** Exits the given measurement mode. */
     onExitMeasurement?: (measurementType: MEASUREMENT_MODES_ENUM) => void;
+    /** Whether orbit controls are on, which decides what the right button is said to do. */
+    isOrbitEnabled?: boolean;
 }
 
-/** Bindings worth stating in the pill, sourced from settings so a rebind cannot desync them. */
-export function getEditModeBindings(): string[] {
+/**
+ * Bindings worth stating in the pill, sourced from settings so a rebind cannot desync them.
+ *
+ * `isOrbitEnabled` gates the right-button note. Orbit controls start disabled
+ * (`initOrbitControls(enabled = false)`), so while they are off the right button orbits nothing -
+ * and advertising a binding that does nothing is the defect this whole slice is trying to undo.
+ */
+export function getEditModeBindings({
+    isOrbitEnabled = false,
+}: { isOrbitEnabled?: boolean } = {}): string[] {
     const keys = settings.hotKeysConfig as Record<string, string>;
+    const orbitKey = keys?.toggleOrbitControls?.toUpperCase();
+    // The remap that surprises people: in edit mode a left-drag on empty space marquees, so orbit
+    // moves to the right button (D-4). That is only true once orbit is on, so while it is off the
+    // pill points at the key that turns it on instead of naming a button that does nothing.
+    let orbitNote = "";
+    if (isOrbitEnabled) orbitNote = "RMB = orbit";
+    else if (orbitKey) orbitNote = `${orbitKey} = enable orbit`;
+
     return [
         "drag = move",
-        // The remap that surprises people: in edit mode a left-drag on empty space marquees,
-        // so orbit moves to the right button (D-4).
-        "RMB = orbit",
+        orbitNote,
         "Del = remove",
         "Esc = deselect",
         keys?.focusCameraOnSelection ? `${keys.focusCameraOnSelection.toUpperCase()} = focus` : "",
@@ -115,6 +131,7 @@ function ModePill(props: ModePillProps) {
         activeMeasurement = null,
         onExitEditMode,
         onExitMeasurement,
+        isOrbitEnabled = false,
     } = props;
 
     if (!isEditModeActive && !activeMeasurement?.isActive) return null;
@@ -146,7 +163,7 @@ function ModePill(props: ModePillProps) {
                     exitTitle="Exit edit mode"
                 >
                     <Typography variant="caption" noWrap>
-                        {getEditModeBindings().join(" · ")}
+                        {getEditModeBindings({ isOrbitEnabled }).join(" · ")}
                     </Typography>
                 </Pill>
             )}

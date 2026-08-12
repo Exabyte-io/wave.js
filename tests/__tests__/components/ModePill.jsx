@@ -137,8 +137,22 @@ describe("getMeasurementLabel and getMeasurementHint", () => {
 });
 
 describe("getEditModeBindings", () => {
-    it("states the right-button orbit remap, which appears in no tooltip or menu", () => {
-        expect(getEditModeBindings().join(" ")).toContain("RMB = orbit");
+    it("states the right-button orbit remap once orbit is on - it appears in no tooltip or menu", () => {
+        expect(getEditModeBindings({ isOrbitEnabled: true }).join(" ")).toContain("RMB = orbit");
+    });
+
+    it("points at the enabling key instead while orbit is off", () => {
+        // Orbit controls start disabled (initOrbitControls(enabled = false)), so naming the right
+        // button then would advertise a gesture that does nothing.
+        const text = getEditModeBindings({ isOrbitEnabled: false }).join(" ");
+        expect(text).not.toContain("RMB = orbit");
+        expect(text).toContain(
+            `${settings.hotKeysConfig.toggleOrbitControls.toUpperCase()} = enable orbit`,
+        );
+    });
+
+    it("defaults to treating orbit as off", () => {
+        expect(getEditModeBindings().join(" ")).not.toContain("RMB = orbit");
     });
 
     it("takes the focus key from settings rather than hardcoding it", () => {
@@ -150,13 +164,13 @@ describe("getEditModeBindings", () => {
 describe("ModePill", () => {
     it("renders nothing when no mode is active - absence is the signal for view mode", () => {
         expect(mount(<ModePill />).isEmptyRender()).toBe(true);
-        expect(mount(<ModePill activeMeasurement={distanceMode({ isActive: false })} />).html()).toBe(
-            null,
-        );
+        expect(
+            mount(<ModePill activeMeasurement={distanceMode({ isActive: false })} />).html(),
+        ).toBe(null);
     });
 
     it("names edit mode and its bindings", () => {
-        const wrapper = mount(<ModePill isEditModeActive />);
+        const wrapper = mount(<ModePill isEditModeActive isOrbitEnabled />);
         expect(wrapper.find('[data-name="ModePill-edit"]').exists()).toBe(true);
         expect(wrapper.text()).toContain("EDIT");
         expect(wrapper.text()).toContain("RMB = orbit");
@@ -184,7 +198,9 @@ describe("ModePill", () => {
     });
 
     it("shows pick progress only while a measurement is half-specified", () => {
-        const partial = mount(<ModePill activeMeasurement={distanceMode({ selectedAtomsCount: 1 })} />);
+        const partial = mount(
+            <ModePill activeMeasurement={distanceMode({ selectedAtomsCount: 1 })} />,
+        );
         expect(partial.find('[data-name="ModePillProgress"]').exists()).toBe(true);
         expect(partial.text()).toContain("1 of 2 picked");
 
@@ -196,7 +212,9 @@ describe("ModePill", () => {
 
     it("shows the latest measured value", () => {
         const wrapper = mount(
-            <ModePill activeMeasurement={distanceMode({ values: [2.3514], selectedAtomsCount: 2 })} />,
+            <ModePill
+                activeMeasurement={distanceMode({ values: [2.3514], selectedAtomsCount: 2 })}
+            />,
         );
         expect(wrapper.text()).toContain("d = 2.351 Å");
     });
