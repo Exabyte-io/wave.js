@@ -3,6 +3,20 @@ import { saveImageDataToFile } from "@mat3ra/cove/dist/utils/downloader";
 import * as THREE from "three";
 import { DEFAULT_MAX_FIGURE_DIMENSION, drawScaleBar, getFigureBackground, getFigureFileName, getScaleBarPlan, } from "../utils/figureExport";
 import { createGIFAsync } from "./utils";
+/**
+ * Whether a line's colour is viewer chrome rather than data, for figure export (U-12).
+ *
+ * The rule is "light and achromatic": the unit cell is `#CCCCCC` and the axes indicator is
+ * `#FFFFFF`, both drawn to be seen against the dark viewer and both invisible on a white page.
+ * Anything with a hue is carrying meaning - boundary-condition lines are amber and blue by type -
+ * and anything dark already reads on a light background, so neither is touched. A property of the
+ * colour rather than a list of objects, so a new piece of chrome inherits it.
+ */
+function isChromeLineColor(color) {
+    const hsl = { h: 0, s: 0, l: 0 };
+    color.getHSL(hsl);
+    return hsl.s < 0.05 && hsl.l > 0.6;
+}
 export const ImageMixin = (superclass) => class extends superclass {
     takeScreenshot() {
         saveImageDataToFile(this.getScreenshotImage());
@@ -54,21 +68,6 @@ export const ImageMixin = (superclass) => class extends superclass {
         return visibleHeight / zoom / pixelHeight;
     }
     /**
-     * Whether a line's colour is viewer chrome rather than data.
-     *
-     * The rule is "light and achromatic": the unit cell is `#CCCCCC` and the axes indicator is
-     * `#FFFFFF`, both drawn to be seen against the dark viewer and both invisible on a white
-     * page. Anything with a hue is carrying meaning - boundary-condition lines are amber and
-     * blue by type - and anything dark already reads on a light background, so neither is
-     * touched. Stated as a property of the colour so a new piece of chrome inherits it.
-     */
-    // eslint-disable-next-line class-methods-use-this
-    isChromeLineColor(color) {
-        const hsl = { h: 0, s: 0, l: 0 };
-        color.getHSL(hsl);
-        return hsl.s < 0.05 && hsl.l > 0.6;
-    }
-    /**
      * Recolours the viewer's chrome - text label sprites and chrome-coloured lines - and returns
      * a function restoring every colour it changed.
      *
@@ -92,7 +91,7 @@ export const ImageMixin = (superclass) => class extends superclass {
                 // recording the same one twice would restore it to the export colour.
                 if (!material || !material.color || originalColors.has(material))
                     return;
-                if (isLine && !this.isChromeLineColor(material.color))
+                if (isLine && !isChromeLineColor(material.color))
                     return;
                 originalColors.set(material, material.color.clone());
                 material.color.copy(target);
