@@ -10,7 +10,6 @@ import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
 import CenterFocusStrong from "@mui/icons-material/CenterFocusStrong";
-import CheckIcon from "@mui/icons-material/Check";
 import CloudDownload from "@mui/icons-material/CloudDownload";
 import ContentCopy from "@mui/icons-material/ContentCopy";
 import ControlCameraRounded from "@mui/icons-material/ControlCameraRounded";
@@ -58,6 +57,7 @@ import ModePill from "./ModePill";
 import ParametersMenu from "./ParametersMenu";
 import SquareIconButton from "./SquareIconButton";
 import StatusBar, { normalizeElement } from "./StatusBar";
+import ToggleIndicator from "./ToggleIndicator";
 import { WaveComponent } from "./WaveComponent";
 
 /**
@@ -1031,12 +1031,14 @@ export class ThreeDEditor extends React.Component {
     }
 
     // TODO: move in the toolbar component when it's created
+    /**
+     * On/off state for a menu toggle, plus its hotkey in a fixed slot. Replaces the previous
+     * grey-checkmark-means-off rendering, which used one shape for both answers (F2), and takes
+     * the key out of the label text so every row advertises it the same way (F3).
+     */
     // eslint-disable-next-line class-methods-use-this
-    getCheckmark(isActive) {
-        if (isActive) {
-            return <CheckIcon style={{ color: DarkMaterialUITheme.palette.success.main }} />;
-        }
-        return <CheckIcon style={{ color: DarkMaterialUITheme.palette.grey[800] }} />;
+    getToggleIndicator(isActive, hotKey) {
+        return <ToggleIndicator isActive={Boolean(isActive)} hotKey={hotKey} />;
     }
 
     getViewSettingsActions = () => {
@@ -1047,9 +1049,12 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "rotate-zoom",
                 disabled: false,
-                content: `Rotate/Zoom [${settings.hotKeysConfig.toggleOrbitControls.toUpperCase()}]`,
+                content: "Rotate/Zoom",
                 leftIcon: <ThreeDRotation />,
-                rightIcon: this.getCheckmark(this._getWaveProperty("areOrbitControlsEnabled")),
+                rightIcon: this.getToggleIndicator(
+                    this._getWaveProperty("areOrbitControlsEnabled"),
+                    settings.hotKeysConfig.toggleOrbitControls,
+                ),
                 onClick: this.handleToggleOrbitControls,
                 shouldMenuStayOpened: true,
             },
@@ -1058,7 +1063,7 @@ export class ThreeDEditor extends React.Component {
                 disabled: false,
                 content: "Auto Rotate",
                 leftIcon: <Autorenew />,
-                rightIcon: this.getCheckmark(
+                rightIcon: this.getToggleIndicator(
                     this._getWaveProperty("isOrbitControlsAnimationEnabled"),
                 ),
                 onClick: this.handleToggleOrbitControlsAnimation,
@@ -1069,7 +1074,7 @@ export class ThreeDEditor extends React.Component {
                 disabled: false,
                 content: "Axes",
                 leftIcon: <GpsFixed />,
-                rightIcon: this.getCheckmark(this._getWaveProperty("areAxesEnabled")),
+                rightIcon: this.getToggleIndicator(this._getWaveProperty("areAxesEnabled")),
                 onClick: this.handleToggleAxes,
                 shouldMenuStayOpened: true,
             },
@@ -1078,16 +1083,19 @@ export class ThreeDEditor extends React.Component {
                 disabled: false,
                 content: "Orthographic Camera",
                 leftIcon: <SwitchCamera />,
-                rightIcon: this.getCheckmark(this._getWaveProperty("isCameraOrthographic")),
+                rightIcon: this.getToggleIndicator(this._getWaveProperty("isCameraOrthographic")),
                 onClick: this.handleToggleOrthographicCamera,
                 shouldMenuStayOpened: true,
             },
             {
                 id: "toggle-bonds",
                 disabled: false,
-                content: `Bonds [${settings.hotKeysConfig.toggleBonds.toUpperCase()}]`,
+                content: "Bonds",
                 leftIcon: <Dehaze />,
-                rightIcon: this.getCheckmark(this._getWaveProperty("isDrawBondsEnabled")),
+                rightIcon: this.getToggleIndicator(
+                    this._getWaveProperty("isDrawBondsEnabled"),
+                    settings.hotKeysConfig.toggleBonds,
+                ),
                 onClick: this.handleToggleBonds,
                 shouldMenuStayOpened: true,
             },
@@ -1096,17 +1104,18 @@ export class ThreeDEditor extends React.Component {
                 disabled: false,
                 content: "Conventional Cell",
                 leftIcon: <FormatShapes />,
-                rightIcon: this.getCheckmark(isConventionalCellShown),
+                rightIcon: this.getToggleIndicator(isConventionalCellShown),
                 onClick: this.handleToggleConventionalCell,
                 shouldMenuStayOpened: true,
             },
             {
                 id: "toggle-element-labels",
                 disabled: false,
-                content: `Elements [${settings.hotKeysConfig.toggleElementLabels.toUpperCase()}]`,
+                content: "Elements",
                 leftIcon: <Spellcheck />,
-                rightIcon: this.getCheckmark(
+                rightIcon: this.getToggleIndicator(
                     areLabelsVisibleByType && areLabelsVisibleByType("element"),
+                    settings.hotKeysConfig.toggleElementLabels,
                 ),
                 onClick: this.handleToggleElementLabels,
                 shouldMenuStayOpened: true,
@@ -1114,10 +1123,11 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "toggle-coordinate-labels",
                 disabled: false,
-                content: `Coordinates [${settings.hotKeysConfig.toggleCoordinateLabels.toUpperCase()}]`,
+                content: "Coordinates",
                 leftIcon: <Spellcheck />,
-                rightIcon: this.getCheckmark(
+                rightIcon: this.getToggleIndicator(
                     areLabelsVisibleByType && areLabelsVisibleByType("coordinate"),
+                    settings.hotKeysConfig.toggleCoordinateLabels,
                 ),
                 onClick: this.handleToggleCoordinateLabels,
                 shouldMenuStayOpened: true,
@@ -1127,7 +1137,7 @@ export class ThreeDEditor extends React.Component {
                 disabled: false,
                 content: "Auto-center on change",
                 leftIcon: <ControlCameraRounded />,
-                rightIcon: this.getCheckmark(viewerSettings.isViewAdjustable),
+                rightIcon: this.getToggleIndicator(viewerSettings.isViewAdjustable),
                 onClick: this.handleToggleIsViewAdjustable,
                 shouldMenuStayOpened: true,
             },
@@ -1138,7 +1148,7 @@ export class ThreeDEditor extends React.Component {
             {
                 id: "reset-view",
                 disabled: false,
-                content: `Reset View [${settings.hotKeysConfig.resetViewer.toUpperCase()}]`,
+                content: "Reset View",
                 leftIcon: <Replay />,
                 onClick: this.handleResetViewer,
                 shouldMenuStayOpened: true,
@@ -1152,11 +1162,12 @@ export class ThreeDEditor extends React.Component {
         return [
             {
                 id: "Distances",
-                content: `Distances [${settings.hotKeysConfig.toggleDistanceShown.toUpperCase()}]`,
-                rightIcon: this.getCheckmark(
+                content: "Distances",
+                rightIcon: this.getToggleIndicator(
                     measurementsSettingsHandler.isMeasurementActiveByType(
                         MEASUREMENT_MODES.DISTANCE,
                     ),
+                    settings.hotKeysConfig.toggleDistanceShown,
                 ),
                 leftIcon: <HeightIcon />,
                 onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.DISTANCE),
@@ -1164,9 +1175,10 @@ export class ThreeDEditor extends React.Component {
             },
             {
                 id: "Angles",
-                content: `Angles [${settings.hotKeysConfig.toggleAnglesShown.toUpperCase()}]`,
-                rightIcon: this.getCheckmark(
+                content: "Angles",
+                rightIcon: this.getToggleIndicator(
                     measurementsSettingsHandler.isMeasurementActiveByType(MEASUREMENT_MODES.ANGLE),
+                    settings.hotKeysConfig.toggleAnglesShown,
                 ),
                 leftIcon: <LooksIcon />,
                 onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.ANGLE),
@@ -1174,11 +1186,12 @@ export class ThreeDEditor extends React.Component {
             },
             {
                 id: "Coordinates",
-                content: `Copy Coordinates [${settings.hotKeysConfig.toggleCopyCoordinatesShown.toUpperCase()}]`,
-                rightIcon: this.getCheckmark(
+                content: "Copy Coordinates",
+                rightIcon: this.getToggleIndicator(
                     measurementsSettingsHandler.isMeasurementActiveByType(
                         MEASUREMENT_MODES.COORDINATE,
                     ),
+                    settings.hotKeysConfig.toggleCopyCoordinatesShown,
                 ),
                 leftIcon: <GpsFixed />,
                 onClick: () => this.handleToggleMeasurement(MEASUREMENT_MODES.COORDINATE),
@@ -1186,7 +1199,7 @@ export class ThreeDEditor extends React.Component {
             },
             {
                 id: "Delete",
-                content: `Delete connection [${settings.hotKeysConfig.deleteConnection.toUpperCase()}]`,
+                content: "Delete connection",
                 leftIcon: <DeleteIcon />,
                 onClick: this.handleDeleteConnection,
                 shouldMenuStayOpened: true,
