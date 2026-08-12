@@ -16,7 +16,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Exabyte-io/wave.js.git"
+        "url": "https://github.com/mat3ra/wave.js.git"
     },
     "main": "dist/exports.js",
     "files": [
@@ -26,7 +26,7 @@
     ],
     "author": "Exabyte Inc.",
     "bugs": {
-        "url": "https://github.com/Exabyte-io/wave/issues"
+        "url": "https://github.com/mat3ra/wave.js/issues"
     },
     "license": "Apache-2.0",
     "homepage": ".",

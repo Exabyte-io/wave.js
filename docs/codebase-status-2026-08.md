@@ -146,7 +146,7 @@ Numbered `S-n` to avoid colliding with the spec's own D-register.
 | **S-6** | `ThreeDEditor.jsx:195` | `_applyInitialToggleSettings` returns early if `this.WaveComponent?.wave` isn't ready, with no retry — URL-shared view settings are then silently dropped forever. |
 | **S-7** | `ThreeDEditor.jsx` | `historyStack` grows without bound; each entry is a full `Material.clone()`. A long session on a few-thousand-atom structure is a memory problem. Cap it (50 is generous) and drop the oldest. |
 | **S-8** | `jest.config.js:14` | `collectCoverageFrom: ["src/**/*.js"]` measures **only the JS half** of a codebase that is now 4,424 lines TS vs 3,265 JS. Reported coverage is ~9%; **real coverage is 82.3%**. The config is both hiding good news and hiding the actual gaps: `image.js` 4.4%, `MeasurementSettingsHandler.ts` 42.9%, `as_points.ts` 0%, `ParametersMenu.tsx` 0%. |
-| **S-9** | multiple | Dead surface left from the removed modal editor: `.cm-editor` guards ×2 (CodeMirror is gone — deps and CSS were already removed), `renderWaveOrThreejsEditorModal()` (there is no modal), **99 of 496 lines** of `#threejs-editor` CSS in `main.css`, `handleSetMaterial`, and `materialsToThreeDSceneData` in `src/utils.js` — which constructs a whole WebGL `Wave` just to serialize scene JSON, is not in `exports.js`, and has no remaining caller. |
+| **S-9** | multiple | Dead surface left from the removed modal editor: `.cm-editor` guards ×2 (CodeMirror is gone — deps and CSS were already removed), `renderWaveOrThreejsEditorModal()` (there is no modal), **470 of 496 lines** of `#threejs-editor` CSS in `main.css`, `handleSetMaterial`, and `materialsToThreeDSceneData` in `src/utils.js` — which constructs a whole WebGL `Wave` just to serialize scene JSON, is not in `exports.js`, and has no remaining caller. |
 
 ---
 
@@ -163,7 +163,7 @@ Numbered `S-n` to avoid colliding with the spec's own D-register.
 **Dependency debt:**
 
 - **13 open Dependabot PRs**, oldest from **2025-03-10** (~17 months). Several are security bumps: `form-data`, `tar-fs`, `brace-expansion`, `sha.js`, `pbkdf2`, `js-yaml`, `qs`.
-- `underscore` carries a **critical** advisory (arbitrary code execution) and has **exactly one import site** — `SquareIconButton.tsx`. Cheapest critical-severity fix on the board.
+- `underscore` carries a **critical** advisory (arbitrary code execution) and has **exactly one import site** — `SquareIconButton.tsx`. Worth dropping on its own merits, but note it does **not** clear the advisory: the vulnerable `underscore@1.8.3` also arrives transitively via `@mat3ra/periodic-table`, which is a production dependency. Clearing it means fixing that package.
 - `typescript` is in **`dependencies`**, not `devDependencies`. Every consumer of this package installs the TypeScript compiler.
 - **`@types/three@0.173` against `three@0.140`** — 33 minors of drift. Already leaking: `atoms.ts:147` uses `THREE.Object3DEventMap`, a type that doesn't exist in 0.140. `tsc` is validating against an API generation the runtime doesn't have.
 - Declared but with **zero import sites**: `moment`, `underscore.string`, `sprintf-js`, `classnames`, `@mui/styles`, `@mui/lab`.

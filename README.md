@@ -5,7 +5,7 @@
 
 **W**eb-based **A**tomic **V**iewer and **E**ditor in **J**ava**S**cript. Wave.js is a library for atomic visualization and editing written in JavaScript enabling visualization of material structures from atoms up on the web.
 
-The library was originally designed as part of and presently powers materials design capabilities of the [Mat3ra.com](https://exabyte.io) platform.
+The library was originally designed as part of and presently powers materials design capabilities of the [Mat3ra.com](https://mat3ra.com) platform.
 
 ## 1. Functionality.
 
@@ -14,15 +14,20 @@ As below:
 - the package provides a web environment for the visualization of atomic structures and is written in ECMAScript 2015 (ES6) for use on the web
 - ESSE Data Convention is employed to organize and store information [[1]](#links) via [Made.js](https://github.com/mat3ra/made)
 - [THREE.js](https://threejs.org/) is used for 3d visualization purposes
-- High-level classes for the representation of the [viewer](src/wave.js) and modular ES6-compatible mixins for the associated functionality, ie:
-    - [Atoms](src/mixins/atoms.ts), 
-    - [Cell](src/mixins/cell.js),
+- High-level classes for the representation of the [viewer](src/wave.js) and modular mixins for the associated functionality, ie:
+    - [Atoms](src/mixins/atoms.ts),
+    - [Bonds](src/mixins/bonds.ts),
+    - [Cell](src/mixins/cell.ts),
     - [Controls](src/mixins/controls.js),
-    - [Mouse](src/mixins/mouse.js),
-    - and others to be added.
+    - [Interactive structure editor](src/mixins/interactive_structure_editor.ts),
+    - [Labels](src/mixins/labels/) and [Measurements](src/mixins/measurements/),
+    - and others.
 - wrapper components for [React](https://reactjs.org/):
-    - [ThreeDEditor](src/components/ThreeDEditor.js), with control trigger button panels
-    - [WaveComponent](src/components/WaveComponent.js),
+    - [ThreeDEditor](src/components/ThreeDEditor.jsx) — the package's public component, with
+      control trigger button panels, the edit toolbar and the host-app API
+    - [WaveComponent](src/components/WaveComponent.jsx) — owns the `Wave` instance lifecycle;
+      used internally by `ThreeDEditor` and not currently exported from
+      [exports.js](src/exports.js)
 
 The package is written in a modular way easy to extend. Contributions can be in the form of additional functionality modules developed, or feature requests and [bug/issue reports](https://help.github.com/articles/creating-an-issue/).
 
@@ -38,7 +43,7 @@ npm install @exabyte-io/wave.js
 From source to contribute to development:
 
 ```bash
-git clone git@github.com:Exabyte-io/wave.git
+git clone git@github.com:mat3ra/wave.js.git
 ```
 
 ## 3. Contribution.
@@ -62,8 +67,12 @@ Wave.js is written in EcmaScript 6th edition [[2]](#links) with the application 
 Desirable features for implementation:
 
 - React Three Fiber
-- scripting console
-- other (TBA)
+- migration to React 18+ (currently blocked on the enzyme test adapter)
+- remaining roadmap items in the [editor design spec](docs/design/interactive-editor-spec.md)
+
+Note that the in-viewer structure editor replaced the previous standalone THREE.js editor
+modal; its generic 3D-authoring features (primitives, lights, materials editor, JS scripting
+console) and its outliner panel are deliberately out of scope — see the spec.
 
 
 ## 4. Development.
@@ -79,23 +88,28 @@ Note that snapshots may be slightly different depending on operating systems lea
 A `docker-compose.yml` is provided for convenience. To run the tests, execute the following commands:
 
 ```bash
-
 docker-compose build
 docker-compose run test
+```
 
-or directly, on a host:
+Or directly on a host. Note the two prerequisites: fixtures and visual baselines are partly in
+Git LFS, and `headless-gl` needs a real GL context (mesa + xvfb on Linux — see the
+[Dockerfile](Dockerfile) for the package list).
 
 ```bash
-
-npm install
-npm test
+git lfs install && git lfs pull
+npm ci
+xvfb-run -s "-ac -screen 0 1024x768x24" npm test
 ```
 
 ### 4.1. Important Notes.
 
 1. Keep the tests directory structure similar to the main codebase directory structure. Every JS module in the main codebase should have a corresponding module in tests directory which implements the tests for provided functionality.
 
-2. Add tests fixtures into [fixtures](./tests/fixtures) directory. The fixtures will be automatically stored on Git LFS [[6]](#links).
+2. Add tests fixtures into [fixtures](./tests/fixtures) directory as plain files. Only binary
+   visual baselines (`tests/__tests__/__snapshots__/expected/*.png` and `*.snap`) are stored on
+   Git LFS [[6]](#links) — small JSON fixtures deliberately are not, so that a clone without
+   `git-lfs` can still run the suite.
 
 3. Add Jest configuration into [setupFiles](./tests/setupFiles.js) module.
 
@@ -105,7 +119,7 @@ npm test
 
 ### 4.2. Dependencies.
 
-This package depends on [Made.js](https://github.com/mat3ra/made), as well as a slightly [modified version of Three.js](https://github.com/Exabyte-io/three.js/commits/v0.90.0). See [package.json](package.json) for the full list.
+This package depends on [Made.js](https://github.com/mat3ra/made) and on stock [THREE.js](https://threejs.org/). See [package.json](package.json) for the full list.
 
 ### 4.3. Using `cove.js` for local development
 

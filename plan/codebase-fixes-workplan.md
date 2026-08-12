@@ -94,6 +94,9 @@ code with no gate to keep it fixed.
   jump is `@exabyte-io/cove.js@2025.2.22-0` → `@mat3ra/cove@2026.7.18-4` — ~17 months of
   drift across 9 import sites, needing its own branch and its own verification.
 - **Merging the 13 open Dependabot PRs.** Actions on existing PRs, not code changes here.
+- **Clearing the transitive `underscore` critical.** Requires `@mat3ra/periodic-table` to stop
+  depending on `underscore@1.8.3`, and its current release does not install standalone (see
+  above). Work for that repo.
 - **React 18 / enzyme → `@testing-library/react`.** The largest single item in the report
   and its own project.
 
@@ -102,8 +105,58 @@ code with no gate to keep it fixed.
 Every batch must leave all four green, checked before commit:
 
 ```
-npx eslint src tests          # 0 errors
+npm run lint                  # 0 errors
 npx tsc --noEmit              # exit 0
-xvfb-run -s "-ac -screen 0 1024x768x24" npx jest    # 13/13 suites
+xvfb-run -s "-ac -screen 0 1024x768x24" npx jest    # all suites
 npm run build
 ```
+
+## Outcome
+
+| | before | after |
+|---|---|---|
+| `npm run lint` errors | 19 | **0** (and now `--report-unused-disable-directives`) |
+| `tsc --noEmit` | clean, against types 33 minors ahead of runtime | clean, against matching types |
+| tests | 183 (181 passing, 2 skipped) | **187 (185 passing, 2 skipped)** |
+| coverage reported | ~9% (JS-only glob) | **82.9% stmts / 69.4% branch**, with a floor |
+| CI gates | containerized tests only | + lint, typecheck, build on every push |
+| tracked build output | 129 files in `dist/` | none |
+| runtime dependencies | 19 | **10** |
+| prod-tree vulnerabilities | 13 (2 critical, 7 high) | **13 — unchanged, see below** |
+| `main.css` | 496 lines, 470 of them dead | **26 lines** |
+
+**The vulnerability count did not move, and the status report was over-optimistic about why it
+would.** Dropping the direct `underscore` dependency removed wave.js's own use of it, but the
+critical advisory (GHSA-cf4h-3jhx-xvhq) comes from `@mat3ra/periodic-table@2025.1.18-1`, which
+pulls `underscore@1.8.3` transitively — and periodic-table is a production dependency, so the
+critical is still in the prod tree. `npm audit`'s suggested remedy is
+`@mat3ra/periodic-table@2026.2.6-0`, which **does not install**: its own prepare step fails with
+
+```
+src/js/index.ts(3,33): error TS2732: Cannot find module '../../periodic-table.json'.
+                       Consider using '--resolveJsonModule'
+tsconfig-transpile.json(2,16): error TS6053: File
+                       '@mat3ra/tsconfig/tsconfig-js-py-transpile.json' not found
+```
+
+So clearing this critical is work in the `periodic-table` repo — fixing that package's publish
+— not a bump here. Added to the not-in-this-branch list. The remaining highs are all in
+transitive dev tooling (babel, eslint's ajv, brace-expansion, minimatch, picomatch, js-yaml)
+and are what the open Dependabot PRs address.
+
+Notes worth carrying forward:
+
+- The status report undercounted the dead CSS as "99 of 496 lines". 99 was the number of
+  `#threejs-editor` string occurrences; the actual dead block was 470 lines. Corrected in
+  `docs/codebase-status-2026-08.md`.
+- The vdW fix needed no `atomRadiiScale` retune after all: at the default 0.2 the largest
+  sphere pair spans 0.84 A against a 2.368 A nearest-neighbour distance.
+- Aligning `@types/three` to the runtime surfaced two latent type errors the drifted types had
+  been masking (`THREE.Object3DEventMap`, an unchecked `raycaster.params.Line` dereference).
+  Both fixed rather than suppressed.
+- `move-actual-expected.sh` was silently a no-op — it looked for baselines one directory above
+  where they live. Fixed; it had presumably not worked since the baselines moved into
+  `expected/`.
+- This branch still carries `@exabyte-io/*` naming, so it will conflict with `dev`'s scope
+  migration exactly as PR #212 does. That is the untouched P0 and it is a merge decision, not a
+  fix.

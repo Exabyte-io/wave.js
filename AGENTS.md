@@ -1,127 +1,200 @@
 # AGENTS.md
 
-This document describes generic architecture and conventions for AI coding agents.
+Architecture and conventions for AI coding agents working in **wave.js** — a TypeScript/React
+library for 3D atomic visualization and editing, built on THREE.js and Made.js.
 
-## Conventions
+> This file previously carried the conventions of a C++/DFT engine project verbatim (MPI
+> rank-0 logging, GTest layouts, pseudopotential naming, `snake_case` variables and file
+> names). The OOP guidance below transferred well and is kept. The rest has been replaced with
+> what this codebase actually is and does.
 
-### Design Patterns
+## Running the code
 
-- **Factory**: when multiple implementations are possible - e.g. multiple exchange-correlation functionals, or multiple k-point samplers.
-- **Object-oriented design**: define abstract interfaces for components that have multiple implementations - e.g. Method → PseudopotentialMethod, PlaneWaveMethod, Model → DFTModel, HFModel, etc.
+Two environment prerequisites bite before anything else, and neither is optional:
 
-### OOP Guidelines & Antipatterns
+```bash
+# 1. Test fixtures and visual baselines are partly in Git LFS.
+git lfs install && git lfs pull
+
+# 2. The test suite renders through headless-gl, which needs a real GL context.
+#    On Linux: mesa + xvfb (see Dockerfile for the exact package list).
+xvfb-run -s "-ac -screen 0 1024x768x24" npm test
+```
+
+Without LFS the suites fail at parse time on a fixture that is still a pointer stub. Without a
+GL context every `Wave`-constructing test fails in `initRenderer`. `docker-compose run test`
+wraps both.
+
+The four checks that must be green before any commit — the same four CI runs:
+
+```bash
+npm run lint        # 0 errors; warnings are tolerated (mostly no-explicit-any)
+npx tsc --noEmit
+xvfb-run -s "-ac -screen 0 1024x768x24" npm test
+npm run build
+```
+
+## Architecture
+
+`Wave` (`src/wave.js`) is a `WaveBase` — renderer, scene, cameras, lights — composed with
+domain mixins via `mixwith`. Each mixin owns one concern: `AtomsMixin`, `BondsMixin`,
+`CellMixin`, `ControlsMixin`, `BoundaryMixin`, `RepetitionMixin`, labels, measurements, and the
+interactive editor (`InteractiveStructureEditorMixin` plus `MarqueeSelectionMixin` and
+`GroupTransformMixin`). Mixin construction order matters: the editor mixin's constructor runs
+last and calls `initializeEditor()`, by which point the others have set their own state.
+
+React wrappers live in `src/components/`. `WaveComponent` owns the `Wave` instance lifecycle;
+`ThreeDEditor` is the toolbar, coordinate panel, undo/redo history and host-app API surface.
+`src/exports.js` is the package entry point — anything a host needs must be exported there.
+
+Editing is **delta-based**: apply the known change to the known material. Do not reintroduce
+"re-derive the whole material from the THREE.js scene on every edit" — that pattern was the
+root of a whole cluster of defects and was deliberately removed. See
+`docs/design/interactive-editor-spec.md`, which is the authority for editor behavior.
+
+## Design patterns
+
+- **Factory**: when multiple implementations are possible.
+- **Object-oriented design**: define abstract interfaces for components with multiple
+  implementations.
+- **Composition over inheritance** for combining behaviors: use mixins, as the whole `Wave`
+  class does, rather than deep inheritance hierarchies.
+
+### OOP guidelines and antipatterns
 
 **Prefer polymorphism over type-checking chains.** Instead of:
 
-```cpp
+```ts
 // ❌ ANTIPATTERN: long if-chain checking object type
-if (functional.is_lda()) {
-    compute_lda_energy(...);
-} else if (functional.is_gga()) {
-    compute_gga_energy(...);
-} else if (functional.is_meta_gga()) {
-    compute_meta_gga_energy(...);
+if (label.isElementLabel()) {
+    text = formatElement(object);
+} else if (label.isDistanceLabel()) {
+    text = formatDistance(object);
 }
 ```
 
 Use:
 
-```cpp
-// ✅ CORRECT: polymorphic dispatch via virtual method
-Real energy = functional.compute_energy(density);
+```ts
+// ✅ CORRECT: polymorphic dispatch via an overridden method
+const text = label.getLabelTextFromLabeledObject(object);
 ```
+
+That is exactly how `src/mixins/labels/` works: `base.ts` declares
+`getLabelTextFromLabeledObject` abstract and each label type overrides it. `class-methods-use-this`
+is switched off for `src/mixins/**` in `.eslintrc.json` because a base or hook implementation
+legitimately ignoring `this` is the point of that design.
 
 **Key principles:**
 
-- **Single Responsibility**: each class does one thing. If a class has methods for reading, computing, and writing, split it.
-- **Open/Closed**: add new behavior by adding new classes, not by adding `if` branches to existing code.
-- **Interface Segregation**: keep interfaces small. Don't force implementors to provide methods they don't need.
-- **No `is_xxx()` type queries**: if you need `is_ultrasoft()`, `is_paw()`, `is_norm_conserving()`, your design likely needs a virtual method instead.
-- **Favor composition over inheritance** for combining behaviors: use mixins (e.g., `BinarySerializableMixin`) rather than deep inheritance hierarchies.
-- **Use factories** to create the right subclass from runtime configuration (e.g., `create_diagonalizer("davidson")`).
+- **Single Responsibility**: each class does one thing. If a class reads, computes and writes,
+  split it.
+- **Open/Closed**: add behavior by adding classes, not `if` branches to existing ones.
+- **Interface Segregation**: keep interfaces small.
+- **No `is_xxx()` type queries**: if you need `isElementLabel()`, you probably need a virtual
+  method.
+- **Use factories** to build the right subclass from runtime configuration.
 
-### Logging
+**But do not split a unified state machine for tidiness.** `beginAtomDrag_`/`endAtomDrag_`/
+`cancelAtomDrag_` deliberately handle all four drag shapes (single/group × direct/gizmo)
+together, because they genuinely are one state machine and the Esc-cancel correctness surface
+lives there. Readability is not worth trading correctness for.
 
-- All output via logger
-- Allow log level to be set via command line argument (critical, error, warn, info, debug, trace). Default is error.
-- Only rank 0 outputs (MPI-aware initialization)
-- No print statement in the log
+## Naming
 
-### Testing
+**camelCase** for variables, functions, methods, and fields. **PascalCase** for classes, types,
+and interfaces.
 
-- Unit tests: `tests/unit/` (GTest)
-- Integration tests: `tests/integration/`
+**Full, descriptive names — no abbreviations.** This matters as much in a physics codebase as
+in an engine:
 
-### Comment Style
+- ❌ `nkp`, `ib`, `ia`, `et`, `radiimap`, `vdw`
+- ✅ `numberOfKpoints`, `bandIndex`, `atomIndex`, `eigenvalues`, `radiiMap`,
+  `vanDerWaalsRadius`
+- ❌ `Vec3`, `Mat3`
+- ✅ `Vector3D`, `Matrix3x3` (`THREE.Vector3` etc. are the library's own names — leave those)
 
-- **Multiline docstrings** must have `/**` on its own line followed by the comment body:
+Exceptions are permitted for widely-known physical or mathematical notation, but spell it out
+where you can, and make the meaning obvious from context.
 
-```cpp
+**Private members use a trailing underscore**: `selectedMeshes_`, `isEditModeEnabled_`,
+`transformDragStartPosition_`. Note that `WaveBase` predates this rule and uses a leading
+underscore (`_structure`, `_cell`); do not add new leading-underscore fields, and prefer
+trailing when touching existing code near them.
+
+**File naming is currently inconsistent** — `interactive_structure_editor.ts` (snake),
+`LinesManager.ts` (Pascal), `viewSettingsUrl.ts` (camel). For new files: **PascalCase for
+files whose default export is a class or React component**, **camelCase otherwise**. Do not
+rename existing files opportunistically; they are load-bearing in an open PR stack.
+
+## Comments
+
+Explain **why**, not what. The valuable comments in this codebase record the invariant a
+reader would otherwise break — why `collectSelectableAtoms()` takes only the first
+`ATOM_GROUP_NAME` group, why `vdwRadii` must stay symbol-keyed, why a `finally` is there.
+Prefer those over restating the code.
+
+- Multiline docblocks put `/**` on its own line:
+
+```ts
 // ✅ CORRECT
 /**
- * Compute the angular phase factor (-i)^l.
+ * Compute the centroid of the current selection.
  */
 
 // ❌ INCORRECT
-/** Compute the angular phase factor (-i)^l.
+/** Compute the centroid of the current selection.
  */
 ```
 
-- Use `///` for single-line doc comments.
-- Use `//` for inline implementation comments.
-- Never use bare `/* ... */` for documentation; use `/** ... */`.
+- Use `//` for inline implementation comments. Never use bare `/* ... */` for documentation.
 
-### Linter
+## Testing
 
-Use linting for autoformatting the codebase. Consider language-specific tools and/or prettier.
+- Tests live in `tests/__tests__/`, mirroring `src/`. Every module in `src/` should have a
+  corresponding test module.
+- Fixtures go in `tests/fixtures/` (plain JSON — not LFS). Visual baselines go in
+  `tests/__tests__/__snapshots__/expected/` (PNG — LFS).
+- Jest setup: `tests/setupFiles.js` (environment, headless-gl renderer override),
+  `tests/setupFilesAfterEnv.js` (hooks). Reusable editor helpers are in `tests/helpers/editor.js`.
+- Wave-class tests are asynchronous — use `async`.
+- **A bug fix ships with a regression test proven to fail before the fix.** Stash the source
+  change and watch the test go red; that is the house standard, not a suggestion.
+- Visual snapshot tests compare rendered PNGs with a pixelmatch tolerance, because line
+  rendering varies across platforms. Regenerate baselines with `move-actual-expected.sh
+  forward` — but only when the committed baselines passed unmodified in the same environment
+  immediately beforehand, and always diff the new images visually.
+- Prefer tests that do not need a GL context where the logic does not need one; they are far
+  faster and run anywhere.
 
-### Pre-commit
+## Linting and formatting
 
-Use pre-commit to run linters and formatters automatically.
+ESLint (`@exabyte-io/eslint-config`, airbnb-derived) plus Prettier. `npm run lint` runs with
+`--report-unused-disable-directives`, so a stale `eslint-disable` is an error — remove it
+rather than leaving it. `npm run lint:fix` autofixes. Husky runs `lint-staged` pre-commit.
 
-### GitHub Actions
+## Hard rules
 
-Use GitHub Actions to run tests and linters automatically.
+### 1. Never commit without an explicit ask
 
-## !!! IMPORTANT !!!: Code Editing & Development HARD RULES
+Leave changes in the working directory for the user to review.
 
-### HARD RULE 1: Never commit without explicit ask from user
+### 2. All scratch files go in `agents/workdir/tmp/`
 
-NEVER commit changes using `git commit` without the user's explicit ask. Leave files in the working directory for the user to review.
+The repository root stays clean and contains only tracked project files. Debug helpers, patch
+scripts, one-off analysis scripts, throwaway test snippets — all of it goes in
+`agents/workdir/tmp/` (create it if missing). Reusable agent artifacts go in
+`agents/workdir/reusable/`; cross-project ones in `agents/plan/`. `agents/` is gitignored.
+Project plans and workplans belong in `plan/`, which **is** tracked.
 
-### HARD RULE 2: use `<PROJECT_DIRECTORY>/agents/workdir/` for ALL scratch files.
+### 3. Never commit generated output
 
-NEVER create any throwaway files at the top level of the project directory (`<PROJECT_DIRECTORY>`). The top level of `<PROJECT_DIRECTORY>` must remain clean and contain only tracked project files. All throw-away scripts — debug helpers, patch scripts, test snippets, one-off analysis scripts — MUST go in `<PROJECT_DIRECTORY>/agents/workdir/tmp/`. Create that directory if it does not exist. Examples of files that belong in `<PROJECT_DIRECTORY>/agents/workdir/tmp/`: `debug_*.py`, `fix_*.py`, `patch_*.py`, `print_*.py`, `test_*.py` / `test_*.cpp` that are not formal tests in `tests/`, any other ephemeral script written to inspect or patch source code. Any potentially reusable agent artifacts should be either in `<PROJECT_DIRECTORY>/agents/workdir/reusable` (if they're intended to be used in the current project only) or in `<PROJECT_DIRECTORY>/agents/plan` (if they're intended to be used in multiple projects). NO EXCEPTIONS.
+`dist/` is gitignored and built at publish time via `prepack`. Do not re-add it: committing it
+produced spurious merge conflicts, shipped stale type declarations, and touched 74 of the
+repository's first 174 commits.
 
-### HARD RULE 3: Always setup and use a virtual environment
+### 4. Respect the open PR stack
 
-(`venv`) when working with Python. Do NOT install Python packages globally. Use pyenv to select python version(s). Create venv in the agents workdir directory as explained in the next item
-
-## HARD RULE 4: names with no abbreviations, Snake for Py, Camel for JS/TS, classnames
-
-Variables, functions, methods, field names, class names, type names, file names. Always use full, descriptive names. For example:
-
-- ❌ `nkp`, `nbnd`, `nspin`, `npw`, `ik`, `ib`, `ig`, `ia`, `et`, `pw`, `ppset`
-- ✅ `number_of_kpoints`, `number_of_bands`, `number_of_spin_components`, `number_of_plane_waves`, `kpoint_index`, `band_index`, `g_index`, `atom_index`, `eigenvalues`, `planewave_basis`, `pseudopotential_set`
-- ❌ `Vec3`, `Mat3`, `IVec3`
-- ✅ `Vector3D`, `Matrix3x3`, `IntegerVector3D`
-
-Also:
-
-- Use **snake_case** for variables, functions, and file names.
-- Use **PascalCase** for classes and structs.
-- Member variables use trailing underscore: `planewave_basis_`, `number_of_bands_`.
-- General rule: if a name looks abbreviated, spell it out. Exceptions could be made for complex physical and mathematical extpressions where the abbreviation is widely know and used for compacting the representation. However, even in these cases, try to spell it out. Make sure to make it obvious from the context what the abbreviation means.
-
-## Other
-
-### JSON Formatting
-
-- **HARD RULE**: JSON schemas MUST follow ESSE formatting conventions:
-    - **4-space indentation** (matching ESSE `.prettierrc`)
-    - **100 character print width**
-    - **Double quotes** only (standard JSON)
-    - **Trailing newline** at end of file
-    - **Bracket spacing** enabled (e.g., `{ "key": "value" }`)
-    - Q3 postprocessing/result schemas use ESSE-native names (e.g., `density_of_states`, not `dos_result`)
-    - All Q3 result schemas must `$ref` their corresponding ESSE schema in `schemas/esse/schema/`
+Large refactors of files with unmerged changes — `src/components/ThreeDEditor.jsx` above all —
+turn tractable merge conflicts into intractable ones. Check what is in flight before
+restructuring a file.
