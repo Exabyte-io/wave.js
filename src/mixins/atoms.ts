@@ -144,7 +144,7 @@ export const AtomsMixin = (superclass: any) =>
         }
 
         getAtomGroups() {
-            const atomGroups: THREE.Object3D<THREE.Object3DEventMap>[] = [];
+            const atomGroups: THREE.Object3D[] = [];
             this.structureGroup.children.forEach((group: THREE.Group) => {
                 if (group.name === ATOM_GROUP_NAME) {
                     atomGroups.push(...group.children);

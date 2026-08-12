@@ -37,7 +37,10 @@ export const RaycasterMixinWithListeners = <T extends Constructor>(superclass: T
 
         initRaycaster() {
             this.raycaster = new THREE.Raycaster();
-            this.raycaster.params.Line.threshold = 0.1;
+            // Assigned wholesale rather than mutating `.threshold` in place: Raycaster's
+            // `params.Line` is optional, so the in-place write was an unchecked dereference
+            // that only typechecked because @types/three was 33 minors ahead of the runtime.
+            this.raycaster.params.Line = { threshold: 0.1 };
             this.pointer = new THREE.Vector2();
         }
 

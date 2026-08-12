@@ -42,7 +42,6 @@ import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import $ from "jquery";
 import PropTypes from "prop-types";
 import React from "react";
 
@@ -366,11 +365,11 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleCellRepetitionsChange(e) {
-        this.handleSetSetting({ [e.target.id]: parseFloat($(e.target).val()) });
+        this.handleSetSetting({ [e.target.id]: parseFloat(e.target.value) });
     }
 
     handleSphereRadiusChange(e) {
-        this.handleSetSetting({ atomRadiiScale: parseFloat($(e.target).val()) });
+        this.handleSetSetting({ atomRadiiScale: parseFloat(e.target.value) });
     }
 
     handleToggleOrthographicCamera() {
@@ -389,7 +388,7 @@ export class ThreeDEditor extends React.Component {
     }
 
     handleChemicalConnectivityFactorChange(e) {
-        this.handleSetSetting({ chemicalConnectivityFactor: parseFloat($(e.target).val()) });
+        this.handleSetSetting({ chemicalConnectivityFactor: parseFloat(e.target.value) });
     }
 
     // eslint-disable-next-line class-methods-use-this

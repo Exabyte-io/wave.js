@@ -1,7 +1,6 @@
 import IconButton, { IconButtonProps } from "@mui/material/IconButton";
 import Tooltip, { TooltipProps } from "@mui/material/Tooltip";
 import React from "react";
-import _ from "underscore";
 
 interface SquareIconButtonProps extends IconButtonProps {
     title: string;
@@ -10,6 +9,7 @@ interface SquareIconButtonProps extends IconButtonProps {
     onClick: (...args: React.MouseEvent[]) => void;
     tooltipPlacement?: TooltipProps["placement"];
     isToggleable?: boolean;
+    isToggled?: boolean;
 }
 
 /**
@@ -17,6 +17,18 @@ interface SquareIconButtonProps extends IconButtonProps {
  */
 function SquareIconButton(props: SquareIconButtonProps) {
     const { title, id, label, onClick, tooltipPlacement = "top", disabled } = props;
+    // Everything this component consumes itself is stripped out; the remainder - `disabled`
+    // included, which is read above but still forwarded - passes through to IconButton.
+    const {
+        title: consumedTitle,
+        tooltipPlacement: consumedTooltipPlacement,
+        id: consumedId,
+        label: consumedLabel,
+        onClick: consumedOnClick,
+        isToggleable,
+        isToggled,
+        ...iconButtonProps
+    } = props;
 
     const defaultIconButtonStyle = {
         borderRadius: 0,
@@ -32,16 +44,7 @@ function SquareIconButton(props: SquareIconButtonProps) {
             onClick={onClick}
             sx={defaultIconButtonStyle}
             // eslint-disable-next-line react/jsx-props-no-spreading
-            {..._.omit(
-                props,
-                "title",
-                "tooltipPlacement",
-                "id",
-                "label",
-                "onClick",
-                "isToggleable",
-                "isToggled",
-            )}
+            {...iconButtonProps}
         />
     );
 
