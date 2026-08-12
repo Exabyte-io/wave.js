@@ -50,8 +50,10 @@ import {
     MeasurementSettingsHandler,
 } from "../mixins/measurements/MeasurementSettingsHandler";
 import settings from "../settings";
+import { matchesEditorKey } from "../utils/keyBindings";
 import { formatMeasurementValue } from "../utils/measurementReadout";
 import IconsToolbar from "./IconsToolbar";
+import KeyboardSheet from "./KeyboardSheet";
 import ModePill from "./ModePill";
 import ParametersMenu from "./ParametersMenu";
 import SquareIconButton from "./SquareIconButton";
@@ -102,6 +104,8 @@ export class ThreeDEditor extends React.Component {
             elementDraft: null,
             // isDistanceAndAnglesShown: false,
             measurementsSettings: defaultMeasurementsSettings,
+            // Keyboard sheet (`?`) visibility - it is help, so available whenever interactive.
+            isKeyboardSheetOpen: false,
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -169,6 +173,8 @@ export class ThreeDEditor extends React.Component {
         this.handleElementCommit = this.handleElementCommit.bind(this);
         this.handleSelectionChanged = this.handleSelectionChanged.bind(this);
         this.handleSelectElement = this.handleSelectElement.bind(this);
+        this.handleToggleKeyboardSheet = this.handleToggleKeyboardSheet.bind(this);
+        this.handleCloseKeyboardSheet = this.handleCloseKeyboardSheet.bind(this);
         this.handleEditModeKeyDown = this.handleEditModeKeyDown.bind(this);
         this.canUndo = this.canUndo.bind(this);
         this.canRedo = this.canRedo.bind(this);
@@ -262,16 +268,20 @@ export class ThreeDEditor extends React.Component {
             return;
         }
 
-        const isUndoKey = (event.metaKey || event.ctrlKey) && !event.shiftKey && event.key === "z";
-        const isRedoKey = (event.metaKey || event.ctrlKey) && event.shiftKey && event.key === "z";
+        // Matched against settings.editorKeysConfig rather than inline comparisons, so these keys
+        // reach the keyboard sheet (U-3) from the same declaration the handler uses. Escape is
+        // declared there too but implemented in the mixin, which owns cancel-drag-versus-deselect.
+        const { undo, redo, removeSelected } = settings.editorKeysConfig;
 
-        if (isUndoKey) {
-            event.preventDefault();
-            this.handleUndo();
-        } else if (isRedoKey) {
+        // Redo is checked first: it is undo's binding plus Shift, and matchesEditorKey treats
+        // Shift as significant, so order only matters if a future binding relaxes that.
+        if (matchesEditorKey(event, redo)) {
             event.preventDefault();
             this.handleRedo();
-        } else if (event.key === "Delete" || event.key === "Backspace") {
+        } else if (matchesEditorKey(event, undo)) {
+            event.preventDefault();
+            this.handleUndo();
+        } else if (matchesEditorKey(event, removeSelected)) {
             this.handleRemoveSelectedAtom();
         }
     }
@@ -333,6 +343,7 @@ export class ThreeDEditor extends React.Component {
     // map of hotkeys to their handlers
     getKeyConfig() {
         return {
+            [settings.hotKeysConfig.toggleKeyboardSheet]: this.handleToggleKeyboardSheet,
             [settings.hotKeysConfig.toggleOrbitControls]: this.handleToggleOrbitControls,
             [settings.hotKeysConfig.toggleInteractive]: this.handleToggleInteractive,
             [settings.hotKeysConfig.toggleBonds]: this.handleToggleBonds,
@@ -919,6 +930,15 @@ export class ThreeDEditor extends React.Component {
         }
     }
 
+    handleToggleKeyboardSheet() {
+        const { isKeyboardSheetOpen } = this.state;
+        this.setState({ isKeyboardSheetOpen: !isKeyboardSheetOpen });
+    }
+
+    handleCloseKeyboardSheet() {
+        this.setState({ isKeyboardSheetOpen: false });
+    }
+
     /**
      * The armed measurement mode, or null. Read straight off the state the managers already push
      * through updateState on every click, so the mode pill and the status-bar readout follow the
@@ -1496,7 +1516,14 @@ export class ThreeDEditor extends React.Component {
     }
 
     renderViewerWithToolbars() {
-        const { isInteractive, isEditModeActive, material, selectedAtomIndices } = this.state;
+        const {
+            isInteractive,
+            isEditModeActive,
+            material,
+            selectedAtomIndices,
+            isKeyboardSheetOpen,
+        } = this.state;
+        const { editable } = this.props;
         const activeMeasurement = this.getActiveMeasurement();
 
         return (
@@ -1528,6 +1555,11 @@ export class ThreeDEditor extends React.Component {
                         onSelectElement={isEditModeActive ? this.handleSelectElement : undefined}
                     />
                 )}
+                <KeyboardSheet
+                    isOpen={isInteractive && isKeyboardSheetOpen}
+                    onClose={this.handleCloseKeyboardSheet}
+                    editable={editable}
+                />
             </div>
         );
     }
