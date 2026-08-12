@@ -9,8 +9,19 @@ declare module "@mat3ra/periodic-table" {
     }
 }
 
-const vdwRadiiMapAngstrom = Object.keys(PERIODIC_TABLE).map(
-    (key) => PERIODIC_TABLE[key].van_der_Waals_radius_pm / 100,
+/**
+ * Van der Waals radii in Angstrom, keyed by element symbol.
+ *
+ * Must stay a symbol-keyed object: `getAtomRadiusByElement` (mixins/atoms.ts) looks radii up
+ * by element symbol, so building this with `Array.prototype.map` - which yields a positional
+ * array indexed 0..117 - made every lookup return undefined and silently fall back to
+ * `sphereRadius`, rendering every element at the same size.
+ */
+const vdwRadiiMapAngstrom: Record<string, number> = Object.fromEntries(
+    Object.keys(PERIODIC_TABLE).map((elementSymbol) => [
+        elementSymbol,
+        PERIODIC_TABLE[elementSymbol].van_der_Waals_radius_pm / 100,
+    ]),
 );
 
 export default {
