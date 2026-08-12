@@ -154,6 +154,13 @@ class WaveBase {
         this.orthographicCamera.right = (sceneSize / 2) * this.ASPECT;
         this.orthographicCamera.top = sceneSize / 2;
         this.orthographicCamera.bottom = -sceneSize / 2;
+        // Kept here rather than left to each caller so the frustum fields and the matrix that
+        // actually projects can never disagree. adjustCamerasTargetAndFrustum did not update it,
+        // so between construction and the first resize the orthographic camera rendered the
+        // initial +-10 frustum from initCameras instead of the cell-fitted one - invisible in a
+        // browser, where ResizeObserver fires immediately and handleResize repaired it, and
+        // load-bearing for figure export, whose scale bar reads these fields.
+        this.orthographicCamera.updateProjectionMatrix();
     }
     initScene() {
         this.scene = new THREE.Scene();
@@ -177,11 +184,28 @@ class WaveBase {
      * @param {node} domElement
      */
     handleResize(domElement = this.container) {
+        this.setViewportSize(domElement.clientWidth, domElement.clientHeight);
+    }
+    /**
+     * Points the renderer and both cameras at an explicit pixel size.
+     *
+     * `updateStyle: false` changes only the drawing buffer and leaves the canvas's CSS size alone,
+     * which is what figure export needs (mixins/image.js): it renders at a publication resolution
+     * that the on-screen layout must not follow, and `renderer.setSize` would otherwise replace the
+     * `width: 100%` set in initRenderer with a pixel width and break the responsive canvas.
+     *
+     * @param width {Number} drawing buffer width in pixels
+     * @param height {Number} drawing buffer height in pixels
+     * @param updateStyle {Boolean} whether to also set the canvas element's CSS size
+     */
+    setViewportSize(width, height, updateStyle = true) {
         const { maxSize } = this.getCellViewParams();
-        this.WIDTH = domElement.clientWidth;
-        this.HEIGHT = domElement.clientHeight;
-        this.ASPECT = this.WIDTH / this.HEIGHT;
-        this.renderer.setSize(this.WIDTH, this.HEIGHT);
+        this.WIDTH = width;
+        this.HEIGHT = height;
+        // Guarded as in initDimensions: a container measured at zero height (a collapsed panel, or
+        // a detached node) otherwise puts NaN into the projection matrix and blanks the canvas.
+        this.ASPECT = width > 0 && height > 0 ? width / height : 1;
+        this.renderer.setSize(width, height, updateStyle);
         this.perspectiveCamera.aspect = this.ASPECT;
         this.perspectiveCamera.updateProjectionMatrix();
         this.setOrthographicCameraFrustum(this.PADDING_RATIO * maxSize);

@@ -23,6 +23,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
             values: never[];
         }[];
         isKeyboardSheetOpen: boolean;
+        isFigureExportOpen: boolean;
         displayUnits: null;
         lastActionHint: null;
         viewerError: null;
@@ -138,6 +139,19 @@ export class ThreeDEditor extends React.Component<any, any, any> {
     handleSelectElement(elementSymbol: any): void;
     handleToggleKeyboardSheet(): void;
     handleCloseKeyboardSheet(): void;
+    handleOpenFigureExport(): void;
+    handleCloseFigureExport(): void;
+    /**
+     * Renders and downloads a figure (U-12).
+     *
+     * Reported either way through the status bar's live region. A download is one of the few actions
+     * with no visible effect inside the app at all - the browser may put the file somewhere the user
+     * never sees - and an over-large request can exhaust the GL context, where "nothing happened" is
+     * the least useful possible outcome. Deliberately not routed through handleViewerError: the
+     * viewer is still fine, and blanking it behind an error card would be a worse lie than the
+     * failure itself.
+     */
+    handleExportFigure(options: any): void;
     handleViewerError(error: any): void;
     handleDisplayUnitsChange(displayUnits: any): void;
     /**
@@ -218,6 +232,8 @@ export class ThreeDEditor extends React.Component<any, any, any> {
      * component is the same defect class as S-2.
      */
     _showEditHint(source: any): void;
+    /** Shared timer behind every transient status-bar hint, edit or otherwise. */
+    _showHint(text: any): void;
     _applyMaterialToViewer(material: any, source: any): void;
     _getWaveProperty(name: any): any;
     /**
@@ -225,6 +241,17 @@ export class ThreeDEditor extends React.Component<any, any, any> {
      * empty: if the build threw, the atom count is not evidence of anything.
      */
     getViewerStatusKind(): "error" | "empty" | null;
+    /**
+     * Canvas size in pixels, for the export dialog's "On-screen" preset and to keep every other
+     * preset at the canvas aspect ratio. Zeroes are a valid answer (a not-yet-measured container);
+     * getFigureResolution falls back to 4:3 rather than dividing by zero.
+     */
+    getViewportSize(): {
+        width: any;
+        height: any;
+    };
+    /** GL-reported render limit, or undefined so the dialog uses its own conservative default. */
+    getMaxFigureDimension(): any;
     /**
      * The selected atom's coordinates expressed in `displayUnits`, or null when that is already the
      * material's own unit (in which case the stored values are shown as-is).

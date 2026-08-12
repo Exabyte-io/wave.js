@@ -17,6 +17,7 @@ import Edit from "@mui/icons-material/Edit";
 import FormatShapes from "@mui/icons-material/FormatShapes";
 import GpsFixed from "@mui/icons-material/GpsFixed";
 import HeightIcon from "@mui/icons-material/Height";
+import Image from "@mui/icons-material/Image";
 import ImportExport from "@mui/icons-material/ImportExport";
 import LooksIcon from "@mui/icons-material/Looks";
 import PictureInPicture from "@mui/icons-material/PictureInPicture";
@@ -40,6 +41,7 @@ import { describeEditCommit, EDIT_HINT_TIMEOUT_MS } from "../utils/editActions";
 import { matchesEditorKey } from "../utils/keyBindings";
 import { formatMeasurementValue } from "../utils/measurementReadout";
 import EditToolbar from "./EditToolbar";
+import FigureExportDialog from "./FigureExportDialog";
 import IconsToolbar from "./IconsToolbar";
 import KeyboardSheet from "./KeyboardSheet";
 import ModePill from "./ModePill";
@@ -290,6 +292,17 @@ export class ThreeDEditor extends React.Component {
                     onClick: this.handleTakeScreenshot,
                 },
                 {
+                    // Kept alongside Screenshot rather than replacing it: one-click capture of exactly
+                    // what is on screen is still the common case, and a dialog in front of it would be
+                    // a tax on it. This is the publication case (U-12) - chosen resolution, chosen
+                    // background, scale bar - which the canvas readback structurally cannot do.
+                    id: "Figure",
+                    title: "Export figure",
+                    content: "Figure (PNG)…",
+                    leftIcon: _jsx(Image, {}),
+                    onClick: this.handleOpenFigureExport,
+                },
+                {
                     id: "Download",
                     title: "Download",
                     content: "Download",
@@ -335,6 +348,8 @@ export class ThreeDEditor extends React.Component {
             measurementsSettings: defaultMeasurementsSettings,
             // Keyboard sheet (`?`) visibility - it is help, so available whenever interactive.
             isKeyboardSheetOpen: false,
+            // Figure export dialog (U-12) visibility.
+            isFigureExportOpen: false,
             // Units the inspector *shows*. Independent of material.basis.units, which is what
             // the material stores and the only thing edits write to.
             displayUnits: null,
@@ -407,6 +422,9 @@ export class ThreeDEditor extends React.Component {
         this.handleSelectElement = this.handleSelectElement.bind(this);
         this.handleToggleKeyboardSheet = this.handleToggleKeyboardSheet.bind(this);
         this.handleCloseKeyboardSheet = this.handleCloseKeyboardSheet.bind(this);
+        this.handleOpenFigureExport = this.handleOpenFigureExport.bind(this);
+        this.handleCloseFigureExport = this.handleCloseFigureExport.bind(this);
+        this.handleExportFigure = this.handleExportFigure.bind(this);
         this.handleViewerError = this.handleViewerError.bind(this);
         this.handleDisplayUnitsChange = this.handleDisplayUnitsChange.bind(this);
         this.handleViewAlongAxis = this.handleViewAlongAxis.bind(this);
@@ -690,12 +708,15 @@ export class ThreeDEditor extends React.Component {
      * component is the same defect class as S-2.
      */
     _showEditHint(source) {
-        const lastActionHint = describeEditCommit(source);
-        if (!lastActionHint)
+        this._showHint(describeEditCommit(source));
+    }
+    /** Shared timer behind every transient status-bar hint, edit or otherwise. */
+    _showHint(text) {
+        if (!text)
             return;
         if (this._editHintTimeout)
             clearTimeout(this._editHintTimeout);
-        this.setState({ lastActionHint });
+        this.setState({ lastActionHint: text });
         this._editHintTimeout = setTimeout(() => {
             this._editHintTimeout = null;
             this.setState({ lastActionHint: null });
@@ -1103,6 +1124,46 @@ export class ThreeDEditor extends React.Component {
     handleCloseKeyboardSheet() {
         this.setState({ isKeyboardSheetOpen: false });
     }
+    handleOpenFigureExport() {
+        this.setState({ isFigureExportOpen: true });
+    }
+    handleCloseFigureExport() {
+        this.setState({ isFigureExportOpen: false });
+    }
+    /**
+     * Renders and downloads a figure (U-12).
+     *
+     * Reported either way through the status bar's live region. A download is one of the few actions
+     * with no visible effect inside the app at all - the browser may put the file somewhere the user
+     * never sees - and an over-large request can exhaust the GL context, where "nothing happened" is
+     * the least useful possible outcome. Deliberately not routed through handleViewerError: the
+     * viewer is still fine, and blanking it behind an error card would be a worse lie than the
+     * failure itself.
+     */
+    handleExportFigure(options) {
+        try {
+            const fileName = this.WaveComponent.wave.exportFigure(options);
+            this._showHint(`Saved ${fileName}`);
+        }
+        catch (error) {
+            this._showHint(`Figure export failed: ${(error === null || error === void 0 ? void 0 : error.message) || error}`);
+        }
+    }
+    /**
+     * Canvas size in pixels, for the export dialog's "On-screen" preset and to keep every other
+     * preset at the canvas aspect ratio. Zeroes are a valid answer (a not-yet-measured container);
+     * getFigureResolution falls back to 4:3 rather than dividing by zero.
+     */
+    getViewportSize() {
+        var _a;
+        const wave = (_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave;
+        return { width: (wave === null || wave === void 0 ? void 0 : wave.WIDTH) || 0, height: (wave === null || wave === void 0 ? void 0 : wave.HEIGHT) || 0 };
+    }
+    /** GL-reported render limit, or undefined so the dialog uses its own conservative default. */
+    getMaxFigureDimension() {
+        var _a, _b, _c;
+        return (_c = (_b = (_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) === null || _b === void 0 ? void 0 : _b.getMaxFigureDimension) === null || _c === void 0 ? void 0 : _c.call(_b);
+    }
     handleDisplayUnitsChange(displayUnits) {
         this.setState({ displayUnits });
     }
@@ -1379,9 +1440,10 @@ export class ThreeDEditor extends React.Component {
             }, children: [_jsx(SelectionInspector, { selectedAtomIndices: selectedAtomIndices, selectedElement: selectedElement, selectedCoordinates: selectedCoordinates, materialUnits: (_d = material === null || material === void 0 ? void 0 : material.basis) === null || _d === void 0 ? void 0 : _d.units, displayUnits: displayUnits, displayCoordinates: this.getDisplayCoordinates(), elementColor: elementColor, coordinateDrafts: coordinateDrafts, elementDraft: elementDraft, onDisplayUnitsChange: this.handleDisplayUnitsChange, onCoordinateDraftChange: this.handleCoordinateDraftChange, onCoordinateCommit: this.handleCoordinateCommit, onElementDraftChange: this.handleElementDraftChange, onElementCommit: this.handleElementCommit }), _jsx(EditToolbar, { activeTransformMode: activeTransformMode, selectedCount: selectedAtomIndices.length, defaultElement: (editSessionOptions === null || editSessionOptions === void 0 ? void 0 : editSessionOptions.defaultElement) || "Si", canUndo: this.canUndo(), canRedo: this.canRedo(), onSetTransformMode: this.handleSetTransformMode, onAddAtom: this.handleAddAtom, onCloneSelected: this.handleCloneSelectedAtoms, onRemoveSelected: this.handleRemoveSelectedAtom, onFocusCamera: this.handleFocusCameraOnSelection, onUndo: this.handleUndo, onRedo: this.handleRedo })] }));
     }
     renderViewerWithToolbars() {
-        const { isInteractive, isEditModeActive, material, selectedAtomIndices, isKeyboardSheetOpen, viewerError, viewerResetKey, lastActionHint, } = this.state;
+        const { isInteractive, isEditModeActive, material, selectedAtomIndices, isKeyboardSheetOpen, isFigureExportOpen, viewerError, viewerResetKey, lastActionHint, } = this.state;
         const { editable } = this.props;
         const activeMeasurement = this.getActiveMeasurement();
+        const viewportSize = this.getViewportSize();
         // Every surface that drives the wave instance is gated on this, not just on
         // isInteractive: after a caught render failure this.WaveComponent is null, and most
         // handlers dereference it unguarded, so a click would throw from an event handler where
@@ -1399,7 +1461,7 @@ export class ThreeDEditor extends React.Component {
                     // outside it the chips stay a pure legend rather than a dead control.
                     onSelectElement: isViewerUsable && isEditModeActive
                         ? this.handleSelectElement
-                        : undefined })), _jsx(KeyboardSheet, { isOpen: isInteractive && isKeyboardSheetOpen, onClose: this.handleCloseKeyboardSheet, editable: editable })] }));
+                        : undefined })), _jsx(KeyboardSheet, { isOpen: isInteractive && isKeyboardSheetOpen, onClose: this.handleCloseKeyboardSheet, editable: editable }), isViewerUsable && (_jsx(FigureExportDialog, { isOpen: isFigureExportOpen, onClose: this.handleCloseFigureExport, onExport: this.handleExportFigure, viewportWidth: viewportSize.width, viewportHeight: viewportSize.height, maxDimension: this.getMaxFigureDimension(), isCameraOrthographic: Boolean(this._getWaveProperty("isCameraOrthographic")) }))] }));
     }
     render() {
         const { isStandalone } = this.props;
