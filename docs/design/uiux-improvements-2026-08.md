@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | P0 shipped 2026-08-12 (§0.1); P1/P2 still proposals |
+| **Status** | P0 and P1 shipped 2026-08-12 (§0.1); P2 blocked on one decision (§5, question 2) |
 | **Date** | 2026-08-12 |
 | **Scope** | The viewer's own chrome: toolbars, panels, feedback, discoverability. Not the interaction model (settled in the [editor spec](./interactive-editor-spec.md)), not rendering. |
 | **Basis** | Read of `ThreeDEditor.jsx`, `IconsToolbar.tsx`, `ParametersMenu.tsx`, `SquareIconButton.tsx`, `settings.ts`, `main.css`; the editor spec's own R-register; the [status analysis](../codebase-status-2026-08.md). Prior art: VESTA, CrystalMaker, Avogadro 2, Blender, Figma. |
@@ -27,7 +27,7 @@ The three highest-value additions are a **status bar**, a **mode pill**, and a *
 
 ## 0.1 What shipped
 
-The P0 slice is implemented as a branch chain off this document's branch, one branch per item:
+P0 and P1 are implemented as a branch chain off this document's branch, one branch per item, opened as a single PR ([#214](https://github.com/mat3ra/wave.js/pull/214)) intended to squash-land:
 
 | # | Branch | Commit | Tests |
 |---|---|---|---|
@@ -36,9 +36,15 @@ The P0 slice is implemented as a branch chain off this document's branch, one br
 | U-3 | `claude/uiux-p0-keyboard-sheet` | `10cb287` | 21 |
 | U-4 | `claude/uiux-p0-view-switches` | `0bc1f91`, `5d7ddc4` | 8 |
 | U-5 | `claude/uiux-p0-viewer-states` | `eef4704` | 11 |
+| U-6 | `claude/uiux-p1-inspector-split` | `f26ef8d` | 20 |
+| U-9 | `claude/uiux-p1-undo-reachable` | `16a986e` | 13 |
+| U-10 | `claude/uiux-p1-camera-presets` | `f628e8f` | 10 |
+| U-11 | `claude/uiux-p1-focus-visibility` | `da8f03d` | 6 |
+| U-7 | `claude/uiux-p1-quick-toggles` | `319447c` | 8 |
+| U-8 | `claude/uiux-p1-parameters` | `7972622` | 15 |
 
 `tsc --noEmit` and `eslint` are clean on the tip. The suite goes from 185 passing to
-**249 passing**; the 19 failures are unchanged from the pre-change baseline (measured by stashing)
+**321 passing** (**136 new tests**); the 19 failures are unchanged from the pre-change baseline (measured by stashing)
 and are all visual-snapshot tests comparing against `.expected.png` files that are Git LFS pointer
 stubs in a container without `git-lfs`. Every surface was also driven in Chromium against the live
 dev server — view mode, edit mode, the keyboard sheet, the View menu, and an armed distance
@@ -57,15 +63,30 @@ measurement — with no console or page errors.
    off the pill names the key that enables it instead of a gesture that does nothing.
 4. **U-3 dropped the mockup's "advertised nowhere" markers.** They were a device for arguing the
    case here; as code they would be a claim about other UI with nothing keeping them true.
-5. **U-2 needed no new mixin callback.** The measurement managers already push `getSettings()`
+5. **U-6's units toggle changes the display, not the material.** Editing is enabled only in the
+   material's own units, with the fields read-only and an explanation otherwise. Converting a whole
+   point back on commit is a riskier change than switching a display and belongs in its own slice
+   with round-trip tests.
+6. **U-8 ships no live bond count**, though the mockup showed one. Bonds are computed
+   asynchronously; printing a number that had not been computed would be the same false-claim
+   problem the rest of this work removes. The caption explains what the factor multiplies instead.
+7. **U-11 is partial by design.** It covers the buttons this package styles. MUI's own text fields
+   and toggle buttons signal focus through border and background changes rather than an outline, and
+   are left to MUI. Keyboard *canvas* selection stays out of scope, with the roadmap's arrow-key
+   nudging and its unresolved axis-frame decision (D-6).
+8. **U-2 needed no new mixin callback.** The measurement managers already push `getSettings()`
    through `updateState` on every click; two facts were added to that payload
    (`selectedAtomsCount`, `atomsPerMeasurement`) instead of adding a channel.
 
-Two things surfaced during implementation that are **not** defects, recorded so they are not
-re-investigated: the View menu reporting *Rotate/Zoom* as off at startup is correct, not rough
-edge R7's desync — orbit really is off until toggled; and F1's clipping is still live, since the
-edit panel plus a single-atom selection reaches roughly 630 px against the status bar's 730 px, so
-a short viewer still collides. U-6 is what fixes that.
+Recorded so they are not re-investigated: the View menu reporting *Rotate/Zoom* as off at startup
+is correct, not rough edge R7's desync — orbit really is off until toggled
+(`initOrbitControls(enabled = false)`, confirmed by dragging the live app). **F1 is now fixed** and
+measured: at 1100×520, the viewport that used to clip, the inspector occupies 12–196 px and the tool
+strip 12–380 px against a status bar at 486 px, with no field overflowing its card.
+
+Three layout bugs were found by measuring the live DOM rather than by eye, all in code added here:
+a clipped third coordinate field, MUI's `InputBase` 75 px `min-width` overriding its grid column,
+and slider mark labels overlapping a caption. None were visible in jsdom.
 
 ## 1. What the UI is today
 
