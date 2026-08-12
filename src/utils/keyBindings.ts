@@ -23,6 +23,12 @@ export interface KeyBinding {
     group: BindingGroup;
     /** A pointer gesture rather than a key - grouped the same, rendered the same. */
     isGesture?: boolean;
+    /**
+     * Only meaningful in edit mode. The mouse gestures express this through `group: "edit"`, but the
+     * touch rows are grouped by input device instead, so they carry it explicitly - filtering them by
+     * matching label text would break silently the first time a label is reworded.
+     */
+    editOnly?: boolean;
 }
 
 export interface EditorKeyDefinition {
@@ -102,13 +108,22 @@ const TOUCH_GESTURES: KeyBinding[] = [
     },
     { label: "Zoom", keys: "pinch", group: "touch", isGesture: true },
     { label: "Pan", keys: "two-finger drag", group: "touch", isGesture: true },
-    { label: "Select atom", keys: "tap", group: "touch", isGesture: true },
-    { label: "Move atom / group", keys: "drag atom", group: "touch", isGesture: true },
-    { label: "Orbit while editing", keys: "two fingers", group: "touch", isGesture: true },
+    { label: "Select atom", keys: "tap", group: "touch", isGesture: true, editOnly: true },
+    {
+        label: "Move atom / group",
+        keys: "drag atom",
+        group: "touch",
+        isGesture: true,
+        editOnly: true,
+    },
+    {
+        label: "Orbit while editing",
+        keys: "two fingers",
+        group: "touch",
+        isGesture: true,
+        editOnly: true,
+    },
 ];
-
-/** Which touch gestures only mean something in edit mode. */
-const EDIT_ONLY_TOUCH_LABELS = new Set(["Select atom", "Move atom / group", "Orbit while editing"]);
 
 /** Configured single-character keys, in the order they should read, with their group. */
 const HOTKEY_ROWS: { setting: string; label: string; group: BindingGroup }[] = [
@@ -187,7 +202,7 @@ export function getKeyBindings({
 
     const showTouch = includeTouch ?? hasTouchSupport();
     const touchGestures = showTouch
-        ? TOUCH_GESTURES.filter((gesture) => editable || !EDIT_ONLY_TOUCH_LABELS.has(gesture.label))
+        ? TOUCH_GESTURES.filter((gesture) => editable || !gesture.editOnly)
         : [];
 
     return [...fromHotKeys, ...fromEditorKeys, ...gestures, ...touchGestures];

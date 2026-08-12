@@ -18,6 +18,12 @@ export interface KeyBinding {
     group: BindingGroup;
     /** A pointer gesture rather than a key - grouped the same, rendered the same. */
     isGesture?: boolean;
+    /**
+     * Only meaningful in edit mode. The mouse gestures express this through `group: "edit"`, but the
+     * touch rows are grouped by input device instead, so they carry it explicitly - filtering them by
+     * matching label text would break silently the first time a label is reworded.
+     */
+    editOnly?: boolean;
 }
 export interface EditorKeyDefinition {
     keys: string[];
