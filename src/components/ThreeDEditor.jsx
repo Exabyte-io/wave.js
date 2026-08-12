@@ -58,6 +58,8 @@ import ParametersMenu from "./ParametersMenu";
 import SquareIconButton from "./SquareIconButton";
 import StatusBar, { normalizeElement } from "./StatusBar";
 import ToggleIndicator from "./ToggleIndicator";
+import { ViewerErrorBoundary } from "./ViewerErrorBoundary";
+import ViewerStatus from "./ViewerStatus";
 import { WaveComponent } from "./WaveComponent";
 
 /**
@@ -106,6 +108,10 @@ export class ThreeDEditor extends React.Component {
             measurementsSettings: defaultMeasurementsSettings,
             // Keyboard sheet (`?`) visibility - it is help, so available whenever interactive.
             isKeyboardSheetOpen: false,
+            // Set when the viewer subtree throws; cleared by a retry, which also bumps
+            // viewerResetKey to remount the boundary's children.
+            viewerError: null,
+            viewerResetKey: 0,
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
@@ -175,6 +181,8 @@ export class ThreeDEditor extends React.Component {
         this.handleSelectElement = this.handleSelectElement.bind(this);
         this.handleToggleKeyboardSheet = this.handleToggleKeyboardSheet.bind(this);
         this.handleCloseKeyboardSheet = this.handleCloseKeyboardSheet.bind(this);
+        this.handleViewerError = this.handleViewerError.bind(this);
+        this.handleRetryViewer = this.handleRetryViewer.bind(this);
         this.handleEditModeKeyDown = this.handleEditModeKeyDown.bind(this);
         this.canUndo = this.canUndo.bind(this);
         this.canRedo = this.canRedo.bind(this);
@@ -930,6 +938,30 @@ export class ThreeDEditor extends React.Component {
         }
     }
 
+    handleViewerError(error) {
+        // Keep the message rather than only the fact of failure: a blank canvas with no reason is
+        // exactly what F8 was about.
+        this.setState({ viewerError: error?.message || String(error) });
+    }
+
+    handleRetryViewer() {
+        const { viewerResetKey } = this.state;
+        this.setState({ viewerError: null, viewerResetKey: viewerResetKey + 1 });
+    }
+
+    /**
+     * Which overlay state the canvas is in, or null for "showing a structure". Error wins over
+     * empty: if the build threw, the atom count is not evidence of anything.
+     */
+    getViewerStatusKind() {
+        const { viewerError, material } = this.state;
+        if (viewerError) return "error";
+        if (!material) return "empty";
+        const atomCount = material.basis?.elements?.length;
+        if (!atomCount) return "empty";
+        return null;
+    }
+
     handleToggleKeyboardSheet() {
         const { isKeyboardSheetOpen } = this.state;
         this.setState({ isKeyboardSheetOpen: !isKeyboardSheetOpen });
@@ -1535,21 +1567,41 @@ export class ThreeDEditor extends React.Component {
             material,
             selectedAtomIndices,
             isKeyboardSheetOpen,
+            viewerError,
+            viewerResetKey,
         } = this.state;
         const { editable } = this.props;
         const activeMeasurement = this.getActiveMeasurement();
+        // Every surface that drives the wave instance is gated on this, not just on
+        // isInteractive: after a caught render failure this.WaveComponent is null, and most
+        // handlers dereference it unguarded, so a click would throw from an event handler where
+        // no error boundary can catch it. The status bar is exempt - it only reads the material.
+        const isViewerUsable = isInteractive && !viewerError;
 
         return (
             <div className="wave-component-holder" style={{ position: "relative", height: "100%" }}>
                 {this.renderCoverDiv()}
                 <IconsToolbar
                     toolbarConfig={this.getToolbarConfig()}
-                    isInteractive={isInteractive}
+                    // A failed viewer leaves this.WaveComponent null, and most menu handlers
+                    // dereference it without a guard - so a click after an error would throw
+                    // again, this time from an event handler where no boundary can catch it.
+                    // IconsToolbar already hides everything but the power button when not
+                    // interactive, which is exactly the reachable surface we want here: power
+                    // off/on, or Retry from the status card.
+                    isInteractive={isViewerUsable}
                     handleToggleInteractive={this.handleToggleInteractive}
                 />
-                {this.renderWaveComponent()}
-                {isInteractive && isEditModeActive && this.renderEditToolbar()}
-                {isInteractive && (
+                <ViewerErrorBoundary onError={this.handleViewerError} resetKey={viewerResetKey}>
+                    {this.renderWaveComponent()}
+                </ViewerErrorBoundary>
+                <ViewerStatus
+                    kind={this.getViewerStatusKind()}
+                    message={viewerError}
+                    onRetry={this.handleRetryViewer}
+                />
+                {isViewerUsable && isEditModeActive && this.renderEditToolbar()}
+                {isViewerUsable && (
                     <ModePill
                         isEditModeActive={isEditModeActive}
                         activeMeasurement={activeMeasurement}
@@ -1566,7 +1618,11 @@ export class ThreeDEditor extends React.Component {
                         measurement={formatMeasurementValue(activeMeasurement)}
                         // Chip-click selection only has machinery to act on in edit mode, so
                         // outside it the chips stay a pure legend rather than a dead control.
-                        onSelectElement={isEditModeActive ? this.handleSelectElement : undefined}
+                        onSelectElement={
+                            isViewerUsable && isEditModeActive
+                                ? this.handleSelectElement
+                                : undefined
+                        }
                     />
                 )}
                 <KeyboardSheet
