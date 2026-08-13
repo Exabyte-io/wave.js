@@ -2,9 +2,8 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 /* eslint-disable react/sort-comp */
 // import "../MuiClassNameSetup";
 import { DarkMaterialUITheme } from "@mat3ra/cove/dist/theme";
-import ThemeProvider from "@mat3ra/cove/dist/theme/provider";
+import ThemeProvider, { AlertProvider } from "@mat3ra/cove/dist/theme/provider";
 import { exportToDisk } from "@mat3ra/cove/dist/utils/downloader";
-import { AlertProvider } from "@mat3ra/cove/src/theme/provider";
 import { Made } from "@mat3ra/made";
 import Article from "@mui/icons-material/Article";
 import Autorenew from "@mui/icons-material/Autorenew";
@@ -582,7 +581,7 @@ export class ThreeDEditor extends React.Component {
         const isDrawBondsEnabled = this._getWaveProperty("isDrawBondsEnabled") || false;
         return (_jsx(WaveComponent, { ref: (el) => {
                 this.WaveComponent = el;
-            }, triggerHandleResize: viewerTriggerResize, isConventionalCellShown: isConventionalCellShown, isDrawBondsEnabled: isDrawBondsEnabled, isViewAdjustable: viewerSettings.isViewAdjustable, structure: materialCopy, boundaryConditions: boundaryConditions, cell: materialCopy.Lattice.unitCell, name: materialCopy.name, settings: viewerSettings }));
+            }, triggerHandleResize: viewerTriggerResize, isConventionalCellShown: isConventionalCellShown, isDrawBondsEnabled: isDrawBondsEnabled, isViewAdjustable: viewerSettings.isViewAdjustable, structure: materialCopy, boundaryConditions: boundaryConditions, cell: materialCopy.getLattice().unitCell, name: materialCopy.name, settings: viewerSettings }));
     }
     // TODO: move in the toolbar component when it's created
     // eslint-disable-next-line class-methods-use-this
@@ -653,10 +652,10 @@ export class ThreeDEditor extends React.Component {
             const { originalMaterial } = this.state;
             const { onUpdate } = this.props;
             // preserve lattice type
-            material.lattice = {
-                ...material.Lattice.toJSON(),
-                type: originalMaterial.Lattice.type,
-            };
+            material.setLattice({
+                ...material.getLattice().toJSON(),
+                type: originalMaterial.getLattice().type,
+            });
             this.setState({
                 originalMaterial: material,
                 material: material.clone(),

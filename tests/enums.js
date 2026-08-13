@@ -32,7 +32,7 @@ export function getWaveInstance(settings, material = new Made.Material(MATERIAL_
     return new Wave({
         DOMElement: createElement("div", ELEMENT_PROPERTIES),
         structure: material,
-        cell: material.Lattice.unitCell,
+        cell: material.getLattice().unitCell,
         settings: settings || WAVE_SETTINGS,
     });
 }
@@ -41,7 +41,7 @@ export function getFeOWaveInstance(settings, material = new Made.Material(FeO_CO
     return new Wave({
         DOMElement: createElement("div", ELEMENT_PROPERTIES),
         structure: material,
-        cell: material.Lattice.unitCell,
+        cell: material.getLattice().unitCell,
         settings: settings || WAVE_SETTINGS,
     });
 }

@@ -9,7 +9,7 @@ class BoundaryMixinTestBase {
     constructor(config) {
         this.boundaryConditions = config.boundaryConditions || {};
         const material = new Made.Material(MATERIAL_CONFIG);
-        this.basis = material.Basis;
+        this.basis = material.getBasis();
     }
 }
 
