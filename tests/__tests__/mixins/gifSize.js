@@ -98,6 +98,20 @@ describe("GIF output size", () => {
             expect(wave.renderer.domElement.height).toBe(HEIGHT);
         });
 
+        it("puts it back before encoding, not after", async () => {
+            // Encoding 60 frames takes seconds, and the frames are already captured by then - so
+            // holding the square drawing buffer through it only means the on-screen canvas shows a
+            // stretched 512x512 buffer for the whole wait.
+            let sizeDuringEncode = null;
+            mixinUtils.createGIFAsync.mockImplementation(async (args) => {
+                sizeDuringEncode = `${wave.renderer.domElement.width}x${wave.renderer.domElement.height}`;
+                gifCalls.push(args);
+                return "data:image/gif;base64,GIF";
+            });
+            await wave.createRotatingGifData({ totalFrames: 2 });
+            expect(sizeDuringEncode).toBe(`${WIDTH}x${HEIGHT}`);
+        });
+
         it("restores the size even when encoding throws", async () => {
             mixinUtils.createGIFAsync.mockImplementation(async () => {
                 throw new Error("encode failed");

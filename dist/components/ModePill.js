@@ -8,40 +8,7 @@ import Typography from "@mui/material/Typography";
 import settings from "../settings";
 import { formatMeasurementValue, getMeasurementHint, getMeasurementLabel, getMeasurementProgress, } from "../utils/measurementReadout";
 import { useObservedWidth } from "../utils/useObservedWidth";
-import { INSPECTOR_WIDTH } from "./SelectionInspector";
-/**
- * A mode was previously signalled only by the Edit icon changing colour, and a measurement mode
- * not at all: it is armed from a dropdown that then closes, after which every click means
- * something different with nothing on screen to say so (finding F5). Edit mode additionally
- * remaps orbit-rotate to the right mouse button (spec section 3f) - a change to what the primary
- * mouse gesture does, advertised nowhere (F4).
- *
- * This pill names the active mode, states the bindings that appear in no tooltip or menu, and
- * offers a one-click exit so leaving a mode does not mean hunting back through the menu that
- * armed it. Absence of a pill is itself information: clicks do nothing but orbit.
- */
-/**
- * Below this much room, the pill keeps only its name and its exit. Set just above the width the full
- * edit binding list occupies (~430 px measured), so the drop happens when the text would start
- * fighting for space rather than after it already has.
- */
-export const PILL_COMPACT_WIDTH_PX = 460;
-/**
- * Horizontal inset clearing the chrome pinned to each edge. In pixels rather than `em` on purpose:
- * the widths being cleared are themselves pixel constants - the icon strip is 44 px at a 12 px
- * margin, the edit toolbar 52 px at 12 px - and an `em` here resolved against the caption font to
- * 54 px, two pixels under the toolbar it was supposed to clear.
- */
-const SIDE_CHROME_INSET = "72px";
-/**
- * Extra right inset while edit mode is on, clearing the selection inspector as well as the toolbar.
- *
- * The container's insets describe the space that is genuinely free, so the compact decision falls out
- * of measuring that space - one mechanism rather than the pill separately guessing what else is on
- * screen. Without this the pill measured a band it could not actually use and still overlapped the
- * inspector at every width between "narrow" and "full desktop".
- */
-const EDIT_SURFACE_INSET = `calc(${SIDE_CHROME_INSET} + ${INSPECTOR_WIDTH} + 8px)`;
+import { EDIT_SURFACE_INSET, PILL_COMPACT_WIDTH_PX, SIDE_CHROME_INSET } from "./chromeLayout";
 /**
  * Bindings worth stating in the pill, sourced from settings so a rebind cannot desync them.
  *

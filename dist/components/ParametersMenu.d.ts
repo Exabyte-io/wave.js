@@ -43,5 +43,16 @@ export declare const PARAMETER_RANGES: {
 export declare function getParameterDefaults(): PartialViewerSettings;
 /** How many atoms a repetition actually draws - the cost the old UI never mentioned. */
 export declare function getDrawnAtomCount(viewerSettings: Pick<ViewerSettings, "repetitionsAlongLatticeVectorA" | "repetitionsAlongLatticeVectorB" | "repetitionsAlongLatticeVectorC">, atomCountInCell?: number): number;
+/**
+ * Clamps whichever of these settings a patch carries, leaving everything else untouched.
+ *
+ * The menu clamps what a user types, but values also arrive from outside it - URL parameters
+ * (`utils/viewSettingsUrl.ts`) and a host's `initialViewSettings` - and those were never checked.
+ * That is how an out-of-range value gets in: a saved link with `atomRadiiScale=3` renders at 3, shows
+ * "3.00" in the field, pins the slider at its maximum, and then silently drops to the maximum the
+ * first time the slider is touched. Narrowing the radius range from 10 to 1 turned that from a corner
+ * case into a likely one, so the boundary is worth guarding rather than the control alone.
+ */
+export declare function clampParameterSettings(partialSettings: PartialViewerSettings): PartialViewerSettings;
 declare function ParametersMenu(props: ParametersMenuProps): import("react/jsx-runtime").JSX.Element;
 export default ParametersMenu;

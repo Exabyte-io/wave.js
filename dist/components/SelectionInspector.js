@@ -8,12 +8,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import settings from "../settings";
-/**
- * Card width. Exported because the mode pill has to know what the top-right corner costs: the pill is
- * centred in the space above the canvas, and without accounting for this card it lands on top of it
- * in any viewer narrower than a full desktop window - which is every embedded one.
- */
-export const INSPECTOR_WIDTH = "19em";
+import { INSPECTOR_WIDTH } from "./chromeLayout";
 const AXIS_NAMES = ["X", "Y", "Z"];
 /** Caption for a units value, matching what the edit panel used to show. */
 export function getUnitsCaption(units) {

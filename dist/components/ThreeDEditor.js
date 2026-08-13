@@ -45,7 +45,7 @@ import FigureExportDialog from "./FigureExportDialog";
 import IconsToolbar from "./IconsToolbar";
 import KeyboardSheet from "./KeyboardSheet";
 import ModePill from "./ModePill";
-import ParametersMenu from "./ParametersMenu";
+import ParametersMenu, { clampParameterSettings } from "./ParametersMenu";
 import QuickToggles from "./QuickToggles";
 import SelectionInspector from "./SelectionInspector";
 import StatusBar, { normalizeElement } from "./StatusBar";
@@ -362,15 +362,19 @@ export class ThreeDEditor extends React.Component {
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
-            // Settings of the wave viewer, merged with any initial overrides from URL params
-            viewerSettings: {
+            // Settings of the wave viewer, merged with any initial overrides from URL params.
+            // Clamped on the way in (clampParameterSettings): these values also arrive from a saved
+            // URL or a host's initialViewSettings, neither of which the parameters menu can vet, and
+            // an out-of-range one renders at that value while its slider pins at the maximum - then
+            // silently snaps there on first touch.
+            viewerSettings: clampParameterSettings({
                 isViewAdjustable: (_a = initialViewSettings.isViewAdjustable) !== null && _a !== void 0 ? _a : settings.isViewAdjustable,
                 atomRadiiScale: (_b = initialViewSettings.atomRadiiScale) !== null && _b !== void 0 ? _b : settings.atomRadiiScale,
                 repetitionsAlongLatticeVectorA: (_c = initialViewSettings.repetitionsAlongLatticeVectorA) !== null && _c !== void 0 ? _c : settings.repetitions,
                 repetitionsAlongLatticeVectorB: (_d = initialViewSettings.repetitionsAlongLatticeVectorB) !== null && _d !== void 0 ? _d : settings.repetitions,
                 repetitionsAlongLatticeVectorC: (_e = initialViewSettings.repetitionsAlongLatticeVectorC) !== null && _e !== void 0 ? _e : settings.repetitions,
                 chemicalConnectivityFactor: (_f = initialViewSettings.chemicalConnectivityFactor) !== null && _f !== void 0 ? _f : settings.chemicalConnectivityFactor,
-            },
+            }),
             // Toggle settings from URL to apply after Wave instance mounts
             _initialToggleSettings: {
                 orthographicCamera: initialViewSettings.orthographicCamera,
@@ -1461,7 +1465,11 @@ export class ThreeDEditor extends React.Component {
                     // outside it the chips stay a pure legend rather than a dead control.
                     onSelectElement: isViewerUsable && isEditModeActive
                         ? this.handleSelectElement
-                        : undefined })), _jsx(KeyboardSheet, { isOpen: isInteractive && isKeyboardSheetOpen, onClose: this.handleCloseKeyboardSheet, editable: editable }), isViewerUsable && (_jsx(FigureExportDialog, { isOpen: isFigureExportOpen, onClose: this.handleCloseFigureExport, onExport: this.handleExportFigure, viewportWidth: viewportSize.width, viewportHeight: viewportSize.height, maxDimension: this.getMaxFigureDimension(), isCameraOrthographic: Boolean(this._getWaveProperty("isCameraOrthographic")) }))] }));
+                        : undefined })), _jsx(KeyboardSheet, { isOpen: isInteractive && isKeyboardSheetOpen, onClose: this.handleCloseKeyboardSheet, editable: editable }), isViewerUsable && (_jsx(FigureExportDialog, { isOpen: isFigureExportOpen, onClose: this.handleCloseFigureExport, onExport: this.handleExportFigure, viewportWidth: viewportSize.width, viewportHeight: viewportSize.height, 
+                    // Queried only while the dialog is open: it reads three GL parameters, and
+                    // this component re-renders on every selection change, drag commit and
+                    // transient hint. Undefined lets the dialog fall back to its own cap.
+                    maxDimension: isFigureExportOpen ? this.getMaxFigureDimension() : undefined, isCameraOrthographic: Boolean(this._getWaveProperty("isCameraOrthographic")) }))] }));
     }
     render() {
         const { isStandalone } = this.props;

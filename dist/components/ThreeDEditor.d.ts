@@ -29,14 +29,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         viewerError: null;
         viewerResetKey: number;
         viewerTriggerResize: boolean;
-        viewerSettings: {
-            isViewAdjustable: any;
-            atomRadiiScale: any;
-            repetitionsAlongLatticeVectorA: any;
-            repetitionsAlongLatticeVectorB: any;
-            repetitionsAlongLatticeVectorC: any;
-            chemicalConnectivityFactor: any;
-        };
+        viewerSettings: Partial<import("./ParametersMenu").ViewerSettings>;
         _initialToggleSettings: {
             orthographicCamera: any;
             bonds: any;

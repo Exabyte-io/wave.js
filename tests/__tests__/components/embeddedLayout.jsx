@@ -3,8 +3,8 @@ import Enzyme from "enzyme";
 import expect from "expect";
 import React from "react";
 
-import ModePill, { PILL_COMPACT_WIDTH_PX } from "../../../src/components/ModePill";
-import { INSPECTOR_WIDTH } from "../../../src/components/SelectionInspector";
+import { INSPECTOR_WIDTH, PILL_COMPACT_WIDTH_PX } from "../../../src/components/chromeLayout";
+import ModePill from "../../../src/components/ModePill";
 
 Enzyme.configure({ adapter: new Adapter() });
 
