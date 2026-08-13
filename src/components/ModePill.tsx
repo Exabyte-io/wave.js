@@ -16,6 +16,8 @@ import {
     getMeasurementLabel,
     getMeasurementProgress,
 } from "../utils/measurementReadout";
+import { useObservedWidth } from "../utils/useObservedWidth";
+import { INSPECTOR_WIDTH } from "./SelectionInspector";
 
 /**
  * A mode was previously signalled only by the Edit icon changing colour, and a measurement mode
@@ -28,6 +30,31 @@ import {
  * offers a one-click exit so leaving a mode does not mean hunting back through the menu that
  * armed it. Absence of a pill is itself information: clicks do nothing but orbit.
  */
+
+/**
+ * Below this much room, the pill keeps only its name and its exit. Set just above the width the full
+ * edit binding list occupies (~430 px measured), so the drop happens when the text would start
+ * fighting for space rather than after it already has.
+ */
+export const PILL_COMPACT_WIDTH_PX = 460;
+
+/**
+ * Horizontal inset clearing the chrome pinned to each edge. In pixels rather than `em` on purpose:
+ * the widths being cleared are themselves pixel constants - the icon strip is 44 px at a 12 px
+ * margin, the edit toolbar 52 px at 12 px - and an `em` here resolved against the caption font to
+ * 54 px, two pixels under the toolbar it was supposed to clear.
+ */
+const SIDE_CHROME_INSET = "72px";
+
+/**
+ * Extra right inset while edit mode is on, clearing the selection inspector as well as the toolbar.
+ *
+ * The container's insets describe the space that is genuinely free, so the compact decision falls out
+ * of measuring that space - one mechanism rather than the pill separately guessing what else is on
+ * screen. Without this the pill measured a band it could not actually use and still overlapped the
+ * inspector at every width between "narrow" and "full desktop".
+ */
+const EDIT_SURFACE_INSET = `calc(${SIDE_CHROME_INSET} + ${INSPECTOR_WIDTH} + 8px)`;
 
 export interface ModePillProps {
     /** Edit mode is active. Mutually exclusive with a measurement, per decision D-12. */
@@ -163,21 +190,33 @@ function ModePill(props: ModePillProps) {
         isOrbitEnabled = false,
     } = props;
 
+    const { ref: containerRef, width: containerWidth } = useObservedWidth<HTMLDivElement>();
+
     if (!isEditModeActive && !activeMeasurement?.isActive) return null;
 
     const progress = getMeasurementProgress(activeMeasurement);
     const latestValue = formatMeasurementValue(activeMeasurement);
+    // Until measured, assume there is room: the wide case is the common one, and a pill that starts
+    // compact and expands one frame later flickers.
+    const isCompact = containerWidth !== null && containerWidth < PILL_COMPACT_WIDTH_PX;
 
     return (
         <Stack
+            ref={containerRef}
             data-name="ModePillContainer"
-            alignItems="center"
+            data-compact={isCompact ? "true" : "false"}
+            // Left-aligned when compact: the top-right corner belongs to the selection inspector, and
+            // a centred pill lands squarely on it in an embedded panel.
+            alignItems={isCompact ? "flex-start" : "center"}
             spacing={0.5}
             sx={{
                 position: "absolute",
                 top: "1em",
-                left: 0,
-                right: 0,
+                // Insets clear the chrome pinned to either edge - the icon strip on the left, the edit
+                // toolbar and inspector on the right. Spanning the full width let the pill grow to
+                // 520 px and run underneath all of them, which an embedded viewer showed first.
+                left: SIDE_CHROME_INSET,
+                right: isEditModeActive ? EDIT_SURFACE_INSET : SIDE_CHROME_INSET,
                 // The canvas keeps its pointer events; each pill opts back in for itself.
                 pointerEvents: "none",
                 zIndex: 1,
@@ -191,9 +230,14 @@ function ModePill(props: ModePillProps) {
                     onExit={onExitEditMode}
                     exitTitle="Exit edit mode"
                 >
-                    <Typography variant="caption" noWrap>
-                        {getEditModeBindings({ isOrbitEnabled }).join(" · ")}
-                    </Typography>
+                    {/* The bindings are the expendable part: they are a reminder, and the same list
+                        lives in the shortcuts sheet, which the View menu now opens. The mode name and
+                        the way out are not expendable, so those are what survive the squeeze. */}
+                    {!isCompact && (
+                        <Typography variant="caption" noWrap>
+                            {getEditModeBindings({ isOrbitEnabled }).join(" · ")}
+                        </Typography>
+                    )}
                 </Pill>
             )}
 
@@ -211,7 +255,14 @@ function ModePill(props: ModePillProps) {
                         activeMeasurement.measurementType,
                     ).toLowerCase()} mode`}
                 >
-                    <Typography variant="caption" noWrap>
+                    {/* The measurement hint says what to click next, which is the whole point of
+                        the pill in a mode armed from a menu that closed - so it is kept and
+                        truncated rather than dropped. */}
+                    <Typography
+                        variant="caption"
+                        noWrap
+                        sx={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}
+                    >
                         {getMeasurementHint(activeMeasurement)}
                     </Typography>
                     {progress.isPartial && (

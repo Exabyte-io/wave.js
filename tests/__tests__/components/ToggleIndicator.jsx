@@ -41,10 +41,31 @@ describe("ToggleIndicator", () => {
         expect(keycap.text()).toBe("B");
     });
 
-    it("omits the keycap slot entirely for an item with no hotkey", () => {
-        expect(mount(<ToggleIndicator />).find('[data-name="ToggleIndicatorKey"]').exists()).toBe(
-            false,
+    it("reserves the keycap slot for an item with no hotkey, rather than collapsing it", () => {
+        // Omitting it let each row size itself, so the switches landed at different offsets down the
+        // View menu - a column of toggles that does not line up reads as a rendering fault. The slot
+        // stays, empty and hidden, so every switch is the same distance from the right edge.
+        const wrapper = mount(<ToggleIndicator />);
+        const slot = wrapper.find('kbd[data-name="ToggleIndicatorKey"]').first();
+        expect(slot.exists()).toBe(true);
+        expect(slot.text()).toBe("");
+        expect(slot.prop("aria-hidden")).toBe(true);
+    });
+
+    it("gives the keycap slot the same width with and without a hotkey", () => {
+        const withKey = mount(<ToggleIndicator hotKey="b" />)
+            .find('kbd[data-name="ToggleIndicatorKey"]')
+            .first();
+        const withoutKey = mount(<ToggleIndicator />)
+            .find('kbd[data-name="ToggleIndicatorKey"]')
+            .first();
+        // Same declared width is what keeps the switch column aligned; jsdom does no layout, so the
+        // style is the assertable form of it.
+        expect(window.getComputedStyle(withoutKey.getDOMNode()).width).toBe(
+            window.getComputedStyle(withKey.getDOMNode()).width,
         );
+        expect(window.getComputedStyle(withoutKey.getDOMNode()).visibility).toBe("hidden");
+        expect(window.getComputedStyle(withKey.getDOMNode()).visibility).toBe("visible");
     });
 
     it("keeps the switch out of the accessibility tree - the menu row is the control", () => {
