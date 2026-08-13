@@ -13,7 +13,7 @@ library for 3D atomic visualization and editing, built on THREE.js and Made.js.
 Two environment prerequisites bite before anything else, and neither is optional:
 
 ```bash
-# 1. Test fixtures and visual baselines are partly in Git LFS.
+# 1. The visual baselines in tests/__tests__/__snapshots__/expected/ are in Git LFS.
 git lfs install && git lfs pull
 
 # 2. The test suite renders through headless-gl, which needs a real GL context.
@@ -21,9 +21,12 @@ git lfs install && git lfs pull
 xvfb-run -s "-ac -screen 0 1024x768x24" npm test
 ```
 
-Without LFS the suites fail at parse time on a fixture that is still a pointer stub. Without a
-GL context every `Wave`-constructing test fails in `initRenderer`. `docker-compose run test`
-wraps both.
+Both matter, and they fail differently. Without `git-lfs` the baselines stay 130-byte pointer
+stubs, `PNG.sync.read` cannot parse them, and all 17 visual tests fail — but every other suite
+passes, so a green-looking partial run is the signal to check LFS first. (Fixtures under
+`tests/fixtures/` are plain JSON and no longer LFS-tracked; the older "fails at parse time on a
+fixture" symptom is gone.) Without a GL context every `Wave`-constructing test fails in
+`initRenderer`. `docker-compose run test` wraps both.
 
 The four checks that must be green before any commit — the same four CI runs:
 
@@ -155,15 +158,21 @@ Prefer those over restating the code.
   corresponding test module.
 - Fixtures go in `tests/fixtures/` (plain JSON — not LFS). Visual baselines go in
   `tests/__tests__/__snapshots__/expected/` (PNG — LFS).
-- Jest setup: `tests/setupFiles.js` (environment, headless-gl renderer override),
-  `tests/setupFilesAfterEnv.js` (hooks). Reusable editor helpers are in `tests/helpers/editor.js`.
+- Jest setup: `tests/setupFiles.js` (environment, headless-gl renderer override) is the only
+  setup file — `jest.config.js` declares no `setupFilesAfterEnv`. Reusable editor helpers are in
+  `tests/helpers/editor.js`.
 - Wave-class tests are asynchronous — use `async`.
 - **A bug fix ships with a regression test proven to fail before the fix.** Stash the source
   change and watch the test go red; that is the house standard, not a suggestion.
-- Visual snapshot tests compare rendered PNGs with a pixelmatch tolerance, because line
-  rendering varies across platforms. Regenerate baselines with `move-actual-expected.sh
-  forward` — but only when the committed baselines passed unmodified in the same environment
-  immediately beforehand, and always diff the new images visually.
+- Visual snapshot tests compare rendered PNGs with a pixelmatch tolerance (`threshold: 0.7`),
+  because line rendering varies across platforms — the same cell edges draw solid on one mesa
+  and dashed on another, worth thousands of pixels. Regenerate baselines with
+  `./move-actual-expected.sh forward` — but only when the committed baselines passed unmodified
+  in the same environment immediately beforehand, and always diff the new images visually.
+  Prove the first part rather than assuming it: revert only the source change under test, run
+  the suite, and confirm the committed baselines pass. Note that `0.7` is loose enough to hide
+  a real change (a 37.7% increase in painted geometry once passed unflagged), so a passing
+  visual test does not by itself mean the render is unchanged.
 - Prefer tests that do not need a GL context where the logic does not need one; they are far
   faster and run anywhere.
 
