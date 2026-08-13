@@ -19,7 +19,15 @@ import React from "react";
  *
  * The hotkey moves out of the label into a fixed slot next to it (F3). Spelled inside the label,
  * some rows read "Bonds [B]" and others just "Axes", and nothing keeps that consistent.
+ *
+ * That slot is *always* rendered, and the whole indicator is a fixed width. Omitting the keycap on
+ * rows without a hotkey let each row size itself, so the switches landed at slightly different
+ * offsets down the View menu - close enough to look like a rendering fault rather than a layout one.
+ * A menu of toggles reads as a column, and a column has to line up.
  */
+
+/** Keycap slot width. Fixed, so a row without a hotkey still reserves it. */
+const KEY_SLOT_WIDTH = "1.35rem";
 
 export interface ToggleIndicatorProps {
     isActive?: boolean;
@@ -34,33 +42,39 @@ function ToggleIndicator({ isActive = false, hotKey }: ToggleIndicatorProps) {
         <Stack
             direction="row"
             alignItems="center"
+            justifyContent="flex-end"
             spacing={1}
             data-name="ToggleIndicator"
             data-active={isActive ? "true" : "false"}
         >
-            {hotKey && (
-                <Box
-                    component="kbd"
-                    data-name="ToggleIndicatorKey"
-                    sx={{
-                        fontFamily: "monospace",
-                        fontSize: "0.68rem",
-                        lineHeight: 1.5,
-                        minWidth: "1.15rem",
-                        textAlign: "center",
-                        px: 0.4,
-                        borderRadius: "3px",
-                        border: `1px solid ${theme.palette.divider}`,
-                        color: theme.palette.text.secondary,
-                    }}
-                >
-                    {hotKey.toUpperCase()}
-                </Box>
-            )}
+            <Box
+                component="kbd"
+                data-name="ToggleIndicatorKey"
+                // Hidden rather than absent when there is no hotkey: `display: none` would collapse
+                // the slot and take the switch with it, which is the misalignment this fixes.
+                // `undefined` rather than `false` for the populated case, so the attribute is simply
+                // absent there instead of asserting a negative.
+                aria-hidden={hotKey ? undefined : true}
+                sx={{
+                    fontFamily: "monospace",
+                    fontSize: "0.68rem",
+                    lineHeight: 1.5,
+                    width: KEY_SLOT_WIDTH,
+                    flexShrink: 0,
+                    textAlign: "center",
+                    borderRadius: "3px",
+                    border: `1px solid ${theme.palette.divider}`,
+                    color: theme.palette.text.secondary,
+                    visibility: hotKey ? "visible" : "hidden",
+                }}
+            >
+                {hotKey ? hotKey.toUpperCase() : ""}
+            </Box>
 
             {/* Decorative: the row that contains this is the control. */}
             <Box
                 aria-hidden="true"
+                data-name="ToggleIndicatorSwitch"
                 sx={{
                     position: "relative",
                     width: 28,

@@ -45,7 +45,10 @@ const repetitionKey = (axis: string) =>
     `repetitionsAlongLatticeVector${axis}` as keyof ViewerSettings;
 
 export const PARAMETER_RANGES = {
-    atomRadiiScale: { min: 0.1, max: 10, step: 0.1 },
+    // Capped at 1 rather than 10: the scale multiplies each element's van der Waals radius, so 1 is
+    // already space-filling and everything above it is atoms swallowing the cell. A range whose top
+    // 90% is unusable also makes the useful band - around the 0.2 default - a few pixels of travel.
+    atomRadiiScale: { min: 0.1, max: 1, step: 0.05 },
     chemicalConnectivityFactor: { min: 0, max: 2, step: 0.01 },
     repetitions: { min: 1, max: 10, step: 1 },
 };
@@ -160,8 +163,9 @@ function SliderRow(props: SliderRowProps) {
             {/* The range goes in the caption rather than as slider mark labels: MUI positions
                 those absolutely below the track, so they overlapped this line. Either way the
                 point is that the range is visible at all, which it was not when it lived only in
-                inputProps. */}
-            <Typography variant="caption" color="text.secondary">
+                inputProps. Kept to one line - a paragraph under every control is noise in a menu
+                whose controls are already labelled. */}
+            <Typography variant="caption" color="text.secondary" noWrap>
                 {`${range.min}–${range.max} · ${caption}`}
             </Typography>
         </Stack>
@@ -196,7 +200,7 @@ function ParametersMenu(props: ParametersMenuProps) {
                 settingKey="atomRadiiScale"
                 value={viewerSettings.atomRadiiScale}
                 decimals={2}
-                caption="Scales every atom; van der Waals radii still set their relative sizes."
+                caption="1 = full van der Waals size"
                 onSettingChange={onSettingChange}
             />
 
@@ -273,7 +277,7 @@ function ParametersMenu(props: ParametersMenuProps) {
                             viewerSettings.repetitionsAlongLatticeVectorB
                         } × ${
                             viewerSettings.repetitionsAlongLatticeVectorC
-                        } → ${drawnAtoms.toLocaleString()} atoms drawn, from ${atomCountInCell} in the cell`}
+                        } → ${drawnAtoms.toLocaleString()} atoms`}
                     </Typography>
                 )}
             </Stack>
@@ -283,7 +287,7 @@ function ParametersMenu(props: ParametersMenuProps) {
                 settingKey="chemicalConnectivityFactor"
                 value={viewerSettings.chemicalConnectivityFactor}
                 decimals={2}
-                caption="Multiplies the sum of two atoms' van der Waals radii to decide if they bond."
+                caption="× the two atoms' van der Waals sum"
                 onSettingChange={onSettingChange}
             />
 
@@ -295,7 +299,7 @@ function ParametersMenu(props: ParametersMenuProps) {
                 sx={{ alignSelf: "flex-start", textTransform: "none" }}
                 onClick={() => onSettingChange(getParameterDefaults())}
             >
-                Reset all to defaults
+                Reset all
             </Button>
         </Stack>
     );

@@ -26,6 +26,13 @@ import settings from "../settings";
 
 export type DisplayUnits = "crystal" | "cartesian";
 
+/**
+ * Card width. Exported because the mode pill has to know what the top-right corner costs: the pill is
+ * centred in the space above the canvas, and without accounting for this card it lands on top of it
+ * in any viewer narrower than a full desktop window - which is every embedded one.
+ */
+export const INSPECTOR_WIDTH = "19em";
+
 export interface SelectionInspectorProps {
     /** Selected atomic indices, per the mixin's multi-select contract. */
     selectedAtomIndices?: number[];
@@ -94,7 +101,7 @@ function SelectionInspector(props: SelectionInspectorProps) {
             data-name="SelectionInspector"
             sx={{
                 boxShadow: 4,
-                width: "19em",
+                width: INSPECTOR_WIDTH,
                 maxHeight: "100%",
                 overflowY: "auto",
                 p: 1.25,

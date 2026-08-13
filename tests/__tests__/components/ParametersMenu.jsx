@@ -76,9 +76,12 @@ describe("ParametersMenu", () => {
         const slider = wrapper.find('[data-name="ParameterSlider-atomRadiiScale"]').first();
         expect(slider.prop("min")).toBe(PARAMETER_RANGES.atomRadiiScale.min);
         expect(slider.prop("max")).toBe(PARAMETER_RANGES.atomRadiiScale.max);
-        // The range has to be visible somewhere, since inputProps is invisible.
+        // The range has to be visible somewhere, since inputProps is invisible. Read from the
+        // constant rather than spelled out, so changing the range cannot leave this asserting a
+        // number the UI no longer shows.
+        const { min, max } = PARAMETER_RANGES.atomRadiiScale;
         expect(wrapper.find('[data-name="Parameter-atomRadiiScale"]').first().text()).toContain(
-            "0.1–10",
+            `${min}–${max}`,
         );
         expect(
             wrapper.find('[data-name="ParameterSlider-chemicalConnectivityFactor"]').exists(),
@@ -103,9 +106,9 @@ describe("ParametersMenu", () => {
         field.prop("onChange")({ target: { value: "-5" } });
         field.prop("onChange")({ target: { value: "abc" } });
         expect(changes).toEqual([
-            { atomRadiiScale: 10 },
-            { atomRadiiScale: 0.1 },
-            { atomRadiiScale: 0.1 },
+            { atomRadiiScale: PARAMETER_RANGES.atomRadiiScale.max },
+            { atomRadiiScale: PARAMETER_RANGES.atomRadiiScale.min },
+            { atomRadiiScale: PARAMETER_RANGES.atomRadiiScale.min },
         ]);
     });
 
@@ -158,8 +161,13 @@ describe("ParametersMenu", () => {
         );
         const cost = wrapper.find('[data-name="RepetitionCost"]');
         expect(cost.exists()).toBe(true);
-        expect(cost.first().text()).toContain("192 atoms drawn");
-        expect(cost.first().text()).toContain("from 24 in the cell");
+        // "2 × 2 × 2 → 192 atoms": the product and the resulting count, which is the whole point of
+        // the line. It used to also restate the per-cell count the status bar already shows.
+        expect(cost.first().text()).toContain("2 × 2 × 2");
+        expect(cost.first().text()).toContain("192 atoms");
+        // 192 is 8 × the cell's 24, so the per-cell count is still doing its work here - it is just
+        // no longer restated in the line, where the status bar already carries it.
+        expect(cost.first().text()).not.toContain("in the cell");
     });
 
     it("warns rather than merely informs once the count gets large", () => {
