@@ -180,9 +180,55 @@ mouse button; `utils/inputCapabilities.ts` replacing the viewport-width `isMobil
 capability queries; 44 px targets under `(pointer: coarse)`; and the shortcut sheet reachable without
 a keyboard, with a touch-gesture section and honest labels.
 
-## 9. Open / next
+## 9. Maintainer review pass over both branches
+
+A read of the two open branches as a maintainer would read them, after the teammate feedback had been
+addressed. Five findings, all implemented on both lines. What they have in common is that none is
+visible in the suite as it stood — four are correctness-under-a-condition-nobody-tested, and the fifth
+is a dependency direction.
+
+1. **The GIF square only held until encoding started.** The size restore was in a `finally`, so the
+   512×512 drawing buffer survived through gifshot's encode — seconds for 60 frames, all of them with
+   the on-screen canvas stretching a square buffer across a wide viewer. The frames are captured
+   before the encode begins, so the restore belongs immediately after the capture loop; the `finally`
+   keeps a null-guarded copy for the throwing path. The test asserts the canvas dimensions *inside*
+   the mocked `createGIFAsync`, which is the only place the distinction is observable.
+
+2. **`useObservedWidth` shared one record across every observer.** The mutable record was declared
+   outside the `[]`-dep `useCallback`, so it was module-level state: two mounted components measuring
+   different containers wrote to the same object. Nothing in the app mounts two today, which is why
+   the suite was quiet.
+
+3. **Parameters were clamped on the way out but not on the way in.** The menu clamped typed input,
+   and the slider pinned at its bounds — but a value arriving from a saved URL or a host's
+   `initialViewSettings` went straight to the viewer. A radius of 3.0 rendered at 3.0 while the slider
+   sat at 1.0, then snapped there on first touch. `clampParameterSettings` lives next to the ranges
+   that define it, and the editor runs its initial settings through it. This became reachable *because*
+   the range tightened to 0.1–1.0 on the teammate's feedback — the old 10× ceiling hid it.
+
+4. **`getMaxFigureDimension()` ran every frame.** Three `gl.getParameter` calls — each a pipeline
+   sync — to compute a bound only the export dialog reads. Gated on the dialog being open.
+
+5. **`ModePill` imported its geometry from `SelectionInspector`.** An overlay depending on a sibling
+   component for a width, so a change to the inspector silently moved the pill. The shared numbers are
+   now in `chromeLayout.ts`, which both read from — including the inset that the pill uses to avoid
+   the inspector and the inspector uses to size itself.
+
+Verified on both lines before pushing: `npm run lint` (0 errors), `tsc --noEmit`, `npm run build`, and
+the full suite — 461 tests on the U-13 line (#214), 431 on the U-12 line (#216), the difference being
+U-13's two touch suites.
+
+The port to #216 was a `cherry-pick -n`, not a file copy. #216 predates U-13, so its `ModePill.tsx`
+and `ThreeDEditor.jsx` legitimately lack the coarse-pointer wording and the sheet menu entry;
+overwriting those files with the #214 copies would have silently back-ported U-13 content into the
+PR that is not supposed to contain it. The merge was verified by grepping the result for
+`isCoarsePointer` and finding none.
+
+## 10. Open / next
 
 - **PR size.** #214 carries the 25-commit editor stack it sits on (that work is not on `dev` —
+  `interactive_structure_editor.ts` does not exist there) plus ~20 commits of this work. If the
+  editor stack lands separately first, this PR shrinks to just the UI work.
   `interactive_structure_editor.ts` does not exist there) plus ~20 commits of this work. If the
   editor stack lands separately first, this PR shrinks to just the UI work.
 - **Still true from the status analysis:** `dist/` is tracked and produced half the merge conflict
