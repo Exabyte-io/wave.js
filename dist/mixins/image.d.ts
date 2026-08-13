@@ -9,6 +9,16 @@ export function ImageMixin(superclass: any): {
          */
         getMaxFigureDimension(): number;
         /**
+         * Points the renderer at an explicit pixel size and returns the function that puts it back.
+         *
+         * Shared by figure export and GIF recording, which have the same requirement - an output size
+         * that is stated rather than inherited from whatever the container happens to be - but
+         * different shapes, one synchronous and one an await loop over frames. Returning a restore
+         * callback lets both wrap it in their own try/finally rather than forcing one into the other's
+         * control flow.
+         */
+        beginFixedRenderSize(width: any, height: any): () => void;
+        /**
          * World units (Ångström) spanned by one image pixel, which is what a scale bar needs.
          *
          * Exact for the orthographic camera. For the perspective camera it is exact only in the
