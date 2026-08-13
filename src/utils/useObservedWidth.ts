@@ -21,15 +21,20 @@ export function useObservedWidth<T extends HTMLElement = HTMLDivElement>() {
     const [width, setWidth] = useState<number | null>(null);
     const observerRef = useRef<ResizeObserver | null>(null);
 
-    /**
-     * Zero is reported as "not measured", not as a width. An environment that does no layout at all -
-     * jsdom, where every rect is zeroes - would otherwise look identical to the narrowest possible
-     * container, and every consumer would silently render its most degraded form under test. A truly
-     * zero-width container displays nothing either way, so nothing is lost by not distinguishing them.
-     */
-    const record = (value: number) => setWidth(value > 0 ? value : null);
-
     const ref = useCallback((node: T | null) => {
+        /**
+         * Zero is recorded as "not measured", not as a width. An environment that does no layout at
+         * all - jsdom, where every rect is zeroes - would otherwise look identical to the narrowest
+         * possible container, and every consumer would silently render its most degraded form under
+         * test. A truly zero-width container displays nothing either way, so nothing is lost by not
+         * telling them apart.
+         *
+         * Declared inside the callback rather than in the component body: with an empty dependency
+         * list the callback captures whichever copy existed on the first render, so a helper defined
+         * outside it is a stale closure waiting for the day it reads a prop.
+         */
+        const record = (value: number) => setWidth(value > 0 ? value : null);
+
         observerRef.current?.disconnect();
         observerRef.current = null;
         if (!node) return;

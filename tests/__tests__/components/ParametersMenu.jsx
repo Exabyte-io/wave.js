@@ -4,6 +4,7 @@ import expect from "expect";
 import React from "react";
 
 import ParametersMenu, {
+    clampParameterSettings,
     getDrawnAtomCount,
     getParameterDefaults,
     PARAMETER_RANGES,
@@ -206,5 +207,41 @@ describe("ParametersMenu", () => {
         });
         wrapper.find('button[data-name="ResetAllParameters"]').simulate("click");
         expect(changes).toEqual([getParameterDefaults()]);
+    });
+});
+
+describe("clampParameterSettings", () => {
+    it("clamps a value that arrived from outside the menu", () => {
+        // A saved URL or a host's initialViewSettings can carry anything; before this, an
+        // out-of-range radius rendered at its own value while the slider pinned at the maximum, then
+        // snapped there on first touch.
+        expect(clampParameterSettings({ atomRadiiScale: 3 }).atomRadiiScale).toBe(
+            PARAMETER_RANGES.atomRadiiScale.max,
+        );
+        expect(clampParameterSettings({ atomRadiiScale: 0 }).atomRadiiScale).toBe(
+            PARAMETER_RANGES.atomRadiiScale.min,
+        );
+    });
+
+    it("clamps every setting it owns, repetitions included", () => {
+        const clamped = clampParameterSettings({
+            chemicalConnectivityFactor: 99,
+            repetitionsAlongLatticeVectorA: 0,
+            repetitionsAlongLatticeVectorB: 500,
+        });
+        expect(clamped.chemicalConnectivityFactor).toBe(
+            PARAMETER_RANGES.chemicalConnectivityFactor.max,
+        );
+        expect(clamped.repetitionsAlongLatticeVectorA).toBe(PARAMETER_RANGES.repetitions.min);
+        expect(clamped.repetitionsAlongLatticeVectorB).toBe(PARAMETER_RANGES.repetitions.max);
+    });
+
+    it("leaves keys it does not own, and absent keys, alone", () => {
+        // isViewAdjustable is a boolean that travels in the same object; clamping must not touch it,
+        // and a partial patch must not gain keys it did not carry.
+        const clamped = clampParameterSettings({ isViewAdjustable: false, atomRadiiScale: 0.2 });
+        expect(clamped.isViewAdjustable).toBe(false);
+        expect(clamped.atomRadiiScale).toBe(0.2);
+        expect(Object.keys(clampParameterSettings({}))).toEqual([]);
     });
 });

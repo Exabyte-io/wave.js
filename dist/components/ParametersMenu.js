@@ -43,6 +43,33 @@ function clampToRange(value, { min, max }) {
         return min;
     return Math.min(max, Math.max(min, value));
 }
+/** Which range governs each viewer setting the menu owns. Repetitions share one range. */
+const RANGE_BY_SETTING = {
+    atomRadiiScale: PARAMETER_RANGES.atomRadiiScale,
+    chemicalConnectivityFactor: PARAMETER_RANGES.chemicalConnectivityFactor,
+    repetitionsAlongLatticeVectorA: PARAMETER_RANGES.repetitions,
+    repetitionsAlongLatticeVectorB: PARAMETER_RANGES.repetitions,
+    repetitionsAlongLatticeVectorC: PARAMETER_RANGES.repetitions,
+};
+/**
+ * Clamps whichever of these settings a patch carries, leaving everything else untouched.
+ *
+ * The menu clamps what a user types, but values also arrive from outside it - URL parameters
+ * (`utils/viewSettingsUrl.ts`) and a host's `initialViewSettings` - and those were never checked.
+ * That is how an out-of-range value gets in: a saved link with `atomRadiiScale=3` renders at 3, shows
+ * "3.00" in the field, pins the slider at its maximum, and then silently drops to the maximum the
+ * first time the slider is touched. Narrowing the radius range from 10 to 1 turned that from a corner
+ * case into a likely one, so the boundary is worth guarding rather than the control alone.
+ */
+export function clampParameterSettings(partialSettings) {
+    const clamped = { ...partialSettings };
+    Object.entries(RANGE_BY_SETTING).forEach(([key, range]) => {
+        const value = clamped[key];
+        if (typeof value === "number")
+            clamped[key] = clampToRange(value, range);
+    });
+    return clamped;
+}
 function ResetButton({ title, onClick }) {
     return (_jsx(Tooltip, { title: title, disableInteractive: true, children: _jsx(IconButton, { size: "small", "aria-label": title, onClick: onClick, sx: {
                 "&:focus-visible": {

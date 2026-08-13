@@ -282,7 +282,7 @@ export const ImageMixin = (superclass) =>
             // try/finally so a throw mid-capture cannot leave the viewer spinning: the restore
             // below used to be plain trailing statements, so any failure in frame capture or
             // GIF encoding left autoRotate on at the modified speed for the rest of the session.
-            const restoreSize = this.beginFixedRenderSize(side, side);
+            let restoreSize = this.beginFixedRenderSize(side, side);
 
             try {
                 const frames = [];
@@ -293,6 +293,14 @@ export const ImageMixin = (superclass) =>
                     await this.updateScene(); // Wait for rendering to finish
                     frames.push(this.getScreenshotImage()); // Capture screenshot
                 }
+
+                // Put the viewer back *before* encoding, not after. The frames are already captured,
+                // so the square drawing buffer has done its job - and encoding 60 of them takes
+                // seconds, during which the canvas would otherwise still be showing a 512x512 buffer
+                // stretched across its on-screen box. Restoring here means the visible distortion
+                // lasts only as long as the capture itself.
+                restoreSize();
+                restoreSize = null;
 
                 showInfoAlert("GIF is being created. Please wait...");
 
@@ -307,7 +315,8 @@ export const ImageMixin = (superclass) =>
                 // Restore original rotation settings
                 this.orbitControls.autoRotateSpeed = originalSpeed;
                 this.orbitControls.autoRotate = false;
-                restoreSize();
+                // Still guarded: a throw during capture never reaches the restore above.
+                if (restoreSize) restoreSize();
             }
         }
 

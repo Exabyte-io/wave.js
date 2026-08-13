@@ -50,7 +50,7 @@ import FigureExportDialog from "./FigureExportDialog";
 import IconsToolbar from "./IconsToolbar";
 import KeyboardSheet from "./KeyboardSheet";
 import ModePill from "./ModePill";
-import ParametersMenu from "./ParametersMenu";
+import ParametersMenu, { clampParameterSettings } from "./ParametersMenu";
 import QuickToggles from "./QuickToggles";
 import SelectionInspector from "./SelectionInspector";
 import StatusBar, { normalizeElement } from "./StatusBar";
@@ -119,8 +119,12 @@ export class ThreeDEditor extends React.Component {
             // TODO: remove the need for `viewerTriggerResize`
             // whether to trigger resize
             viewerTriggerResize: false,
-            // Settings of the wave viewer, merged with any initial overrides from URL params
-            viewerSettings: {
+            // Settings of the wave viewer, merged with any initial overrides from URL params.
+            // Clamped on the way in (clampParameterSettings): these values also arrive from a saved
+            // URL or a host's initialViewSettings, neither of which the parameters menu can vet, and
+            // an out-of-range one renders at that value while its slider pins at the maximum - then
+            // silently snaps there on first touch.
+            viewerSettings: clampParameterSettings({
                 isViewAdjustable: initialViewSettings.isViewAdjustable ?? settings.isViewAdjustable,
                 atomRadiiScale: initialViewSettings.atomRadiiScale ?? settings.atomRadiiScale,
                 repetitionsAlongLatticeVectorA:
@@ -132,7 +136,7 @@ export class ThreeDEditor extends React.Component {
                 chemicalConnectivityFactor:
                     initialViewSettings.chemicalConnectivityFactor ??
                     settings.chemicalConnectivityFactor,
-            },
+            }),
             // Toggle settings from URL to apply after Wave instance mounts
             _initialToggleSettings: {
                 orthographicCamera: initialViewSettings.orthographicCamera,
@@ -1769,7 +1773,10 @@ export class ThreeDEditor extends React.Component {
                         onExport={this.handleExportFigure}
                         viewportWidth={viewportSize.width}
                         viewportHeight={viewportSize.height}
-                        maxDimension={this.getMaxFigureDimension()}
+                        // Queried only while the dialog is open: it reads three GL parameters, and
+                        // this component re-renders on every selection change, drag commit and
+                        // transient hint. Undefined lets the dialog fall back to its own cap.
+                        maxDimension={isFigureExportOpen ? this.getMaxFigureDimension() : undefined}
                         isCameraOrthographic={Boolean(
                             this._getWaveProperty("isCameraOrthographic"),
                         )}
