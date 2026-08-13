@@ -1,7 +1,7 @@
 import { showInfoAlert, showSuccessAlert, showWarningAlert } from "@mat3ra/cove/dist/other/alerts";
 import { saveImageDataToFile } from "@mat3ra/cove/dist/utils/downloader";
 import * as THREE from "three";
-import { DEFAULT_MAX_FIGURE_DIMENSION, drawScaleBar, getFigureBackground, getFigureFileName, getScaleBarPlan, } from "../utils/figureExport";
+import { DEFAULT_MAX_FIGURE_DIMENSION, drawScaleBar, getFigureBackground, getFigureFileName, getGifSide, getScaleBarPlan, } from "../utils/figureExport";
 import { createGIFAsync } from "./utils";
 /**
  * Whether a line's colour is viewer chrome rather than data, for figure export (U-12).
@@ -45,6 +45,30 @@ export const ImageMixin = (superclass) => class extends superclass {
         catch (error) {
             return DEFAULT_MAX_FIGURE_DIMENSION;
         }
+    }
+    /**
+     * Points the renderer at an explicit pixel size and returns the function that puts it back.
+     *
+     * Shared by figure export and GIF recording, which have the same requirement - an output size
+     * that is stated rather than inherited from whatever the container happens to be - but
+     * different shapes, one synchronous and one an await loop over frames. Returning a restore
+     * callback lets both wrap it in their own try/finally rather than forcing one into the other's
+     * control flow.
+     */
+    beginFixedRenderSize(width, height) {
+        const { renderer } = this;
+        const saved = {
+            width: this.WIDTH,
+            height: this.HEIGHT,
+            pixelRatio: renderer.getPixelRatio(),
+        };
+        // Pinned to 1 so the output is the requested pixel count on a HiDPI display too.
+        renderer.setPixelRatio(1);
+        this.setViewportSize(width, height, false);
+        return () => {
+            renderer.setPixelRatio(saved.pixelRatio);
+            this.setViewportSize(saved.width, saved.height, false);
+        };
     }
     /**
      * World units (Ångström) spanned by one image pixel, which is what a scale bar needs.
@@ -121,14 +145,12 @@ export const ImageMixin = (superclass) => class extends superclass {
         const savedClearColor = new THREE.Color();
         renderer.getClearColor(savedClearColor);
         const saved = {
-            width: this.WIDTH,
-            height: this.HEIGHT,
-            pixelRatio: renderer.getPixelRatio(),
             clearAlpha: renderer.getClearAlpha(),
             sceneBackground: this.scene.background,
             fogColor: this.scene.fog ? this.scene.fog.color.clone() : null,
         };
         let restoreForeground = null;
+        let restoreSize = null;
         try {
             if (backgroundOption.foregroundColor) {
                 restoreForeground = this.applyFigureForeground(backgroundOption.foregroundColor);
@@ -142,9 +164,7 @@ export const ImageMixin = (superclass) => class extends superclass {
             if (this.scene.fog)
                 this.scene.fog.color.set(backgroundOption.clearColor);
             renderer.setClearColor(backgroundOption.clearColor, backgroundOption.clearAlpha);
-            // Pinned to 1 so the output is the requested pixel count on a HiDPI display too.
-            renderer.setPixelRatio(1);
-            this.setViewportSize(width, height, false);
+            restoreSize = this.beginFixedRenderSize(width, height);
             return includeScaleBar
                 ? this.composeFigureWithScaleBar({ width, height, backgroundOption })
                 : this.getScreenshotImage();
@@ -156,8 +176,8 @@ export const ImageMixin = (superclass) => class extends superclass {
             if (this.scene.fog && saved.fogColor)
                 this.scene.fog.color.copy(saved.fogColor);
             renderer.setClearColor(savedClearColor, saved.clearAlpha);
-            renderer.setPixelRatio(saved.pixelRatio);
-            this.setViewportSize(saved.width, saved.height, false);
+            if (restoreSize)
+                restoreSize();
         }
     }
     /**
@@ -222,8 +242,15 @@ export const ImageMixin = (superclass) => class extends superclass {
         // `canvas.willReadFrequently = true/false` used to be set around this block;
         // willReadFrequently is a getContext() attribute, not a canvas property, so those
         // assignments only added an inert expando.
-        const canvas = this.renderer.domElement;
-        const { width, height } = canvas;
+        //
+        // The frames are captured at a fixed square instead of at the canvas's own size. Taking
+        // the canvas size made every GIF the shape of whoever's window recorded it - wide,
+        // letterboxed wherever it was embedded, and clipping the structure at the extremes of the
+        // rotation, since a turning structure sweeps through its own width.
+        const side = getGifSide({
+            requested: options.size,
+            maxDimension: this.getMaxFigureDimension(),
+        });
         if (this.orbitControls.autoRotate) {
             showWarningAlert("Please disable auto-rotation before creating a GIF.");
             return null;
@@ -235,6 +262,7 @@ export const ImageMixin = (superclass) => class extends superclass {
         // try/finally so a throw mid-capture cannot leave the viewer spinning: the restore
         // below used to be plain trailing statements, so any failure in frame capture or
         // GIF encoding left autoRotate on at the modified speed for the rest of the session.
+        const restoreSize = this.beginFixedRenderSize(side, side);
         try {
             const frames = [];
             for (let i = 0; i < totalFrames; i += 1) {
@@ -246,8 +274,8 @@ export const ImageMixin = (superclass) => class extends superclass {
             showInfoAlert("GIF is being created. Please wait...");
             return await createGIFAsync({
                 images: frames,
-                gifWidth: width,
-                gifHeight: height,
+                gifWidth: side,
+                gifHeight: side,
                 sampleInterval,
                 frameDuration,
             });
@@ -256,6 +284,7 @@ export const ImageMixin = (superclass) => class extends superclass {
             // Restore original rotation settings
             this.orbitControls.autoRotateSpeed = originalSpeed;
             this.orbitControls.autoRotate = false;
+            restoreSize();
         }
     }
     async takeGifScreenshot(options = {}) {

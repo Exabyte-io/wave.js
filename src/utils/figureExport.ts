@@ -130,6 +130,28 @@ export const MIN_FIGURE_DIMENSION = 64;
  */
 export const DEFAULT_MAX_FIGURE_DIMENSION = 8192;
 
+/**
+ * Side of the square the rotating GIF is rendered at.
+ *
+ * Fixed rather than derived from the canvas: a GIF that inherits the window's aspect ratio comes out
+ * a different shape on every machine, and letterboxed wherever it is embedded. A rotating structure
+ * also *wants* a square - it sweeps through its own width as it turns, so the frame has to hold the
+ * structure's largest dimension in both axes or the animation clips at the extremes.
+ *
+ * 512 is smaller in area than the window-sized frames it replaces on a typical desktop, so encoding
+ * gets cheaper as well as more predictable.
+ */
+export const DEFAULT_GIF_SIDE_PX = 512;
+
+/** Square side for a GIF: the requested size, or the default, clamped to what the context allows. */
+export function getGifSide({
+    requested,
+    maxDimension = DEFAULT_MAX_FIGURE_DIMENSION,
+}: { requested?: number | null; maxDimension?: number } = {}): number {
+    const side = Number(requested) > 0 ? Number(requested) : DEFAULT_GIF_SIDE_PX;
+    return Math.min(Math.max(Math.round(side), MIN_FIGURE_DIMENSION), Math.round(maxDimension));
+}
+
 export interface FigureResolution {
     width: number;
     height: number;
