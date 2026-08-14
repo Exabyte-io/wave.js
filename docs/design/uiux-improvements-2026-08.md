@@ -45,8 +45,8 @@ All thirteen proposals are implemented as a branch chain off this document's bra
 | U-12 | `claude/uiux-p2-figure-export` | `e4fb816` | 70 |
 | U-13 | `claude/uiux-p2-touch-support` | `52539cf` | 32 |
 
-`tsc --noEmit` and `eslint src tests` are clean on the tip, and the whole suite passes: **440 passing**,
-30 suites, up from 185 at the branch point. The 17 visual-snapshot failures that were red throughout
+`tsc --noEmit` and `npm run lint` are clean on the tip, and the whole suite passes: **461 passing**,
+32 suites, up from 185 at the branch point. The 17 visual-snapshot failures that were red throughout
 this work were never caused by it — reproduced exactly on the branch point — and were fixed by
 regenerating the baselines the van der Waals radii fix (`7e3541f`) had invalidated (`5882636`, and
 §0.2). Every surface was also driven in Chromium against the **production bundle**, not just the dev

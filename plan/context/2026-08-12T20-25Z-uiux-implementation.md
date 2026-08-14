@@ -35,7 +35,7 @@ P0 and P1 — `U-1` through `U-11` — as one branch per item.
 | U-12 | `claude/uiux-p2-figure-export` | `e4fb816` | figure export |
 | U-13 | `claude/uiux-p2-touch-support` | `52539cf` | touch + small screens |
 
-Suite: **185 → 440 passing**, 30/30 suites, 0 failed. `tsc --noEmit` clean, `eslint src tests` 0 errors.
+Suite: **185 → 461 passing**, 32/32 suites, 0 failed. `tsc --noEmit` clean, `npm run lint` 0 errors.
 **Every U-n is now shipped.**
 
 ## 2. Decisions worth not relitigating

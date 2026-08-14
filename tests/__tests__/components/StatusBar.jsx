@@ -146,7 +146,9 @@ describe("StatusBar rendering", () => {
 
     it("marks the selection region as a live region", () => {
         const wrapper = mount(<StatusBar material={CUBIC_SIO2} selectedAtomIndices={[0]} />);
-        expect(wrapper.find('[data-name="StatusBarLive"]').first().prop("aria-live")).toBe("polite");
+        expect(wrapper.find('[data-name="StatusBarLive"]').first().prop("aria-live")).toBe(
+            "polite",
+        );
     });
 
     it("renders a chip per element and reports the clicked symbol", () => {
@@ -168,7 +170,11 @@ describe("StatusBar rendering", () => {
     });
 
     it("renders with no material at all rather than throwing", () => {
-        expect(mount(<StatusBar />).find('[data-name="StatusBar"]').exists()).toBe(true);
+        expect(
+            mount(<StatusBar />)
+                .find('[data-name="StatusBar"]')
+                .exists(),
+        ).toBe(true);
     });
 
     it("shows a measurement readout when one is supplied", () => {
