@@ -8,6 +8,7 @@ interface SquareIconButtonProps extends IconButtonProps {
     onClick: (...args: React.MouseEvent[]) => void;
     tooltipPlacement?: TooltipProps["placement"];
     isToggleable?: boolean;
+    isToggled?: boolean;
 }
 /**
  * Square icon button with toggle logic

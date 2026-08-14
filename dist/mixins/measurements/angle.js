@@ -8,6 +8,7 @@ export class AnglesMeasurementManager extends BaseMeasurementManager {
         const groupName = MEASUREMENT_MODES_ENUM.ANGLE;
         super(waveStructureGroup, waveCamera, wave, groupName, updateState);
         this.measurementType = MEASUREMENT_MODES_ENUM.ANGLE;
+        this.atomsPerMeasurement = 3;
         this.LabelsManagerCls = AngleLabelsManager;
         this.labelsManager = this.getLabelsManagerInstance();
     }

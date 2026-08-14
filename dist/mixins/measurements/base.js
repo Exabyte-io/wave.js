@@ -14,6 +14,14 @@ export class BaseMeasurementManager extends BaseManager {
         this.measurementType = MEASUREMENT_MODES_ENUM.NONE;
         this.selectedAtoms = [];
         this.isActive = false;
+        /**
+         * How many atom picks one measurement of this type consumes: a distance needs a pair, an
+         * angle a triplet, a coordinate copy just the one. Reported through getSettings() so the UI
+         * can say how many picks are still outstanding without hardcoding the arity a second time -
+         * the managers group their own selections by this number (getPairsOfSelectedAtoms,
+         * getTripletsOfSelectedAtoms), so this is the same fact, not a copy of it.
+         */
+        this.atomsPerMeasurement = 1;
         this.currentSelectedLine = null;
         this.toggleActive = () => {
             this.isActive = !this.isActive;
@@ -128,6 +136,10 @@ export class BaseMeasurementManager extends BaseManager {
             isActive: this.isActive,
             measurementType: this.measurementType,
             values: this.values,
+            // Picks made so far, so a partially-specified measurement ("1 of 2 picked") is
+            // visible instead of leaving the user guessing why nothing has been measured yet.
+            selectedAtomsCount: this.selectedAtoms.length,
+            atomsPerMeasurement: this.atomsPerMeasurement,
         };
     }
     onClick(event) {

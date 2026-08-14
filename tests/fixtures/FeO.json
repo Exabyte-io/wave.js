@@ -1,3 +1,83 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:b79fba6f0f40957225817e45ad0a9a86eaa60bdd2155e2fc1d115ac3259569f8
-size 1737
+{
+    "name": "FeO BCC",
+    "basis": {
+        "elements": [
+            {
+                "id": 0,
+                "value": "Fe"
+            },
+            {
+                "id": 1,
+                "value": "Fe"
+            },
+            {
+                "id": 2,
+                "value": "O"
+            },
+            {
+                "id": 3,
+                "value": "O"
+            }
+        ],
+        "coordinates": [
+            {
+                "id": 0,
+                "value": [0, 0, 0]
+            },
+            {
+                "id": 1,
+                "value": [0.5, 0.5, 0.5]
+            },
+            {
+                "id": 2,
+                "value": [0.25, 0.25, 0.25]
+            },
+            {
+                "id": 3,
+                "value": [0.75, 0.75, 0.75]
+            }
+        ],
+        "units": "crystal",
+        "labels": [
+            {
+                "id": 0,
+                "value": 1
+            },
+            {
+                "id": 1,
+                "value": 2
+            }
+        ],
+        "constraints": [
+            {
+                "id": 0,
+                "value": [true, true, true]
+            },
+            {
+                "id": 1,
+                "value": [true, true, true]
+            },
+            {
+                "id": 2,
+                "value": [true, true, true]
+            },
+            {
+                "id": 3,
+                "value": [true, true, true]
+            }
+        ]
+    },
+    "lattice": {
+        "a": 4.334,
+        "b": 4.334,
+        "c": 4.334,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90,
+        "units": {
+            "length": "angstrom",
+            "angle": "degree"
+        },
+        "type": "CUB"
+    }
+}

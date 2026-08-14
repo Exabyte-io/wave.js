@@ -1,0 +1,39 @@
+# Netlify deployment for the wave.js demo viewer.
+#
+# The point is to be able to try a branch's viewer in a real browser: every pull request gets its
+# own Deploy Preview URL, which is the only way to exercise things the Jest suite structurally
+# cannot reach - pointer capture, real event ordering, CSS layout at a given viewport, GPU
+# rendering (see docs/design/MANUAL_SMOKE.md).
+#
+# One manual step is required once, and cannot be done from the repository: link this repo to a
+# Netlify site (Netlify UI → Add new site → Import an existing project). Everything else is here.
+
+[build]
+    # `vite.config.js` sets base = "/wave.js/" so the GitHub Pages deploy resolves assets under
+    # that path. Netlify serves from the domain root, where that prefix would 404 every asset, so
+    # the base is overridden on the command line rather than in the config - leaving the Pages
+    # build untouched.
+    command = "npm run transpile && npx vite build --base=/"
+    publish = "build"
+
+[build.environment]
+    # Matches the version the CI verify job uses, so a green CI build means a green Netlify build.
+    NODE_VERSION = "20"
+
+# Deploy previews and branch deploys build exactly like production: the whole value of the preview
+# is that it is the same artifact reviewers would ship.
+[context.deploy-preview]
+    command = "npm run transpile && npx vite build --base=/"
+
+[context.branch-deploy]
+    command = "npm run transpile && npx vite build --base=/"
+
+# Deliberately no SPA catch-all redirect. The demo is a single index.html with no client-side
+# routing, so rewriting unknown paths to it would turn genuine 404s into a silently blank viewer.
+
+[[headers]]
+    for = "/*"
+    [headers.values]
+        # The viewer runs entirely client-side and loads nothing cross-origin.
+        X-Content-Type-Options = "nosniff"
+        Referrer-Policy = "strict-origin-when-cross-origin"

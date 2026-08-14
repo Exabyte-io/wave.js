@@ -8,7 +8,7 @@ export declare abstract class BaseLabelsAsPointsManager extends BaseLabelsManage
      * @param {String} name - name for the points object
      * @returns {THREE.Points}
      */
-    createLabelPoints(text: string, positions: number[], name: string): THREE.Points<THREE.BufferGeometry<THREE.NormalBufferAttributes>, THREE.PointsMaterial, THREE.Object3DEventMap>;
+    createLabelPoints(text: string, positions: number[], name: string): THREE.Points<THREE.BufferGeometry, THREE.PointsMaterial>;
     /**
      * Creates and positions multiple labels efficiently using Three.Points
      * For best performance when rendering many labels.

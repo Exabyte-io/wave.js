@@ -1,8 +1,26 @@
-import Box from "@mui/material/Box";
+import LinkIcon from "@mui/icons-material/Link";
+import LinkOffIcon from "@mui/icons-material/LinkOff";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Slider from "@mui/material/Slider";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import React from "react";
+import React, { useState } from "react";
+
+import settings from "../settings";
+
+/**
+ * Viewer parameters.
+ *
+ * These were five bare number inputs (finding F7). Their ranges existed only as invisible
+ * `inputProps`, there was no way back to a default, and nothing said what a value would cost - a
+ * 4x4x4 repetition on a 24-atom cell draws 1,536 atoms with no warning. Radius and bond cutoff in
+ * particular are found by nudging until the picture reads right, which is a job for a slider; the
+ * numeric box stays beside each one so a value can still be read off and reproduced exactly.
+ */
 
 export type ViewerSettings = {
     isViewAdjustable: boolean;
@@ -13,86 +31,306 @@ export type ViewerSettings = {
     chemicalConnectivityFactor: number;
 };
 
-type ViewerSettingsKey = keyof ViewerSettings;
+type PartialViewerSettings = Partial<ViewerSettings>;
 
 interface ParametersMenuProps {
     viewerSettings: ViewerSettings;
-    handleSphereRadiusChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleCellRepetitionsChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    handleChemicalConnectivityFactorChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    /** Atoms in the unit cell, so the repetition cost can be stated rather than guessed. */
+    atomCountInCell?: number;
+    onSettingChange: (setting: PartialViewerSettings) => void;
+}
+
+const REPETITION_AXES = ["A", "B", "C"] as const;
+const repetitionKey = (axis: string) =>
+    `repetitionsAlongLatticeVector${axis}` as keyof ViewerSettings;
+
+export const PARAMETER_RANGES = {
+    // Capped at 1 rather than 10: the scale multiplies each element's van der Waals radius, so 1 is
+    // already space-filling and everything above it is atoms swallowing the cell. A range whose top
+    // 90% is unusable also makes the useful band - around the 0.2 default - a few pixels of travel.
+    atomRadiiScale: { min: 0.1, max: 1, step: 0.05 },
+    chemicalConnectivityFactor: { min: 0, max: 2, step: 0.01 },
+    repetitions: { min: 1, max: 10, step: 1 },
+};
+
+/** Defaults come from settings, so "reset" cannot drift from what the viewer actually starts with. */
+export function getParameterDefaults(): PartialViewerSettings {
+    return {
+        atomRadiiScale: settings.atomRadiiScale,
+        chemicalConnectivityFactor: settings.chemicalConnectivityFactor,
+        repetitionsAlongLatticeVectorA: settings.repetitions,
+        repetitionsAlongLatticeVectorB: settings.repetitions,
+        repetitionsAlongLatticeVectorC: settings.repetitions,
+    };
+}
+
+/** How many atoms a repetition actually draws - the cost the old UI never mentioned. */
+export function getDrawnAtomCount(
+    viewerSettings: Pick<
+        ViewerSettings,
+        | "repetitionsAlongLatticeVectorA"
+        | "repetitionsAlongLatticeVectorB"
+        | "repetitionsAlongLatticeVectorC"
+    >,
+    atomCountInCell = 0,
+): number {
+    const product =
+        (viewerSettings.repetitionsAlongLatticeVectorA || 1) *
+        (viewerSettings.repetitionsAlongLatticeVectorB || 1) *
+        (viewerSettings.repetitionsAlongLatticeVectorC || 1);
+    return product * atomCountInCell;
+}
+
+function clampToRange(value: number, { min, max }: { min: number; max: number }): number {
+    if (Number.isNaN(value)) return min;
+    return Math.min(max, Math.max(min, value));
+}
+
+/** Which range governs each viewer setting the menu owns. Repetitions share one range. */
+const RANGE_BY_SETTING: Record<string, { min: number; max: number }> = {
+    atomRadiiScale: PARAMETER_RANGES.atomRadiiScale,
+    chemicalConnectivityFactor: PARAMETER_RANGES.chemicalConnectivityFactor,
+    repetitionsAlongLatticeVectorA: PARAMETER_RANGES.repetitions,
+    repetitionsAlongLatticeVectorB: PARAMETER_RANGES.repetitions,
+    repetitionsAlongLatticeVectorC: PARAMETER_RANGES.repetitions,
+};
+
+/**
+ * Clamps whichever of these settings a patch carries, leaving everything else untouched.
+ *
+ * The menu clamps what a user types, but values also arrive from outside it - URL parameters
+ * (`utils/viewSettingsUrl.ts`) and a host's `initialViewSettings` - and those were never checked.
+ * That is how an out-of-range value gets in: a saved link with `atomRadiiScale=3` renders at 3, shows
+ * "3.00" in the field, pins the slider at its maximum, and then silently drops to the maximum the
+ * first time the slider is touched. Narrowing the radius range from 10 to 1 turned that from a corner
+ * case into a likely one, so the boundary is worth guarding rather than the control alone.
+ */
+export function clampParameterSettings(
+    partialSettings: PartialViewerSettings,
+): PartialViewerSettings {
+    const clamped: Record<string, unknown> = { ...partialSettings };
+    Object.entries(RANGE_BY_SETTING).forEach(([key, range]) => {
+        const value = clamped[key];
+        if (typeof value === "number") clamped[key] = clampToRange(value, range);
+    });
+    return clamped as PartialViewerSettings;
+}
+
+function ResetButton({ title, onClick }: { title: string; onClick: () => void }) {
+    return (
+        <Tooltip title={title} disableInteractive>
+            <IconButton
+                size="small"
+                aria-label={title}
+                onClick={onClick}
+                sx={{
+                    "&:focus-visible": {
+                        outline: (theme) => `2px solid ${theme.palette.primary.main}`,
+                        outlineOffset: "1px",
+                    },
+                }}
+            >
+                <RestartAltIcon fontSize="inherit" />
+            </IconButton>
+        </Tooltip>
+    );
+}
+
+interface SliderRowProps {
+    label: string;
+    settingKey: "atomRadiiScale" | "chemicalConnectivityFactor";
+    value: number;
+    caption: string;
+    decimals: number;
+    onSettingChange: (setting: PartialViewerSettings) => void;
+}
+
+function SliderRow(props: SliderRowProps) {
+    const { label, settingKey, value, caption, decimals, onSettingChange } = props;
+    const range = PARAMETER_RANGES[settingKey];
+
+    return (
+        <Stack spacing={0.25} data-name={`Parameter-${settingKey}`}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="body2">{label}</Typography>
+                <ResetButton
+                    title={`Reset ${label.toLowerCase()}`}
+                    onClick={() =>
+                        onSettingChange({ [settingKey]: getParameterDefaults()[settingKey] })
+                    }
+                />
+            </Stack>
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+                <Slider
+                    size="small"
+                    value={value}
+                    min={range.min}
+                    max={range.max}
+                    step={range.step}
+                    aria-label={label}
+                    data-name={`ParameterSlider-${settingKey}`}
+                    onChange={(event, next) =>
+                        onSettingChange({ [settingKey]: Array.isArray(next) ? next[0] : next })
+                    }
+                    sx={{ flex: 1, minWidth: 0 }}
+                />
+                <TextField
+                    size="small"
+                    type="number"
+                    label="Value"
+                    className="inverse stepper"
+                    id={settingKey}
+                    value={Number(value).toFixed(decimals)}
+                    inputProps={{ ...range, "aria-label": `${label} value` }}
+                    sx={{ width: "6em", flexShrink: 0 }}
+                    onChange={(event) =>
+                        onSettingChange({
+                            [settingKey]: clampToRange(parseFloat(event.target.value), range),
+                        })
+                    }
+                />
+            </Stack>
+            {/* The range goes in the caption rather than as slider mark labels: MUI positions
+                those absolutely below the track, so they overlapped this line. Either way the
+                point is that the range is visible at all, which it was not when it lived only in
+                inputProps. Kept to one line - a paragraph under every control is noise in a menu
+                whose controls are already labelled. */}
+            <Typography variant="caption" color="text.secondary" noWrap>
+                {`${range.min}–${range.max} · ${caption}`}
+            </Typography>
+        </Stack>
+    );
 }
 
 function ParametersMenu(props: ParametersMenuProps) {
-    const {
-        viewerSettings,
-        handleCellRepetitionsChange,
-        handleSphereRadiusChange,
-        handleChemicalConnectivityFactorChange,
-    } = props;
+    const { viewerSettings, atomCountInCell = 0, onSettingChange } = props;
+    // A=B=C is the common case for a supercell, so linking is on by default but stays overridable.
+    const [isRepetitionLinked, setIsRepetitionLinked] = useState(true);
+
+    const range = PARAMETER_RANGES.repetitions;
+    const drawnAtoms = getDrawnAtomCount(viewerSettings, atomCountInCell);
+
+    const changeRepetition = (axis: string, rawValue: string) => {
+        const value = clampToRange(parseFloat(rawValue), range);
+        if (!isRepetitionLinked) {
+            onSettingChange({ [repetitionKey(axis)]: value });
+            return;
+        }
+        onSettingChange({
+            repetitionsAlongLatticeVectorA: value,
+            repetitionsAlongLatticeVectorB: value,
+            repetitionsAlongLatticeVectorC: value,
+        });
+    };
 
     return (
-        <Stack spacing={1.5} margin={2}>
-            <Typography variant="body1">Atomic radius</Typography>
-            <Box>
-                <TextField
-                    fullWidth
-                    label="Value"
-                    type="number"
-                    size="small"
-                    className="inverse stepper sphere-radius"
-                    id="sphere-radius"
-                    value={viewerSettings.atomRadiiScale}
-                    onChange={handleSphereRadiusChange}
-                    inputProps={{
-                        max: 10,
-                        min: 0.1,
-                        step: 0.1,
-                    }}
-                />
-            </Box>
-            <Typography variant="body1">Repetition along vectors:</Typography>
-            <Stack key="repetition" direction="row" spacing={1}>
-                {["A", "B", "C"].map((label) => {
-                    const key = `repetitionsAlongLatticeVector${label}` as ViewerSettingsKey;
+        <Stack spacing={2} margin={2} sx={{ width: "22em" }} data-name="ParametersMenu">
+            <SliderRow
+                label="Atomic radius"
+                settingKey="atomRadiiScale"
+                value={viewerSettings.atomRadiiScale}
+                decimals={2}
+                caption="1 = full van der Waals size"
+                onSettingChange={onSettingChange}
+            />
 
-                    return (
-                        <Box key={label}>
-                            <TextField
-                                label={label}
+            <Stack spacing={0.5} data-name="Parameter-repetitions">
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Typography variant="body2">Cell repetitions</Typography>
+                    <Stack direction="row" alignItems="center">
+                        <Tooltip
+                            title={
+                                isRepetitionLinked
+                                    ? "A, B and C change together — click to set them separately"
+                                    : "A, B and C change separately — click to link them"
+                            }
+                            disableInteractive
+                        >
+                            <IconButton
                                 size="small"
-                                type="number"
-                                className="inverse stepper cell-repetitions"
-                                id={`repetitionsAlongLatticeVector${label}`}
-                                value={viewerSettings[key]}
-                                onChange={handleCellRepetitionsChange}
-                                inputProps={{
-                                    max: 10,
-                                    min: 1,
-                                    step: 1,
+                                aria-label="Link repetitions"
+                                aria-pressed={isRepetitionLinked}
+                                data-name="RepetitionLink"
+                                data-active={isRepetitionLinked ? "true" : "false"}
+                                onClick={() => setIsRepetitionLinked(!isRepetitionLinked)}
+                                color={isRepetitionLinked ? "primary" : "default"}
+                                sx={{
+                                    "&:focus-visible": {
+                                        outline: (theme) =>
+                                            `2px solid ${theme.palette.primary.main}`,
+                                        outlineOffset: "1px",
+                                    },
                                 }}
-                            />
-                        </Box>
-                    );
-                })}
+                            >
+                                {isRepetitionLinked ? (
+                                    <LinkIcon fontSize="inherit" />
+                                ) : (
+                                    <LinkOffIcon fontSize="inherit" />
+                                )}
+                            </IconButton>
+                        </Tooltip>
+                        <ResetButton
+                            title="Reset repetitions"
+                            onClick={() =>
+                                onSettingChange({
+                                    repetitionsAlongLatticeVectorA: settings.repetitions,
+                                    repetitionsAlongLatticeVectorB: settings.repetitions,
+                                    repetitionsAlongLatticeVectorC: settings.repetitions,
+                                })
+                            }
+                        />
+                    </Stack>
+                </Stack>
+                <Stack direction="row" spacing={1}>
+                    {REPETITION_AXES.map((axis) => (
+                        <TextField
+                            key={axis}
+                            label={axis}
+                            size="small"
+                            type="number"
+                            className="inverse stepper cell-repetitions"
+                            id={`repetitionsAlongLatticeVector${axis}`}
+                            value={viewerSettings[repetitionKey(axis)]}
+                            inputProps={{ ...range, "aria-label": `Repetitions along ${axis}` }}
+                            sx={{ flex: 1, minWidth: 0 }}
+                            onChange={(event) => changeRepetition(axis, event.target.value)}
+                        />
+                    ))}
+                </Stack>
+                {Boolean(atomCountInCell) && (
+                    <Typography
+                        variant="caption"
+                        color={drawnAtoms > 2000 ? "warning.main" : "text.secondary"}
+                        data-name="RepetitionCost"
+                    >
+                        {`${viewerSettings.repetitionsAlongLatticeVectorA} × ${
+                            viewerSettings.repetitionsAlongLatticeVectorB
+                        } × ${
+                            viewerSettings.repetitionsAlongLatticeVectorC
+                        } → ${drawnAtoms.toLocaleString()} atoms`}
+                    </Typography>
+                )}
             </Stack>
-            <Typography variant="body1">Chemical connectivity factor</Typography>
-            <Box>
-                <TextField
-                    fullWidth
-                    size="small"
-                    label="Value"
-                    type="number"
-                    className="inverse stepper cell-repetitions"
-                    id="chemical-connectivity-factor"
-                    value={viewerSettings.chemicalConnectivityFactor}
-                    onChange={handleChemicalConnectivityFactorChange}
-                    inputProps={{
-                        max: 2,
-                        min: 0,
-                        step: 0.01,
-                    }}
-                />
-            </Box>
+
+            <SliderRow
+                label="Bond cutoff"
+                settingKey="chemicalConnectivityFactor"
+                value={viewerSettings.chemicalConnectivityFactor}
+                decimals={2}
+                caption="× the two atoms' van der Waals sum"
+                onSettingChange={onSettingChange}
+            />
+
+            <Button
+                size="small"
+                variant="text"
+                startIcon={<RestartAltIcon />}
+                data-name="ResetAllParameters"
+                sx={{ alignSelf: "flex-start", textTransform: "none" }}
+                onClick={() => onSettingChange(getParameterDefaults())}
+            >
+                Reset all
+            </Button>
         </Stack>
     );
 }

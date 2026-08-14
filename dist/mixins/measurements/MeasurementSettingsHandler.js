@@ -14,6 +14,15 @@ export class MeasurementSettingsHandler {
             Object.assign(settingsForType, newSettings);
         }
     }
+    /**
+     * The settings entry for whichever mode is currently armed, or null when none is. The modes
+     * are mutually exclusive in practice (toggling one clears the others), so "the active mode"
+     * is well defined; if that ever stopped holding, the first match is still the one whose
+     * clicks the user is about to make.
+     */
+    getActiveMeasurement() {
+        return this.measurementsSettings.find((setting) => setting.isActive) || null;
+    }
     getSettingsByType(measurementType) {
         const settingsForType = this.measurementsSettings.find((setting) => setting.measurementType === measurementType);
         if (!settingsForType) {

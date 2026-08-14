@@ -24,8 +24,18 @@ COPY src ./src
 COPY tsconfig.json ./tsconfig.json
 COPY babel.config.json ./babel.config.json
 
-# Install project dependencies
-RUN npm install --legacy-peer-deps
+# Install project dependencies.
+#
+# Retried for the same reason as the `verify` job in .github/workflows/cicd.yml: `sharp` (a
+# transitive dev dependency of `looks-same`) fetches a prebuilt libvips tarball from GitHub
+# Releases at install time, and a 503 there sends it down a source-compile path this image has
+# no libvips headers for - failing the image build on commits that changed nothing relevant.
+RUN for attempt in 1 2 3; do \
+        npm ci && exit 0; \
+        echo "npm ci failed (attempt $attempt of 4) - retrying"; \
+        sleep $((attempt * 15)); \
+    done; \
+    npm ci
 
 # Copy the entire repository into the container
 COPY . .

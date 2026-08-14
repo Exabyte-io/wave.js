@@ -28,6 +28,15 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
 
     isActive = false;
 
+    /**
+     * How many atom picks one measurement of this type consumes: a distance needs a pair, an
+     * angle a triplet, a coordinate copy just the one. Reported through getSettings() so the UI
+     * can say how many picks are still outstanding without hardcoding the arity a second time -
+     * the managers group their own selections by this number (getPairsOfSelectedAtoms,
+     * getTripletsOfSelectedAtoms), so this is the same fact, not a copy of it.
+     */
+    atomsPerMeasurement = 1;
+
     values!: any[];
 
     LabelsManagerCls!: LabelsManagerConstructor<T>;
@@ -159,6 +168,10 @@ export class BaseMeasurementManager<T extends BaseLabelsManager> extends BaseMan
             isActive: this.isActive,
             measurementType: this.measurementType,
             values: this.values,
+            // Picks made so far, so a partially-specified measurement ("1 of 2 picked") is
+            // visible instead of leaving the user guessing why nothing has been measured yet.
+            selectedAtomsCount: this.selectedAtoms.length,
+            atomsPerMeasurement: this.atomsPerMeasurement,
         };
     }
 

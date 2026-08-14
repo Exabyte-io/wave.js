@@ -1,0 +1,89 @@
+<svg viewBox="0 0 960 640" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="960" height="640" fill="#ffffff" stroke="#d0d7de" rx="10"/>
+  <text x="40" y="42" font-size="18" font-weight="600" fill="#24292f">Edit-mode pointer interaction — state machine</text>
+
+  <!-- Idle -->
+  <rect x="40" y="80" width="180" height="70" rx="8" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="130" y="108" font-size="15" font-weight="600" fill="#24292f" text-anchor="middle">Idle</text>
+  <text x="130" y="130" font-size="11.5" fill="#57606a" text-anchor="middle">edit mode on · no selection</text>
+
+  <!-- Hover -->
+  <rect x="310" y="80" width="200" height="70" rx="8" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="410" y="108" font-size="15" font-weight="600" fill="#24292f" text-anchor="middle">Hover</text>
+  <text x="410" y="130" font-size="11.5" fill="#57606a" text-anchor="middle">atom under cursor · cursor: move</text>
+
+  <!-- Pending drag -->
+  <rect x="620" y="80" width="230" height="70" rx="8" fill="#fff8c5" stroke="#d4a72c" stroke-width="1.5"/>
+  <text x="735" y="108" font-size="15" font-weight="600" fill="#24292f" text-anchor="middle">Pending drag</text>
+  <text x="735" y="130" font-size="11.5" fill="#57606a" text-anchor="middle">pointer down on atom · moved &lt; 5 px</text>
+
+  <!-- Selected -->
+  <rect x="310" y="320" width="200" height="84" rx="8" fill="#ddf4ff" stroke="#54aeff" stroke-width="1.5"/>
+  <text x="410" y="350" font-size="15" font-weight="600" fill="#24292f" text-anchor="middle">Selected</text>
+  <text x="410" y="370" font-size="11.5" fill="#57606a" text-anchor="middle">gizmo attached · coordinate</text>
+  <text x="410" y="386" font-size="11.5" fill="#57606a" text-anchor="middle">panel active</text>
+
+  <!-- Dragging -->
+  <rect x="620" y="320" width="230" height="84" rx="8" fill="#ddf4ff" stroke="#0969da" stroke-width="2"/>
+  <text x="735" y="350" font-size="15" font-weight="600" fill="#24292f" text-anchor="middle">Dragging</text>
+  <text x="735" y="370" font-size="11.5" fill="#57606a" text-anchor="middle">camera-parallel plane · depth locked</text>
+  <text x="735" y="386" font-size="11.5" fill="#57606a" text-anchor="middle">orbit frozen · pointer captured</text>
+
+  <!-- Gizmo drag -->
+  <rect x="310" y="520" width="200" height="70" rx="8" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.5"/>
+  <text x="410" y="548" font-size="15" font-weight="600" fill="#24292f" text-anchor="middle">Gizmo drag</text>
+  <text x="410" y="570" font-size="11.5" fill="#57606a" text-anchor="middle">TransformControls owns pointer</text>
+
+  <!-- Idle -> Hover -->
+  <line x1="220" y1="103" x2="308" y2="103" stroke="#57606a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="264" y="95" font-size="11" fill="#57606a" text-anchor="middle">pointer over atom</text>
+  <!-- Hover -> Idle -->
+  <line x1="310" y1="132" x2="222" y2="132" stroke="#57606a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="264" y="150" font-size="11" fill="#57606a" text-anchor="middle">pointer out</text>
+
+  <!-- Hover -> Pending -->
+  <line x1="510" y1="115" x2="618" y2="115" stroke="#57606a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="564" y="105" font-size="11" fill="#57606a" text-anchor="middle">pointerdown (LMB only)</text>
+
+  <!-- Pending -> Selected (click) -->
+  <line x1="650" y1="150" x2="480" y2="318" stroke="#57606a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="530" y="222" font-size="11" fill="#57606a" text-anchor="middle">pointerup &lt; 5 px</text>
+  <text x="530" y="237" font-size="11" fill="#57606a" text-anchor="middle">= click → select</text>
+
+  <!-- Pending -> Dragging -->
+  <line x1="735" y1="150" x2="735" y2="318" stroke="#57606a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="745" y="222" font-size="11" fill="#57606a">move ≥ 5 px:</text>
+  <text x="745" y="237" font-size="11" fill="#57606a">capture cursor–atom offset,</text>
+  <text x="745" y="252" font-size="11" fill="#57606a">freeze orbit, select atom</text>
+
+  <!-- Dragging -> Selected (commit) -->
+  <line x1="620" y1="345" x2="512" y2="345" stroke="#57606a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="550" y="333" font-size="11" fill="#1a7f37" text-anchor="middle" font-weight="600">pointerup → commit</text>
+
+  <!-- Dragging -> Selected (esc) -->
+  <line x1="620" y1="385" x2="512" y2="385" stroke="#cf222e" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+  <text x="548" y="420" font-size="11" fill="#cf222e" text-anchor="middle" font-weight="600">Esc → revert, no history</text>
+
+  <!-- Selected -> Gizmo -->
+  <line x1="380" y1="404" x2="380" y2="518" stroke="#57606a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="370" y="465" font-size="11" fill="#57606a" text-anchor="end">pointerdown on</text>
+  <text x="370" y="480" font-size="11" fill="#57606a" text-anchor="end">gizmo handle</text>
+
+  <!-- Gizmo -> Selected -->
+  <line x1="445" y1="518" x2="445" y2="406" stroke="#57606a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="455" y="465" font-size="11" fill="#57606a">pointerup →</text>
+  <text x="455" y="480" font-size="11" fill="#57606a">commit only if Δ ≠ 0</text>
+
+  <!-- Selected -> Idle -->
+  <line x1="310" y1="352" x2="128" y2="152" stroke="#57606a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="180" y="255" font-size="11" fill="#57606a" text-anchor="middle">click empty space / Esc</text>
+
+  <!-- Footnotes -->
+  <text x="40" y="620" font-size="11" fill="#57606a">Every commit = exactly one undo entry + one onStructureModified(material′). From Selected, pointerdown on a different atom re-enters Pending drag for that atom.</text>
+</svg>

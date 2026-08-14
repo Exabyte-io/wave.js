@@ -8,6 +8,7 @@ export class DistancesMeasurementManager extends BaseMeasurementManager {
         const groupName = MEASUREMENT_MODES_ENUM.DISTANCE;
         super(waveStructureGroup, waveCamera, wave, groupName, updateState);
         this.measurementType = MEASUREMENT_MODES_ENUM.DISTANCE;
+        this.atomsPerMeasurement = 2;
         this.LabelsManagerCls = DistanceLabelsManager;
         this.labelsManager = new DistanceLabelsManager(waveStructureGroup, waveCamera, wave, groupName);
         this.currentSelectedLine = null;

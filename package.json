@@ -5,12 +5,13 @@
     "scripts": {
         "build": "npm run transpile && vite build",
         "start": "vite",
-        "transpile": "tsc && npm run copy-css",
+        "transpile": "rm -rf dist && tsc && npm run copy-css",
         "copy-css": "mkdir -p dist/stylesheets && cp src/stylesheets/* dist/stylesheets/",
+        "prepack": "npm run transpile",
         "prestart": "npm-link-shared ./node_modules/@mat3ra/cove/node_modules . react",
         "test": "npx jest",
-        "lint": "eslint src tests",
-        "lint:fix": "eslint --fix --cache src tests",
+        "lint": "eslint src tests --report-unused-disable-directives",
+        "lint:fix": "eslint --fix --cache src tests --report-unused-disable-directives",
         "prepare": "husky install"
     },
     "repository": {
@@ -23,12 +24,12 @@
         "/src",
         "babel.config.json"
     ],
-    "author": "Exabyte Inc.",
+    "author": "Mat3ra Inc.",
     "bugs": {
         "url": "https://github.com/mat3ra/wave.js/issues"
     },
     "license": "Apache-2.0",
-    "homepage": "https://github.com/mat3ra/wave.js",
+    "homepage": ".",
     "dependencies": {
         "@emotion/react": "^11.10.5",
         "@emotion/styled": "^11.10.5",
@@ -39,21 +40,16 @@
         "@mui/styles": "^5.11.7",
         "classnames": "^2.3.1",
         "gifshot": "^0.4.5",
-        "jquery": "3.6.0",
         "mixwith": "^0.1.1",
         "moment": "^2.29.4",
-        "pixelmatch": "^5.3.0",
         "prop-types": "^15.8.0",
-        "sprintf-js": "^1.1.2",
         "static-kdtree": "^1.0.2",
-        "three": "npm:@exabyte-io/three@2023.8.23-0",
-        "typescript": "^5.7.3",
-        "underscore": "^1.8.3",
-        "underscore.string": "^3.3.4"
+        "three": "^0.140.2",
+        "underscore": "^1.8.3"
     },
     "peerDependencies": {
-        "@mat3ra/cove": "*",
         "@mat3ra/code": "*",
+        "@mat3ra/cove": "*",
         "@mat3ra/esse": "*",
         "@mat3ra/made": "*",
         "@mat3ra/utils": "*",
@@ -61,9 +57,9 @@
         "react-dom": "^17.0.0"
     },
     "devDependencies": {
-        "@mat3ra/cove": "2026.7.18-4",
         "@exabyte-io/eslint-config": "^2025.1.15-0",
         "@mat3ra/code": "2026.8.13-0",
+        "@mat3ra/cove": "2026.7.18-4",
         "@mat3ra/esse": "2026.8.13-0",
         "@mat3ra/made": "2026.8.13-0",
         "@mat3ra/tsconfig": "^2024.6.3-0",
@@ -71,8 +67,7 @@
         "@types/react": "^18.2.8",
         "@types/react-dom": "^18.2.4",
         "@types/static-kdtree": "^1.0.3",
-        "@types/three": "^0.173.0",
-        "@types/underscore": "^1.11.9",
+        "@types/three": "^0.140.0",
         "@typescript-eslint/eslint-plugin": "^5.56.0",
         "@typescript-eslint/parser": "^5.56.0",
         "@vitejs/plugin-react": "^4.3.4",
@@ -101,12 +96,14 @@
         "lint-staged": "^12.1.2",
         "looks-same": "^9.0.0",
         "npm-link-shared": "^0.5.6",
+        "pixelmatch": "^5.3.0",
         "pngjs": "6.0.0",
         "prettier": "2.5.1",
         "react": "^17.0.0",
         "react-dom": "^17.0.0",
         "react-error-overlay": "^6.0.9",
         "react-test-renderer": "^17.0.0",
+        "typescript": "^5.7.3",
         "vite": "^6.0.7",
         "vite-plugin-commonjs": "^0.10.4",
         "vite-plugin-node-polyfills": "^0.26.0",

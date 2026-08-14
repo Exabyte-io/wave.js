@@ -132,9 +132,7 @@ export const BondsMixin = (superclass) => class extends superclass {
         const maxBondLength = this.getMaxBondLength(bondsData);
         const elementsAndCoordinatesArray1 = this.basis.elementsAndCoordinatesArray;
         const elementsAndCoordinatesArray2 = this.getElementsAndCoordinatesArrayWithEdgeNeighbors(maxBondLength);
-        const tree = createKDTree(
-        // eslint-disable-next-line no-unused-vars
-        elementsAndCoordinatesArray2.map(([element, coordinate]) => coordinate));
+        const tree = createKDTree(elementsAndCoordinatesArray2.map(([element, coordinate]) => coordinate));
         const baseBondsData = [];
         elementsAndCoordinatesArray1.forEach(([element1, coordinate1], index1) => {
             // iterate over all elements in maxBondLength radius of this element. O(3n^(2/3))

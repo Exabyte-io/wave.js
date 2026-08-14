@@ -9,6 +9,8 @@ import { BaseMeasurementManager } from "./base";
 export class AnglesMeasurementManager extends BaseMeasurementManager<AngleLabelsManager> {
     measurementType = MEASUREMENT_MODES_ENUM.ANGLE;
 
+    override atomsPerMeasurement = 3;
+
     override LabelsManagerCls: LabelsManagerConstructor<AngleLabelsManager> = AngleLabelsManager;
 
     constructor(

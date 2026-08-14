@@ -22,7 +22,6 @@ export const RepetitionMixin = (superclass) => class extends superclass {
      * The method receives coordinates in the form of a cube (NxNxN) and repetitions we want to display
      * Returns a new array based on the received data
      */
-    // eslint-disable-next-line class-methods-use-this
     coordinatesByAxes(coordinates, repetitions) {
         const { repetitionsAlongLatticeVectorA, repetitionsAlongLatticeVectorB, repetitionsAlongLatticeVectorC, } = repetitions;
         const maxNumberOfRepetitions = Math.max(repetitionsAlongLatticeVectorA, repetitionsAlongLatticeVectorB, repetitionsAlongLatticeVectorC);
@@ -116,7 +115,6 @@ export const RepetitionMixin = (superclass) => class extends superclass {
     /**
      * Creates a cloned atom with a unique atomic index based on its position in the repetition grid
      */
-    // eslint-disable-next-line class-methods-use-this
     createClonedAtomWithUniqueIndex(originalAtom, gridPosition, dimensions, originalAtomCount, point) {
         const { indexA, indexB, indexC } = gridPosition;
         const { dimB, dimC } = dimensions;

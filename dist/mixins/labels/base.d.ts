@@ -15,13 +15,13 @@ export declare abstract class BaseLabelsManager extends BaseTHREEGroupManager {
     /**
      * Creates a sprite with a label text
      */
-    createLabelSprite(text: string, name: string): THREE.Sprite<THREE.Object3DEventMap>;
+    createLabelSprite(text: string, name: string): THREE.Sprite;
     /**
      * Creates and positions multiple labels as sprites
      * More flexible but less performant than Points for many labels
      */
-    createLabelsAsSprites(verticesHashMap: VerticesHashMapHandler, threeGroup?: THREE.Group<THREE.Object3DEventMap>): void;
-    createLabels(atoms?: THREE.Object3D, threeGroup?: THREE.Group<THREE.Object3DEventMap>): void;
+    createLabelsAsSprites(verticesHashMap: VerticesHashMapHandler, threeGroup?: THREE.Group): void;
+    createLabels(atoms?: THREE.Object3D, threeGroup?: THREE.Group): void;
     getLabelPositionWithOffset(position: THREE.Vector3, atomName: string): THREE.Vector3;
     /**
      * Adjusts labels to camera position. Applied to labels of a specific type.

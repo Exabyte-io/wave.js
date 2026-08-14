@@ -5,6 +5,7 @@ import { DistanceLabelsManager } from "../labels/distance";
 import { BaseMeasurementManager } from "./base";
 export declare class DistancesMeasurementManager extends BaseMeasurementManager<DistanceLabelsManager> {
     measurementType: MEASUREMENT_MODES_ENUM;
+    atomsPerMeasurement: number;
     LabelsManagerCls: LabelsManagerConstructor<DistanceLabelsManager>;
     constructor(waveStructureGroup: THREE.Group, waveCamera: THREE.Camera, wave: any, updateState: (arg: object) => void);
     onClick(updateState: (arg: object) => void, event: MouseEvent): void;

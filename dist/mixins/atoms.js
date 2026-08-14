@@ -109,11 +109,9 @@ export const AtomsMixin = (superclass) => class extends superclass {
         });
         return atomGroups;
     }
-    // eslint-disable-next-line class-methods-use-this
     isTHREEObjectAnAtom(object) {
         return object instanceof THREE.Mesh;
     }
-    // eslint-disable-next-line class-methods-use-this
     getAtomNameFromObject(object) {
         return object.name.split("-")[0];
     }

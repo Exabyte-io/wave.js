@@ -19,6 +19,8 @@ interface ToolbarConfig {
     header?: string;
     onClick: (...args: React.MouseEvent[]) => void;
     leftIcon: React.ReactNode;
+    /** Renders the button inert and greyed - used by items whose action is not currently available. */
+    disabled?: boolean;
     actions?: NestedDropdownAction[];
     contentObject?: NestedDropdownProps["contentObject"];
     paperPlacement?: NestedDropdownProps["paperPlacement"];
@@ -97,12 +99,13 @@ function IconsToolbar(props: IconToolbarProps) {
                                 </NestedDropdown>
                             );
                         }
-                        const { id, key, title, onClick, leftIcon } = config;
+                        const { id, key, title, onClick, leftIcon, disabled } = config;
                         return (
                             <SquareIconButton
                                 key={key || id}
                                 data-name={id}
                                 title={title}
+                                disabled={disabled}
                                 onClick={onClick}
                             >
                                 {leftIcon}

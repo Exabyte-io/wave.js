@@ -26,7 +26,6 @@ export const CellMixin = (superclass) => class extends superclass {
      * @param zMultiplier {Number} specifies a multiplier to adjust the z coordinates of the cell vertices with.
      */
     // TODO: move to made.unit_cell
-    // eslint-disable-next-line class-methods-use-this
     getCellVertices(cell, zMultiplier = 1) {
         return [
             [0, 0, 0],

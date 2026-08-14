@@ -42,3 +42,20 @@ Wave.prototype.getWebGLRenderer = (config) => {
 
 window.setImmediate = window.setTimeout;
 window.clearImmediate = window.clearTimeout;
+
+/**
+ * jsdom does not implement ResizeObserver (a real browser API); every real browser Wave.js
+ * targets has it, so this is a test-environment polyfill, not a production fallback.
+ */
+class ResizeObserverMock {
+    // eslint-disable-next-line class-methods-use-this
+    observe() {}
+
+    // eslint-disable-next-line class-methods-use-this
+    unobserve() {}
+
+    // eslint-disable-next-line class-methods-use-this
+    disconnect() {}
+}
+window.ResizeObserver = ResizeObserverMock;
+global.ResizeObserver = ResizeObserverMock;

@@ -12,5 +12,5 @@ export class Wave {
     doFunc(func: any): void;
     clearView(): void;
     adjustCamerasAndOrbitControlsToCell(): void;
-    collectAllAtoms(): any[];
+    collectSelectableAtoms(): any[];
 }

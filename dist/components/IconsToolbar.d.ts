@@ -7,6 +7,8 @@ interface ToolbarConfig {
     header?: string;
     onClick: (...args: React.MouseEvent[]) => void;
     leftIcon: React.ReactNode;
+    /** Renders the button inert and greyed - used by items whose action is not currently available. */
+    disabled?: boolean;
     actions?: NestedDropdownAction[];
     contentObject?: NestedDropdownProps["contentObject"];
     paperPlacement?: NestedDropdownProps["paperPlacement"];

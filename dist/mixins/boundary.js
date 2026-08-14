@@ -29,7 +29,6 @@ export const BoundaryMixin = (superclass) => class extends superclass {
      * @param coordinates4 {Array} fourth point.
      * @param zOffset {Number} offset to add to the z coordinate of points forming the object.
      */
-    // eslint-disable-next-line class-methods-use-this
     getBoundaryMeshObject(color, coordinates1, coordinates2, coordinates3, coordinates4, zOffset = 0) {
         const geometry = new THREE.BufferGeometry();
         const vertices = new Float32Array([coordinates1, coordinates2, coordinates3, coordinates3, coordinates4, coordinates1]

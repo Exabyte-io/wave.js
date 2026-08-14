@@ -1,0 +1,115 @@
+<svg viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect x="0" y="0" width="1000" height="720" fill="#ffffff" stroke="#d0d7de" rx="10"/>
+  <text x="30" y="36" font-size="18" font-weight="600" fill="#24292f">Making modes visible — and making “off” look off</text>
+  <text x="30" y="58" font-size="12.5" fill="#57606a">Today a measurement mode is armed from a dropdown that then closes, leaving nothing on screen to say that clicks now measure instead of select.</text>
+
+  <!-- ===== A. mode pill states ===== -->
+  <text x="30" y="88" font-size="12.5" font-weight="700" fill="#57606a">A · MODE PILL, ONE PER ACTIVE MODE</text>
+  <rect x="30" y="98" width="940" height="222" rx="8" fill="#202020"/>
+
+  <!-- edit -->
+  <g>
+    <rect x="220" y="114" width="560" height="34" rx="17" fill="#0d2440" stroke="#1f6feb"/>
+    <rect x="230" y="122" width="46" height="18" rx="9" fill="#1f6feb"/>
+    <text x="253" y="135" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">EDIT</text>
+    <text x="286" y="136" font-size="11.5" fill="#cbe3ff">drag = move · RMB = orbit · Del = remove · Esc = deselect · ? = keys</text>
+    <text x="764" y="136" font-size="13" fill="#8fb8e8" text-anchor="middle">✕</text>
+  </g>
+  <!-- distance -->
+  <g>
+    <rect x="220" y="160" width="560" height="34" rx="17" fill="#3a2a06" stroke="#d29922"/>
+    <rect x="230" y="168" width="76" height="18" rx="9" fill="#d29922"/>
+    <text x="268" y="181" font-size="10.5" font-weight="700" fill="#1c1c00" text-anchor="middle">DISTANCE</text>
+    <text x="316" y="182" font-size="11.5" fill="#f2d98a">click two atoms —</text>
+    <text x="424" y="182" font-size="11.5" font-weight="700" fill="#ffffff">1 of 2 picked</text>
+    <text x="510" y="182" font-size="11.5" fill="#f2d98a">· X = clear last · result copied to clipboard</text>
+    <text x="764" y="182" font-size="13" fill="#e8c76a" text-anchor="middle">✕</text>
+  </g>
+  <!-- angle -->
+  <g>
+    <rect x="220" y="206" width="560" height="34" rx="17" fill="#3a2a06" stroke="#d29922"/>
+    <rect x="230" y="214" width="60" height="18" rx="9" fill="#d29922"/>
+    <text x="260" y="227" font-size="10.5" font-weight="700" fill="#1c1c00" text-anchor="middle">ANGLE</text>
+    <text x="300" y="228" font-size="11.5" fill="#f2d98a">click three atoms —</text>
+    <text x="420" y="228" font-size="11.5" font-weight="700" fill="#ffffff">2 of 3 picked</text>
+    <text x="764" y="228" font-size="13" fill="#e8c76a" text-anchor="middle">✕</text>
+  </g>
+  <!-- coordinate copy -->
+  <g>
+    <rect x="220" y="252" width="560" height="34" rx="17" fill="#3a2a06" stroke="#d29922"/>
+    <rect x="230" y="260" width="98" height="18" rx="9" fill="#d29922"/>
+    <text x="279" y="273" font-size="10.5" font-weight="700" fill="#1c1c00" text-anchor="middle">COORDINATES</text>
+    <text x="338" y="274" font-size="11.5" fill="#f2d98a">every atom you click is copied to the clipboard</text>
+    <text x="764" y="274" font-size="13" fill="#e8c76a" text-anchor="middle">✕</text>
+  </g>
+  <text x="500" y="308" font-size="11" fill="#6e7681" text-anchor="middle">View mode shows no pill — absence of a pill means clicks do nothing but orbit.</text>
+
+  <!-- ===== B. checkmark vs switch ===== -->
+  <text x="30" y="352" font-size="12.5" font-weight="700" fill="#57606a">B · VIEW MENU — TODAY</text>
+  <text x="530" y="352" font-size="12.5" font-weight="700" fill="#0969da">B · VIEW MENU — PROPOSED</text>
+
+  <!-- today -->
+  <rect x="30" y="362" width="440" height="196" rx="8" fill="#2b2b2b" stroke="#3f3f3f"/>
+  <g font-size="12" fill="#c9d1d9">
+    <text x="48" y="388">⟳   Rotate/Zoom [O]</text>
+    <text x="446" y="388" fill="#57ab5a" text-anchor="end" font-size="13">✓</text>
+    <text x="48" y="418">↻   Auto Rotate</text>
+    <text x="446" y="418" fill="#555c63" text-anchor="end" font-size="13">✓</text>
+    <text x="48" y="448">⊹   Axes</text>
+    <text x="446" y="448" fill="#555c63" text-anchor="end" font-size="13">✓</text>
+    <text x="48" y="478">≡   Bonds [B]</text>
+    <text x="446" y="478" fill="#57ab5a" text-anchor="end" font-size="13">✓</text>
+    <text x="48" y="508">▢   Conventional Cell</text>
+    <text x="446" y="508" fill="#555c63" text-anchor="end" font-size="13">✓</text>
+    <text x="48" y="538">▣   Orthographic Camera</text>
+    <text x="446" y="538" fill="#555c63" text-anchor="end" font-size="13">✓</text>
+  </g>
+  <rect x="424" y="406" width="36" height="24" rx="4" fill="none" stroke="#e5534b" stroke-dasharray="4 3"/>
+  <text x="416" y="422" font-size="10.5" fill="#f08a84" text-anchor="end">off — but still a ✓</text>
+  <text x="452" y="352" font-size="11" fill="#e5534b" text-anchor="end" font-weight="600">grey ✓ = off</text>
+
+  <!-- proposed -->
+  <rect x="530" y="362" width="440" height="196" rx="8" fill="#2b2b2b" stroke="#3f3f3f"/>
+  <g font-size="12" fill="#c9d1d9">
+    <text x="548" y="388">⟳   Rotate/Zoom</text>
+    <rect x="814" y="378" width="14" height="14" rx="3" fill="#21262d" stroke="#484f58"/>
+    <text x="821" y="389" font-size="9" fill="#8b949e" text-anchor="middle">O</text>
+    <rect x="912" y="381" width="30" height="15" rx="7.5" fill="#1f6feb"/>
+    <circle cx="934" cy="388.5" r="6" fill="#ffffff"/>
+
+    <text x="548" y="418">↻   Auto Rotate</text>
+    <rect x="912" y="411" width="30" height="15" rx="7.5" fill="#4a5157"/>
+    <circle cx="920" cy="418.5" r="6" fill="#c9d1d9"/>
+
+    <text x="548" y="448">⊹   Axes</text>
+    <rect x="912" y="441" width="30" height="15" rx="7.5" fill="#4a5157"/>
+    <circle cx="920" cy="448.5" r="6" fill="#c9d1d9"/>
+
+    <text x="548" y="478">≡   Bonds</text>
+    <rect x="814" y="468" width="14" height="14" rx="3" fill="#21262d" stroke="#484f58"/>
+    <text x="821" y="479" font-size="9" fill="#8b949e" text-anchor="middle">B</text>
+    <rect x="912" y="471" width="30" height="15" rx="7.5" fill="#1f6feb"/>
+    <circle cx="934" cy="478.5" r="6" fill="#ffffff"/>
+
+    <text x="548" y="508">▢   Conventional Cell</text>
+    <rect x="912" y="501" width="30" height="15" rx="7.5" fill="#4a5157"/>
+    <circle cx="920" cy="508.5" r="6" fill="#c9d1d9"/>
+
+    <text x="548" y="538">▣   Orthographic Camera</text>
+    <rect x="912" y="531" width="30" height="15" rx="7.5" fill="#4a5157"/>
+    <circle cx="920" cy="538.5" r="6" fill="#c9d1d9"/>
+  </g>
+  <text x="808" y="352" font-size="11" fill="#0969da" text-anchor="end" font-weight="600">keycap</text>
+  <text x="964" y="352" font-size="11" fill="#0969da" text-anchor="end" font-weight="600">switch</text>
+
+  <!-- Legend -->
+  <g font-size="12.5" fill="#24292f">
+    <text x="30" y="596"><tspan font-weight="700">A</tspan>  One pill per active mode, top-centre, carrying the bindings that exist nowhere in the UI today: the edit-mode RMB-orbit remap</text>
+    <text x="47" y="614">(spec §3f), Delete-to-remove, Esc semantics, and — for measurements — how many picks are still needed and the fact that the result</text>
+    <text x="47" y="632">is written to the clipboard. The ✕ exits the mode without going back through the menu that armed it.</text>
+
+    <text x="30" y="662"><tspan font-weight="700">B</tspan>  <tspan font-weight="600">“Off” must not be a checkmark.</tspan> <tspan font-family="monospace" font-size="11.5">getCheckmark()</tspan> renders every inactive item as a grey ✓, which reads as “checked but</text>
+    <text x="47" y="680">disabled” rather than “off”. A switch has exactly one reading. A keycap chip in a fixed slot also beats spelling the key inside the</text>
+    <text x="47" y="698">label text, which is why some rows say “[O]” and others say nothing at all.</text>
+  </g>
+</svg>

@@ -1,2 +1,6 @@
 *.actual.png
 *.diff.png
+# move-actual-expected.sh writes its rollback copies into expected/ as <name>.save.png. They
+# are not baselines, and the documented finishing step is `git add .../expected`, which would
+# otherwise commit all 18 of them as plain (non-LFS) blobs.
+*.save.png

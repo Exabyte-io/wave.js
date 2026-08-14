@@ -10,12 +10,14 @@ import { BondsMixin } from "./mixins/bonds";
 import { BoundaryMixin } from "./mixins/boundary";
 import { CellMixin } from "./mixins/cell";
 import { ControlsMixin } from "./mixins/controls";
+import { GroupTransformMixin } from "./mixins/group_transform";
 import { ImageMixin } from "./mixins/image";
+import { InteractiveStructureEditorMixin } from "./mixins/interactive_structure_editor";
 import { AllLabelsMixin } from "./mixins/labels/all";
+import { MarqueeSelectionMixin } from "./mixins/marquee_selection";
 import { AllMeasurementsMixin } from "./mixins/measurements/all";
 import { RepetitionMixin } from "./mixins/repetition";
 import SETTINGS from "./settings";
-// eslint-disable-next-line import/no-cycle
 
 const TV3 = THREE.Vector3;
 const TCo = THREE.Color;
@@ -87,14 +89,26 @@ class WaveBase {
         this.renderer.domElement.style.height = "100%";
         this.container.appendChild(this.renderer.domElement);
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
-        // TODO: detach listener on exit
-        window.addEventListener(
-            "resize",
-            () => {
-                this.handleResize();
-            },
-            false,
-        );
+        // Observes the container itself (not the window) so resizing works correctly when the
+        // container's size changes for reasons other than a window resize (e.g. a layout panel
+        // opening/closing) - disconnected in dispose() to avoid leaking across reset/re-init.
+        this._resizeObserver = new ResizeObserver(() => this.handleResize());
+        this._resizeObserver.observe(this.container);
+    }
+
+    /**
+     * Releases the renderer/WebGL context and the resize observer. Must be called before
+     * discarding a Wave instance (e.g. on component unmount or before constructing a
+     * replacement instance for the same container), otherwise both leak.
+     */
+    dispose() {
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+            this._resizeObserver = null;
+        }
+        if (this.renderer) {
+            this.renderer.dispose();
+        }
     }
 
     /**
@@ -171,6 +185,13 @@ class WaveBase {
         this.orthographicCamera.right = (sceneSize / 2) * this.ASPECT;
         this.orthographicCamera.top = sceneSize / 2;
         this.orthographicCamera.bottom = -sceneSize / 2;
+        // Kept here rather than left to each caller so the frustum fields and the matrix that
+        // actually projects can never disagree. adjustCamerasTargetAndFrustum did not update it,
+        // so between construction and the first resize the orthographic camera rendered the
+        // initial +-10 frustum from initCameras instead of the cell-fitted one - invisible in a
+        // browser, where ResizeObserver fires immediately and handleResize repaired it, and
+        // load-bearing for figure export, whose scale bar reads these fields.
+        this.orthographicCamera.updateProjectionMatrix();
     }
 
     initScene() {
@@ -198,12 +219,30 @@ class WaveBase {
      * @param {node} domElement
      */
     handleResize(domElement = this.container) {
+        this.setViewportSize(domElement.clientWidth, domElement.clientHeight);
+    }
+
+    /**
+     * Points the renderer and both cameras at an explicit pixel size.
+     *
+     * `updateStyle: false` changes only the drawing buffer and leaves the canvas's CSS size alone,
+     * which is what figure export needs (mixins/image.js): it renders at a publication resolution
+     * that the on-screen layout must not follow, and `renderer.setSize` would otherwise replace the
+     * `width: 100%` set in initRenderer with a pixel width and break the responsive canvas.
+     *
+     * @param width {Number} drawing buffer width in pixels
+     * @param height {Number} drawing buffer height in pixels
+     * @param updateStyle {Boolean} whether to also set the canvas element's CSS size
+     */
+    setViewportSize(width, height, updateStyle = true) {
         const { maxSize } = this.getCellViewParams();
 
-        this.WIDTH = domElement.clientWidth;
-        this.HEIGHT = domElement.clientHeight;
-        this.ASPECT = this.WIDTH / this.HEIGHT;
-        this.renderer.setSize(this.WIDTH, this.HEIGHT);
+        this.WIDTH = width;
+        this.HEIGHT = height;
+        // Guarded as in initDimensions: a container measured at zero height (a collapsed panel, or
+        // a detached node) otherwise puts NaN into the projection matrix and blanks the canvas.
+        this.ASPECT = width > 0 && height > 0 ? width / height : 1;
+        this.renderer.setSize(width, height, updateStyle);
         this.perspectiveCamera.aspect = this.ASPECT;
         this.perspectiveCamera.updateProjectionMatrix();
 
@@ -246,6 +285,9 @@ export class Wave extends mix(WaveBase).with(
     AllLabelsMixin,
     AllMeasurementsMixin,
     ImageMixin,
+    MarqueeSelectionMixin,
+    GroupTransformMixin,
+    InteractiveStructureEditorMixin,
 ) {
     /**
      *
@@ -272,23 +314,44 @@ export class Wave extends mix(WaveBase).with(
         this.adjustOrbitControlsTarget(cellViewParams.center);
     }
 
-    collectAllAtoms() {
+    // Scoped to the FIRST child named ATOM_GROUP_NAME, matching extractBasisFromScene's own
+    // (already-fixed) traversal in utils.js: RepetitionMixin.repeatAtomsAtRepetitionCoordinates
+    // adds the real, base-structure group first and every repetition clone after, each also
+    // named ATOM_GROUP_NAME but with its atoms' userData.atomicIndex deliberately offset out of
+    // the material's actual range. Iterating every matching group (the previous behavior) made
+    // those clones - with out-of-range indices - real, clickable, draggable meshes in edit mode:
+    // selecting one showed a blank/zero coordinate panel (indexing basis.coordinates[] with an
+    // index that doesn't exist), and dragging one committed a spurious no-op history entry before
+    // visibly snapping back on the next rebuild (the clone's position is always re-derived from
+    // the unchanged base atom, never actually stored).
+    collectSelectableAtoms() {
         const atoms = [];
-        this.structureGroup.children.forEach((group) => {
-            if (group.name !== ATOM_GROUP_NAME) return;
-
-            group.children.forEach((atom) => {
+        const atomsGroup = this.structureGroup.children.find(
+            (group) => group.name === ATOM_GROUP_NAME,
+        );
+        if (atomsGroup) {
+            atomsGroup.children.forEach((atom) => {
                 if (atom instanceof THREE.Mesh) {
                     atoms.push(atom);
                 }
             });
-        });
+        }
 
         return atoms;
     }
 
     // Called on each change to the Redux store via reloadViewer.
     rebuildScene() {
+        // Rebuilding replaces every atom mesh, so the edit-mode selection (and the gizmo
+        // attached to it) must be re-pointed at the atoms' new mesh instances afterwards. Uses
+        // the full multi-select array (D-4), not just the single last-selected atom - otherwise
+        // a rebuild mid-group-selection (e.g. the host's onStructureModified round-trip calling
+        // setStructure+rebuildScene again after a group move/rotate/clone) would silently
+        // collapse the selection down to one atom.
+        const selectedAtomicIndices = (this.selectedMeshes_ || []).map(
+            (mesh) => mesh.userData.atomicIndex,
+        );
+
         this.clearView();
         this.drawAtomsAsSpheres();
         this.drawUnitCell();
@@ -296,6 +359,7 @@ export class Wave extends mix(WaveBase).with(
         if (this.isDrawBondsEnabled) this.drawBonds();
         this.createAllLabels();
         this.createAllMeasurements();
+        if (this.isEditModeEnabled_) this.reselectAtomsByIndices(selectedAtomicIndices);
         this.render();
     }
 

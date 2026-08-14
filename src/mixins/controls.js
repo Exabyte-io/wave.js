@@ -81,7 +81,6 @@ const OrbitControlsMixin = (superclass) =>
             this.performOrbitControlsAnimation();
         }
 
-        // eslint-disable-next-line class-methods-use-this
         performOrbitControlsAnimation(action = () => {}) {
             this.animationFrameId = window.requestAnimationFrame(
                 this.performOrbitControlsAnimation,
@@ -302,6 +301,65 @@ export const ControlsMixin = (superclass) =>
                     if (!skipStateUpdate) {
                         this.updateControlsFromState(initialState, this.getControlsState());
                     }
+                }
+
+                /**
+                 * Points the camera down a lattice vector, framing the whole cell.
+                 *
+                 * Reset View was the only camera command the viewer had (finding F12), though
+                 * axis-aligned views are a primary control in VESTA and CrystalMaker. Paired with
+                 * the orthographic toggle these give an exact projection, which is what makes a
+                 * screen-plane drag an exact two-axis move (editor spec section 3a).
+                 *
+                 * `axis` is "a", "b", "c" or "111" (the body diagonal). Distance is recomputed to
+                 * fit the cell rather than preserved, since the point is to frame the structure
+                 * along that direction - unlike focusCameraOnSelection, which deliberately keeps
+                 * the current viewing angle.
+                 */
+                setCameraAlongCellVector(axis) {
+                    if (!this.orbitControls || !this._cell) return;
+                    const cell = this._cell;
+                    const vectors = {
+                        a: [cell.ax, cell.ay, cell.az],
+                        b: [cell.bx, cell.by, cell.bz],
+                        c: [cell.cx, cell.cy, cell.cz],
+                        111: [
+                            cell.ax + cell.bx + cell.cx,
+                            cell.ay + cell.by + cell.cy,
+                            cell.az + cell.bz + cell.cz,
+                        ],
+                    };
+                    const raw = vectors[axis];
+                    if (!raw || raw.some((component) => !Number.isFinite(component))) return;
+
+                    const direction = new TV3(...raw);
+                    // A degenerate vector would put the camera on top of the target; keep the
+                    // current view rather than producing a NaN transform.
+                    if (direction.lengthSq() < 1e-9) return;
+                    direction.normalize();
+
+                    const { center, maxSize } = this.getCellViewParams();
+                    const target = new TV3(...center);
+                    const size = Math.max(maxSize, 1);
+
+                    let distance;
+                    if (this.camera.isOrthographicCamera) {
+                        this.setOrthographicCameraFrustum(this.PADDING_RATIO * size);
+                        // Orthographic framing comes from the frustum, so the distance only has to
+                        // clear the geometry.
+                        distance = Math.max(size * 4, 10);
+                    } else {
+                        const fovInRadians = (this.camera.fov * Math.PI) / 180;
+                        distance = (this.PADDING_RATIO * size) / Math.tan(fovInRadians / 2);
+                    }
+
+                    this.camera.position.copy(
+                        target.clone().add(direction.multiplyScalar(distance)),
+                    );
+                    this.orbitControls.target.copy(target);
+                    this.camera.lookAt(target);
+                    this.orbitControls.update();
+                    this.render();
                 }
 
                 updateControlsFromState(initialState, finalState) {

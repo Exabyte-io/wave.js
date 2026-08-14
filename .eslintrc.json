@@ -14,5 +14,21 @@
     "rules": {
         // To avoid "Missing return type on function"
         "@typescript-eslint/explicit-module-boundary-types": "off"
-    }
+    },
+    "overrides": [
+        {
+            // The mixin tree is built on template methods and abstract base classes:
+            // `LabelsMixin.getLabelTextFromLabeledObject` is abstract with four overrides,
+            // `MeasurementsMixin.getAdditionalObjectsFromSelectedObjects` has two, and the
+            // listener mixins expose deliberately empty hooks for subclasses to fill in. A
+            // base or hook implementation that legitimately ignores `this` is the point of
+            // that design (see AGENTS.md, "polymorphism over type-checking chains"), so
+            // `class-methods-use-this` only produces false positives here - it was already
+            // being suppressed by hand at a dozen individual call sites.
+            "files": ["src/mixins/**/*.ts", "src/mixins/**/*.js"],
+            "rules": {
+                "class-methods-use-this": "off"
+            }
+        }
+    ]
 }

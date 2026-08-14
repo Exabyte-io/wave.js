@@ -25,6 +25,14 @@ export declare class BaseMeasurementManager<T extends BaseLabelsManager> extends
     measurementType: MEASUREMENT_MODES_ENUM;
     selectedAtoms: THREE.Object3D[];
     isActive: boolean;
+    /**
+     * How many atom picks one measurement of this type consumes: a distance needs a pair, an
+     * angle a triplet, a coordinate copy just the one. Reported through getSettings() so the UI
+     * can say how many picks are still outstanding without hardcoding the arity a second time -
+     * the managers group their own selections by this number (getPairsOfSelectedAtoms,
+     * getTripletsOfSelectedAtoms), so this is the same fact, not a copy of it.
+     */
+    atomsPerMeasurement: number;
     values: any[];
     LabelsManagerCls: LabelsManagerConstructor<T>;
     labelsManager: any;
@@ -40,7 +48,7 @@ export declare class BaseMeasurementManager<T extends BaseLabelsManager> extends
     unsetAtomAsSelected(atomObject: THREE.Object3D): void;
     setIntersectedAtom(intersectItem: THREE.Object3D | null): void;
     isIntersectedAtomSelected(): boolean;
-    getIntersections(): THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>[];
+    getIntersections(): THREE.Intersection<THREE.Object3D<THREE.Event>>[];
     toggleAtomSelection(atomObject: THREE.Object3D): void;
     toggleLineSelection(line: THREE.Line): void;
     refillSelectedAtoms(): void;
@@ -48,12 +56,14 @@ export declare class BaseMeasurementManager<T extends BaseLabelsManager> extends
         isActive: boolean;
         measurementType: MEASUREMENT_MODES_ENUM;
         values: any[];
+        selectedAtomsCount: number;
+        atomsPerMeasurement: number;
     };
     onClick(event: MouseEvent): void;
     onPointerMove: (event: MouseEvent) => void;
     copyValuesToClipboard(): void;
     extractMeasurementValues(): number[] | number[][];
-    createMeasurementLabel(text: string, name: string, position: THREE.Vector3, threeGroup?: THREE.Group<THREE.Object3DEventMap>): void;
+    createMeasurementLabel(text: string, name: string, position: THREE.Vector3, threeGroup?: THREE.Group): void;
     getLabelObjectsFromSelectedObjects(): THREE.Object3D[];
     getAdditionalObjectsFromSelectedObjects(): THREE.Object3D[];
     createMeasurements(): void;

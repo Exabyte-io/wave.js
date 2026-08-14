@@ -1,3 +1,4 @@
+import * as THREE from "three";
 declare module "@mat3ra/periodic-table" {
     interface Element {
         van_der_Waals_radius_pm: number;
@@ -11,7 +12,7 @@ declare const _default: {
     sphereRadius: number;
     sphereQuality: number;
     elementColors: any;
-    vdwRadii: number[];
+    vdwRadii: Record<string, number>;
     lineWidth: number;
     lineMaterial: {
         dashSize: number;
@@ -114,12 +115,12 @@ declare const _default: {
     labelPointsConfig: {
         size: number;
         depthTest: boolean;
-        depthFunc: 7;
+        depthFunc: THREE.DepthModes;
         transparent: boolean;
     };
     labelSpriteConfig: {
         transparent: boolean;
-        depthFunc: 3;
+        depthFunc: THREE.DepthModes;
         depthTest: boolean;
     };
     boundaryConditionTypeColors: {
@@ -127,7 +128,13 @@ declare const _default: {
         bc2: number[];
         bc3: number[];
     };
+    /**
+     * Single-character keys, dispatched from a `keypress` handler. Every entry here appears in
+     * the keyboard sheet automatically, so a rebind cannot leave a stale label behind - the
+     * drift that produced defect D2, where a tooltip promised a hotkey that did not exist.
+     */
     hotKeysConfig: {
+        toggleKeyboardSheet: string;
         toggleOrbitControls: string;
         toggleInteractive: string;
         toggleBonds: string;
@@ -138,6 +145,44 @@ declare const _default: {
         toggleAnglesShown: string;
         toggleCopyCoordinatesShown: string;
         deleteConnection: string;
+        toggleEditMode: string;
+        focusCameraOnSelection: string;
+    };
+    /**
+     * Editor keys that `keypress` never fires for - non-character keys and modifier combos - so
+     * they are handled on `keydown` instead. They used to be hardcoded inside
+     * ThreeDEditor.handleEditModeKeyDown, which meant the keyboard sheet had no way to know about
+     * them and they appeared in no tooltip or menu at all. Declaring them here makes the handler
+     * and the sheet read from one source.
+     *
+     * `usesModifier: true` means Ctrl on Windows/Linux and Cmd on macOS; `requiresShift` is
+     * additive on top of it. `keys` lists every key that triggers the action.
+     */
+    editorKeysConfig: {
+        undo: {
+            keys: string[];
+            usesModifier: boolean;
+            requiresShift: boolean;
+            label: string;
+        };
+        redo: {
+            keys: string[];
+            usesModifier: boolean;
+            requiresShift: boolean;
+            label: string;
+        };
+        removeSelected: {
+            keys: string[];
+            usesModifier: boolean;
+            requiresShift: boolean;
+            label: string;
+        };
+        cancelOrDeselect: {
+            keys: string[];
+            usesModifier: boolean;
+            requiresShift: boolean;
+            label: string;
+        };
     };
     measurementLabelsConfig: {
         areSpritesUsed: boolean;

@@ -43,9 +43,9 @@ export function parseViewSettingsFromUrlParams(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 params) {
     const result = {};
-    for (const [paramName, rawValue] of Object.entries(params)) {
+    Object.entries(params).forEach(([paramName, rawValue]) => {
         if (rawValue === undefined || rawValue === "")
-            continue;
+            return;
         const valueStr = String(rawValue);
         // Special handling for `repetitions` (comma-separated or single number)
         if (paramName === "repetitions") {
@@ -67,11 +67,11 @@ params) {
                 if (c !== undefined && c >= 1)
                     result.repetitionsAlongLatticeVectorC = c;
             }
-            continue;
+            return;
         }
         const parser = PARAM_PARSERS[paramName];
         if (!parser)
-            continue;
+            return;
         if (parser.type === "number") {
             const n = parseNumber(valueStr);
             if (n !== undefined) {
@@ -90,7 +90,7 @@ params) {
                 }
             }
         }
-    }
+    });
     return result;
 }
 /**
@@ -115,7 +115,9 @@ export function serializeViewSettingsToUrlParams(viewSettings) {
         const a = repA !== null && repA !== void 0 ? repA : settings.repetitions;
         const b = repB !== null && repB !== void 0 ? repB : settings.repetitions;
         const c = repC !== null && repC !== void 0 ? repC : settings.repetitions;
-        if (a !== settings.repetitions || b !== settings.repetitions || c !== settings.repetitions) {
+        if (a !== settings.repetitions ||
+            b !== settings.repetitions ||
+            c !== settings.repetitions) {
             if (a === b && b === c) {
                 params.repetitions = String(a);
             }
@@ -134,11 +136,11 @@ export function serializeViewSettingsToUrlParams(viewSettings) {
         { key: "coordinateLabels", urlKey: "coordinateLabels" },
         { key: "conventionalCell", urlKey: "conventionalCell" },
     ];
-    for (const { key, urlKey } of booleanParams) {
+    booleanParams.forEach(({ key, urlKey }) => {
         if (viewSettings[key] !== undefined) {
             params[urlKey] = String(viewSettings[key]);
         }
-    }
+    });
     if (viewSettings.isViewAdjustable !== undefined &&
         viewSettings.isViewAdjustable !== settings.isViewAdjustable) {
         params.isViewAdjustable = String(viewSettings.isViewAdjustable);

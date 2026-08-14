@@ -30,8 +30,8 @@ function IconsToolbar(props) {
                             , { ...config, actions: config.actions, contentObject: config.contentObject, key: config.key || config.id, "data-name": config.id, paperPlacement: config.paperPlacement || "right-start", paperSx: paperSx, isMobile: isMobile },
                                 _jsx(SquareIconButton, { "data-name": config.id, title: config.title, onClick: config.onClick, children: config.leftIcon }, `button-${config.key}` || `button-${config.id}`)));
                         }
-                        const { id, key, title, onClick, leftIcon } = config;
-                        return (_jsx(SquareIconButton, { "data-name": id, title: title, onClick: onClick, children: leftIcon }, key || id));
+                        const { id, key, title, onClick, leftIcon, disabled } = config;
+                        return (_jsx(SquareIconButton, { "data-name": id, title: title, disabled: disabled, onClick: onClick, children: leftIcon }, key || id));
                     })] }, "toolbar-button-group") }));
 }
 export default IconsToolbar;

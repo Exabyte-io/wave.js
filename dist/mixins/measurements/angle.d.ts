@@ -5,6 +5,7 @@ import { LabelsManagerConstructor } from "../labels/base";
 import { BaseMeasurementManager } from "./base";
 export declare class AnglesMeasurementManager extends BaseMeasurementManager<AngleLabelsManager> {
     measurementType: MEASUREMENT_MODES_ENUM;
+    atomsPerMeasurement: number;
     LabelsManagerCls: LabelsManagerConstructor<AngleLabelsManager>;
     constructor(waveStructureGroup: THREE.Group, waveCamera: THREE.Camera, wave: any, updateState: (arg: object) => void);
     onClick(updateState: (arg: object) => void, event: MouseEvent): void;

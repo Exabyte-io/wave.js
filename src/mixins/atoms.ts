@@ -145,7 +145,7 @@ export const AtomsMixin = (superclass: any) =>
         }
 
         getAtomGroups() {
-            const atomGroups: THREE.Object3D<THREE.Object3DEventMap>[] = [];
+            const atomGroups: THREE.Object3D[] = [];
             this.structureGroup.children.forEach((group: THREE.Group) => {
                 if (group.name === ATOM_GROUP_NAME) {
                     atomGroups.push(...group.children);
@@ -154,12 +154,10 @@ export const AtomsMixin = (superclass: any) =>
             return atomGroups;
         }
 
-        // eslint-disable-next-line class-methods-use-this
         isTHREEObjectAnAtom(object: any) {
             return object instanceof THREE.Mesh;
         }
 
-        // eslint-disable-next-line class-methods-use-this
         getAtomNameFromObject(object: any) {
             return object.name.split("-")[0];
         }

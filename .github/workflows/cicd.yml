@@ -9,6 +9,46 @@ concurrency:
 
 jobs:
 
+  # Lint, typecheck and build. Deliberately not containerized: none of these need a GL
+  # context, so they run in ~2 minutes on a plain runner and gate every push. This
+  # replaces the commented-out `actions/js/validate` step below, whose absence let 19
+  # eslint errors accumulate on a branch unnoticed.
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      # Retried because `npm ci` here fails for reasons that have nothing to do with the commit
+      # being tested: `sharp` (a transitive dev dependency of `looks-same`, used by the visual
+      # regression tests) downloads a prebuilt libvips tarball from GitHub Releases during
+      # install, and when that endpoint returns 503 the install falls back to compiling libvips
+      # from source - which this runner has no headers for. That has turned CI red on unrelated
+      # commits. An upstream outage should cost a retry, not a red build.
+      - name: Install dependencies
+        run: |
+          for attempt in 1 2 3; do
+            if npm ci; then exit 0; fi
+            echo "::warning::npm ci failed (attempt $attempt of 4) - retrying"
+            sleep $((attempt * 15))
+          done
+          npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
   run-tests:
     runs-on: ubuntu-24.04
 
@@ -56,7 +96,7 @@ jobs:
 
 
   publish:
-    needs: run-tests
+    needs: [verify, run-tests]
     runs-on: ubuntu-latest
     if: github.ref_name == 'dev'
 
