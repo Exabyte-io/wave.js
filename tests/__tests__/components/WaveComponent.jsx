@@ -12,7 +12,7 @@ Enzyme.configure({ adapter: new Adapter() });
 const { mount } = Enzyme;
 
 const material = new Made.Material(MATERIAL_CONFIG);
-const baseCell = material.Lattice.unitCell;
+const baseCell = material.getLattice().unitCell;
 
 function mountWaveComponent() {
     const container = createElement("div", ELEMENT_PROPERTIES);

@@ -797,7 +797,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
      */
     applyBasisDelta_(mutateBasis) {
         const updatedMaterial = this.structure.clone();
-        const basis = updatedMaterial.Basis;
+        const basis = updatedMaterial.getBasis();
         mutateBasis(basis);
         updatedMaterial.setBasis(basis.toJSON());
         return updatedMaterial;
@@ -815,7 +815,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
                 : basis.cell.convertPointToCrystal(cartesianCoordinates);
             basis.addAtom({ element: elementName, coordinate });
         });
-        const newIndex = newMaterial.Basis.elements.length - 1;
+        const newIndex = newMaterial.getBasis().elements.length - 1;
         this.setStructure(newMaterial);
         this.structureGroup.name = newMaterial.name || newMaterial.formula;
         this.rebuildScene();
@@ -944,7 +944,7 @@ export const InteractiveStructureEditorMixin = (superclass) => class extends sup
                 basis.addAtom({ element, coordinate });
             });
         });
-        const startIndex = newMaterial.Basis.elements.length - sourceAtoms.length;
+        const startIndex = newMaterial.getBasis().elements.length - sourceAtoms.length;
         const newIndices = sourceAtoms.map((_atom, index) => startIndex + index);
         this.setStructure(newMaterial);
         this.rebuildScene();

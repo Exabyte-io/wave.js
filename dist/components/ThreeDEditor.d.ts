@@ -499,7 +499,7 @@ export class ThreeDEditor extends React.Component<any, any, any> {
 }
 export namespace ThreeDEditor {
     namespace propTypes {
-        let material: PropTypes.Validator<import("@mat3ra/made").Material>;
+        let material: PropTypes.Validator<import("@mat3ra/made").Material<import("@mat3ra/made/dist/js/Material").MaterialSchemaMap>>;
         let editable: PropTypes.Requireable<boolean>;
         let isConventionalCellShown: PropTypes.Requireable<boolean>;
         let boundaryConditions: PropTypes.Requireable<object>;

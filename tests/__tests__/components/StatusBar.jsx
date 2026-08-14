@@ -15,7 +15,8 @@ Enzyme.configure({ adapter: new Adapter() });
 const { mount } = Enzyme;
 
 // Deliberately plain objects, not Made.Material: the status bar reads the material and never
-// mutates it, so its unit tests need no GL context and no real Basis/Lattice construction.
+// mutates it, so its unit tests need no GL context and no real Basis/Lattice construction. `getLattice` is a
+// function because that is what Made.Material exposes since the constraints refactor (SOF-7926).
 const CUBIC_SIO2 = {
     formula: "Si8O16",
     basis: {
@@ -27,10 +28,10 @@ const CUBIC_SIO2 = {
             { id: 3, value: "Si" },
         ],
     },
-    Lattice: {
+    getLattice: () => ({
         type: "CUB",
         unitCell: { ax: 7.164, ay: 0, az: 0, bx: 0, by: 7.164, bz: 0, cx: 0, cy: 0, cz: 7.164 },
-    },
+    }),
 };
 
 describe("normalizeElement", () => {
@@ -86,10 +87,10 @@ describe("getLatticeSummary", () => {
 
     it("lists all three lengths when they differ", () => {
         const tetragonal = {
-            Lattice: {
+            getLattice: () => ({
                 type: "TET",
                 unitCell: { ax: 3.9, ay: 0, az: 0, bx: 0, by: 3.9, bz: 0, cx: 0, cy: 0, cz: 4.2 },
-            },
+            }),
         };
         expect(getLatticeSummary(tetragonal)).toBe("TET · a, b, c = 3.900, 3.900, 4.200 Å");
     });
@@ -98,9 +99,9 @@ describe("getLatticeSummary", () => {
         // A non-orthogonal cell: |a| is the vector norm (5), never the ax component (3). This is
         // the same class of mistake defect D22 made when it took a cell centre component-wise.
         const triclinic = {
-            Lattice: {
+            getLattice: () => ({
                 unitCell: { ax: 3, ay: 4, az: 0, bx: 0, by: 5, bz: 0, cx: 0, cy: 0, cz: 5 },
-            },
+            }),
         };
         const summary = getLatticeSummary(triclinic);
         expect(summary).toBe("a = 5.000 Å");
@@ -109,8 +110,10 @@ describe("getLatticeSummary", () => {
     });
 
     it("falls back to the lattice type when there is no cell", () => {
-        expect(getLatticeSummary({ Lattice: { type: "FCC" } })).toBe("FCC");
+        expect(getLatticeSummary({ getLattice: () => ({ type: "FCC" }) })).toBe("FCC");
         expect(getLatticeSummary(null)).toBe("");
+        // A material predating the accessor, or one that simply has no lattice, must not throw.
+        expect(getLatticeSummary({})).toBe("");
     });
 });
 

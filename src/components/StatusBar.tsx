@@ -37,7 +37,7 @@ export interface MaterialLike {
     unitCellFormula?: string;
     name?: string;
     basis?: BasisLike;
-    Lattice?: LatticeLike;
+    getLattice?: () => LatticeLike | undefined;
 }
 
 export interface StatusBarProps {
@@ -81,8 +81,9 @@ const norm = (x: number, y: number, z: number) => Math.sqrt(x * x + y * y + z * 
  * drawn.
  */
 export function getLatticeSummary(material?: MaterialLike | null): string {
-    const cell = material?.Lattice?.unitCell;
-    const type = material?.Lattice?.type;
+    const lattice = material?.getLattice?.();
+    const cell = lattice?.unitCell;
+    const type = lattice?.type;
     if (!cell) return type || "";
     const { ax = 0, ay = 0, az = 0, bx = 0, by = 0, bz = 0, cx = 0, cy = 0, cz = 0 } = cell;
     const a = norm(ax, ay, az);

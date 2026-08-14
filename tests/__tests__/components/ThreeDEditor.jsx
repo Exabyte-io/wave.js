@@ -302,8 +302,8 @@ test("Add Atom places the new atom at the true cell center, not the component-wi
     // by definition), which is a cleaner, convention-independent way to assert this than
     // re-deriving Cartesian coordinates by hand.
     const newMaterial = wrapper.state("material");
-    const addedCoordinate = newMaterial.Basis.coordinatesAsArray[1];
-    const { ax, ay, az, bx, by, bz, cx, cy, cz } = skewedMaterial.Lattice.unitCell;
+    const addedCoordinate = newMaterial.getBasis().coordinatesAsArray[1];
+    const { ax, ay, az, bx, by, bz, cx, cy, cz } = skewedMaterial.getLattice().unitCell;
     const trueCenterCartesian = [(ax + bx + cx) / 2, (ay + by + cy) / 2, (az + bz + cz) / 2];
     const diagonalCenterCartesian = [ax / 2, by / 2, cz / 2];
 
@@ -324,7 +324,7 @@ test("Add Atom offsets a new atom that would otherwise land on an existing one",
     wrapper.update();
 
     const newMaterial = wrapper.state("material");
-    const basis = newMaterial.Basis;
+    const basis = newMaterial.getBasis();
     basis.toCartesian(); // OCCUPIED_TOLERANCE/OFFSET_STEP are Cartesian (Å); compare in the same space
     const [first, second] = basis.coordinatesAsArray.slice(-2);
     const distance = Math.sqrt(
@@ -694,7 +694,7 @@ describe("Full-stack regression: pre-existing interactions survive through the r
         expect(startPosition.equals(endPosition)).toBe(false);
         expect(wrapper.state("historyPointer")).toBe(1);
 
-        const basis = wrapper.state("material").Basis;
+        const basis = wrapper.state("material").getBasis();
         basis.toCartesian();
         const committed = basis.coordinatesAsArray[firstAtom.userData.atomicIndex];
         expect(committed[0]).toBeCloseTo(endPosition.x, 5);

@@ -35,9 +35,10 @@ const norm = (x, y, z) => Math.sqrt(x * x + y * y + z * z);
  * drawn.
  */
 export function getLatticeSummary(material) {
-    var _a, _b;
-    const cell = (_a = material === null || material === void 0 ? void 0 : material.Lattice) === null || _a === void 0 ? void 0 : _a.unitCell;
-    const type = (_b = material === null || material === void 0 ? void 0 : material.Lattice) === null || _b === void 0 ? void 0 : _b.type;
+    var _a;
+    const lattice = (_a = material === null || material === void 0 ? void 0 : material.getLattice) === null || _a === void 0 ? void 0 : _a.call(material);
+    const cell = lattice === null || lattice === void 0 ? void 0 : lattice.unitCell;
+    const type = lattice === null || lattice === void 0 ? void 0 : lattice.type;
     if (!cell)
         return type || "";
     const { ax = 0, ay = 0, az = 0, bx = 0, by = 0, bz = 0, cx = 0, cy = 0, cz = 0 } = cell;

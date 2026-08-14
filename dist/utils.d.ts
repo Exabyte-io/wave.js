@@ -4,4 +4,4 @@
  * Basis is constructed from the base structure's atom sphere meshes (see
  * extractBasisFromScene above for what that excludes).
  */
-export function ThreeDSceneDataToMaterial(scene: any): import("@mat3ra/made").Material;
+export function ThreeDSceneDataToMaterial(scene: any): import("@mat3ra/made").Material<import("@mat3ra/made/dist/js/Material").MaterialSchemaMap>;
