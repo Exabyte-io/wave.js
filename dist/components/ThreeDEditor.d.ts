@@ -302,6 +302,15 @@ export class ThreeDEditor extends React.Component<any, any, any> {
         rightIcon?: undefined;
         onClick?: undefined;
         shouldMenuStayOpened?: undefined;
+    } | {
+        id: string;
+        disabled: boolean;
+        content: string;
+        leftIcon: import("react/jsx-runtime").JSX.Element;
+        onClick: () => void;
+        rightIcon?: undefined;
+        shouldMenuStayOpened?: undefined;
+        isDivider?: undefined;
     })[];
     getMeasurementsActions: () => ({
         id: string;
@@ -402,6 +411,15 @@ export class ThreeDEditor extends React.Component<any, any, any> {
             rightIcon?: undefined;
             onClick?: undefined;
             shouldMenuStayOpened?: undefined;
+        } | {
+            id: string;
+            disabled: boolean;
+            content: string;
+            leftIcon: import("react/jsx-runtime").JSX.Element;
+            onClick: () => void;
+            rightIcon?: undefined;
+            shouldMenuStayOpened?: undefined;
+            isDivider?: undefined;
         })[];
         onClick: () => void;
         contentObject?: undefined;

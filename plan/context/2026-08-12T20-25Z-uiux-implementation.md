@@ -33,13 +33,10 @@ P0 and P1 — `U-1` through `U-11` — as one branch per item.
 | — | (tip) | `2e5fa89` | this context record |
 | — | (tip) | `19527bd` | retry `npm ci` (sharp/libvips 503) |
 | U-12 | `claude/uiux-p2-figure-export` | `e4fb816` | figure export |
+| U-13 | `claude/uiux-p2-touch-support` | `52539cf` | touch + small screens |
 
-Suite: **185 → 410 passing**, 28/28 suites, 0 failed. `tsc --noEmit` clean, `npm run lint` 0 errors.
-
-**`U-13` (touch and small screens) is a separate PR stacked on this one**, on branch
-`claude/uiux-p2-touch-support`. It is the only item in the set that changes how *existing* input is
-handled rather than adding a surface, so it is worth being separately reviewable and separately
-revertable. Its own record is in §8.
+Suite: **185 → 461 passing**, 32/32 suites, 0 failed. `tsc --noEmit` clean, `npm run lint` 0 errors.
+**Every U-n is now shipped.**
 
 ## 2. Decisions worth not relitigating
 
@@ -71,6 +68,14 @@ revertable. Its own record is in §8.
   a `try/finally` gets the same result with one context; what it costs is the discipline of restoring
   *everything* — size, pixel ratio, clear colour and alpha, scene background, fog, and every material
   colour touched — which is what the tests pin.
+- **`U-13` sizes by pointer capability, never by viewport width.** The `isMobile` it replaces asked
+  the wrong question in both directions. Sizing keys off `(pointer: coarse)`, documentation off
+  whether touch exists at all, and both are read at call time — a window can be dragged to a
+  touchscreen mid-session.
+- **`U-13` is not a mobile port and should not grow into one.** The existing chrome was *measured* at
+  390×844 and fits: no collisions, no clipping. The defects were gesture ownership, 32 px targets and
+  labels naming keys the device lacks. A bottom sheet would have been a rewrite in search of a
+  problem.
 
 ## 3. Confirmed *not* defects — do not re-investigate
 
@@ -136,7 +141,7 @@ that tolerance on its own evidence, not as a way to hide a stale reference.
 
 ## 6. What the browser pass caught that jsdom could not
 
-Six defects in newly written code, which is the argument for keeping a real-browser pass in the
+Nine defects in newly written code, which is the argument for keeping a real-browser pass in the
 loop rather than trusting the suite alone:
 
 1. The pill advertised `RMB = orbit` unconditionally while orbit starts disabled.
@@ -146,41 +151,30 @@ loop rather than trusting the suite alone:
    `MuiClassNameSetup` renames MUI classes to `wave-Mui*`, so a `.MuiInputBase-root` selector never
    matches — it needs a class-substring selector.
 5. Slider range marks overlapped their caption, because MUI positions mark labels absolutely.
-6. `U-12`'s scale-bar label was set at `height/28` only after looking at a rendered figure; the
-   original `height/36` is about 5 pt at 300 dpi, under most journals' minimum type size.
+6. The figure export's scale-bar label was set at `height/36`, about 5 pt at 300 dpi — under most
+   journals' minimum type size. Only visible by looking at a rendered figure.
+7. The shortcut sheet still promised "? or Esc to close" on a touch profile with neither, and had no
+   visible way out at all (the exits were `?`, Escape, or knowing that the backdrop dismisses).
+8. The touch gesture group rendered *last*, below three groups of keyboard shortcuts, on the one
+   device where those gestures are the only way in — and the sheet is single-column there, so group
+   order is scroll distance.
+9. Probes that measured "the canvas" were measuring the 100×100 axes overlay, not the viewer.
 
-One pre-existing bug also came out of verification rather than reading: the orthographic projection
-matrix was never updated after the frustum was fitted to the cell. Caught by cross-checking the
-scale bar against the camera's own projection over a known 2 Å separation — the kind of assertion
-that catches a formula wrong by a constant factor, which nothing else in the suite would have.
+Two pre-existing bugs also came out of verification rather than reading (both fixed): the
+orthographic projection matrix never being updated after the frustum was fitted to the cell, and
+`touch-action: auto` swallowing every touch drag. The first was caught by cross-checking the scale
+bar against the camera's own projection over a known 2 Å separation — the kind of assertion that
+catches a formula wrong by a constant factor, which nothing else in the suite would have.
 
 ## 7. Deployment
 
 Netlify is live and confirmed. Site `mat3ra-mave`; PR #214's preview serves at
-`https://deploy-preview-214--mat3ra-mave.netlify.app/` (HTTP 200, verified, with `/main.js` resolving
-at the domain root — the `--base=/` override works). The production URL 404s because `netlify.toml`
-only exists on this chain, so no build has run for `dev` yet; that resolves when this lands. Nothing
-appeared on commit `6850383` because the site was linked *after* that push — Netlify builds on new
-pushes, so the first evidence arrives with the next commit.
+`https://deploy-preview-214--mat3ra-mave.netlify.app/` (HTTP 200, verified). The production URL 404s
+because `netlify.toml` only exists on this chain, so no build has run for `dev` yet — expected, and it
+resolves when this lands. Nothing appeared on commit `6850383` because the site was linked *after*
+that push; Netlify builds on new pushes, so the first evidence arrives with the next commit.
 
-Chromium in this container cannot traverse the sandbox's egress proxy (curl can), so the live preview
-was verified by fetching it, not by driving it. The interactive verification was done against the
-byte-identical local build of the same artifact.
-
-## 8. The stacked touch PR (`U-13`)
-
-Branch `claude/uiux-p2-touch-support`, based on this PR's head rather than on `dev`. Kept separate
-because it is the only item in the set that changes how *existing* input is handled — `touch-action`
-on the canvas and OrbitControls' touch mapping in edit mode — rather than adding a new surface. That
-makes it the one slice worth being able to review and revert on its own.
-
-What it contains: `touch-action: none` on the renderer canvas (without which no touch drag ever
-reached any handler); edit mode reserving the first finger, mirroring how it already frees the left
-mouse button; `utils/inputCapabilities.ts` replacing the viewport-width `isMobile` with pointer
-capability queries; 44 px targets under `(pointer: coarse)`; and the shortcut sheet reachable without
-a keyboard, with a touch-gesture section and honest labels.
-
-## 9. Maintainer review pass over both branches
+## 8. Maintainer review pass over both branches
 
 A read of the two open branches as a maintainer would read them, after the teammate feedback had been
 addressed. Five findings, all implemented on both lines. What they have in common is that none is
@@ -215,21 +209,21 @@ is a dependency direction.
    the inspector and the inspector uses to size itself.
 
 Verified on both lines before pushing: `npm run lint` (0 errors), `tsc --noEmit`, `npm run build`, and
-the full suite — 461 tests on the U-13 line (#214), 431 on the U-12 line (#216), the difference being
+the full suite — 461 tests on this line (#214), 431 on the U-12 line (#216), the difference being
 U-13's two touch suites.
 
 The port to #216 was a `cherry-pick -n`, not a file copy. #216 predates U-13, so its `ModePill.tsx`
 and `ThreeDEditor.jsx` legitimately lack the coarse-pointer wording and the sheet menu entry;
-overwriting those files with the #214 copies would have silently back-ported U-13 content into the
+overwriting those files with this branch's copies would have silently back-ported U-13 content into the
 PR that is not supposed to contain it. The merge was verified by grepping the result for
 `isCoarsePointer` and finding none.
 
-## 10. Open / next
+## 9. Open / next
+
+Every `U-n` is shipped. What remains is not this work:
 
 - **PR size.** #214 carries the 25-commit editor stack it sits on (that work is not on `dev` —
-  `interactive_structure_editor.ts` does not exist there) plus ~20 commits of this work. If the
-  editor stack lands separately first, this PR shrinks to just the UI work.
-  `interactive_structure_editor.ts` does not exist there) plus ~20 commits of this work. If the
+  `interactive_structure_editor.ts` does not exist there) plus ~22 commits of this work. If the
   editor stack lands separately first, this PR shrinks to just the UI work.
 - **Still true from the status analysis:** `dist/` is tracked and produced half the merge conflict
   surface again; untracking it remains the right fix. It also means every commit here carries a

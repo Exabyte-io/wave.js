@@ -71,6 +71,12 @@ class WaveBase {
         this.renderer.sortObjects = false;
         this.renderer.domElement.style.width = "100%";
         this.renderer.domElement.style.height = "100%";
+        // Without this the browser claims touch drags for scrolling and pinch-zooming the page, and
+        // sends `pointercancel` to everything that had started tracking the gesture - so on a phone
+        // or a touch laptop no drag ever reached the viewer: not orbiting, not dragging an atom, not
+        // marquee-selecting (U-13). Every pointer handler in the editor is already pointer-event
+        // based, so this one declaration is what makes them work with a finger.
+        this.renderer.domElement.style.touchAction = "none";
         this.container.appendChild(this.renderer.domElement);
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
         // Observes the container itself (not the window) so resizing works correctly when the

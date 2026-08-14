@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
+import { COARSE_POINTER_QUERY, TOUCH_TARGET_MIN_PX } from "../utils/inputCapabilities";
 function QuickToggles({ items = [] }) {
     if (!items.length)
         return null;
@@ -30,6 +31,16 @@ function QuickToggles({ items = [] }) {
                             height: 32,
                             p: 0,
                             borderRadius: "16px",
+                            // Grown to the touch minimum on coarse pointers only (U-13): a
+                            // 32 px circle is a comfortable mouse target and an unreliable
+                            // finger one, and this row is the primary control surface on a
+                            // phone, where the toolbar menus are the awkward path.
+                            [`@media ${COARSE_POINTER_QUERY}`]: {
+                                width: TOUCH_TARGET_MIN_PX,
+                                height: TOUCH_TARGET_MIN_PX,
+                                borderRadius: `${TOUCH_TARGET_MIN_PX / 2}px`,
+                                "& svg": { fontSize: "1.35rem" },
+                            },
                             cursor: "pointer",
                             border: 1,
                             borderColor: item.isActive ? "primary.light" : "divider",

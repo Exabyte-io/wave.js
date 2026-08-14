@@ -17,6 +17,7 @@ import Edit from "@mui/icons-material/Edit";
 import FormatShapes from "@mui/icons-material/FormatShapes";
 import GpsFixed from "@mui/icons-material/GpsFixed";
 import HeightIcon from "@mui/icons-material/Height";
+import HelpOutline from "@mui/icons-material/HelpOutline";
 import Image from "@mui/icons-material/Image";
 import ImportExport from "@mui/icons-material/ImportExport";
 import LooksIcon from "@mui/icons-material/Looks";
@@ -1322,6 +1323,20 @@ export class ThreeDEditor extends React.Component {
                 leftIcon: <Replay />,
                 onClick: this.handleResetViewer,
                 shouldMenuStayOpened: true,
+            },
+            {
+                id: "divider-help",
+                isDivider: true,
+            },
+            {
+                // The sheet was reachable only by pressing `?` (U-3), which is unreachable on a
+                // device with no keyboard - so the one surface documenting how to drive the viewer
+                // was missing exactly where a user most needs it (U-13). The key still works.
+                id: "keyboard-sheet",
+                disabled: false,
+                content: "Shortcuts & gestures",
+                leftIcon: <HelpOutline />,
+                onClick: this.handleToggleKeyboardSheet,
             },
         ];
     };
