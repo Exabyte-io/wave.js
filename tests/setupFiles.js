@@ -6,10 +6,16 @@ import expect from "expect";
 import GL from "gl";
 import { toBeDeepCloseTo, toMatchCloseTo } from "jest-matcher-deep-close-to";
 import * as THREE from "three";
+import { deserialize, serialize } from "v8";
 
 import { Wave } from "../src/wave";
 import { ELEMENT_PROPERTIES } from "./enums";
 import { createElement, HEIGHT, WIDTH } from "./utils";
+
+// Jest 27 jsdom does not provide structuredClone; @mat3ra/code deepClone requires it.
+if (typeof global.structuredClone !== "function") {
+    global.structuredClone = (value) => deserialize(serialize(value));
+}
 
 // configure enzyme adapter
 configure({ adapter: new Adapter() });

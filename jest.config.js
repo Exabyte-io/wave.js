@@ -30,7 +30,7 @@ module.exports = {
     },
 
     // A list of paths to modules that run some code to configure or set up the testing environment.
-    setupFiles: ["./tests/setupFiles.js"],
+    setupFiles: ["./tests/register-esse-schemas.cjs", "./tests/setupFiles.js"],
 
     // Adding this config to accommodate for new TS files
     // https://jestjs.io/docs/getting-started#using-typescript

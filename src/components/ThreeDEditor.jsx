@@ -577,10 +577,10 @@ export class ThreeDEditor extends React.Component {
             this.WaveComponent.wave.bypassReloadViewer = true;
         }
 
-        newMaterial.lattice = {
-            ...newMaterial.Lattice.toJSON(),
-            type: material.Lattice.type,
-        };
+        newMaterial.setLattice({
+            ...newMaterial.getLattice().toJSON(),
+            type: material.getLattice().type,
+        });
 
         const clonedMaterial = newMaterial.clone();
         const newStack = historyStack.slice(0, historyPointer + 1);
@@ -685,7 +685,7 @@ export class ThreeDEditor extends React.Component {
         if (Number.isNaN(floatValue)) return;
 
         const newMaterial = material.clone();
-        const basis = newMaterial.Basis;
+        const basis = newMaterial.getBasis();
         const { coordinates } = basis;
         if (!coordinates[selectedAtomIndex]) return;
 
@@ -799,7 +799,7 @@ export class ThreeDEditor extends React.Component {
     handleAddAtom() {
         const { material } = this.state;
         const { editSessionOptions } = this.props;
-        if (!this.WaveComponent?.wave || !material?.Lattice?.unitCell) return;
+        if (!this.WaveComponent?.wave || !material?.getLattice()?.unitCell) return;
 
         const {
             ax = 0,
@@ -811,10 +811,10 @@ export class ThreeDEditor extends React.Component {
             cx = 0,
             cy = 0,
             cz = 0,
-        } = material.Lattice.unitCell;
+        } = material.getLattice().unitCell;
         const trueCenter = [(ax + bx + cx) / 2, (ay + by + cy) / 2, (az + bz + cz) / 2];
 
-        const basis = material.Basis;
+        const basis = material.getBasis();
         basis.toCartesian();
         const existingPositions = basis.coordinatesAsArray;
 
@@ -884,14 +884,14 @@ export class ThreeDEditor extends React.Component {
 
             if (selectedAtomIndices.length === 1 && symbol in PERIODIC_TABLE) {
                 const [selectedAtomIndex] = selectedAtomIndices;
-                const basis = material.Basis;
+                const basis = material.getBasis();
                 const { elements } = basis;
                 const currentEntry = elements[selectedAtomIndex];
                 const currentSymbol =
                     typeof currentEntry === "string" ? currentEntry : currentEntry?.value;
                 if (currentEntry && currentSymbol !== symbol) {
                     const newMaterial = material.clone();
-                    const newBasis = newMaterial.Basis;
+                    const newBasis = newMaterial.getBasis();
                     const newElements = newBasis.elements;
                     newElements[selectedAtomIndex] = {
                         ...newElements[selectedAtomIndex],
@@ -1081,7 +1081,7 @@ export class ThreeDEditor extends React.Component {
         const point = material?.basis?.coordinates?.[selectedAtomIndices[0]]?.value;
         if (!Array.isArray(point)) return null;
         try {
-            const { cell } = material.Basis;
+            const { cell } = material.getBasis();
             return displayUnits === "cartesian"
                 ? cell.convertPointToCartesian([...point])
                 : cell.convertPointToCrystal([...point]);
@@ -1172,7 +1172,7 @@ export class ThreeDEditor extends React.Component {
                 isViewAdjustable={viewerSettings.isViewAdjustable}
                 structure={materialCopy}
                 boundaryConditions={boundaryConditions}
-                cell={materialCopy.Lattice.unitCell}
+                cell={materialCopy.getLattice().unitCell}
                 name={materialCopy.name}
                 settings={{
                     ...viewerSettings,

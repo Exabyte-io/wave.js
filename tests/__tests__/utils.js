@@ -16,7 +16,7 @@ function buildWave({ settings = {}, boundaryConditions } = {}) {
     return new Wave({
         DOMElement: createElement("div", ELEMENT_PROPERTIES),
         structure: material,
-        cell: material.Lattice.unitCell,
+        cell: material.getLattice().unitCell,
         settings: { atomRadiiScale: 0.2, ...settings },
         boundaryConditions,
     });
@@ -51,7 +51,7 @@ describe("utils: ThreeDSceneDataToMaterial", () => {
         expect(wave.bondsGroup.isInstancedMesh).toBe(true);
 
         const material = ThreeDSceneDataToMaterial(wave.scene);
-        const { elements, coordinates } = material.Basis;
+        const { elements, coordinates } = material.getBasis();
 
         // The fixture material has exactly 2 real atoms; bonds, boundary planes, and the
         // repetition clones must not inflate this count.
@@ -80,7 +80,7 @@ describe("utils: ThreeDSceneDataToMaterial", () => {
 
     test("editing under non-periodic boundary conditions does not throw and preserves the lattice", () => {
         const referenceMaterial = new Made.Material(MATERIAL_CONFIG);
-        const expectedVectorArrays = referenceMaterial.Lattice.vectorArrays;
+        const expectedVectorArrays = referenceMaterial.getLattice().vectorArrays;
 
         const wave = buildWave({
             boundaryConditions: { type: "bc1", offset: 0 },
@@ -91,7 +91,7 @@ describe("utils: ThreeDSceneDataToMaterial", () => {
             material = ThreeDSceneDataToMaterial(wave.scene);
         }).not.toThrow();
 
-        const actualVectorArrays = material.Lattice.vectorArrays;
+        const actualVectorArrays = material.getLattice().vectorArrays;
         expectedVectorArrays.forEach((expectedVector, vectorIndex) => {
             expectedVector.forEach((component, componentIndex) => {
                 expect(actualVectorArrays[vectorIndex][componentIndex]).toBeCloseTo(component, 5);

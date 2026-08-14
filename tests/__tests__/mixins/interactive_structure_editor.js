@@ -1343,8 +1343,9 @@ describe("Interactive structure editor functionality tests", () => {
 
             const [committedMaterial] = structureModifiedCalls[structureModifiedCalls.length - 1];
             const committedCrystal = toValue(committedMaterial.basis.coordinates[targetIndex]);
-            const roundTripped =
-                committedMaterial.Basis.cell.convertPointToCartesian(committedCrystal);
+            const roundTripped = committedMaterial
+                .getBasis()
+                .cell.convertPointToCartesian(committedCrystal);
 
             ["x", "y", "z"].forEach((axis, i) => {
                 expect(roundTripped[i]).toBeCloseTo(endPosition[axis], 6);

@@ -27,7 +27,7 @@ export interface MaterialLike {
     unitCellFormula?: string;
     name?: string;
     basis?: BasisLike;
-    Lattice?: LatticeLike;
+    getLattice?: () => LatticeLike | undefined;
 }
 export interface StatusBarProps {
     material?: MaterialLike | null;

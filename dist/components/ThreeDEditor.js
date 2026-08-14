@@ -746,10 +746,10 @@ export class ThreeDEditor extends React.Component {
         if (this.WaveComponent && this.WaveComponent.wave) {
             this.WaveComponent.wave.bypassReloadViewer = true;
         }
-        newMaterial.lattice = {
-            ...newMaterial.Lattice.toJSON(),
-            type: material.Lattice.type,
-        };
+        newMaterial.setLattice({
+            ...newMaterial.getLattice().toJSON(),
+            type: material.getLattice().type,
+        });
         const clonedMaterial = newMaterial.clone();
         const newStack = historyStack.slice(0, historyPointer + 1);
         newStack.push(clonedMaterial);
@@ -834,7 +834,7 @@ export class ThreeDEditor extends React.Component {
         if (Number.isNaN(floatValue))
             return;
         const newMaterial = material.clone();
-        const basis = newMaterial.Basis;
+        const basis = newMaterial.getBasis();
         const { coordinates } = basis;
         if (!coordinates[selectedAtomIndex])
             return;
@@ -942,11 +942,11 @@ export class ThreeDEditor extends React.Component {
         var _a, _b;
         const { material } = this.state;
         const { editSessionOptions } = this.props;
-        if (!((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) || !((_b = material === null || material === void 0 ? void 0 : material.Lattice) === null || _b === void 0 ? void 0 : _b.unitCell))
+        if (!((_a = this.WaveComponent) === null || _a === void 0 ? void 0 : _a.wave) || !((_b = material === null || material === void 0 ? void 0 : material.getLattice()) === null || _b === void 0 ? void 0 : _b.unitCell))
             return;
-        const { ax = 0, ay = 0, az = 0, bx = 0, by = 0, bz = 0, cx = 0, cy = 0, cz = 0, } = material.Lattice.unitCell;
+        const { ax = 0, ay = 0, az = 0, bx = 0, by = 0, bz = 0, cx = 0, cy = 0, cz = 0, } = material.getLattice().unitCell;
         const trueCenter = [(ax + bx + cx) / 2, (ay + by + cy) / 2, (az + bz + cz) / 2];
-        const basis = material.Basis;
+        const basis = material.getBasis();
         basis.toCartesian();
         const existingPositions = basis.coordinatesAsArray;
         const OCCUPIED_TOLERANCE = 0.5; // Å; below any realistic bond length
@@ -1009,13 +1009,13 @@ export class ThreeDEditor extends React.Component {
             const symbol = trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
             if (selectedAtomIndices.length === 1 && symbol in PERIODIC_TABLE) {
                 const [selectedAtomIndex] = selectedAtomIndices;
-                const basis = material.Basis;
+                const basis = material.getBasis();
                 const { elements } = basis;
                 const currentEntry = elements[selectedAtomIndex];
                 const currentSymbol = typeof currentEntry === "string" ? currentEntry : currentEntry === null || currentEntry === void 0 ? void 0 : currentEntry.value;
                 if (currentEntry && currentSymbol !== symbol) {
                     const newMaterial = material.clone();
-                    const newBasis = newMaterial.Basis;
+                    const newBasis = newMaterial.getBasis();
                     const newElements = newBasis.elements;
                     newElements[selectedAtomIndex] = {
                         ...newElements[selectedAtomIndex],
@@ -1190,7 +1190,7 @@ export class ThreeDEditor extends React.Component {
         if (!Array.isArray(point))
             return null;
         try {
-            const { cell } = material.Basis;
+            const { cell } = material.getBasis();
             return displayUnits === "cartesian"
                 ? cell.convertPointToCartesian([...point])
                 : cell.convertPointToCrystal([...point]);
@@ -1267,7 +1267,7 @@ export class ThreeDEditor extends React.Component {
         const isDrawBondsEnabled = this._getWaveProperty("isDrawBondsEnabled") || false;
         return (_jsx(WaveComponent, { ref: (el) => {
                 this.WaveComponent = el;
-            }, triggerHandleResize: viewerTriggerResize, isConventionalCellShown: isConventionalCellShown, isDrawBondsEnabled: isDrawBondsEnabled, isViewAdjustable: viewerSettings.isViewAdjustable, structure: materialCopy, boundaryConditions: boundaryConditions, cell: materialCopy.Lattice.unitCell, name: materialCopy.name, settings: {
+            }, triggerHandleResize: viewerTriggerResize, isConventionalCellShown: isConventionalCellShown, isDrawBondsEnabled: isDrawBondsEnabled, isViewAdjustable: viewerSettings.isViewAdjustable, structure: materialCopy, boundaryConditions: boundaryConditions, cell: materialCopy.getLattice().unitCell, name: materialCopy.name, settings: {
                 ...viewerSettings,
                 onStructureModified: this.handleStructureModified,
                 onSelectionChanged: this.handleSelectionChanged,
