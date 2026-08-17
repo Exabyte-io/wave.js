@@ -10,5 +10,9 @@ jobs:
     with:
       package-name: wave.js
       build-script: transpile
+      # gl (native WebGL rendering dep) has no prebuilt binary for Node 24 and fails to
+      # compile from source on the runner (missing X11 dev headers); pin to 20.x where a
+      # prebuilt binary is available.
+      node-version: 20.x
     secrets:
       github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
