@@ -12,7 +12,8 @@
         "test": "npx jest",
         "lint": "eslint src tests --report-unused-disable-directives",
         "lint:fix": "eslint --fix --cache src tests --report-unused-disable-directives",
-        "prepare": "husky install"
+        "prepare": "husky install",
+        "prepublishOnly": "npm run transpile"
     },
     "repository": {
         "type": "git",
