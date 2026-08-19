@@ -12,7 +12,8 @@
         "test": "npx jest",
         "lint": "eslint src tests --report-unused-disable-directives",
         "lint:fix": "eslint --fix --cache src tests --report-unused-disable-directives",
-        "prepare": "husky install"
+        "prepare": "husky install",
+        "prepublishOnly": "npm run transpile"
     },
     "repository": {
         "type": "git",
@@ -58,12 +59,12 @@
     },
     "devDependencies": {
         "@exabyte-io/eslint-config": "^2025.1.15-0",
-        "@mat3ra/code": "2026.8.13-0",
-        "@mat3ra/cove": "2026.7.18-4",
-        "@mat3ra/esse": "2026.8.13-0",
-        "@mat3ra/made": "2026.8.13-0",
+        "@mat3ra/code": "2026.8.18-0",
+        "@mat3ra/cove": "2026.8.19-4",
+        "@mat3ra/esse": "2026.8.18-2",
+        "@mat3ra/made": "2026.8.18-0",
         "@mat3ra/tsconfig": "^2024.6.3-0",
-        "@mat3ra/utils": "^2026.7.8-0",
+        "@mat3ra/utils": "2026.8.18-1",
         "@types/react": "^18.2.8",
         "@types/react-dom": "^18.2.4",
         "@types/static-kdtree": "^1.0.3",
